@@ -1,0 +1,395 @@
+#!/bin/builder.sh
+skip=( true true false false false false true true false false true false false false )
+step=10
+prefix="setup"
+source=http://192.168.248.24/config/$scriptName
+
+
+  workDir="${HOME}/uck-vboxAdd"
+scriptDir="${HOME}/uck-build_scripts"
+
+sourceISO="/export/ubuntu-12.10-gnome-amd64.iso"
+sourceISO="/export/ubuntu-12.10-desktop-amd64.iso"
+  liveISO="/export/ubuntu-12.10-vbox-amd64.iso"
+  liveISO_desc="Description is 32 Characters Max"
+  liveISO_desc="01234567890123456789012345678901"
+  liveISO_desc="Ubuntu 12.10+ x64 VBox Add"
+
+uck_scripts="${workDir}/customization-scripts"
+ uck_initrd="${workDir}/remaster-initrd"
+    uck_iso="${workDir}/remaster-iso"
+
+# System dependencies to ensure a smooth build process
+#	Primarily the source repo for the UCK team
+#		add-apt-repository -y ppa:uck-team/uck-stable
+#        	add-apt-repository -y ppa:uck-team/uck-unstable
+#	These add-apt commands add two files to /etc/apt/sources.list.d/ dir
+#		/etc/apt/sources.list.d/uck-team-uck-stable-quantal.list
+#		/etc/apt/sources.list.d/uck-team-uck-unstable-quantal.list
+#	Both of these need to be modified as follows
+#		uck-team-uck-stable-quantal.list   :: replace quantal with precise
+#		uck-team-uck-unstable-quantal.list :: replace quantal with oneiric
+#
+#	To install UCK from the correct repo we need to specify the version as follows
+#        	apt-get install uck=`apt_get_version uck-stable uck`	
+#
+#	The following fix some gfx related errors when UCK goes to re-pack the unionfs
+#		apt-get install libfribidi-bin gfxboot-dev gfxboot-theme-ubuntu
+#
+#	Add these fuse packages customized by the UCK team to add the ISO in rw mode ('-m' option)
+#		apt-get install unionfs-fuse=
+#
+#	To discover the correct version number of a package that may be available from more than one repo...
+#		apt-cache show    [package name]
+#		apt-cache showpkg [package name]
+#		
+#	I have created two functions at the end of this script to manipulate apt-cache version and repo details
+#		function apt_get_repos          [package name]
+#		function apt_get_version [repo] [package name]
+#	Step #2 Prep Check Dependencies demos these two commands
+#
+#	IMPORTANT: Be sure to use full paths with the uck commands
+
+function setup_Prep_Updates(){
+	desc Pull updates on all scripts from cental server
+	waitForNetwork && networkUpMsg || return 1
+	mkdir -p "$scriptDir"
+	local scriptURLS=(
+		${source%/*}/builder.sh
+		${source%/*}/runonce-12.10_Live.sh
+		${source%/*}/runonce-12.10_Live.sh-skel_xfce4.sh
+		${source%/*}/runonce-12.10_Live.sh-skel_terminator.sh
+		${source%/*}/runonce-12.10_Live.sh-skel_google_chrome.sh
+	)
+	for URL in ${scriptURLS[@]}; do
+		local file="${scriptDir}/`basename $URL`"
+		wget -q --random-wait -t 2 -N -O "$file" "$URL"
+ 		chmod +x "$file"
+	done
+	cp -rvf  "${scriptDir}"/* "${uck_scripts}"/. | sed 's/^[^>]*/-/'
+}
+function setup_Prep_Check_Dependencies(){
+	desc Verify required repos and packages
+	repc 100 _
+	padl 100 \. Get Repos
+	apt_get_repos uck
+	echo
+	apt_get_repos unionfs-fuse
+	echo
+	repc 100 _
+	padl 100 \. Get Version from Repo \for uck \@ uck-stable
+	apt_get_version uck-stable uck
+	repc 100 _
+	padl 100 \. Get Version from Repo \for unionfs-fuse \@ uck-unstable
+	apt_get_version uck-unstable unionfs-fuse
+}
+function setup_Prep_WorkDir(){
+	desc Setup-UP Working Directory:  Unmount, Clean \& Prep
+	if [ -e "${workDir}" ]; then
+		# Unmount all sub-folders in the working dir
+		cat /etc/mtab | grep "${workDir}" | cut -f2 -d\ | sed 's|^|sudo umount |' | bash
+		cat /etc/mtab | grep "${workDir}" | cut -f2 -d\ | sed 's|^|sudo umount |' | bash
+		# Not sure what this does
+		sudo uck-remaster-clean-all "${workDir}"
+		# Wipe out the working dir now that were sure nothing is mounted
+		sudo rm -rf                 "${workDir}"
+	fi
+	# Create ${workDir}/customization-scripts 
+	mkdir -p                  "${uck_scripts}"
+	# Copy all of my custom scripts into UCK's working dir.  These will be mounted to /tmp/customization-scripts once we chroot
+	cp -rvf  "${scriptDir}"/* "${uck_scripts}"/. | sed 's/^[^>]*/-/'
+}
+function setup_Unpack_ISO(){
+	desc Unpack ISO
+	# Mounting the ISO with the '-m' option sets up a read write ability
+	# With the '-m' option we can add files and folders to the ISO related or not to Ubuntu
+	# We can also modify the boot process and menues
+	# The '-m' option has dependencies detailed above
+	#
+	# In the working dir you wil notice the creation of three folders
+	#	remaster-iso/
+	#	remaster-iso-cache/
+	#	remaster-iso-mount/
+	# To make changes we modify and add directly to remaster-iso.  Changes are visible by looking at remaster-iso-cache
+
+	# time sudo uck-remaster-unpack-iso    "${sourceISO}" "${workDir}"
+	  time sudo uck-remaster-unpack-iso -m "${sourceISO}" "${workDir}"
+}
+function setup_Modify_ISO(){
+	desc Modify ISO\; isolinux/\{txt.cfg isolinux.cfg gfxboot.cfg lang\}
+	# These functions are below and detailed appropriatelly
+	modify_isolinux_isolinux
+	modify_isolinux_gfxboot
+	modify_isolinux_txt
+	modify_isolinux_lang
+}
+function setup_Unpack_initrd(){
+	desc Unpack initrd
+	time sudo uck-remaster-unpack-initrd "${workDir}"
+}
+function setup_Modify_initrd(){
+	desc Modify initrd\; /etc/casper.conf
+	sudo sed -i '/export FLAVOUR/s/.*/export FLAVOUR="Ubuntu"/' "${uck_initrd}/etc/casper.conf"
+	sudo cat                                                    "${uck_initrd}/etc/casper.conf"
+}
+function setup_Unpack_rootfs(){
+	desc Unpack rootfs
+	time sudo uck-remaster-unpack-rootfs "${workDir}"
+}
+function setup_Modify_rootfs(){
+	#######################################################################################
+	# The `uck-remaster-chroot-rootfs` commmand automates the process of setting up and
+	# chooting into the Ubuntu Live filesystem.  Here you can add packages, users ( be wary
+	# of casper) and anything else.  The command also lets you point to a script to run
+	# instead of making changes manually.
+	#
+	# Scripts and software copied into the "customization-scripts" directory will be available
+	# in "/tmp/customization-scripts" in the chrooted environment.
+	#
+	# The following is a simple example 
+	[ -z "template" ] && { 
+	#######################################################################################
+	local myModScript=bootstrap.sh
+	echo \#\!/bin/bash >       "${uck_scripts}/${myModScript}"
+	chmod +x                   "${uck_scripts}/${myModScript}"
+	cat << END-OF-BOOTSTRAP >> "${uck_scripts}/${myModScript}"
+		echo _________________________________________________________
+		echo Hello World
+		echo
+		uname -a
+		echo
+		echo DONE
+		echo _________________________________________________________
+END-OF-BOOTSTRAP
+	sudo uck-remaster-chroot-rootfs "${workDir}" "/tmp/customization-scripts/${myModScript}"
+	}
+
+	#######################################################################################
+	[ -n "complex" ] && {
+	#######################################################################################
+	# The following code creates a boot strap 
+	local rootfs_ModifyScript="runonce-12.10_Live.sh"
+	local rootfs_ModifyBootStrap="BootStrap.sh"
+	local rootfs_tmp="/tmp/customization-scripts"
+	desc Modify rootfs\; ${rootfs_ModifyScript}
+	cd "${uck_scripts}"
+	[ ! -x "builder.sh" ]             && echo builder.sh missing\!             && return 1
+	[ ! -x "${rootfs_ModifyScript}" ] && echo ${rootfs_ModifyScript} missing\! && return 1
+	touch                      "${rootfs_ModifyBootStrap}"
+	chmod +x                   "${rootfs_ModifyBootStrap}"
+	cat << END-OF-SCRIPT >     "${rootfs_ModifyBootStrap}"
+#!/bin/bash
+	echo .........................................................
+	ls -1 "${rootfs_tmp}/`basename ${rootfs_ModifyScript} .sh`"*.sh | while read file; do
+		mkdir -vp "/etc/builder/\$(basename \"\${file}\").pv"
+		cp -vf "\${file}" /etc/builder/. | sed 's/^[^>]*/-/'
+	done
+	cp -vf "${rootfs_tmp}/builder.sh" /bin/. | sed 's/^[^>]*/-/'
+	echo Done with prep script
+	echo .........................................................
+	#/etc/builder/"${rootfs_ModifyScript}"
+END-OF-SCRIPT
+	sudo uck-remaster-chroot-rootfs "${workDir}" "/tmp/customization-scripts/${rootfs_ModifyBootStrap}"
+	repc 100 _
+	padl 100 \. Execute the following to make any aditional changes
+	echo sudo uck-remaster-chroot-rootfs "${workDir}"
+	}
+}
+function setup_Repack_initrd(){
+	desc Repack initrd
+	time sudo uck-remaster-pack-initrd "${workDir}"
+}
+function setup_Repack_rootfs(){
+	desc Repack rootfs
+	time sudo uck-remaster-pack-rootfs "${workDir}"
+}
+function setup_Repack_ISO(){
+	desc Repack ISO
+	time sudo uck-remaster-pack-iso "${liveISO}" "${workDir}" -d "${liveISO_desc}"
+	sudo chown `whoami`             "${liveISO}"
+	sudo chgrp `whoami`             "${liveISO}"
+}
+
+#######################################################################################
+#######################################################################################
+# Support function below
+#######################################################################################
+#######################################################################################
+
+function networkUpMsg(){ echo Network Up, Internet Accessible + DNS Responding.; }
+
+function modify_isolinux_lang(){
+	repc 100 _
+	padl 100 \. Set Default Lang \& Suppress Prompt :: ISO\> /isolinux/lang
+	local file="${uck_iso}/isolinux/lang"
+	echo en_US | sudo tee "$file"
+}
+function modify_isolinux_gfxboot(){
+	repc 100 _
+	padl 100 \. Disable Hidding of Boot Menu :: ISO\> /isolinux/gfxboot.cfg
+	local file="${uck_iso}/isolinux/gfxboot.cfg"
+	sudo sed -i '/hidden-timeout/s/^/#/' "$file"
+}
+function modify_isolinux_isolinux(){
+	repc 100 _
+	padl 100 \. Show Boot Menu \for 40 seconds :: ISO\> /isolinux/isolinux.cfg
+	local file="${uck_iso}/isolinux/isolinux.cfg"
+	local mod=`cat << END-OF-SED
+		/^prompt/cprompt 1
+		/^timeout/ctimeout 40
+END-OF-SED
+`
+	sudo sed -i "$mod" "$file"
+}
+function modify_isolinux_txt(){
+	#http://en.wikipedia.org/wiki/VESA_BIOS_Extensions#Linux_video_mode_numbers
+	#VGA mode chart
+	#Form Factor	4x3	4x3	 4x3	  4x3	    4x3	      4x3	4x3	   16x10    16x10    16x10
+	#Colour depth	800x600	1024x768 1152x864 1280x1024 1400x1050 1600x1200 1920x1200  1280x800 1440x900 1680x1050
+	#8 (256)	771	773	 353	  775	    835	      796/800	893	   	    864
+	#15 (32K)	787	790	 354	  793		      797/801		   	    865
+	#16 (65K)	788	791	 355	  794	    837	      798/802	           868	    866      865
+	#24 (16M)	789	792	 ?	  795	    838	      799/803	           869	    867      866
+	#32				 356	  829		          834		            868
+	#
+	# http://ubuntuforums.org/showthread.php?t=1613132
+	# boot options; noprompt noeject noplymouth text nonpersistent setkmap
+	#               nomodeset
+	#
+	local -A mod
+	local file="${uck_iso}/isolinux/txt.cfg"
+	local default=PGUI
+	#	List of custom boot entries all with boot messages enabled
+	#		 CLI = non/persistent boot to command line
+	#		PCLI =     persistent boot to command line
+	#		PGUI =     persistent boot to GUI desktop
+	#		LGUI = non/persistent boot to GUI desktop
+	#
+	#	List of Ubuntu boot entries all with quiet spash screen configured
+	#		live = non/persistent boot to GUI desktop
+	#	live-install = boot direct to ubiquity installer
+	#	       check = check disks for defects
+	#	     memtest = standard kernel boot to mt86plus
+	#		  hd = boot to local hard drive
+
+	mod[CLI]=`cat << END-OF-SED
+	        /^label live$/,/append/{
+	                /^label/h
+	                /^label/!H
+	                /^label/clabel CLI
+	                /menu/c\  menu label ^Command Line wo/ GUI Desktop
+	                /append/{
+	                        s/ quiet//
+	                        s/ splash//
+	                        s/ --/ text --/
+	                        s/ --/ noplymouth --/
+	                        s/ --/ nomodeset --/
+	                        s/ --/ noprompt --/
+	                        s/ --/ noeject --/
+				s/ --/ max_loop=16 --/
+				s/ --/ vga=790 --/
+	                        G
+	                }
+	        }
+END-OF-SED
+`
+
+	mod[PCLI]=`cat << END-OF-SED
+	        /^label live$/,/append/{
+	                /^label/h
+	                /^label/!H
+	                /^label/clabel PCLI
+	                /menu/c\  menu label ^Command Line w/ Persistent fs
+	                /append/{
+	                        s/ quiet//
+	                        s/ splash//
+				s/ --/ persistent --/
+	                        s/ --/ noplymouth --/
+	                        s/ --/ nomodeset --/
+	                        s/ --/ noprompt --/
+	                        s/ --/ noeject --/
+				s/ --/ max_loop=16 --/
+				s/ --/ vga=790 --/
+	                        G
+	                }
+	        }
+END-OF-SED
+`
+	mod[PGUI]=`cat << END-OF-SED
+	        /^label live$/,/append/{
+	                /^label/h
+	                /^label/!H
+	                /^label/clabel PGUI
+	                /menu/c\  menu label ^Live Desktop w/ Persistent fs
+	                /append/{
+	                        s/ quiet//
+	                        s/ splash//
+				s/ --/ persistent --/
+	                        s/ --/ noplymouth --/
+	                        s/ --/ nomodeset --/
+	                        s/ --/ noprompt --/
+	                        s/ --/ noeject --/
+				s/ --/ max_loop=16 --/
+				s/ --/ vga=790 --/
+	                        G
+	                }
+	        }
+END-OF-SED
+`
+	mod[LGUI]=`cat << END-OF-SED
+	        /^label live$/,/append/{
+	                /^label/h
+	                /^label/!H
+	                /^label/clabel LGUI
+	                /menu/c\  menu label ^Live Desktop w/ Boot Messages
+	                /append/{
+	                        s/ quiet//
+	                        s/ splash//
+	                        s/ --/ noplymouth --/
+	                        s/ --/ nomodeset --/
+	                        s/ --/ noprompt --/
+	                        s/ --/ noeject --/
+				s/ --/ max_loop=16 --/
+				s/ --/ vga=790 --/
+	                        G
+	                }
+	        }
+END-OF-SED
+`
+	repc 100 _
+	padl 100 \. Change Default Boot Seclection :: ISO\> /isolinux/txt.cfg
+	sudo sed -i "/^default/cdefault ${default}" "$file"
+
+	for i in ${!mod[@]}; do
+		local label=
+		repc 100 \.
+		padl 100 \. Add Boot Menu Item \"$i\" :: ISO\> /isolinux/txt.cfg
+		sudo sed -i "${mod[$i]}" "$file"
+	done
+}
+
+
+#######################################################################################
+#######################################################################################
+
+function apt_get_repos(){
+        local repo='-'
+        local pkg=$1
+        (
+        echo Name Version Repo
+        for ver in `apt-cache show $pkg | egrep ^Version | cut -f2- -d:`
+                do
+                        repo=`apt-cache showpkg $pkg | sed "s|^$ver (/var/lib/apt/lists/\([^()]*\)).*|\1|p;d"`
+                        echo $pkg $ver $repo
+                done
+        ) | column -t
+}
+function apt_get_version(){
+        local repo=$1
+        local pkg=$2
+        for ver in `apt-cache show $pkg | egrep ^Version | cut -f2- -d:`
+                do
+                apt-cache showpkg $pkg | grep $ver | grep $repo &> /dev/null && echo $ver
+                done | sort -u
+}
+

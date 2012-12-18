@@ -1,0 +1,93 @@
+#!/bin/builder.sh
+skip=( true false false false false true false false false false false )
+step=3
+prefix="setup"
+source=http://192.168.248.24/config/$scriptName
+
+rootfsS="runonce-12.10_Live.sh"
+sourceI="${HOME}/ubuntu-12.10-gnome-amd64.iso"
+liveISO="${HOME}/ubuntu-12.10-upgrade-amd64.iso"
+isoDesc="01234567890123456789012345678901"
+isoDesc="Ubuntu 12.10+ x64 Upgraded"
+workDir="${HOME}/uck-upgrade"
+scriptD="${workDir}/customization-scripts"
+initrdD="${workDir}/remaster-initrd"
+
+
+function networkUpMsg(){ echo Network Up, Internet Accessible + DNS Responding.; }
+
+function setup_Prep(){
+	desc Setup-UP Working Directory:  Unmount, Clean \& Prep
+	if [ -e "${workDir}" ]; then
+		cat /etc/mtab | grep "${workDir}" | cut -f2 -d\ | sed 's|^|sudo umount |' | bash
+		cat /etc/mtab | grep "${workDir}" | cut -f2 -d\ | sed 's|^|sudo umount |' | bash
+		sudo uck-remaster-clean-all "${workDir}"
+		rm -rf                      "${workDir}"
+	fi
+		mkdir -p "${scriptD}"
+}
+function setup_Unpack_ISO(){
+	desc Unpack ISO
+	#time sudo uck-remaster-unpack-iso "${sourceI}" "${workDir}"
+	time sudo uck-remaster-unpack-iso -m "${sourceI}" "${workDir}"
+}
+function setup_Unpack_initrd(){
+	desc Unpack initrd
+	time sudo uck-remaster-unpack-initrd "${workDir}"
+}
+function setup_Unpack_rootfs(){
+	desc Unpack rootfs
+	time sudo uck-remaster-unpack-rootfs "${workDir}"
+}
+function setup_Modify_initrd(){
+	desc Customize /etc/casper.conf
+	sudo sed -i '/export FLAVOUR/s/.*/export FLAVOUR="Ubuntu"/' "${initrdD}/etc/casper.conf"
+	sudo cat                                                    "${initrdD}/etc/casper.conf"
+}
+function setup_Update_Scripts(){
+	desc Update \"builder.sh\" \& \"${source%/*}/${rootfsS}\"
+	waitForNetwork && networkUpMsg || return 1
+	mkdir -p  "${scriptD}"
+	chmod 777 "${scriptD}"
+	cd        "${scriptD}"
+	rm -f                "builder.sh"
+	wget -q "${source%/*}/builder.sh"
+	chmod +x             "builder.sh"
+	rm -f                "${rootfsS}"
+	wget -q "${source%/*}/${rootfsS}"
+	chmod +x             "${rootfsS}"
+}
+function setup_Modify_chootfs(){
+	desc Run ${rootfsS}
+	cd "${scriptD}"
+	[ ! -x "builder.sh" ] && echo builder.sh missing\! && return 1
+	[ ! -x "${rootfsS}" ] && echo ${rootfsS} missing\! && return 1
+	local cmd="prep.sh"
+	touch                      "${cmd}"
+	chmod +x                   "${cmd}"
+	cat << END-OF-SCRIPT >     "${cmd}"
+#!/bin/bash
+	echo .........................................................
+	cd /tmp/customization-scripts/
+	cp -vf "${rootfsS}" /root/.
+	cp -vf builder.sh    /bin/.
+	echo Done with prep script
+	echo .........................................................
+	/root/"${rootfsS}"
+END-OF-SCRIPT
+	sudo uck-remaster-chroot-rootfs "${workDir}" "/tmp/customization-scripts/${cmd}"
+}
+function setup_Repack_initrd(){
+	desc Repack initrd
+	time sudo uck-remaster-pack-initrd "${workDir}"
+}
+function setup_Repack_rootfs(){
+	desc Repack rootfs
+	time sudo uck-remaster-pack-rootfs "${workDir}"
+}
+function setup_Repack_ISO(){
+	desc Repack ISO
+	time sudo uck-remaster-pack-iso "${liveISO}" "${workDir}" -d "${isoDesc}"
+	sudo chown `whoami`        "${liveISO}"
+	sudo chgrp `whoami`        "${liveISO}"
+}
