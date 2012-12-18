@@ -6,4 +6,4 @@ echo hello world!
 
 echo wow
 
-echo new
+echo new shit
