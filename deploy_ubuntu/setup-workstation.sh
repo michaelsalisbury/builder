@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -119,7 +119,7 @@ function setup_Package_Gnome_Defaults(){
 	gconftool-2 $opt -t string -s /desktop/gnome/applications/terminal/exec terminator
 
 }
-function setup_Install_Services(){
+function setup_Install_Daemons(){
         desc openssh-server apache2 nfs-kernel-server tftpd-hpa
 	waitForNetwork && networkUpMsg || return 1
 	waitAptgetInstall
@@ -129,6 +129,20 @@ function setup_Install_Services(){
         apt-get ${aptopt} install tftpd-hpa tftp-hpa
 	#apt-get ${aptopt} install 
 }
+function setup_Install_Daemon_VBox_Server(){
+        desc Install VirtualBox Host
+        ###################################################################################
+
+        local version=`wget -O - -o /dev/null http://download.virtualbox.org/virtualbox/LATEST.TXT`
+	echo $version
+	apt_get_repos virtualbox*
+	return 0
+        
+	apt-get ${aptopt} install virtualbox-${version}
+        wget -nv http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpa
+        VBoxManage extpack install Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack
+}
+
 function setup_Must_Have_Tools(){
 	desc Install Tools\; vim, ethtool, iotop, iftop, jre, chrome, filezilla 
         ###################################################################################
