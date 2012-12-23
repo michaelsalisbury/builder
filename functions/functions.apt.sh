@@ -7,6 +7,29 @@ source=http://10.173.119.78/scripts/global/$scriptName
 ###########################################################################################
 #                                                             Repo Support
 ###########################################################################################
+function apt_search(){
+	local filter=$1
+	local search=$2$3
+	local ext_search=$3
+
+	for (( less_char=0; less_char <= ${#ext_search}; less_char++ )); do
+		(( $less_char )) 					\
+			&& local query=${search:0:-${less_char}}	\
+			|| local query=${search}
+		apt-cache search $query			|\
+		egrep ^$search					|\
+		while IFS=\  read pkg desc; do
+			apt-cache show $pkg			|\
+			egrep ^Version:				|\
+			grep $latest				|\
+			while IFS=\  read Version version; do
+				echo ${pkg}=${version}
+			done
+		done
+	done							|\
+		sort -u
+}
+
 function apt_get_repos(){
         local repo='-'
         local pkg=$1

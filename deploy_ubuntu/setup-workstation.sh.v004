@@ -136,11 +136,6 @@ function setup_Install_Daemon_VBox_Server(){
         ###################################################################################
 
         local latest=`wget -O - -o /dev/null http://download.virtualbox.org/virtualbox/LATEST.TXT`
-	apt_search $latest virtualbox- $latest
-
-	return 0
-	
-        local latest=`wget -O - -o /dev/null http://download.virtualbox.org/virtualbox/LATEST.TXT`
 	local base_name='virtualbox-'
 	local full_name=${base_name}${latest}
 	local IFS=$'\n'
@@ -150,7 +145,7 @@ function setup_Install_Daemon_VBox_Server(){
 				&& local search=${full_name:0:-${less_char}}	\
 				|| local search=${full_name}
 			apt-cache search $search			|\
-			egrep ^$search					|\
+			egrep ^${full_name:0:-$less_char}		|\
 			while IFS=\  read pkg desc; do
 				apt-cache show $pkg			|\
 				egrep ^Version:				|\

@@ -136,36 +136,33 @@ function setup_Install_Daemon_VBox_Server(){
         ###################################################################################
 
         local latest=`wget -O - -o /dev/null http://download.virtualbox.org/virtualbox/LATEST.TXT`
-	apt_search $latest virtualbox- $latest
-
-	return 0
-	
-        local latest=`wget -O - -o /dev/null http://download.virtualbox.org/virtualbox/LATEST.TXT`
+	echo $latest
 	local base_name='virtualbox-'
 	local full_name=${base_name}${latest}
-	local IFS=$'\n'
-	local -a install_candidate=( $(
-		for (( less_char=0; less_char < ${#latest}; less_char++ )); do
-			(( $less_char )) 					\
-				&& local search=${full_name:0:-${less_char}}	\
-				|| local search=${full_name}
-			apt-cache search $search			|\
-			egrep ^$search					|\
-			while IFS=\  read pkg desc; do
-				apt-cache show $pkg			|\
-				egrep ^Version:				|\
-				grep $latest				|\
-				while IFS=\  read Version version; do
-					echo ${pkg}=${version}
-				done
+
+	for (( less_char=1; less_char < ${#latest}; less_char++ )); do
+		apt-cache search ${full_name:0:-$less_char}	|\
+		egrep ^${full_name:0:-$less_char}		|\
+		while read pkg desc; do
+			apt-cache show $pkg			|\
+			egrep ^Version:				|\
+			grep $latest				|\
+			while read Version version; do
+				echo ${pkg}=${version}
 			done
-		done							|\
-			sort -u
-	) )
-	echo ${#install_candidate[@]}
-	echo ${install_candidate[@]}
+		done
+	done							|\
+		sort -u
 
 
+
+	for (( less_char=1; less_char < ${#latest}; less_char++ )); do
+		while read pkg desc; do
+			while read Version version; do
+				echo ${pkg}=${version}
+			done < <(apt-cache show $pkg | egrep ^Version: | grep $latest)
+		done < <(apt-cache search ${full_name:0:-$less_char} | egrep ^${full_name:0:-$less_char})
+	done
 
 	#apt_get_repos virtualbox*
 	return 0
