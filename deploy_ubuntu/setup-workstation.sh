@@ -7,15 +7,17 @@ source=http://10.173.119.78/scripts/system-setup/$scriptName
 subScriptBase="/root/system-setup/`basename ${source}`"
 
 
-# Get Ubuntu version info and 
+# Get Ubuntu version info and ... 
 #	DISTRIB_ID=Ubuntu
 #	DISTRIB_RELEASE=11.10
 #	DISTRIB_CODENAME=oneiric
 #	DISTRIB_DESCRIPTION="Ubuntu 11.10"
-while read import; do ${import:+.} "${import:-false}"; done << IMPORTS
-/etc/lsb-release
-`ls -1              functions.*.sh 2> /dev/null`
-`ls -1 ../functions/functions.*.sh 2> /dev/null`
+while read import; do
+	${import:+.} "${import:-false}"
+done << IMPORTS
+	/etc/lsb-release
+	`ls -1              functions*.sh 2> /dev/null`
+	`ls -1 ../functions/functions*.sh 2> /dev/null`
 IMPORTS
 
 aptopt="-y -q"
