@@ -135,9 +135,29 @@ function setup_Install_Daemon_VBox_Server(){
         desc Install VirtualBox Host
         ###################################################################################
 
-        local version=`wget -O - -o /dev/null http://download.virtualbox.org/virtualbox/LATEST.TXT`
-	echo $version
-	apt_get_repos virtualbox*
+        local latest=`wget -O - -o /dev/null http://download.virtualbox.org/virtualbox/LATEST.TXT`
+	echo $latest
+	local base_name='virtualbox-'
+	local full_name=${base_name}${latest}
+
+	for (( less_char=1; less_char < ${#latest}; less_char++ )); do
+		apt-cache search ${full_name:0:-$less_char}	| \
+		egrep ^${full_name:0:-$less_char}		| \
+		while read pkg desc; do
+			apt-cache show $pkg			| \
+			egrep ^Version:				| \
+			grep $latest				| \
+			cut -f2- -d\ 
+		done 
+	done | sort -u
+
+	for (( less_char=1; less_char < ${#latest}; less_char++ )); do
+		while read pkg desc; do
+			apt-cache show $pkg | egrep ^Version: | grep $latest | cut -f2- -d\ 
+		done < <(apt-cache search ${full_name:0:-$less_char} | egrep ^${full_name:0:-$less_char})
+	done | sort -u
+	
+	#apt_get_repos virtualbox*
 	return 0
         
 	apt-get ${aptopt} install virtualbox-${version}

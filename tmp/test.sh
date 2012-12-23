@@ -9,58 +9,7 @@ done << IMPORTS
 	`ls -1 ../functions/functions*.sh 2> /dev/null`
 IMPORTS
 
-function word_split2(){
-	local divide=$1
-	shift
-	local delimiter=$1
-	[ -z "${delimiter}" ] && delimiter=' '
-	shift
-	[ -n "$@" ] && echo "$@" | $FUNCNAME ${divide} "${delimiter}"
-
-	while read word; do
-
- 		local length=${#word}
-	
-		local remander=$(( length % divide ))
-
-		if [[ "$divide" =~ ^- ]]; then
-			   divide=${divide:1}
-			    start=$remander
-			beginning="\${word:0:$remander}"
-			unset end
-		else
-			    start=0
-			unset beginning
-			      end="\${word:$(( length - remander )):$remander}"
-		fi
-
-		  finish=$(( length - divide ))
-
-		middle=`seq $start $divide $finish | awk -v div=$divide '{print "${word:"$0":"div"}"}'`
-		middle=${middle//$'\n'/$delimiter}
-
-		eval_str+=${beginning}
-		eval_str+=${beginning+$delimiter}
-		eval_str+=${middle}
-		eval_str+=${end+$delimiter}
-		eval_str+=${end}
-
-		eval echo \"xxx"${eval_str}"xxx\"
-	done
-}
-
-echo read function
-echo $DISTRIB_ID 
 echo 0123456789ABCDEF | word_split 2
-
-
-
-
-
-
-
-
-
 
 exit 0
 
