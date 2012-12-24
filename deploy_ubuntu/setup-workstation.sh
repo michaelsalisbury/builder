@@ -16,9 +16,10 @@ while read import; do
 	${import:+.} "${import:-false}"
 done << IMPORTS
 	/etc/lsb-release
-	`ls -1              functions*.sh 2> /dev/null`
-	`ls -1 ../functions/functions*.sh 2> /dev/null`
+	`ls -1              "${scriptPath}"/functions*.sh 2> /dev/null`
+	`ls -1 "${scriptPath}"/../functions/functions*.sh 2> /dev/null`
 IMPORTS
+	#`ls -1    functions/functions*.sh 2> /dev/null`
 
 aptopt="-y -q"
 #autoLoginShell="ubuntu"
@@ -136,7 +137,8 @@ function setup_Install_Daemon_VBox_Server(){
         ###################################################################################
 
         local latest=`wget -O - -o /dev/null http://download.virtualbox.org/virtualbox/LATEST.TXT`
-	apt_search $latest virtualbox- $latest
+	#apt_search -v1 2 3 4
+	apt_search -v $latest -e $latest virtualbox-
 
 	return 0
 	

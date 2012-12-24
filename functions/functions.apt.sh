@@ -8,21 +8,30 @@ source=http://10.173.119.78/scripts/global/$scriptName
 #                                                             Repo Support
 ###########################################################################################
 function apt_search(){
-	local filter=$1
-	local search=$2$3
-	local ext_search=$3
+	local OPTIND=
+	local OPTARG=
+	while getopts "e:v:" OPTION 
+               do case $OPTION in
+			v)	local filter=$OPTARG;;
+			e)	local ext_search=$OPTARG;;
+			?)	;;
+		esac
+	done
+	
+	shift $(($OPTIND - 1))
+	local search=$1$ext_search
 
 	for (( less_char=0; less_char <= ${#ext_search}; less_char++ )); do
 		(( $less_char )) 					\
 			&& local query=${search:0:-${less_char}}	\
 			|| local query=${search}
-		apt-cache search $query			|\
-		egrep ^$search					|\
-		while IFS=\  read pkg desc; do
+		apt-cache search $query				|\
+		egrep ^$query					|\
+		while read pkg desc; do
 			apt-cache show $pkg			|\
 			egrep ^Version:				|\
-			grep $latest				|\
-			while IFS=\  read Version version; do
+			egrep ${filter:-'.*'}			|\
+			while read Version version; do
 				echo ${pkg}=${version}
 			done
 		done

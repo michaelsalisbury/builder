@@ -62,7 +62,8 @@ function switches(){
 	`switch_set_default r X`
 	
 	#switches_verifier "$@"
-
+	local OPTIND=
+	local OPTARG=
 	while getopts "b:cd:e:hj:i:lm:nr:s:t:uw:" OPTION
                do
                 case $OPTION in
