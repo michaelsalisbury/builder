@@ -8,18 +8,30 @@ source=http://10.173.119.78/scripts/global/$scriptName
 #                                                             Repo Support
 ###########################################################################################
 function apt_search(){
+	local help=`cat << END-OF-HELP
+---------------------------------------------------------------
+-v "regex filter for package version"
+-e "extend the search text and decrement till a match is found"
+---------------------------------------------------------------
+USAGE
+apt_search [-v "filter"] [-e "extended package name"] "package name" 
+ 
+END-OF-HELP`
 	local OPTIND=
 	local OPTARG=
-	while getopts "e:v:" OPTION 
+	while getopts "e:hv:" OPTION 
                do case $OPTION in
 			v)	local filter=$OPTARG;;
 			e)	local ext_search=$OPTARG;;
+			h)	echo "${help}"; return 0;;
 			?)	;;
 		esac
 	done
 	
 	shift $(($OPTIND - 1))
 	local search=$1$ext_search
+	unset IFS
+	#local IFS=$'\ '
 
 	for (( less_char=0; less_char <= ${#ext_search}; less_char++ )); do
 		(( $less_char )) 					\
