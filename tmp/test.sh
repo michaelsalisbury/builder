@@ -9,6 +9,50 @@ done << IMPORTS
 	`ls -1 ../functions/functions*.sh 2> /dev/null`
 IMPORTS
 
+echo WAN
+get_nmcli_WAN
+echo LAN
+get_nmcli_LAN
+echo DETAIL
+#get_nmcli_detail
+
+#for i in `get_nmcli_WAN` `get_nmcli_LAN`; do
+#	echo $i `get_nmcli_detail $i id`
+#done
+
+
+
+
+echo uuid
+generate_uuid
+
+echo up
+nmcli con up uuid `generate_uuid` iface eth0 --nowait
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exit 0
+
 echo 0123456789ABCDEF | word_split 2
 
 exit 0

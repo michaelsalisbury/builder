@@ -166,6 +166,7 @@ function setup_Must_Have_Tools(){
 	waitAptgetInstall
 	apt-get ${aptopt} install	vim ethtool hwinfo iotop iftop git xclip \
 					terminator multitail everpad \
+					apt-file dlocate wajig aptitude\
 					expect expect-dev \
 					gconf-editor \
 					ipcalc \

@@ -7,6 +7,9 @@ source=http://10.173.119.78/scripts/global/$scriptName
 ###########################################################################################
 #                                                             Network Managemer CLI Support
 ###########################################################################################
+function generate_uuid(){
+	python -c 'import uuid; print uuid.uuid1();'
+}
 function get_nmcli_WAN(){
 	# Returns iface ip; Tests for interface with DHCP4 IP address
 	local -a ifaces
@@ -41,12 +44,29 @@ function get_nmcli_LAN(){
 }
 
 function get_nmcli_detail(){
+	if (( ${#@} < 2 )); then
+		cat << END-OF-HELP-MESSAGE
+ List of Available Interface Details
+-------------------------------------
+  uuid	      timestamp       id
+
+  type	      dhcp_domain     mac		
+  product     dhcp_ip         ip
+  driver      dhcp_gw	      gw
+              dhcp_mask       mask
+              dhcp_cidr       cidr
+-------------------------------------
+END-OF-HELP-MESSAGE
+		return 1
+	fi
 	local iface=$1
 	local detail=$2
 	local  mac="$FUNCNAME $iface mac"
 	local  adr="$FUNCNAME $iface adr"
 	local   ip="$FUNCNAME $iface ip"
 	local cidr="$FUNCNAME $iface cidr"
+	local dhcp_ip="$FUNCNAME $iface dhcp_ip"
+	local dhcp_mask="$FUNCNAME $iface dhcp_mask"
 	case "${detail}" in
 		uuid)		get_nmcli_con_detail `$mac` connection.uuid;;
 		id)		get_nmcli_con_detail `$mac` connection.id;;
@@ -64,6 +84,7 @@ function get_nmcli_detail(){
 		dhcp_dns)	get_nmcli_dev_detail $iface \.domain_name_servers;;
 		dhcp_ip)	get_nmcli_dev_detail $iface ^DHCP4\.OPTION\[[0-9]*\]\.ip_address$;;
 		dhcp_mask)	get_nmcli_dev_detail $iface ^DHCP4\.OPTION\[[0-9]*\]\.subnet_mask$;;
+		dhcp_cidr)	get_ipcalc_netmask `$dhcp_ip` `$dhcp_mask`;;
 		*)		;;
 	esac
 }
