@@ -1,0 +1,196 @@
+#!/bin/bash
+
+# IN_ACCESS        File was accessed (read) (*)
+# IN_ATTRIB        Metadata changed (permissions, timestamps, extended attributes, etc.) (*)
+# IN_CLOSE_WRITE   File opened for writing was closed (*)
+# IN_CLOSE_NOWRITE File not opened for writing was closed (*)
+# IN_CREATE        File/directory created in watched directory (*)
+# IN_DELETE        File/directory deleted from watched directory (*)
+# IN_DELETE_SELF   Watched file/directory was itself deleted
+# IN_MODIFY        File was modified (*)
+# IN_MOVE_SELF     Watched file/directory was itself moved
+# IN_MOVED_FROM    File moved out of watched directory (*)
+# IN_MOVED_TO      File moved into watched directory (*)
+# IN_OPEN          File was opened (*)
+
+
+# $$ - a dollar sign
+# $@ - the watched filesystem path (see above)
+# $# - the event-related file name
+# $% - the event flags (textually)
+# $& - the event flags (numerically)
+
+function main(){
+	# Set log file
+	LOG="/var/log/incron_test.log"
+
+	# Set sleep between uploads
+	SLEEP='20'
+
+	# Read switches for rapper script
+	switches "$@"
+	shift $?
+
+	# main logic 
+	if   ${echo_help:-false}; then
+		echo_help
+		exit 1
+	fi
+
+	${isdir} && exit 1
+
+	# skip filters
+	#[[ "${e_name}" =~ ^\..*\.swpx{0,1}$ ]]	&& exit 1
+	[[ "${e_name}" =~ ^\..*\.sw[xp]$ ]]	&& exit 1
+	[[ "${e_name}" =~ ^.*~$ ]]		&& exit 1
+	[[ "${e_name}" =~ ^[0-9]*$ ]]		&& exit 1
+
+	# only sync every 30 seconds or so
+	# whatever the SLEEP variable is set to
+	# creat a temp file to lock out rapidly accuring syncs
+	inProgress=/tmp/$(basename "${BASH_SOURCE}")
+	[[ -e "${inProgress}" ]] && exit 1
+	touch "${inProgress}"
+
+	# mark the start time of the git sync
+	local mark_start_time=`date "+%s"`
+
+	# log entry header
+	cat << END-OF-LOG >> "${LOG}"
+rootPath :: ${rootPath}
+  e_FQFN :: ${e_FQFN}
+-------------------------------------------------
+END-OF-LOG
+	
+	# git sync
+	sleep 1
+	git_add		>> "${LOG}"
+	git_commit	>> "${LOG}"
+	git_push	>> "${LOG}"
+
+	# log entry footer
+	cat << END-OF-LOG >> "${LOG}"
+-------------------------------------------------
+Done GIT sync
+
+
+END-OF-LOG
+
+	# mark the stop time of the git sync
+	local mark_stop_time=`date "+%s"`
+
+	# sleep for SLEEP var minus the git sync difference
+	sleep $(( SLEEP - ( mark_stop_time - mark_start_time ) ))
+
+	# remove the sync lock
+	rm -f "${inProgress}"
+
+	return 0
+
+	# log
+	cat << END-OF-LOG >> "${LOG}"
+events :: ${events}
+e_FQFN :: ${e_FQFN}
+isdir  :: ${isdir}
+END-OF-LOG
+
+}
+function git_isintree(){
+	local git_search_results_cnt=`git	\
+		--work-tree="${rootPath}"       \
+		--git-dir="${rootPath}/.git"    \
+		ls-tree                         \
+                --name-only                     \
+                HEAD				\
+		"${e_FQFN}"			|\
+		wc -l`
+	if (( git_search_results_cnt > 0 ))
+	then
+		return 0
+	else
+		return 1
+	fi 
+}
+function git_add(){
+	if ! git_isintree; then
+		echo adding file to tree
+		git				\
+		--work-tree="${rootPath}"       \
+		--git-dir="${rootPath}/.git"    \
+		add "${e_FQFN}"
+	fi
+}
+function git_commit(){
+		git				\
+		--work-tree="${rootPath}"       \
+		--git-dir="${rootPath}/.git"    \
+		commit -a --allow-empty-message -m ''
+}
+function git_push(){
+		git				\
+		--work-tree="${rootPath}"       \
+		--git-dir="${rootPath}/.git"    \
+		push
+}
+
+function escape_path(){
+	ls -1 -d --quoting-style=escape "${1}"
+}
+function switches(){
+        local OPTIND=
+        local OPTARG=
+        while getopts "e:f:hr:" OPTION
+               do case $OPTION in
+			e)	events=${OPTARG}
+				[[ "${events}" =~ IN_ISDIR       ]] && isdir=true      || isdir=false
+				[[ "${events}" =~ IN_CREATE      ]] && e_create=true   || e_create=false
+				[[ "${events}" =~ IN_DELETE      ]] && e_delete=true   || e_delete=false
+				[[ "${events}" =~ IN_MODIFY      ]] && e_modify=true   || e_modify=false
+				[[ "${events}" =~ IN_CLOSE_WRITE ]] && e_modified=true || e_modified=false
+				;;
+			f)	e_FQFN=${OPTARG}
+				e_FQFNEscaped=$(escape_path "${e_FQFN}")
+				e_path=$(dirname  "${e_FQFN}")
+				e_name=$(basename "${e_FQFN}")
+				;;
+			h)	echo_help=true;;
+			r)	rootPath=${OPTARG}
+				rootPathEscaped=$(escape_path "${rootPath}")
+				;;
+                        ?)      ;;
+                esac
+        done
+        return $(($OPTIND - 1))
+}
+function echo_help(){
+	cat << END-OF-HELP
+---------------------------------------------------------------
+# IN_ACCESS        File was accessed (read) (*)
+# IN_ATTRIB        Metadata changed (permissions, timestamps, extended attributes, etc.) (*)
+# IN_CLOSE_WRITE   File opened for writing was closed (*)
+# IN_CLOSE_NOWRITE File not opened for writing was closed (*)
+# IN_CREATE        File/directory created in watched directory (*)
+# IN_DELETE        File/directory deleted from watched directory (*)
+# IN_DELETE_SELF   Watched file/directory was itself deleted
+# IN_MODIFY        File was modified (*)
+# IN_MOVE_SELF     Watched file/directory was itself moved
+# IN_MOVED_FROM    File moved out of watched directory (*)
+# IN_MOVED_TO      File moved into watched directory (*)
+# IN_OPEN          File was opened (*)
+
+# \$$ - a dollar sign
+# \$@ - the watched filesystem path (see above)
+# \$# - the event-related file name
+# \$% - the event flags (textually)
+# \$& - the event flags (numerically)
+---------------------------------------------------------------
+SWITCHES
+
+ -h  this help message
+ -e  [events (texual \$%)]
+ -f  [absoluet event path (\$@/\$#)]
+ -r  [absolute root path]
+
+END-OF-HELP
+}
+main "$@"
