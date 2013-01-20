@@ -1,0 +1,25 @@
+# https://access.redhat.com/knowledge/docs/en-US/Red_Hat_Enterprise_Linux/6/html/Installation_Guide/s1-kickstart2-options.html
+# http://www.redhat.com/promo/summit/2010/presentations/summit/decoding-the-code/wed/cshabazi-530-more/MORE-Kickstart-Tips-and-Tricks.pdf
+#############################################################################
+# System authorization information
+auth  --useshadow  --enablemd5
+
+# Installation logging level
+logging --level=info
+
+# Timezone
+timezone America/New_York
+
+# Install OS instead of upgrade
+install
+# Run the Setup Agent on first boot
+firstboot --disable
+reboot
+# Install Method "graphical" or "text", "interactive" or "autostep"
+autostep --autoscreenshot
+
+# Firewall & SELinux configuration
+firewall --disabled
+selinux --disabled
+
+
