@@ -40,20 +40,17 @@ function main(){
 	${isdir} && exit 1
 
 	# skip filters
-	[[ "${e_name}" =~ ^\..*\.swpx{0,1}$ ]]	&& exit 1
+	#[[ "${e_name}" =~ ^\..*\.swpx{0,1}$ ]]	&& exit 1
 	[[ "${e_name}" =~ ^\..*\.sw[xp]$ ]]	&& exit 1
 	[[ "${e_name}" =~ ^.*~$ ]]		&& exit 1
 	[[ "${e_name}" =~ ^[0-9]*$ ]]		&& exit 1
 
-	# exclude if file matches a .gitignore pattern
-	git_isexcluded && exit 1
-
 	# only sync every 30 seconds or so
 	# whatever the SLEEP variable is set to
 	# creat a temp file to lock out rapidly accuring syncs
-	#inProgress=/tmp/$(basename "${BASH_SOURCE}")
-	#[[ -e "${inProgress}" ]] && exit 1
-	#touch "${inProgress}"
+	inProgress=/tmp/$(basename "${BASH_SOURCE}")
+	[[ -e "${inProgress}" ]] && exit 1
+	touch "${inProgress}"
 
 	# mark the start time of the git sync
 	local mark_start_time=`date "+%s"`
@@ -64,45 +61,17 @@ rootPath :: ${rootPath}
   e_FQFN :: ${e_FQFN}
 -------------------------------------------------
 END-OF-LOG
-	git						\
-		--work-tree="${rootPath}"       	\
-                --git-dir="${rootPath}/.git"    	\
-		ls-files				\
-		-o					\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|" >> "${LOG}"
-
-	cat << END-OF-LOG >> "${LOG}"
--------------------------------------------------
-END-OF-LOG
-	git						\
-		--work-tree="${rootPath}"       	\
-                --git-dir="${rootPath}/.git"    	\
-		ls-files				\
-		-o -i					\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|" >> "${LOG}"
-
-	cat << END-OF-LOG >> "${LOG}"
--------------------------------------------------
-END-OF-LOG
-	echo ${e_name} git_isexcluded :: $(git_isexcluded) >>  "${LOG}"
-	echo ${e_name} git_needsadd :: $(git_needsadd) >>  "${LOG}"
-	echo ${e_name} git_needspush :: $(git_needspush) >>  "${LOG}"
 	
-	cat << END-OF-LOG >> "${LOG}"
--------------------------------------------------
-END-OF-LOG
 	# git sync
-	#sleep 1
-	#git_add		>> "${LOG}"
-	#git_commit	>> "${LOG}"
-	#git_push	>> "${LOG}"
+	sleep 1
+	git_add		>> "${LOG}"
+	git_commit	>> "${LOG}"
+	git_push	>> "${LOG}"
 
 	# log entry footer
-	#cat << END-OF-LOG >> "${LOG}"
-#-------------------------------------------------
-#Done GIT sync
+	cat << END-OF-LOG >> "${LOG}"
+-------------------------------------------------
+Done GIT sync
 
 
 END-OF-LOG
@@ -111,12 +80,12 @@ END-OF-LOG
 	local mark_stop_time=`date "+%s"`
 
 	# sleep for SLEEP var minus the git sync difference
-	#sleep $(( SLEEP - ( mark_stop_time - mark_start_time ) ))
+	sleep $(( SLEEP - ( mark_stop_time - mark_start_time ) ))
 
 	# remove the sync lock
-	#rm -f "${inProgress}"
+	rm -f "${inProgress}"
 
-	#return 0
+	return 0
 
 	# log
 	cat << END-OF-LOG >> "${LOG}"
@@ -126,48 +95,6 @@ isdir  :: ${isdir}
 END-OF-LOG
 
 }
-function git_isexcluded(){
-	git						\
-		--work-tree="${rootPath}"       	\
-                --git-dir="${rootPath}/.git"    	\
-		ls-files				\
-		--others				\
-		--ignored				\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|"			|\
-		egrep "^${e_FQFN}$" > /dev/null		\
-		&& { echo    is excluded; return 0; }	\
-		|| { echo isnot excluded; return 1; } 
-
-}
-function git_needsadd(){
-	git						\
-		--work-tree="${rootPath}"       	\
-                --git-dir="${rootPath}/.git"    	\
-		ls-files				\
-		--others				\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|"			|\
-		egrep "^${e_FQFN}$" > /dev/null		\
-		&& { echo   needs add;   return 0; }	\
-		|| { echo already added; return 1; }
-}
-function git_needspush(){
-	git						\
-		--work-tree="${rootPath}"       	\
-                --git-dir="${rootPath}/.git"    	\
-		ls-files				\
-		--others				\
-		--modified				\
-		--deleted				\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|"			|\
-		egrep "^${e_FQFN}$" > /dev/null		\
-		&& { echo   needs push;   return 0; }	\
-		|| { echo already pushed; return 1; } 
-
-}
-
 function git_isintree(){
 	local git_search_results_cnt=`git	\
 		--work-tree="${rootPath}"       \
@@ -264,14 +191,6 @@ SWITCHES
  -e  [events (texual \$%)]
  -f  [absoluet event path (\$@/\$#)]
  -r  [absolute root path]
-
-Incron Entry
-
- /full/path/to/git/root IN_DELETE,IN_CLOSE_WRITE /etc/incron.s/incron_github.sh -r /full/path/to/git/root -e \$% -f \$@/\$#
-
-Incronr Setup Command
-
- incronr.sh -b -c [full path to incron config file]
 
 END-OF-HELP
 }
