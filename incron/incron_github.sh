@@ -21,11 +21,14 @@
 # $& - the event flags (numerically)
 
 function main(){
+	# lock file to pevent multiple simultanios git push events
+	inProgress=/var/run/$(basename "${BASH_SOURCE}")-${rootPath//\//\\}
+
 	# Set log file
 	LOG="/var/log/incron_test.log"
 
 	# Set sleep between uploads
-	SLEEP='20'
+	SLEEP='5'
 
 	# Read switches for rapper script
 	switches "$@"
@@ -40,81 +43,68 @@ function main(){
 	${isdir} && exit 1
 
 	# skip filters
-	[[ "${e_name}" =~ ^\..*\.swpx{0,1}$ ]]	&& exit 1
-	[[ "${e_name}" =~ ^\..*\.sw[xp]$ ]]	&& exit 1
-	[[ "${e_name}" =~ ^.*~$ ]]		&& exit 1
-	[[ "${e_name}" =~ ^[0-9]*$ ]]		&& exit 1
+	#[[ "${e_name}" =~ ^\..*\.swpx{0,1}$ ]]	&& exit 1
+	#[[ "${e_name}" =~ ^\..*\.sw[xp]$ ]]	&& exit 1
+	#[[ "${e_name}" =~ ^.*~$ ]]		&& exit 1
+	#[[ "${e_name}" =~ ^[0-9]*$ ]]		&& exit 1
 
-	# exclude if file matches a .gitignore pattern
-	git_isexcluded && exit 1
+	# exit if file doesn't need to be pushed
+	git_changepending || exit 1
 
-	# only sync every 30 seconds or so
+	# add if file is new and not yet tracked
+	git_isuntracked && git_add
+
+	# only push once every 30 seconds or
 	# whatever the SLEEP variable is set to
-	# creat a temp file to lock out rapidly accuring syncs
-	#inProgress=/tmp/$(basename "${BASH_SOURCE}")
-	#[[ -e "${inProgress}" ]] && exit 1
-	#touch "${inProgress}"
+	for (( f=$(date "+%s") + SLEEP; f > n; n=$(date "+%s") )); do
+		sleep 1
+		git_changepending || exit 0
+		sleep 2
+	done
 
-	# mark the start time of the git sync
-	local mark_start_time=`date "+%s"`
+	# stall while a git push is in progress
+	while [[ -e "${inProgress}" ]]; do
+		sleep 1
+		git_changepending || exit 0
+	done
+
+	# lock out other events from performing a git push 	
+	touch "${inProgress}"
+	git_commit
+	git_push
+	sleep 1
+	rm -f "${inProgress}"
 
 	# log entry header
 	cat << END-OF-LOG >> "${LOG}"
+_________________________________________________
 rootPath :: ${rootPath}
   e_FQFN :: ${e_FQFN}
 -------------------------------------------------
 END-OF-LOG
-	git						\
-		--work-tree="${rootPath}"       	\
-                --git-dir="${rootPath}/.git"    	\
-		ls-files				\
-		-o					\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|" >> "${LOG}"
+        git_list_pending >> "${LOG}"
 
 	cat << END-OF-LOG >> "${LOG}"
 -------------------------------------------------
 END-OF-LOG
-	git						\
-		--work-tree="${rootPath}"       	\
-                --git-dir="${rootPath}/.git"    	\
-		ls-files				\
-		-o -i					\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|" >> "${LOG}"
+	git_list_excluded >> "${LOG}"
 
 	cat << END-OF-LOG >> "${LOG}"
 -------------------------------------------------
 END-OF-LOG
-	echo ${e_name} git_isexcluded :: $(git_isexcluded) >>  "${LOG}"
-	echo ${e_name} git_needsadd :: $(git_needsadd) >>  "${LOG}"
-	echo ${e_name} git_needspush :: $(git_needspush) >>  "${LOG}"
+	( git_isexcluded && echo ${e_name} is excluded || echo ${e_name} is-not excluded ) >> "${LOG}"
+	( git_needsadd   && echo ${e_name} needs add   || echo ${e_name} not on add list ) >> "${LOG}"
+	( git_needspush  && echo ${e_name} needs push  || echo ${e_name} not on add list ) >> "${LOG}"
 	
 	cat << END-OF-LOG >> "${LOG}"
 -------------------------------------------------
 END-OF-LOG
-	# git sync
-	#sleep 1
-	#git_add		>> "${LOG}"
-	#git_commit	>> "${LOG}"
-	#git_push	>> "${LOG}"
+	echo ${inProgress} >> "${LOG}"
 
-	# log entry footer
-	#cat << END-OF-LOG >> "${LOG}"
-#-------------------------------------------------
-#Done GIT sync
-
-
+	cat << END-OF-LOG >> "${LOG}"
+-------------------------------------------------
 END-OF-LOG
 
-	# mark the stop time of the git sync
-	local mark_stop_time=`date "+%s"`
-
-	# sleep for SLEEP var minus the git sync difference
-	#sleep $(( SLEEP - ( mark_stop_time - mark_start_time ) ))
-
-	# remove the sync lock
-	#rm -f "${inProgress}"
 
 	#return 0
 
@@ -126,83 +116,56 @@ isdir  :: ${isdir}
 END-OF-LOG
 
 }
-function git_isexcluded(){
-	git						\
-		--work-tree="${rootPath}"       	\
-                --git-dir="${rootPath}/.git"    	\
-		ls-files				\
-		--others				\
-		--ignored				\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|"			|\
-		egrep "^${e_FQFN}$" > /dev/null		\
-		&& { echo    is excluded; return 0; }	\
-		|| { echo isnot excluded; return 1; } 
-
+function git_list_excluded(){
+	git	--work-tree="${rootPath}"       \
+                --git-dir="${rootPath}/.git"    \
+		ls-files			\
+		--others			\
+		--ignored			\
+		--exclude-standard		|\
+		sed "s|^|${rootPath}/|"
 }
-function git_needsadd(){
-	git						\
-		--work-tree="${rootPath}"       	\
+function git_list_untracked(){
+	git	--work-tree="${rootPath}"       	\
                 --git-dir="${rootPath}/.git"    	\
 		ls-files				\
 		--others				\
 		--exclude-standard			|\
-		sed "s|^|${rootPath}/|"			|\
-		egrep "^${e_FQFN}$" > /dev/null		\
-		&& { echo   needs add;   return 0; }	\
-		|| { echo already added; return 1; }
+		sed "s|^|${rootPath}/|"
 }
-function git_needspush(){
-	git						\
-		--work-tree="${rootPath}"       	\
+function git_list_pending(){
+	git	--work-tree="${rootPath}"       	\
                 --git-dir="${rootPath}/.git"    	\
 		ls-files				\
 		--others				\
 		--modified				\
 		--deleted				\
 		--exclude-standard			|\
-		sed "s|^|${rootPath}/|"			|\
-		egrep "^${e_FQFN}$" > /dev/null		\
-		&& { echo   needs push;   return 0; }	\
-		|| { echo already pushed; return 1; } 
-
+		sed "s|^|${rootPath}/|"
+}
+function git_isexcluded(){
+	git_list_excluded | egrep "^${e_FQFN}$" > /dev/null
+}
+function git_isuntracked(){
+	git_list_untracked | egrep "^${e_FQFN}$" > /dev/null
+}
+function git_changepending(){
+	git_list_pending | egrep "^${e_FQFN}$" > /dev/null
 }
 
-function git_isintree(){
-	local git_search_results_cnt=`git	\
-		--work-tree="${rootPath}"       \
-		--git-dir="${rootPath}/.git"    \
-		ls-tree                         \
-                --name-only                     \
-                HEAD				\
-		"${e_FQFN}"			|\
-		wc -l`
-	if (( git_search_results_cnt > 0 ))
-	then
-		return 0
-	else
-		return 1
-	fi 
-}
 function git_add(){
-	if ! git_isintree; then
-		echo adding file to tree
-		git				\
-		--work-tree="${rootPath}"       \
+	git	--work-tree="${rootPath}"       \
 		--git-dir="${rootPath}/.git"    \
 		add "${e_FQFN}"
-	fi
 }
 function git_commit(){
-		git				\
-		--work-tree="${rootPath}"       \
+	git	--work-tree="${rootPath}"       \
 		--git-dir="${rootPath}/.git"    \
 		#commit -a --allow-empty-message -m ''
 		commit -a -m 'incron'
 }
 function git_push(){
-		git				\
-		--work-tree="${rootPath}"       \
+	git	--work-tree="${rootPath}"       \
 		--git-dir="${rootPath}/.git"    \
 		push
 }
