@@ -47,21 +47,24 @@ function main(){
 	#[[ "${e_name}" =~ ^\..*\.sw[xp]$ ]]	&& exit 1
 	#[[ "${e_name}" =~ ^.*~$ ]]		&& exit 1
 	#[[ "${e_name}" =~ ^[0-9]*$ ]]		&& exit 1
+	[[ "${e_name}" =~ ^index.lock$ ]]	&& exit 1
+
+	exit 1
 
 	# exit if file doesn't need to be pushed
-	git_changepending || exit 1
+	#git_changepending || exit 1
 
 	# add if file is new and not yet tracked
-	git_isuntracked && git_add
+	#git_isuntracked && git_add
 
 	# only push once every 30 seconds or
 	# whatever the SLEEP variable is set to
-	for (( f=$(date "+%s") + SLEEP; f > n; n=$(date "+%s") )); do
+	#for (( f=$(date "+%s") + SLEEP; f > n; n=$(date "+%s") )); do
 		#sleep 1
 		#git_changepending || exit 0
-		date >> "${LOG}"
+		#date >> "${LOG}"
 		#sleep 2
-	done
+	#done
 
 	# stall while a git push is in progress
 	#while [[ -e "${inProgress}" ]]; do
@@ -71,11 +74,11 @@ function main(){
 	#done
 
 	# lock out other events from performing a git push 	
-	touch "${inProgress}"
+	#touch "${inProgress}"
 	#git_commit
 	#git_push
 	#sleep 1
-	rm -f "${inProgress}"
+	#rm -f "${inProgress}"
 
 	# log entry header
 	cat << END-OF-LOG >> "${LOG}"
@@ -100,15 +103,11 @@ END-OF-LOG
 	git_list_untracked	| sed 's/^/untracked\t/'	>> "${LOG}"
 	git_list_excluded	| sed 's/^/excluded\t/'		>> "${LOG}"
 
-	cat << END-OF-LOG >> "${LOG}"
--------------------------------------------------
-END-OF-LOG
-
-
-	#return 0
+	return 0
 
 	# log
 	cat << END-OF-LOG >> "${LOG}"
+-------------------------------------------------
 events :: ${events}
 e_FQFN :: ${e_FQFN}
 isdir  :: ${isdir}
@@ -127,12 +126,29 @@ function git_list_excluded(){
 function git_list_untracked(){
 	git	--work-tree="${rootPath}"       	\
                 --git-dir="${rootPath}/.git"    	\
+		status				\
+		--untracked-files			\
+		--porcelain
+}
+function git_list_untracked_old(){
+	git	--work-tree="${rootPath}"       	\
+                --git-dir="${rootPath}/.git"    	\
 		ls-files				\
 		--others				\
 		--exclude-standard			|\
 		sed "s|^|${rootPath}/|"
 }
 function git_list_pending(){
+	git	--work-tree="${rootPath}"       	\
+                --git-dir="${rootPath}/.git"    	\
+		log					\
+		--name-only				\
+		--pretty="format:"			\
+		origin/master..master			|\
+		sort -u					|\
+		sed "s|^|${rootPath}/|"
+}
+function git_list_pending_old(){
 	git	--work-tree="${rootPath}"       	\
                 --git-dir="${rootPath}/.git"    	\
 		ls-files				\
