@@ -21,18 +21,18 @@
 # $& - the event flags (numerically)
 
 function main(){
-	# lock file to pevent multiple simultanios git push events
-	inProgress=/tmp/$(basename "${BASH_SOURCE}")-${rootPath//\//\\}
+	# Read switches for rapper script
+	switches "$@"
+	shift $?
 
 	# Set log file
 	LOG="/var/log/incron_test.log"
 
 	# Set sleep between uploads
-	SLEEP='5'
+	SLEEP='1'
 
-	# Read switches for rapper script
-	switches "$@"
-	shift $?
+	# lock file to pevent multiple simultanios git push events
+	inProgress=/tmp/$(basename "${BASH_SOURCE}")\-${rootPath//\//$'\\'}
 
 	# main logic 
 	if   ${echo_help:-false}; then
@@ -57,17 +57,17 @@ function main(){
 	# only push once every 30 seconds or
 	# whatever the SLEEP variable is set to
 	for (( f=$(date "+%s") + SLEEP; f > n; n=$(date "+%s") )); do
-		sleep 1
+		#sleep 1
 		#git_changepending || exit 0
 		date >> "${LOG}"
-		sleep 2
+		#sleep 2
 	done
 
 	# stall while a git push is in progress
 	#while [[ -e "${inProgress}" ]]; do
-		sleep 1
+		#sleep 1
 		#git_changepending || exit 0
-		echo holding... >> "${LOG}"
+		#echo holding... >> "${LOG}"
 	#done
 
 	# lock out other events from performing a git push 	
@@ -91,7 +91,14 @@ END-OF-LOG
 	cat << END-OF-LOG >> "${LOG}"
 -------------------------------------------------
 END-OF-LOG
-	echo ${inProgress} >> "${LOG}"
+	echo inProgress :: ${inProgress} >> "${LOG}"
+
+	cat << END-OF-LOG >> "${LOG}"
+-------------------------------------------------
+END-OF-LOG
+	git_list_pending	| sed 's/^/pending\t\t/'	>> "${LOG}"
+	git_list_untracked	| sed 's/^/untracked\t/'	>> "${LOG}"
+	git_list_excluded	| sed 's/^/excluded\t/'		>> "${LOG}"
 
 	cat << END-OF-LOG >> "${LOG}"
 -------------------------------------------------

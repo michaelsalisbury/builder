@@ -89,8 +89,3 @@ all2 = int2.GetAll('org.freedesktop.NetworkManager.Device')
 for prop in all2:
 	print all2[prop], "\t", prop
 
-
-
-
-
-
