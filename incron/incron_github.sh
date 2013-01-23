@@ -22,7 +22,7 @@
 
 function main(){
 	# lock file to pevent multiple simultanios git push events
-	inProgress=/var/run/$(basename "${BASH_SOURCE}")-${rootPath//\//\\}
+	inProgress=/tmp/$(basename "${BASH_SOURCE}")-${rootPath//\//\\}
 
 	# Set log file
 	LOG="/var/log/incron_test.log"
@@ -58,21 +58,23 @@ function main(){
 	# whatever the SLEEP variable is set to
 	for (( f=$(date "+%s") + SLEEP; f > n; n=$(date "+%s") )); do
 		sleep 1
-		git_changepending || exit 0
+		#git_changepending || exit 0
+		date >> "${LOG}"
 		sleep 2
 	done
 
 	# stall while a git push is in progress
-	while [[ -e "${inProgress}" ]]; do
+	#while [[ -e "${inProgress}" ]]; do
 		sleep 1
-		git_changepending || exit 0
-	done
+		#git_changepending || exit 0
+		echo holding... >> "${LOG}"
+	#done
 
 	# lock out other events from performing a git push 	
 	touch "${inProgress}"
-	git_commit
-	git_push
-	sleep 1
+	#git_commit
+	#git_push
+	#sleep 1
 	rm -f "${inProgress}"
 
 	# log entry header
@@ -82,19 +84,9 @@ rootPath :: ${rootPath}
   e_FQFN :: ${e_FQFN}
 -------------------------------------------------
 END-OF-LOG
-        git_list_pending >> "${LOG}"
-
-	cat << END-OF-LOG >> "${LOG}"
--------------------------------------------------
-END-OF-LOG
-	git_list_excluded >> "${LOG}"
-
-	cat << END-OF-LOG >> "${LOG}"
--------------------------------------------------
-END-OF-LOG
-	( git_isexcluded && echo ${e_name} is excluded || echo ${e_name} is-not excluded ) >> "${LOG}"
-	( git_needsadd   && echo ${e_name} needs add   || echo ${e_name} not on add list ) >> "${LOG}"
-	( git_needspush  && echo ${e_name} needs push  || echo ${e_name} not on add list ) >> "${LOG}"
+	( git_isexcluded    && echo ${e_name} is excluded    || echo ${e_name} is-not excluded ) >> "${LOG}"
+	( git_isuntracked   && echo ${e_name} needs add      || echo ${e_name} is tracked ) >> "${LOG}"
+	( git_changepending && echo ${e_name} change pending || echo ${e_name} no change pending ) >> "${LOG}"
 	
 	cat << END-OF-LOG >> "${LOG}"
 -------------------------------------------------
