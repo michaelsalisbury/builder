@@ -25,22 +25,13 @@ function main(){
 	switches "$@"
 	shift $?
 
-	# Set log file
-	LOG="/var/log/incron_test.log"
-
-	# Set sleep between uploads
-	SLEEP='1'
-
-	# lock file to pevent multiple simultanios git push events
-	inProgress=/tmp/$(basename "${BASH_SOURCE}")\-${rootPath//\//$'\\'}
-
 	# main logic 
 	if   ${echo_help:-false}; then
 		echo_help
 		exit 1
 	fi
 
-	${isdir} && exit 1
+	isdir && exit 1
 
 	# skip filters
 	#[[ "${e_name}" =~ ^\..*\.swpx{0,1}$ ]]	&& exit 1
@@ -49,96 +40,55 @@ function main(){
 	#[[ "${e_name}" =~ ^[0-9]*$ ]]		&& exit 1
 	[[ "${e_name}" =~ ^index.lock$ ]]	&& exit 1
 
-	exit 1
-
 	# exit if file doesn't need to be pushed
-	#git_changepending || exit 1
+	git_changepending || exit 1
 
 	# add if file is new and not yet tracked
-	#git_isuntracked && git_add
+	git_isuntracked && git_add
 
-	# only push once every 30 seconds or
-	# whatever the SLEEP variable is set to
-	#for (( f=$(date "+%s") + SLEEP; f > n; n=$(date "+%s") )); do
-		#sleep 1
-		#git_changepending || exit 0
-		#date >> "${LOG}"
-		#sleep 2
-	#done
+	# if deleted update git index
+	git_isdeleted && git_add_update
 
-	# stall while a git push is in progress
-	#while [[ -e "${inProgress}" ]]; do
-		#sleep 1
-		#git_changepending || exit 0
-		#echo holding... >> "${LOG}"
-	#done
+	# commit change
+	git_isuncommited && git_commit
 
-	# lock out other events from performing a git push 	
-	#touch "${inProgress}"
-	#git_commit
-	#git_push
-	#sleep 1
-	#rm -f "${inProgress}"
-
-	# log entry header
-	cat << END-OF-LOG >> "${LOG}"
-_________________________________________________
-rootPath :: ${rootPath}
-  e_FQFN :: ${e_FQFN}
--------------------------------------------------
-END-OF-LOG
-	( git_isexcluded    && echo ${e_name} is excluded    || echo ${e_name} is-not excluded ) >> "${LOG}"
-	( git_isuntracked   && echo ${e_name} needs add      || echo ${e_name} is tracked ) >> "${LOG}"
-	( git_changepending && echo ${e_name} change pending || echo ${e_name} no change pending ) >> "${LOG}"
-	
-	cat << END-OF-LOG >> "${LOG}"
--------------------------------------------------
-END-OF-LOG
-	echo inProgress :: ${inProgress} >> "${LOG}"
-
-	cat << END-OF-LOG >> "${LOG}"
--------------------------------------------------
-END-OF-LOG
-	git_list_pending	| sed 's/^/pending\t\t/'	>> "${LOG}"
-	git_list_untracked	| sed 's/^/untracked\t/'	>> "${LOG}"
-	git_list_excluded	| sed 's/^/excluded\t/'		>> "${LOG}"
-
-	return 0
-
-	# log
-	cat << END-OF-LOG >> "${LOG}"
--------------------------------------------------
-events :: ${events}
-e_FQFN :: ${e_FQFN}
-isdir  :: ${isdir}
-END-OF-LOG
-
+	# Push change 
+	git_push
 }
 function git_list_excluded(){
-	git	--work-tree="${rootPath}"       \
-                --git-dir="${rootPath}/.git"    \
-		ls-files			\
-		--others			\
-		--ignored			\
-		--exclude-standard		|\
+	git	--work-tree="${rootPath}"       	\
+                --git-dir="${rootPath}/.git"    	\
+		ls-files				\
+		--others				\
+		--ignored				\
+		--exclude-standard			|\
 		sed "s|^|${rootPath}/|"
 }
 function git_list_untracked(){
 	git	--work-tree="${rootPath}"       	\
                 --git-dir="${rootPath}/.git"    	\
-		status				\
+		status					\
 		--untracked-files			\
-		--porcelain
+		--porcelain				|\
+		sed "s|^[?]\{2\}[ \t]*|${rootPath}/|p;d"
 }
-function git_list_untracked_old(){
+function git_list_deleted(){
 	git	--work-tree="${rootPath}"       	\
                 --git-dir="${rootPath}/.git"    	\
-		ls-files				\
-		--others				\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|"
+		status					\
+		--untracked-files			\
+		--porcelain				|\
+		sed "s|^[ A]D[ \t]*|${rootPath}/|p;d"
 }
-function git_list_pending(){
+function git_list_uncommited(){
+	git	--work-tree="${rootPath}"       	\
+                --git-dir="${rootPath}/.git"    	\
+		status					\
+		--untracked-files			\
+		--porcelain				|\
+		sed "s|^[^?]\{2\}[ \t]*|${rootPath}/|p;d"
+}
+function git_list_unmerged(){
 	git	--work-tree="${rootPath}"       	\
                 --git-dir="${rootPath}/.git"    	\
 		log					\
@@ -146,17 +96,14 @@ function git_list_pending(){
 		--pretty="format:"			\
 		origin/master..master			|\
 		sort -u					|\
-		sed "s|^|${rootPath}/|"
+		sed "/^$/d;s|^|${rootPath}/|"
 }
-function git_list_pending_old(){
-	git	--work-tree="${rootPath}"       	\
-                --git-dir="${rootPath}/.git"    	\
-		ls-files				\
-		--others				\
-		--modified				\
-		--deleted				\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|"
+function git_list_pending(){
+	(	git_list_untracked
+		git_list_uncommited
+		git_list_unmerged
+	)						|\
+	sort -u
 }
 function git_isexcluded(){
 	git_list_excluded | egrep "^${e_FQFN}$" > /dev/null
@@ -164,30 +111,130 @@ function git_isexcluded(){
 function git_isuntracked(){
 	git_list_untracked | egrep "^${e_FQFN}$" > /dev/null
 }
+function git_isdeleted(){
+	git_list_deleted | egrep "^${e_FQFN}$" > /dev/null
+}
+function git_isuncommited(){
+	git_list_uncommited | egrep "^${e_FQFN}$" > /dev/null
+}
+function git_isunmerged(){
+	git_list_unmerged | egrep "^${e_FQFN}$" > /dev/null
+}
 function git_changepending(){
 	git_list_pending | egrep "^${e_FQFN}$" > /dev/null
 }
-
 function git_add(){
-	git	--work-tree="${rootPath}"       \
-		--git-dir="${rootPath}/.git"    \
-		add "${e_FQFN}"
+	lockout
+	read -d $'' results < <(
+		git	--work-tree="${rootPath}"       \
+			--git-dir="${rootPath}/.git"    \
+			add				\
+			"${g_FQFN}" 2>&1
+		echo INFO\  \[$$\] ${e_name} added. $(event_stamp)
+	)
+	info && echo "${results}" >> "${LOG}"
+	sleep ${gitCommandSleep}
+	unlock
+}
+function git_add_update(){
+	lockout
+	read -d $'' results < <(
+		echo _____________________________________________________________________UPDATE
+		git	--work-tree="${rootPath}"       \
+			--git-dir="${rootPath}/.git"    \
+			add				\
+			--update			\
+			"${g_FQFN}" 2>&1
+		echo ---------------------------------------------------------------------DONE
+		echo INFO\  \[$$\] ${e_name} updated. $(event_stamp)
+	)
+	info && echo "${results}" >> "${LOG}"
+	sleep ${gitCommandSleep}
+	unlock
 }
 function git_commit(){
-	git	--work-tree="${rootPath}"       \
-		--git-dir="${rootPath}/.git"    \
-		#commit -a --allow-empty-message -m ''
-		commit -a -m 'incron'
+	lockout
+	local message="$(event_stamp) :: $(whoami)@$(hostname)"
+	read -d $'' results < <(
+		echo _____________________________________________________________________COMMIT
+		git	--work-tree="${rootPath}"       \
+			--git-dir="${rootPath}/.git"    \
+			commit				\
+			--message="${message}"		\
+			"${g_FQFN}" 2>&1
+		echo ---------------------------------------------------------------------DONE
+		echo INFO\  \[$$\] ${e_name} commited. $(event_stamp)
+	)
+	info && echo "${results}" >> "${LOG}"
+	sleep ${gitCommandSleep}
+	unlock
 }
 function git_push(){
-	git	--work-tree="${rootPath}"       \
-		--git-dir="${rootPath}/.git"    \
-		push
+	lockout
+	sleep `random 1.5 .5`
+	read -d $'' results < <(
+		echo _____________________________________________________________________PUSH
+		git	--work-tree="${rootPath}"       \
+			--git-dir="${rootPath}/.git"    \
+			push 2>&1
+		echo ---------------------------------------------------------------------DONE
+	)
+	info && echo "${results}" >> "${LOG}"
+	echo EXIT\  \[$$\] ${e_name} merged. $(event_stamp) >> "${LOG}"
+	sleep $uploadMinRepeatInterval
+	unlock
 }
-
+function event_stamp(){
+	date "+%Y %b %e [%a] %r"
+}
 function escape_path(){
 	ls -1 -d --quoting-style=escape "${1}"
 }
+function lockout(){
+	local lockoutPath=${rootLockoutPath}\[${FUNCNAME[1]}\]
+	sleep `random .5 .1`
+	while [ -e "${lockoutPath}" ]; do
+		case ${FUNCNAME[1]} in
+			git_push)	if ! git_isunmerged; then
+					echo EXIT\  \[$$\] ${e_name} merged. $(event_stamp) >> "${LOG}"
+					exit 0
+				fi
+				;;
+			*)	;;
+		esac
+		local pid=$(cat "${lockoutPath}")
+		local cmd=$(cat "${lockoutPath}" | xargs --no-run-if-empty -i@ ps --no-heading -o cmd -p @)
+		if [ -n "${cmd}" ]; then
+			debug && echo DEBUG\ \[$$\] ${e_name} holding for for action \"$1\" \[${pid}\] :: ${cmd:0:49} >> "${LOG}"
+		else
+			echo ERROR\ \[$$\] Found stale lockout file. Removing\! >> "${LOG}"
+			rm -f "${lockoutPath}"
+		fi
+		sleep `random .5 .1`
+	done
+	read -d $'' results < <(echo $$ | tee "${lockoutPath}")
+	debug && echo touched \`"${lockoutPath}"\' ::  ${results} >> "${LOG}"
+}
+function unlock(){
+	local lockoutPath=${rootLockoutPath}\[${FUNCNAME[1]}\]
+	read -d $'' results < <(rm -vf "${lockoutPath}")
+	debug && echo "${results} :: $$" >> "${LOG}"
+}
+function random(){
+	[ -z "$2" ] && local min='.25' || local min=$2
+	[ -z "$1" ] && local max='1.0' || local max=$1
+	echo scale=4 \; \( $max - $min \) \* $RANDOM / \( 2 ^ 15 \) + $min | bc
+}
+function debug(){
+	${debug} && return 0 || return 1
+}
+function info(){
+	${info} && return 0 || return 1
+}
+function isdir(){
+	${isdir} && return 0 || return 1
+}
+
 function switches(){
         local OPTIND=
         local OPTARG=
@@ -208,15 +255,47 @@ function switches(){
 			h)	echo_help=true;;
 			r)	rootPath=${OPTARG}
 				rootPathEscaped=$(escape_path "${rootPath}")
+
+				if read -a results < <(df -T | grep tmpfs.*lock); then
+					rootLockoutPath=${results[@]: -1}
+				elif read -a results < <(df -T | grep tmpfs.*shm); then
+					rootLockoutPath=${results[@]: -1}
+				elif read -a results < <(df -T | grep tmpfs.*user); then
+					rootLockoutPath=${results[@]: -1}/$(whoami)
+				else
+					rootLockoutPath=/tmp
+				fi
+				rootLockoutPath+=/$(basename "${BASH_SOURCE}")
+				[ ! -d "${rootLockoutPath}" ] && mkdir "${rootLockoutPath}"
+				rootLockoutPath+=/_${rootPath//\//$'\\'}
+				#rootLockoutPath=/tmp/$(basename "${BASH_SOURCE}")\-${rootPath//\//$'\\'}
+				rootLOGPath=/var/log/$(basename "${BASH_SOURCE}")\-${rootPath//\//$'\\'}
 				;;
                         ?)      ;;
                 esac
         done
-        return $(($OPTIND - 1))
+
+	# Git Paths
+	g_FQFN=${e_FQFN#${rootPath}/}
+
+	# Minimum delay between git push events in seconds
+	uploadMinRepeatInterval='10'
+
+	# Minimum delay after git command
+	gitCommandSleep=.5
+
+	# Debug|info messages; true for on, false for off
+	debug=true
+	info=true
+
+	# Set log file
+	LOG="/var/log/incron_test.log"
+
+	return $(($OPTIND - 1))
 }
 function echo_help(){
 	cat << END-OF-HELP
----------------------------------------------------------------
+-----------------------------------------------------------------------------------
 # IN_ACCESS        File was accessed (read) (*)
 # IN_ATTRIB        Metadata changed (permissions, timestamps, extended attributes, etc.) (*)
 # IN_CLOSE_WRITE   File opened for writing was closed (*)
@@ -235,7 +314,7 @@ function echo_help(){
 # \$# - the event-related file name
 # \$% - the event flags (textually)
 # \$& - the event flags (numerically)
----------------------------------------------------------------
+-----------------------------------------------------------------------------------
 SWITCHES
 
  -h  this help message
