@@ -1,0 +1,229 @@
+#!/bin/bash
+
+function main(){
+	# Read switches for rapper script
+	switches "$@"
+	shift $?
+
+	# Set global variables
+	incronRapperFQFN=$(readlink -nf "$BASH_SOURCE")
+	incronRapperEscaped=$(ls -1 -d --quoting-style=escape "${incronRapperFQFN}")
+	incronRapperName=$(basename "$incronRapperFQFN")
+	incronRapperPath=$(dirname  "$incronRapperFQFN")
+
+
+	if ${recursive:-false}; then
+		process_recursive_tree_entry "$@"
+	else
+		if [ -e "$1" ]; then
+			cmdFQFN=$(readlink -fn "$1") && shift
+			cmdName=$(basename "$cmdFQFN")
+			cmdPath=$(dirname  "$cmdFQFN")
+
+			${first_run:-true} && setup_recursive_tree_entries
+			/bin/bash "${cmdFQFN}" "$@"
+
+		fi
+	fi
+}
+###########################################################################################
+###########################################################################################
+function add_MON_Entry(){
+	echo	"${recursiveTreePathEscaped}"	\
+		IN_CREATE,IN_DELETE		\
+		${incronRapperEscaped}		\
+		-r "${rootPathEscaped}"		\
+		-c "${incronConfEscaped}"	\
+		\$% \$@/\$#			\
+	>> "${recursiveMON}"
+		#-r "${eventConf[0]}"
+}
+
+
+function process_recursive_tree_entry(){
+	[[ "$1" =~ IN_ISDIR ]] || return 0
+
+	# Process input passed from calling function
+	local recursiveTreeEvent=$1
+	shift
+	recursiveTreePath=$@
+	recursiveTreePathEscaped=$(ls -1 -d --quoting-style=escape "${recursiveTreePath}")
+
+	# 
+	local recursiveFQFNEscaped=$(ls -1 -d --quoting-style=escape "${recursiveFQFN}")
+	local incronFQFNEscaped=$(ls -1 -d --quoting-style=escape "${incronFQFN}")
+
+	#
+	local IFS=':'
+	local -a eventConf=( $(
+		egrep -m1 "^${recursiveFQFNEscaped//\\/$'\\\\\\\\'}" "$incronFQFN" | \
+		sed 's/ \(IN_[^ ]*\) /:\1:/'
+		) )
+	unset IFS
+
+	rootPathEscaped=${eventConf[0]}
+	
+	incronPath=$(dirname "$incronFQFN")
+	recursiveCMD="${incronPath}/recursive-${rootPathEscaped//\//$'\\\\'}-CMD.conf"
+	recursiveMON="${incronPath}/recursive-${rootPathEscaped//\//$'\\\\'}-MON.conf"
+
+	if [[ "${recursiveTreeEvent}" =~ IN_CREATE ]]; then
+		echo	${recursiveTreePathEscaped}	\
+			IN_CREATE,IN_DELETE		\
+			${incronRapperEscaped}		\
+			-r "${rootPathEscaped}"		\
+			-c "${incronFQFNEscaped}"	\
+			\$% \$@/\$#			\
+		>> "${recursiveMON}"
+
+	elif [[ "${recursiveTreeEvent}" =~ IN_DELETE ]]; then
+		local recursiveMON_matchLineNum=$(
+			egrep -m1 -n "^${recursiveTreePathEscaped//\\/$'\\\\\\\\'} IN_" "${recursiveMON}" | \
+			cut -f1 -d:
+			)
+		sed -i "${recursiveMON_matchLineNum}d" "${recursiveMON}"
+		local recursiveCMD_matchLineNum=$(
+			egrep -m1 -n "^${recursiveTreePathEscaped//\\/$'\\\\\\\\'} IN_" "${recursiveCMD}" | \
+			cut -f1 -d:
+			)
+		sed -i "${recursiveCMD_matchLineNum}d" "${recursiveCMD}"
+	fi
+	
+	cat << END-OF-LOG >> /var/log/incron_test.log
+RECURSIVE #> recursiveFQFN  :: ${recursiveFQFN}
+RECURSIVE #> recursiveFQFNE :: ${recursiveFQFNEscaped}
+RECURSIVE #>    incronFQFN  :: ${incronFQFN}
+RECURSIVE #>    incronFQFNE :: ${incronFQFNEscaped}
+RECURSIVE #>    incronPath  :: ${incronPath}
+RECURSIVE #    recursiveCMD :: ${recursiveCMD}
+RECURSIVE #>   recursiveMON :: ${recursiveMON}
+
+RECURSIVE #>  recursiveTreeEvent :: ${recursiveTreeEvent}
+RECURSIVE #>  recursiveTreePath  :: ${recursiveTreePath}
+RECURSIVE #>  recursiveTreePathE :: ${recursiveTreePathEscaped}
+
+RECURSIVE #>  eventConf :: ${eventConf[@]:1}
+
+
+END-OF-LOG
+
+}
+function setup_recursive_tree_entries(){
+	local cmdFQFNEscaped=$(ls -1 -d --quoting-style=escape "${cmdFQFN}")
+
+	local IFS=':'
+	declare -a incronConf=( $(
+			tac /var/log/syslog					| \
+			egrep -m1 "incrond\[[0-9]*]:.*CMD..${cmdFQFNEscaped//\\/$'\\\\\\\\'}"	| \
+			sed 's/^[^(]*(\([^:]*\)::\([^)]*\)).*/\2:\1/'
+		) )
+
+	case ${incronConf[1]} in
+		system)	incronPath="/etc/incron.d";;
+	esac
+
+	###########################################################################
+
+	incronConf="${incronPath}/${incronConf}"
+	incronConfEscaped=$(ls -1 -d --quoting-style=escape "${incronFQFN}")
+
+	local -a eventConf=( $(
+		egrep -m1 "${cmdFQFNEscaped//\\/$'\\\\\\\\'}" "${incronConf}" | \
+		sed 's/ \(IN_[^ ]*\) /:\1:/'
+		) )
+
+	unset IFS
+	
+	rootPathEscaped=${eventConf[0]}
+
+	###########################################################################
+
+	recursiveCMD="${incronPath}/recursive-${rootPathEscaped//\//$'\\\\'}-CMD.conf"
+	recursiveMON="${incronPath}/recursive-${rootPathEscaped//\//$'\\\\'}-MON.conf"
+
+	touch "${recursiveCMD}"
+	touch "${recursiveMON}"
+
+	local recursiveTreePathEscaped=""
+	while read recursiveTreePathEscaped; do
+		echo	${recursiveTreePathEscaped}	\
+			IN_CREATE,IN_DELETE		\
+			${incronRapperEscaped}		\
+			-r "${rootPathEscaped}"		\
+			-c "${incronConfEscaped}"	\
+			\$% \$@/\$#			\
+		>> "${recursiveMON}"
+	done < <(find "${eventConf[0]//\\/}" -type d -exec ls -1 -d --quoting-style=escape {} \; | \
+		sed 's/\\/\\\\/g' | \
+		sort)
+
+
+	cat << END-OF-LOG >> /var/log/incron_test.log
+      cmdFQFN  :: ${cmdFQFN}
+      cmdFQFNE :: ${cmdFQFNEscaped} 
+
+num incronConf :: ${#incronConf[@]}
+    incronConf :: 0 - ${incronConf[0]}
+    incronConf :: 1 - ${incronConf[1]}
+
+num eventConf :: ${#eventConf[@]}
+    eventConf :: 0 - ${eventConf[0]}
+    eventConf :: 1 - ${eventConf[1]}
+    eventConf :: 2 - ${eventConf[2]}
+
+$(tac /var/log/syslog | egrep -m1 "incrond\[[0-9]*]:.*CMD..${cmdFQFNEscaped//\\/$'\\\\\\\\'}")
+
+$(find "${eventConf[0]//\\/}" -type d -exec ls -1 -d --quoting-style=escape {} \; | sort)
+
+
+END-OF-LOG
+
+}
+
+#$(find ${eventConf[0]} -type d -exec ls -1 -d --quoting-style=escape {} \; | sort)
+
+###########################################################################################
+###########################################################################################
+function switches(){
+        local OPTIND=
+        local OPTARG=
+        while getopts "c:hr:" OPTION
+               do case $OPTION in
+			h)      echo_help; exit 1;;
+			s)	first_run=false;;
+			c)	incronFQFN=$OPTARG;;
+			r)	recursive=true
+				recursiveFQFN=$OPTARG;;
+                        ?)      ;;
+                esac
+        done
+        return $(($OPTIND - 1))
+}
+function echo_help(){
+	cat << END-OF-HELP
+---------------------------------------------------------------
+-v "regex filter for package version"
+-e "extend the search text and decrement till a match is found"
+---------------------------------------------------------------
+USAGE
+apt_search [-v "filter"] [-e "extended package name"] "package name"
+END-OF-HELP
+}
+function echo_switches(){
+	echo -----------------------------------------
+	echo "$@"
+	echo 1 :: "$1"
+	echo 2 :: "$2"
+	echo 3 :: "$3"
+	echo 4 :: "$4"
+	echo 5 :: "$5"
+	echo 6 :: "$6"
+	echo 7 :: "$7"
+	echo 8 :: "$8"
+	echo 9 :: "$9"
+	echo -----------------------------------------
+}
+###########################################################################################
+###########################################################################################
+main "$@"
+
