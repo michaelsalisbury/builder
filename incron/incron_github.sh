@@ -61,8 +61,7 @@ function git_list_excluded(){
 		ls-files				\
 		--others				\
 		--ignored				\
-		--exclude-standard			|\
-		sed "s|^|${rootPath}/|"
+		--exclude-standard
 }
 function git_list_untracked(){
 	git	--work-tree="${rootPath}"       	\
@@ -70,7 +69,7 @@ function git_list_untracked(){
 		status					\
 		--untracked-files			\
 		--porcelain				|\
-		sed "s|^[?]\{2\}[ \t]*|${rootPath}/|p;d"
+		sed "s|^[?]\{2\}[ \t]*||p;d"
 }
 function git_list_deleted(){
 	git	--work-tree="${rootPath}"       	\
@@ -78,7 +77,7 @@ function git_list_deleted(){
 		status					\
 		--untracked-files			\
 		--porcelain				|\
-		sed "s|^[ A]D[ \t]*|${rootPath}/|p;d"
+		sed "s|^[ A]D[ \t]*||p;d"
 }
 function git_list_uncommited(){
 	git	--work-tree="${rootPath}"       	\
@@ -86,7 +85,7 @@ function git_list_uncommited(){
 		status					\
 		--untracked-files			\
 		--porcelain				|\
-		sed "s|^[^?]\{2\}[ \t]*|${rootPath}/|p;d"
+		sed "s|^[^?]\{2\}[ \t]*||p;d"
 }
 function git_list_unmerged(){
 	git	--work-tree="${rootPath}"       	\
@@ -96,7 +95,7 @@ function git_list_unmerged(){
 		--pretty="format:"			\
 		origin/master..master			|\
 		sort -u					|\
-		sed "/^$/d;s|^|${rootPath}/|"
+		sed "/^$/d"
 }
 function git_list_pending(){
 	(	git_list_untracked
@@ -106,22 +105,22 @@ function git_list_pending(){
 	sort -u
 }
 function git_isexcluded(){
-	git_list_excluded | egrep "^${e_FQFN}$" > /dev/null
+	git_list_excluded | egrep "^${g_FQFN}$" > /dev/null
 }
 function git_isuntracked(){
-	git_list_untracked | egrep "^${e_FQFN}$" > /dev/null
+	git_list_untracked | egrep "^${g_FQFN}$" > /dev/null
 }
 function git_isdeleted(){
-	git_list_deleted | egrep "^${e_FQFN}$" > /dev/null
+	git_list_deleted | egrep "^${g_FQFN}$" > /dev/null
 }
 function git_isuncommited(){
-	git_list_uncommited | egrep "^${e_FQFN}$" > /dev/null
+	git_list_uncommited | egrep "^${g_FQFN}$" > /dev/null
 }
 function git_isunmerged(){
-	git_list_unmerged | egrep "^${e_FQFN}$" > /dev/null
+	git_list_unmerged | egrep "^${g_FQFN}$" > /dev/null
 }
 function git_changepending(){
-	git_list_pending | egrep "^${e_FQFN}$" > /dev/null
+	git_list_pending | egrep "^${g_FQFN}$" > /dev/null
 }
 function git_add(){
 	lockout
@@ -205,7 +204,7 @@ function lockout(){
 		local pid=$(cat "${lockoutPath}")
 		local cmd=$(cat "${lockoutPath}" | xargs --no-run-if-empty -i@ ps --no-heading -o cmd -p @)
 		if [ -n "${cmd}" ]; then
-			debug && echo DEBUG\ \[$$\] ${e_name} holding for for action \"$1\" \[${pid}\] :: ${cmd:0:49} >> "${LOG}"
+			debug && echo DEBUG\ \[$$\] ${e_name} holding for for action \"${FUNCNAME[1]}\" \[${pid}\] :: ${cmd:0:49} >> "${LOG}"
 		else
 			echo ERROR\ \[$$\] Found stale lockout file. Removing\! >> "${LOG}"
 			rm -f "${lockoutPath}"
@@ -268,7 +267,6 @@ function switches(){
 				rootLockoutPath+=/$(basename "${BASH_SOURCE}")
 				[ ! -d "${rootLockoutPath}" ] && mkdir "${rootLockoutPath}"
 				rootLockoutPath+=/_${rootPath//\//$'\\'}
-				#rootLockoutPath=/tmp/$(basename "${BASH_SOURCE}")\-${rootPath//\//$'\\'}
 				rootLOGPath=/var/log/$(basename "${BASH_SOURCE}")\-${rootPath//\//$'\\'}
 				;;
                         ?)      ;;
@@ -289,7 +287,8 @@ function switches(){
 	info=true
 
 	# Set log file
-	LOG="/var/log/incron_test.log"
+	#LOG="/var/log/incron_test.log"
+	LOG="${rootLOGPath}"
 
 	return $(($OPTIND - 1))
 }
