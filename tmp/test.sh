@@ -22,7 +22,6 @@ echo DETAIL
 
 
 
-
 echo uuid
 generate_uuid
 
