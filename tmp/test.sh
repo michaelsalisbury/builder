@@ -30,27 +30,6 @@ echo up
 nmcli con up uuid `generate_uuid` iface eth0 --nowait
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 exit 0
 
 echo 0123456789ABCDEF | word_split 2
