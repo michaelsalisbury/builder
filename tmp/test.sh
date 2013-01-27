@@ -20,7 +20,6 @@ echo DETAIL
 #	echo $i `get_nmcli_detail $i id`
 #done
 
-
 echo uuid
 generate_uuid
 
