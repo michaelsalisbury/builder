@@ -21,7 +21,6 @@ echo DETAIL
 #done
 
 
-
 echo uuid
 generate_uuid
 
