@@ -9,6 +9,7 @@ done << IMPORTS
 	`ls -1 ../functions/functions*.sh 2> /dev/null`
 IMPORTS
 
+
 echo WAN
 get_nmcli_WAN
 echo LAN
