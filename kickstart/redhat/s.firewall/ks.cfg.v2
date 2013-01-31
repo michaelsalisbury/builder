@@ -1,0 +1,122 @@
+# https://access.redhat.com/knowledge/docs/en-US/Red_Hat_Enterprise_Linux/6/html/Installation_Guide/s1-kickstart2-options.html
+# http://www.redhat.com/promo/summit/2010/presentations/summit/decoding-the-code/wed/cshabazi-530-more/MORE-Kickstart-Tips-and-Tricks.pdf
+#############################################################################
+# Manditory: cannot be included; url|nfs, keyboard & lang 
+nfs --server=10.173.119.72 --dir=/Library/NetBoot/NFSserver/rhel-server-6.3-x86_64-dvd
+keyboard us
+lang en_US
+
+#############################################################################
+# local
+%include /tmp/local.cfg
+# HD config
+%include /tmp/hd.autopart.cfg
+# global defaults
+%include /tmp/defaults.cfg
+
+#############################################################################
+# custom unique kickstart options
+skipx
+
+#############################################################################
+%packages --excludedocs --nobase
+@ core
+# PXE server dependencies
+@ Web Server
+@ NFS File Server
+dhcp
+syslinux
+tftp-server
+nfs-utils
+# VBox Tools dependencies
+kernel-devel
+# Dependencies for terminator
+@ X Window System
+@ Fonts
+gnome-python2-gconf
+python-configobj
+vte
+# yum plugins
+yum-plugin-downloadonly
+yum-plugin-tmprepo
+yum-plugin-versionlock
+# default must have tools 
+openssh-server
+vim
+rsync
+ntp
+wget
+git
+bind-utils
+
+#############################################################################
+%pre
+/bin/sed 's|.*ks=\([^ ]*\)/[^/ ]*.*|\1|p;d' /tmp/anaconda.log |\
+xargs -i@ /bin/wget -r -nd -l 1 --cut-dirs 1 -A cfg -P /tmp @
+
+#############################################################################
+%post --nochroot --interpreter=/bin/bash
+# This is the trick â automatically switch to 6th console
+# and redirect all input/output
+exec < /dev/tty6 > /dev/tty6 2> /dev/tty6
+chvt 6
+echo Welcome to your kickstart post instalation...
+
+# Change service startup settings
+/sbin/chkconfig rhsmcertd off
+/sbin/chkconfig rhsmcertd --list
+/sbin/chkconfig rhnsd     off
+/sbin/chkconfig rhnsd     --list
+/sbin/chkconfig ntp       on
+/sbin/chkconfig ntp       --list
+
+# Setup ntp
+/bin/sed -i /etc/ntp.conf -f <(cat << EOF
+/^server.*rhel/s/^/#/
+/Please consider joining the pool/a\
+server 71.40.128.157	# ntp.myfloridacity.us	\n\
+server 192.5.41.41	# tock.usno.navy.mil	\n\
+server 192.5.41.40	# tick.usno.navy.mil	\n\
+server 128.227.205.3	# ntp-s1.cise.ufl.edu
+EOF
+)
+cat /etc/ntp.conf | grep "server"
+
+# Install RPMS
+rpm -ivh /tmp/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm
+rpm -ivh /tmp/terminator-0.95-3.el6.rf.noarch.rpm
+rpm -ivh /tmp/incron-0.5.9-2.el6.rf.x86_64.rpm
+
+# Download VBoxGuestAdditions
+	echo VBoxGuestAdditions Download
+        mkdir  /tmp/vbox_guest_additions
+	cd     /tmp/vbox_guest_additions
+	# Get version of latest release ###############################################
+        rm -f  /tmp/vbox_guest_additions/LATEST.TXT
+        wget -nv http://download.virtualbox.org/virtualbox/LATEST.TXT 
+        cat    /tmp/vbox_guest_additions/LATEST.TXT
+        version=`cat /tmp/vbox_guest_additions/LATEST.TXT`
+
+	# Get VBoxGuestAdditions ISO ##################################################
+	iso="VBoxGuestAdditions_${version}.iso"
+        wget -nv http://download.virtualbox.org/virtualbox/${version}/${iso}
+	mv "${iso}" /root/.	
+	# Add vbox user and group to specific uid and gid 
+	useradd  -u 130 -g 1 -M -d /var/run/vboxadd -s /bin/false vboxadd
+	groupadd -g 130                                           vboxsf
+	# Cleanup
+	unset version
+	unset iso
+
+# Interact with the install
+echo Welcome to your kickstart post instalation interactive shell...
+/bin/bash
+
+# Then switch back to Anaconda on the first console
+chvt 1
+exec < /dev/tty1 > /dev/tty1 2> /dev/tty1
+
+
+
+
+
