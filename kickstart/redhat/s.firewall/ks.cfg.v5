@@ -122,9 +122,9 @@ sed -i '/Please/a\server 128.227.205.3	# ntp-s1.cise.ufl.edu'  /etc/ntp.conf
 etc/ntp.conf | grep "server"
 
 # Install RPMS
-rpm -ivh /tmp/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm
-rpm -ivh /tmp/terminator-0.95-3.el6.rf.noarch.rpm
-rpm -ivh /tmp/incron-0.5.9-2.el6.rf.x86_64.rpm
+rpm -ivh /root/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm
+rpm -ivh /root/terminator-0.95-3.el6.rf.noarch.rpm
+rpm -ivh /root/incron-0.5.9-2.el6.rf.x86_64.rpm
 
 # Interact with the install
 echo Welcome to your kickstart post instalation chrooted interactive shell...
