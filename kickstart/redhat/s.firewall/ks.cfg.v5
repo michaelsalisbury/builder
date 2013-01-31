@@ -119,7 +119,7 @@ sed -i '/Please/a\server 71.40.128.157	# ntp.myfloridacity.us' /etc/ntp.conf
 sed -i '/Please/a\server 192.5.41.41	# tock.usno.navy.mil'   /etc/ntp.conf
 sed -i '/Please/a\server 192.5.41.40	# tick.usno.navy.mil'   /etc/ntp.conf
 sed -i '/Please/a\server 128.227.205.3	# ntp-s1.cise.ufl.edu'  /etc/ntp.conf
-etc/ntp.conf | grep "server"
+cat /etc/ntp.conf | grep "server"
 
 # Install RPMS
 rpm -ivh /root/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm
