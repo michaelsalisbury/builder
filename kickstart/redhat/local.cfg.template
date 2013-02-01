@@ -1,6 +1,7 @@
 # https://access.redhat.com/knowledge/docs/en-US/Red_Hat_Enterprise_Linux/6/html/Installation_Guide/s1-kickstart2-options.html
 # http://www.redhat.com/promo/summit/2010/presentations/summit/decoding-the-code/wed/cshabazi-530-more/MORE-Kickstart-Tips-and-Tricks.pdf
 #############################################################################
+nfs --server=192.168.253.1 --dir=/export/rhel-server-6.3-x86_64-dvd
 nfs --server=10.173.119.72 --dir=/Library/NetBoot/NFSserver/rhel-server-6.3-x86_64-dvd
 url --url=http://192.168.248.22/repo.rhel6.3dvd
 network  --hostname=RHEL00.pig.pie
