@@ -1,0 +1,259 @@
+#platform=x86, AMD64, or Intel EM64T
+# System authorization information
+auth  --useshadow  --enablemd5 
+# System bootloader configuration
+bootloader --location=mbr
+# Clear the Master Boot Record
+zerombr
+# Partition clearing information
+clearpart --all --initlabel
+
+ 
+# Use text mode install
+#text
+# Use automatics install no prompts
+autostep
+# Firewall configuration
+firewall --disabled
+# Run the Setup Agent on first boot
+#firstboot --disable
+# System keyboard
+keyboard us
+# System language
+lang en_GB
+# Installation logging level
+logging --level=info
+# Use CDROM installation media
+#cdrom
+# Use NFS installation
+#nfs --server=192.168.0.1 --dir=/export/images/CentOS-6.0-x86_64-bin-DVD
+url --url=http://mirror.centos.org/centos/6/os/x86_64/
+
+# Network information
+network --bootproto=dhcp --device=eth0 --onboot=on --hostname=owncloud-test.cos.ucf.edu
+
+# Reboot after installation
+reboot
+#Root password
+rootpw --iscrypted $6$u9Ky7T5R$I/gY3f04Y.e1BTbUBEOdR6bm0Wd4Y9xiVAlmbnP3bKqEVmwSS4AVmpXIljixosmAIWZ/9KlKsnxVd4S7MPtAk0
+
+# SELinux configuration
+selinux --disabled
+# System timezone
+timezone America/New_York
+# Install OS instead of upgrade
+install
+# X Window System configuration information
+#xconfig  --defaultdesktop=GNOME --depth=24 --resolution=1024x768 --startxonboot
+#xconfig  --defaultdesktop=GNOME --startxonboot
+skipx
+
+%packages --excludedocs --nobase
+@ core
+#@ base
+#@ Fonts
+#@ X Window System
+#@ Desktop
+@ MySQL Database server
+@ PHP Support
+@ Development Tools
+@ Web Server
+#@ Web-Based Enterprise Managment
+kernel-devel
+vim
+rsync
+ntp
+#zlib
+#zlib-devel
+#sqlite-devel
+#java-1.6.0-openjdk
+#openssl
+#openssl-devel
+glibc.i686
+wget
+acpid
+
+%post --interpreter=/bin/bash
+# add stuff to be run once on first boot
+
+mkdir         /root/.ssh
+chmod 755     /root/.ssh
+cat << EOF >> /root/.ssh/authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDy8m0fTN3inhUv41Cisv0d02eWDW35qlAn/V6Jy0rHpOCQORfIdlz2fDfv54ww1Mt+dTN8V5o8Ycr2aIIhBBlxofKh9yappXmNoJlIAIXOiEmKgFAQ6QUSQrAgecH1Mwgfp60IrYROYh7xMo+kV1Dp8vbMr5Bl+FJZ/x9AabBiYUifT4xGZ8y/p7DacHK+5nw1pThKNv/DM3/smfDYIk+IU0NYZYGfGOe7laFeHxa+7czKF5rxUrDjtkrrtj3EeJdyjolHAAYfR+HUE9tidX1UtgMTPk9fpm+bVnAVCqNEozfX4L6yCJpi+8rPVhh6K2bQCDdPTFBfenBvjsES1Oan localcosadmin@cf-147728
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDoXyP/pe7u2SZ7gp+CeJb7Jv8ctj3IbaiuhywEtL2C96AesosYJDdnuQ9fFHyDR7vNQ6Sl8LMyDNeahiHG91HZgeoTaPUaye5XGY2sZIj4dIB+ubDa0GSyTFdWvCK6U2f/jxKiON9hqC9cgV3YDOjc/fn5Gqpgb6mkTOT7oRrGhHUcxPrEfG0tUWNFl678GEjRwulO6L9MnZQKZfBZ4pZhdmKbloDdmiznvU6NjGjSGr6oAp7lHg12orfM7soqCJyYaj+vbrsNnDjIwJis6h6KWgbrD9z90b1WZkpnJ6L+/T9xFBELZNvQDoYblf6oaaJPrJjYngPGDaNwAjOaHFgR root@cf-147728
+EOF
+chmod 600     /root/.ssh/authorized_keys
+
+#########################################################################################################
+################################################################################# /var/spool/cron/root
+cat << EOF >> /var/spool/cron/root
+00 05 * * 0 yum -y -v update > /var/log/yum.sunday
+00 05 * * 1 yum -y -v update > /var/log/yum.monday
+00 05 * * 2 yum -y -v update > /var/log/yum.tuesday
+00 05 * * 3 yum -y -v update > /var/log/yum.wednesday
+00 05 * * 4 yum -y -v update > /var/log/yum.thursday
+00 05 * * 5 yum -y -v update > /var/log/yum.friday
+00 05 * * 6 yum -y -v update > /var/log/yum.saturday
+EOF
+
+#########################################################################################################
+################################################################################# /etc/sysconfig/iptables
+cat << EOF >> /etc/sysconfig/iptables
+# Firewall configuration written by system-config-firewall
+# Manual customization of this file is not recommended.
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p icmp -m icmp --icmp-type echo-reply -j REJECT --reject-with icmp-host-prohibited
+-A INPUT -p icmp -m icmp --icmp-type destination-unreachable -j REJECT --reject-with icmp-host-prohibited
+-A INPUT -p icmp -m icmp --icmp-type parameter-problem -j REJECT --reject-with icmp-host-prohibited
+-A INPUT -p icmp -m icmp --icmp-type redirect -j REJECT --reject-with icmp-host-prohibited
+-A INPUT -p icmp -m icmp --icmp-type router-advertisement -j REJECT --reject-with icmp-host-prohibited
+-A INPUT -p icmp -m icmp --icmp-type router-solicitation -j REJECT --reject-with icmp-host-prohibited
+-A INPUT -p icmp -m icmp --icmp-type source-quench -j REJECT --reject-with icmp-host-prohibited
+-A INPUT -p icmp -m icmp --icmp-type time-exceeded -j REJECT --reject-with icmp-host-prohibited
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
+EOF
+
+#########################################################################################################
+########################################################################## /etc/owncloud/updateScripts.sh
+mkdir /etc/owncloud
+cat << END-OF-/etc/owncloud/updateScripts.sh >> /etc/owncloud/updateScripts.sh
+#!/bin/bash
+wget	--recursive				\\
+	--timestamping				\\
+	--no-directories			\\
+	--level 1				\\
+	--cut-dirs 1				\\
+	--accept sh,sql				\\
+	--directory-prefix /etc/owncloud	\\
+	http://10.173.119.78/packages/owncloud
+chmod 755 /etc/owncloud
+END-OF-/etc/owncloud/updateScripts.sh
+chmod 755 /etc/owncloud/updateScripts.sh
+
+#########################################################################################################
+################################################################################### /etc/rc.d/rc.run_once
+cat << END-OF-/etc/rc.d/rc.run_once >> /etc/rc.d/rc.run_once
+#!/bin/bash
+scriptName="\$(basename \$BASH_SOURCE)"
+scriptPath="\$(cd \$(dirname  \$BASH_SOURCE); pwd)"
+# echo "$scriptPath"/"$scriptName"
+
+step=1
+function next(){ sed -i".bk" "/^step=/s/\$step/\$(( step + 1))/" "\$scriptPath"/"\$scriptName"; }
+function rset(){ sed -i".bk" "/^step=/s/\$step/1/"              "\$scriptPath"/"\$scriptName"; }
+
+echo '###########################################################################'
+echo '###########################################################################'
+echo "#### Step[\$step]"
+echo
+
+case \$step in
+	1)	echo "#### modify sshd_config"
+		sed -i "s/.*GSSAPIAuthentication yes.*/#GSSAPIAuthentication yes/" /etc/ssh/sshd_config
+		service sshd restart
+		echo
+		;;
+	2)	echo "#### setup ntpd"
+		/usr/sbin/ntpdate ntp.myfloridacity.us
+		/sbin/chkconfig   ntpd on
+		/sbin/service     ntpd start
+		echo
+		;;
+        3)      echo "#### yum updates and upgrades + reboot"
+		echo
+		# EPEL repo has inotify-tools and incron
+		rpm -i http://mirror.ancl.hawaii.edu/linux/epel/6/i386/epel-release-6-7.noarch.rpm
+		# Webtatic repo has php5.4
+		#rpm -Uvh http://repo.webtatic.com/yum/el6/latest.rpm
+		# Alt repo has php5.3.14, apache 2.2.22, mysql 5.5.x
+		rpm -Uvh http://centos.alt.ru/repository/centos/6/x86_64/centalt-release-6-1.noarch.rpm
+		yum -y update
+		next
+		reboot
+		exit 0
+		;;
+	4)	echo "#### Install VBoxGuestAdditions"
+		yum -y install nfs-utils
+		server=10.173.119.78
+		opts="ro,soft,intr,rsize=8192,wsize=8192"
+		src_Folder="/export/images"
+		dst_Folder="/root/Downloads"
+		trg_Folder="VBoxGuestAdditions"
+		trg_App="VBoxLinuxAdditions.run"
+		showmount -e \${server}
+		mkdir -p \${dst_Folder}/\${trg_Folder}
+		mount -o \${opts} \${server}:\${src_Folder}/\${trg_Folder} \${dst_Folder}/\${trg_Folder}
+		\${dst_Folder}/\${trg_Folder}/\${trg_App}
+		;;
+	5)	echo "#### Install Required Packages for owncloud"
+		# Required packages... apache2 php5 php5-json php-xml php-mbstring php5-zip php5-gd
+		#   php5-json, php5-zip provided by php-common
+		#   
+		# Required packages... php5-sqlite curl libcurl3 libcurl3-dev php5-curl php-pdo
+		#   php5-curl is provided by php-common
+		#   php5-sqlite is provided by php-pdo
+		yum -y install php-mbstring libcurl-devel php-pecl-zip php-mysql php-sqlite
+		;;
+	6)	echo "#### Setup and secure mysql"
+		chkconfig --level 235 mysqld on
+		service mysqld start
+
+		mysql_root_pass='1qaz@WSX'
+		mysql_user_pass='1qaz@WSX'
+		mysqladmin -u root password "\${mysql_root_pass}"
+
+		mysql -u root --password="\${mysql_pass}" -h localhost --execute="\
+		        DROP DATABASE IF EXISTS test;
+		        DROP DATABASE IF EXISTS owncloud_git;
+		        DROP DATABASE IF EXISTS owncloud;"
+		mysql -u root --password="\${mysql_pass}" -h localhost --execute="\
+		        DELETE FROM mysql.user WHERE host='localhost'  AND user<>'root';
+        		DELETE FROM mysql.user WHERE                       user='owncloud';
+        		DELETE FROM mysql.user WHERE host<>'localhost' AND host<>'127.0.0.1';"
+		mysql -u root --password="\${mysql_pass}" -h localhost --execute="\
+		        CREATE DATABASE owncloud;
+		        CREATE DATABASE owncloud_git;
+		        GRANT ALL on owncloud_git.* TO 'owncloud'@'localhost' IDENTIFIED BY '"\${mysql_user_pass}"';
+		        GRANT ALL on owncloud_git.* TO 'owncloud'@'127.0.0.1' IDENTIFIED BY '"\${mysql_user_pass}"';
+		        GRANT ALL on owncloud.*     TO 'owncloud'@'localhost' IDENTIFIED BY '"\${mysql_user_pass}"';
+		        GRANT ALL on owncloud.*     TO 'owncloud'@'127.0.0.1' IDENTIFIED BY '"\${mysql_user_pass}"';"
+		mysql -u root --password="\${mysql_pass}" -h localhost --execute="\
+		        FLUSH PRIVILEGES;"
+		;;
+	7)	echo "#### Setup iptables firewall rules for HTTP and HTTPS"
+		sed -i  '/22/{p;s/22/80/;p;s/80/443/}' /etc/sysconfig/iptables
+		service iptables restart
+		;;
+	8)	echo "#### Setup postfix to relay mail"
+		echo relayhost = ucfsmtps1.mail.ucf.edu >> /etc/postfix/main.cf
+		echo smtp_use_tls = yes                 >> /etc/postfix/main.cf
+		echo smtp_sasl_security_options =       >> /etc/postfix/main.cf
+		;;
+        *)      echo "#### Remove from rc.local"
+		sed -i".bk" "/etc.rc.d.rc.run_once/d" /etc/rc.d/rc.local
+                exit 0;;
+
+esac
+
+next
+sleep 1
+bash -l -c " \\"/.\$scriptPath/\$scriptName\\" &>> \\"/var/log/\$scriptName\\" " &
+END-OF-/etc/rc.d/rc.run_once
+
+chmod +x /etc/rc.d/rc.run_once
+
+#########################################################################################################
+################################################################################### /etc/rc.d/rc.local
+cat << EOF-OF-/etc/rc.d/rc.local >> /etc/rc.d/rc.local
+/etc/rc.d/rc.run_once >> /var/log/rc.run_once 2>&1 &
+EOF-OF-/etc/rc.d/rc.local
+
