@@ -1,0 +1,62 @@
+# https://access.redhat.com/knowledge/docs/en-US/Red_Hat_Enterprise_Linux/6/html/Installation_Guide/s1-kickstart2-options.html
+# http://www.redhat.com/promo/summit/2010/presentations/summit/decoding-the-code/wed/cshabazi-530-more/MORE-Kickstart-Tips-and-Tricks.pdf
+#############################################################################
+# Manditory: cannot be included; url|nfs, keyboard, lang & text|graphical 
+url --url http://archive.ubuntu.com/ubuntu
+keyboard en_us
+lang en_US
+text
+
+#############################################################################
+# local
+%include /tmp/local.cfg
+# HD config
+%include /tmp/hd.autopart.cfg
+# global defaults
+%include /tmp/defaults.cfg
+
+#############################################################################
+# custom unique kickstart options
+xconfig --startxonboot
+
+#############################################################################
+%packages --resolvedeps
+@ kubuntu-desktop
+@ ubuntu-desktop
+@ Fonts
+build-essential
+
+vim
+emacs
+
+ntp
+
+#############################################################################
+%pre
+/bin/sh << END-OF-WGET > /tmp/wget.log 2>&1
+baseURL=\$(sed 's|.*ks=\([^ ]*\)/[^/ ]*.*|\1|p;d' /var/log/syslog | uniq)
+echo          \${baseURL}
+echo ---------------------------------------------------------------
+wget -P  /lib \${baseURL}/wget-12.10/libssl.so.1.0.0
+wget -P  /lib \${baseURL}/wget-12.10/libidn.so.11
+wget -P  /tmp \${baseURL}/wget-12.10/wget
+chmod +x /tmp/wget
+/tmp/wget -r -nd -l 1 --cut-dirs 1 -A cfg -P /tmp \${baseURL}
+END-OF-WGET
+
+
+%post --interpreter=/bin/bash
+# This is the trick — automatically switch to 6th console
+# and redirect all input/output
+exec < /dev/tty6 > /dev/tty6 2> /dev/tty6
+chvt 6
+echo Welcome to your kickstart post instalation chrooted interactive shell...
+
+# Break into a shell prompt
+/bin/bash
+
+# Then switch back to Anaconda on the first console
+chvt 1
+exec < /dev/tty1 > /dev/tty1 2> /dev/tty1
+
+
