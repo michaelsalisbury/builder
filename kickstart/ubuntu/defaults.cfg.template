@@ -7,7 +7,7 @@ auth  --useshadow  --enablemd5
 # Installation logging level
 logging --level=info
 
-# Timezone
+# Timezone and NTP details
 timezone America/New_York
 
 # Install OS instead of upgrade
