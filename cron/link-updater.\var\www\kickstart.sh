@@ -14,9 +14,9 @@ done
 while read src; do
         ln -s "${src}"/* "${dst}"/.
 done << SOURCE-PATHS
-/var/www/repos/github/michaelsalisbury_builder/builder
 SOURCE-PATHS
 
+#/var/www/repos/github/michaelsalisbury_builder/builder
 #/var/www/html/repos/github/michaelsalisbury_builder/UCK
 
 # Add new files and subdirectorys from list of source paths
