@@ -1,0 +1,71 @@
+#!/bin/builder.sh
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+step=1
+prefix="setup"
+
+
+
+
+
+aptopt="-y -q --force-yes"
+autoLoginUser="msalisbury"
+###########################################################################################
+###########################################################################################
+function networkUpMsg(){ echo Network Up, Internet Accessible + DNS Responding.; }
+
+
+function apt_clean_n_update(){
+	desc "apt-get clean & update"
+        ###################################################################################
+	stall 20
+	apt-get clean
+	waitAptgetUpdate
+	apt-get update
+}
+
+function apt_update_n_upgrade(){
+	desc "Run updates and upgrade"
+        ###################################################################################
+	stall 10
+	waitAptgetUpdate
+	apt-get ${aptopt} update
+	waitAptgetInstall
+	apt-get ${aptopt} upgrade
+}
+
+###########################################################################################
+###########################################################################################
+###########################################################################################
+function setup_A(){
+	desc "A"
+        ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
+	echo A
+}
+function setup_B(){
+	desc "B"
+        ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
+	echo B
+	reboot
+}
+function setup_C(){
+	desc "C"
+        ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
+	echo C
+}
+function setup_D(){
+	desc "D"
+        ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
+	echo D
+}
+function setup_END(){
+	desc "END"
+        ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
+	echo END
+}
+
+
