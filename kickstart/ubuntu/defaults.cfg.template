@@ -26,4 +26,8 @@ autostep --autoscreenshot
 firewall --disabled
 selinux --disabled
 
+# Setup repos
+preseed --owner d-i apt-setup/universe   boolean true
+preseed --owner d-i apt-setup/multiverse boolean true
+preseed --owner d-i apt-setup/non-free   boolean true
 
