@@ -170,6 +170,8 @@ function setup_Must_Have_Tools(){
 					expect expect-dev \
 					gconf-editor \
 					ipcalc \
+					cups-pdf \
+					p7zip p7zip-full \
 					google-chrome-stable
 					#default-jre default-jre-headless \
 	# Defaults for vim
