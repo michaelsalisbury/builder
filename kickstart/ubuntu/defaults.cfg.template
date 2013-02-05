@@ -9,6 +9,10 @@ logging --level=info
 
 # Timezone and NTP details
 timezone America/New_York
+preseed --owner d-i clock-setup/ntp boolean true
+preseed --owner d-i clock-setup/utc-auto boolean true
+preseed --owner d-i clock-setup/utc boolean true
+preseed --owner d-i time/zone string US/Eastern
 
 # Install OS instead of upgrade
 install
