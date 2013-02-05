@@ -3,6 +3,8 @@
 #############################################################################
 nfs --server=192.168.253.1 --dir=/export/rhel-server-6.3-x86_64-dvd
 nfs --server=10.173.119.72 --dir=/Library/NetBoot/NFSserver/rhel-server-6.3-x86_64-dvd
+nfs --server=10.173.119.72 --dir=/Library/NetBoot/NFSserver/
+
 url --url=http://192.168.248.22/repo.rhel6.3dvd
 url --url http://archive.ubuntu.com/ubuntu
 network  --hostname=RHEL00.pig.pie
