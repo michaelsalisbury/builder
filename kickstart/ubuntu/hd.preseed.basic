@@ -1,25 +1,9 @@
 preseed partman-auto/disk				string		/dev/sda
 preseed partman-auto/method				string		regular
 preseed partman-auto/purge_lvm_from_device		boolean		true
-preseed partman-auto/expert_recipe string root :: \
-	2048 10 2048 linux-swap \
-	$primary{ } method{ swap } format{ } \
-	. \
-	300 25 300 ext2 \
-	$primary{ } $bootable method{ format } format{ } \
-	use_filesystem{ } filesystem{ ext2 } \
-	mountpoint{ /boot } \
-	. \
-	1 50 99999 ext3 \
-	$primary{ } method{ format } format{ } \
-	use_filesystem{ } filesystem{ ext3 } \
-	mountpoint{ / } \
-	.
+preseed partman-auto/expert_recipe string root :: 2048 10 2048 linux-swap $primary{ } method{ swap } format{ } . 300 25 300 ext2 $primary{ } $bootable method{ format } format{ } use_filesystem{ } filesystem{ ext2 } mountpoint{ /boot } . 1 50 99999 ext3 $primary{ } method{ format } format{ } use_filesystem{ } filesystem{ ext3 } mountpoint{ / } .
 preseed partman-auto/choose_recipe			select		root
 preseed partman-partitioning/confirm_write_new_label	boolean 	true
 preseed partman/choose_partition			select		Finish partitioning and write changes to disk
 preseed partman/confirm					boolean		true
 preseed partman/confirm_nooverwrite			boolean		true
-
-
-
