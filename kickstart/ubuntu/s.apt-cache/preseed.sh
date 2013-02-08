@@ -4,7 +4,7 @@ echo # DO NOT REMOVE THIS BLANK LINE
 #############################################################################
 cat local.preseed
 echo
-cat ../preseed
+cat ../preseed/preseed.hd.basic
 echo
 
 
