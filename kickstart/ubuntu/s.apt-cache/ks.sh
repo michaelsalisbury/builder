@@ -1,4 +1,9 @@
 #!/bin/bash
+function include(){
+	echo '#############################################################################'
+	cat $1
+	echo
+}
 echo "Content-Type: text/plain"
 echo # DO NOT REMOVE THIS BLANK LINE
 #############################################################################
@@ -8,9 +13,8 @@ cat ../defaults.cfg.template
 echo
 cat packages.cfg
 echo
-echo '#############################################################################'
-cat ../post.chroot.get_VBoxGuestAdditions.cfg
-cat ../post.chroot.setup_root_auth_keys.cfg
+include ../post.chroot.get_VBoxGuestAdditions.cfg
+include ../post.chroot.setup_root_auth_keys.cfg
 cat ../post.chroot.setup_ntpd.cfg
 cat ../post.chroot.interactive.cfg
 cat ../post.nochroot.setup_builder.cfg
