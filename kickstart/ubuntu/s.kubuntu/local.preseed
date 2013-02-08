@@ -4,7 +4,7 @@
 d-i mirror/http/proxy string http://10.173.119.78:3142/
 
 # Primary instalation task
-tasksel tasksel/first multiselect Kubuntu full, OpenSSH server
+tasksel tasksel/first multiselect Kubuntu full
 #tasksel tasksel/first multiselect Basic Ubuntu Server
 #tasksel tasksel/first multiselect lamp-server, print-server
 
@@ -14,7 +14,6 @@ tasksel tasksel/first multiselect Kubuntu full, OpenSSH server
 # Whether to upgrade packages after debootstrap.
 # Allowed values: none, safe-upgrade, full-upgrade
 #d-i pkgsel/upgrade select none
-
 
 # Network name preseed config
 preseed --owner d-i netcfg/get_hostname string DLPBMM1-kubuntu-test-deploy
