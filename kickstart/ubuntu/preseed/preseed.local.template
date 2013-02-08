@@ -5,6 +5,7 @@ d-i mirror/http/proxy string http://10.173.119.78:3142/
 
 # Primary instalation task
 tasksel tasksel/first multiselect Basic Ubuntu Server
+#tasksel tasksel/first multiselect Kubuntu full
 #tasksel tasksel/first multiselect lamp-server, print-server
 
 # Individual additional packages to install
