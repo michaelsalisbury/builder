@@ -1,7 +1,7 @@
 # Setup repos
-preseed --owner d-i apt-setup/universe   boolean true
-preseed --owner d-i apt-setup/multiverse boolean true
-preseed --owner d-i apt-setup/non-free   boolean true
+d-i apt-setup/universe   boolean true
+d-i apt-setup/multiverse boolean true
+d-i apt-setup/non-free   boolean true
 
 # Configure updates
-preseed --owner d-i pkgsel/update-policy select unattended-upgrades
+d-i pkgsel/update-policy select unattended-upgrades
