@@ -15,9 +15,10 @@ include ../packages.cfg.template
 include ../post.chroot.get_VBoxGuestAdditions.cfg
 include ../post.chroot.setup_root_auth_keys.cfg
 include ../post.chroot.setup_ntpd.cfg
-include ../post.chroot.interactive.cfg
+#include ../post.chroot.interactive.cfg
 include ../post.nochroot.setup_builder.cfg
-include ../post.nochroot.interactive.cfg
+#include ../post.nochroot.interactive.cfg
 
 #############################################################################
-cat ../pre.interactive-n-download.cfg
+#cat ../pre.interactive-n-download.cfg
+cat ../pre.download.cfg
