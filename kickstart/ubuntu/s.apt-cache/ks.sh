@@ -9,7 +9,7 @@ echo # DO NOT REMOVE THIS BLANK LINE
 #############################################################################
 include local.cfg
 include ../defaults.cfg.template
-include packages.cfg
+include ../packages.cfg.template
 
 #############################################################################
 include ../post.chroot.get_VBoxGuestAdditions.cfg
