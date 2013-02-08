@@ -12,6 +12,8 @@ vim
 ntp
 git
 lsof
+iotop
+iftop
 expect
 expect-dev
 # hardware diagnostics and detection
