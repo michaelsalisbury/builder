@@ -1,10 +1,5 @@
 #############################################################################
 %packages
-#ubuntu-minimal
-#@ Core
-#@ kubuntu-desktop
-#@ ubuntu-desktop
-#@ Fonts
 # default must have tools
 openssh-server
 bash
