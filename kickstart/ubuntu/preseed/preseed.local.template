@@ -2,7 +2,7 @@
 d-i mirror/http/proxy string http://10.173.119.78:3142/
 
 # Primary instalation task
-preseed --owner tasksel tasksel/first multiselect server
+preseed --owner tasksel tasksel/first multiselect Basic Ubuntu Server
 
 # Network name preseed config
 preseed --owner d-i netcfg/get_hostname string DLPBMM1-ubuntu-test-deploy
