@@ -8,7 +8,7 @@ cat ../defaults.cfg.template
 echo
 cat packages.cfg
 echo
-#############################################################################
+echo '#############################################################################'
 cat ../post.chroot.get_VBoxGuestAdditions.cfg
 cat ../post.chroot.setup_root_auth_keys.cfg
 cat ../post.chroot.setup_ntpd.cfg
