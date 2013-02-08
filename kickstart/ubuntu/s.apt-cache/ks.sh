@@ -1,6 +1,7 @@
 #!/bin/bash
 echo "Content-Type: text/plain"
-echo
+echo # DO NOT REMOVE THIS BLANK LINE
+#############################################################################
 cat local.cfg
 echo
 cat ../defaults.cfg.template
