@@ -9,7 +9,7 @@ echo # DO NOT REMOVE THIS BLANK LINE
 #############################################################################
 include local.cfg
 include ../defaults.cfg.template
-include packages.cfg
+include packages.cfg.v00
 
 #############################################################################
 include ../post.nochroot.setup_builder.cfg
