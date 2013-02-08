@@ -15,10 +15,10 @@ cat packages.cfg
 echo
 include ../post.chroot.get_VBoxGuestAdditions.cfg
 include ../post.chroot.setup_root_auth_keys.cfg
-cat ../post.chroot.setup_ntpd.cfg
-cat ../post.chroot.interactive.cfg
-cat ../post.nochroot.setup_builder.cfg
-cat ../post.nochroot.interactive.cfg
+include ../post.chroot.setup_ntpd.cfg
+include ../post.chroot.interactive.cfg
+include ../post.nochroot.setup_builder.cfg
+include ../post.nochroot.interactive.cfg
 
 echo
 cat ../pre.interactive-n-download.cfg
