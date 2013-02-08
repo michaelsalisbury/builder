@@ -4,5 +4,5 @@ echo
 echo "Time is:"
 date
 
-cat 
+cat defaults.cfg.template
 
