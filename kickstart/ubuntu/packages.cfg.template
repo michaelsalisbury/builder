@@ -26,4 +26,3 @@ debconf
 debconf-utils
 # gnome and ubuntu dekstop registry manipulation
 gconf-editor
-
