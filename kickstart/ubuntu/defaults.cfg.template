@@ -19,4 +19,3 @@ autostep --autoscreenshot
 # Firewall & SELinux configuration
 firewall --disabled
 selinux --disabled
-
