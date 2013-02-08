@@ -8,6 +8,10 @@ cat ../defaults.cfg.template
 echo
 cat packages.cfg
 echo
+
+
+
+echo
 cat ../pre.interactive-n-download.cfg
 
 #cat defaults.cfg.template
