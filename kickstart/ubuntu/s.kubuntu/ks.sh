@@ -20,4 +20,4 @@ include ../post.nochroot.setup_builder.cfg
 include ../post.nochroot.interactive.cfg
 
 #############################################################################
-cat ../pre.interactive-n-download.cfg
+cat ../pre.download.cfg
