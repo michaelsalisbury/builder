@@ -2,9 +2,9 @@
 echo "Content-Type: text/plain"
 echo # DO NOT REMOVE THIS BLANK LINE
 #############################################################################
-cat local.cfg
+cat local.preseed
 echo
-cat ../defaults.cfg.template
+cat ../preseed
 echo
 
 
