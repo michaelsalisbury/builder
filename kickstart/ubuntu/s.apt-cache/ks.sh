@@ -6,7 +6,7 @@ cat local.cfg
 echo
 cat ../defaults.cfg.template
 echo
-
+cat ../packages.cfg
 
 #cat defaults.cfg.template
 
