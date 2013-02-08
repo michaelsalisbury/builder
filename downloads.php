@@ -171,8 +171,6 @@ fwrite($kickhandle, $content);
 
 fclose($kickhandle);
 
-
-
 ?>
 <?php
 
