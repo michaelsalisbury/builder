@@ -1,7 +1,7 @@
 #!/bin/bash
 echo Setting up initial softlinks
 ln -s ../../../builder/builder.sh .
-ln -s ../DEB/* .
+ln -s ../DEB .
 echo Copying kickstart templates
 cp             local.cfg.template    local.cfg
 cp          defaults.cfg.template defaults.cfg
