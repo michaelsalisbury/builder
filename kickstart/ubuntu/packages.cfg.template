@@ -1,27 +1,4 @@
 #############################################################################
-# Manditory: cannot be included; url|nfs, keyboard, lang & text|graphical 
-nfs --server=10.173.119.72 --dir=/Library/NetBoot/NFSserver/ubuntu-12.10-server-amd64
-#nfs --server=192.168.253.1 --dir=/export/ubuntu-12.10-server-amd64
-#url --url http://archive.ubuntu.com/ubuntu
-
-keyboard en_us
-lang en_US
-#text
-
-#############################################################################
-# local
-%include /tmp/local.cfg
-# HD config
-#%include /tmp/hd.autopart.cfg
-# global defaults
-%include /tmp/defaults.cfg
-
-#############################################################################
-# custom unique kickstart options
-skipx
-
-#############################################################################
-preseed --owner tasksel tasksel/first multiselect server
 %packages
 #ubuntu-minimal
 #@ Core
