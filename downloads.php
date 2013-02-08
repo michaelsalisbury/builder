@@ -202,6 +202,3 @@ exit;
 // <a href="download.php?download_file=some_file.pdf">Download here</a>
 
 ?>
-
-Terms - Privacy - Project Hosting Help
-Powered by Google Project Hosting 
