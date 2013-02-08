@@ -4,6 +4,7 @@ echo
 cat local.cfg
 echo
 cat ../defaults.cfg.template
+echo
 
 
 #cat defaults.cfg.template
