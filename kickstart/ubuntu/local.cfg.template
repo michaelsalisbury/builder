@@ -14,5 +14,6 @@ rootpw --iscrypted lQiMQwlP73Rxg
 user localcosadmin --fullname "localcosadmin" --iscrypted --password $1$8UY4GkcW$GRy3vz12AtgILfRB18DBw0
 
 # Local login console text or GUI
+#xconfig --startxonboot
 skipx
 
