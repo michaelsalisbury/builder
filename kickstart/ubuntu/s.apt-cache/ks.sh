@@ -1,8 +1,8 @@
 #!/bin/bash
 echo "Content-Type: text/plain"
-echo
-echo "Time is:"
-date
+cat local.cfg
+
+
 
 cat defaults.cfg.template
 
