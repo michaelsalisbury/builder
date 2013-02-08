@@ -1,5 +1,5 @@
 # https://help.ubuntu.com/10.04/installation-guide/i386/preseed-contents.html
-
+#############################################################################
 # Apt-Cache Server
 d-i mirror/http/proxy string http://10.173.119.78:3142/
 
