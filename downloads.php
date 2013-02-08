@@ -56,7 +56,6 @@ auth  --useshadow  --enablemd5
 
 network --bootproto=static --ip=192.168.1.$next --gateway=192.168.1.1 --netmask 255.255.255.0 --nameserver=192.168.1.1 --device=eth0 --hostname=bee$next.gbeehive
 
-
 #Firewall configuration
 firewall --disabled
 #Do not configure the X Window System
