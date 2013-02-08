@@ -16,4 +16,3 @@ user localcosadmin --fullname "localcosadmin" --iscrypted --password $1$8UY4GkcW
 # Local login console text or GUI
 #xconfig --startxonboot
 skipx
-
