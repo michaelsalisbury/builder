@@ -1,7 +1,11 @@
 #!/bin/bash
 echo Setting up initial softlinks
-ln -s ../../../builder/builder.sh .
+ln -s ../../../builder .
+ln -s ../../../functions .
+ln -s ../../../defaults .
+ln -s ../../../deploy_ubuntu deploys
 ln -s ../DEB .
+ln -s ../wget* .
 echo Copying kickstart templates
 cp             ../local.cfg.template    local.cfg
 cp          ../defaults.cfg.template defaults.cfg

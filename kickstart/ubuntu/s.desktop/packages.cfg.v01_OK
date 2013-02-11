@@ -1,0 +1,77 @@
+#############################################################################
+%packages
+# default must have tools
+openssh-server
+bash
+vim
+ntp
+git
+lsof
+iotop
+iftop
+expect
+expect-dev
+# hardware diagnostics and detection
+hwinfo
+ethtool
+ipcalc
+# debian package managment helpers
+apt-file
+dlocate
+aptitude
+debconf
+debconf-utils
+tasksel
+# gnome and ubuntu dekstop registry manipulation
+gconf-editor
+
+# compression
+p7zip
+p7zip-full
+
+# pdf
+okular
+
+# gimp
+gimp
+gimp-data
+gimp-data-extras
+gimp-dcraw
+gimp-flegita
+gimp-gap
+gimp-gutenprint
+gimp-lensfun
+gimp-normalmap
+gimp-texturize
+# email
+thunderbird
+
+# editors
+emacs
+
+# latex
+kile
+gv
+wv
+texlive
+texlive-full
+texlive-science
+texlive-xetex
+texlive-fonts-extra
+texlive-formats-extra
+texlive-latex-extra
+lyx
+latex2html
+latex2rtf
+writer2latex
+dvipost
+
+# fonts and other doc support
+menu
+tex4ht
+tth
+hevea
+libtiff-tools
+chktex
+doxygen
+

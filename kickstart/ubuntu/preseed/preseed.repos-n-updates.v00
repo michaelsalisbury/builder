@@ -1,0 +1,71 @@
+# Configure updates
+d-i pkgsel/update-policy select unattended-upgrades
+
+# Setup Aditional Ubuntu repos
+d-i apt-setup/universe   boolean true
+d-i apt-setup/multiverse boolean true
+d-i apt-setup/non-free   boolean true
+d-i apt-setup/contrib    boolean true
+
+# Backports
+#d-i apt-setup/local0/repository string http://www.backports.org/debian/ lenny-backports main contrib non-free
+#d-i apt-setup/local0/key string http://backports.org/debian/archive.key
+
+# The PPA for the Banshee-1 team
+#d-i apt-setup/local2/repository string http://ppa.launchpad.net/banshee-team/ubuntu hardy main
+
+# Allow uathenticated repos
+#d-i debian-installer/allow_unauthenticated string true
+
+# EverPad
+#d-i apt-setup/local0/comment    string EverPad
+#d-i apt-setup/local0/repository string http://ppa.launchpad.net/nvbn-rm/ppa/ubuntu quantal main
+
+# UCK
+#d-i apt-setup/local1/comment    string UCK-Stable
+#d-i apt-setup/local1/repository string http://ppa.launchpad.net/uck-team/uck-stable/ubuntu precise main
+
+#d-i apt-setup/local2/comment    string UCK-Unstable
+#d-i apt-setup/local2/repository string http://ppa.launchpad.net/uck-team/uck-unstable/ubuntu oneiric main
+
+# Google
+#d-i apt-setup/local3/comment    string Google Chrome
+#d-i apt-setup/local3/repository string http://dl.google.com/linux/chrome/deb/ stable main
+#d-i apt-setup/local3/key        string https://dl-ssl.google.com/linux/linux_signing_key.pub
+
+# VirtualBox
+#d-i apt-setup/local4/comment    string VirtualBox
+#d-i apt-setup/local4/repository string http://download.virtualbox.org/virtualbox/debian quantal contrib
+#d-i apt-setup/local4/key        string http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc
+
+# Skype
+#d-i apt-setup/local5/comment    string Skype
+#d-i apt-setup/local5/repository string deb http://download.skype.com/linux/repos/debian/ stable non-free
+
+# Debian Multimedia for w32codecs and libdvdcss
+#d-i apt-setup/local6/comment    string Multimedia
+#d-i apt-setup/local6/repository string http://www.debian-multimedia.org quantal main
+
+# X2GO
+#d-i apt-setup/local7/comment    string X2GO
+#d-i apt-setup/local7/repository string http://ppa.launchpad.net/x2go/stable/ubuntu quantal main
+
+# Grub Customizer
+#d-i apt-setup/local8/comment    string Grub-Customizer
+#d-i apt-setup/local8/repository string http://ppa.launchpad.net/danielrichter2007/grub-customizer/ubuntu quantal main
+
+# Tweak My Unity 
+#d-i apt-setup/local9/comment    string Tweak-My-Unity
+#d-i apt-setup/local9/repository string http://ppa.launchpad.net/tualatrix/ppa/ubuntu quantal main
+
+# Adobe Reader
+d-i apt-setup/local10/comment    string Adobe-Reader
+d-i apt-setup/local10/repository string deb http://archive.canonical.com/ quantal partner
+
+# Auto Responces
+acroread-common acroread-common/default-viewer                    select true
+ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true
+#ddtemp hddtemp/daemon select false
+#gdm gdm/daemon_name select /usr/sbin/gdm
+#gdm shared/default-x-display-manager select lightdm
+#lightdm shared/default-x-display-manager select lightdm

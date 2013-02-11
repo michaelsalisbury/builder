@@ -1,7 +1,20 @@
-# Setup repos
+# Configure updates
+d-i pkgsel/update-policy select unattended-upgrades
+
+# Setup Aditional Ubuntu repos
 d-i apt-setup/universe   boolean true
 d-i apt-setup/multiverse boolean true
 d-i apt-setup/non-free   boolean true
+d-i apt-setup/contrib    boolean true
 
-# Configure updates
-d-i pkgsel/update-policy select unattended-upgrades
+# Adobe Reader
+d-i apt-setup/local10/comment    string Adobe-Reader
+d-i apt-setup/local10/repository string deb http://archive.canonical.com/ quantal partner
+
+# Auto Responces
+acroread-common acroread-common/default-viewer                    select true
+ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true
+#ddtemp hddtemp/daemon select false
+#gdm gdm/daemon_name select /usr/sbin/gdm
+#gdm shared/default-x-display-manager select lightdm
+#lightdm shared/default-x-display-manager select lightdm

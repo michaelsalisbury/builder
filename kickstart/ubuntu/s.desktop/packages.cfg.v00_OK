@@ -17,7 +17,6 @@ ethtool
 ipcalc
 # debian package managment helpers
 apt-file
-software-properties-common # add-apt-repositories
 dlocate
 aptitude
 debconf
