@@ -1,8 +1,8 @@
 # https://help.ubuntu.com/10.04/installation-guide/i386/preseed-contents.html
 #############################################################################
 # Apt-Cache Server
-#d-i mirror/http/proxy string http://10.173.119.78:3142/
-d-i mirror/http/proxy string http://192.168.253.3:3142/
+d-i mirror/http/proxy string http://10.173.119.78:3142/
+#d-i mirror/http/proxy string http://192.168.253.3:3142/
 
 # Primary instalation task
 tasksel tasksel/first multiselect Ubuntu desktop
