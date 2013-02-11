@@ -585,4 +585,6 @@ function setup_Clean_Update_Upgrade(){
 	apt_update_n_upgrade
 }
 
-
+function waitForNetwork(){
+	mesg Network up
+}
