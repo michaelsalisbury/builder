@@ -178,6 +178,8 @@ function setup_Must_Have_Tools(){
 
 	# setup defaults for the following applications
 	defaults='google_chrome,vim,terminator'
+	echo $scriptPath
+	echo $defaults
 	while read script; do
 		echo $script
 			
