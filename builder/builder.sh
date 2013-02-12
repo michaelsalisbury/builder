@@ -76,7 +76,10 @@ function switches(){
                         h)              show_help; disp_functions; echo;;
 			j)		[[ $OPTARG =~ (b|u) ]] && back || next;
 					wrap; disp_functions; echo;;
-                        i)              step=$OPTARG; eval_function $OPTARG;;
+			i)		find_function $OPTARG		\
+					&& step=`find_function $OPTARG`	\
+					&& eval_function $step		\
+					|| disp_functions;;
                         l)              disp_functions; echo;;
 			m)		[[ $OPTARG =~ (b|u) ]] && move_up $step   && back
 					[[ $OPTARG =~ (f|d) ]] && move_down $step && next
@@ -190,15 +193,18 @@ function make_backup(){
 
 function test_source(){ wget -T 2 -t 2 --spider -v $1 |& egrep '^Remote file exists.$' &> /dev/null && return 0 || return 1; }
 function sync_source(){
-	if [ "${source:-UNSET}" != "UNSET" ] && test_source "$source"; then
+	# get source URL from script that called the update request
+	eval `sed '/^source=/p;d' "${scriptFQFN}"`
+	# Test and sync script
+	if [ "${source:-UNSET}" != "UNSET" ] && test_source "${source}"; then
 		cd "$scriptPath"
 		mesg 80 Syncing :: $source
 		wget -q -O "${scriptName}.new"   "${source}"
-		cat        "${scriptName}.new" > "$scriptName"
+		cat        "${scriptName}.new" > "${scriptName}"
 	else
 		mesg 80 ERROR :: Script source \for $scriptName broken or unset\!
 	fi
-
+	# Test and sync builder.sh
 	if [ "`whoami`" != "root" ]; then
 		mesg 80 DENIED :: Your not root.  Use sudo to sync $buildScriptName\!
 	elif [ "${buildScriptSrc:-UNSET}" != "UNSET" ] \
@@ -278,6 +284,22 @@ function reboot_isset(){ [ -f "/tmp/$$REBOOT" ] && return 0 || return 1; }
 function reboot_start(){ reboot_isset && /sbin/reboot || return 1; }
 ###########################################################################################
 ###########################################################################################
+function find_function(){
+	local srch=$*
+	if [[ "${srch}" =~ ^[0-9]*$ ]]; then
+		echo ${srch}
+		return 0
+	elif (( $(list_functions | egrep -i "(${srch}|${srch// /_})" | wc -l) == 1 )); then
+		list_functions				|\
+		cat -n					|\
+		egrep -i "(${srch}|${srch// /_})"	|\
+		awk '{print $1}'
+		return 0
+	else
+		derr Function match \"${srch}\" not found\!
+		return 1
+	fi
+}
 function eval_function(){ cat "$buildScriptPipe" | log_output $1 &
 			  eval `name_function $1` &> "$buildScriptPipe"; }
 function name_function(){ list_functions | sed "$1!d"; }
@@ -329,7 +351,7 @@ function skip_function(){ [[ $1 =~ ^[0-9]+$ ]] && (( $1 <= `last_function` )) ||
 
 ###########################################################################################
 ###########################################################################################
-function is_rebooting(){ rl=(`who -r | awk '{print $2;}'`); (( $rl == 1 || $rl == 6 )); }
+function is_rebooting(){ rl=(`who -r | awk '{print $2;}'`); [[ "$rl" == 1 ||" $rl" == 6 ]]; }
 function is_finished(){	(( $step > `last_function` )) && return 0 || return 1; }
 function is_unset(){ compgen -A variable | egrep ^$1$ > /dev/null && return 1 || return 0; }
 ###########################################################################################
@@ -377,6 +399,7 @@ function mesg_base(){	[[ $1 =~ ^[0-9]+ ]] && { mesg_base_width=$1; shift; } || m
 			mesg_base_title_first=${mesg_base_title_first:0:3}
 			mesg_base_title=${*:3:$#-3}
 			mesg_base_title_last=${*:$#}
+			let mesg_base_width-=1
 			echo -n \#; repc $mesg_base_width _
 			echo -n \#; padr $mesg_base_width "$mesg_base_title_last" "$mesg_base_title_first" "$mesg_base_title" 
 			echo -n \#; padl $mesg_base_width " " "$mesg_base_desc"
@@ -475,7 +498,7 @@ buildScriptName="$(basename $buildScriptFQFN)"
 buildScriptPath="$(dirname  $buildScriptFQFN)"
 buildScriptPipe="/tmp/$$${buildScriptName}_Pipe"
 mkfifo                 "${buildScriptPipe}"
-buildScriptSrc="http://10.173.119.78/scripts/global/${buildScriptName}"
+buildScriptSrc="http://10.173.119.78/scripts/system-setup/${buildScriptName}"
 
 username=$(who -u | grep "(:" | head -1 | cut -f1 -d" ")
 [ -z "$username" ] && username=root

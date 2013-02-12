@@ -6,7 +6,6 @@ source=http://10.173.119.78/scripts/system-setup/$scriptName
 
 subScriptBase="/root/system-setup/`basename ${source}`"
 
-
 # Get Ubuntu version info and ... 
 #	DISTRIB_ID=Ubuntu
 #	DISTRIB_RELEASE=11.10
@@ -25,6 +24,8 @@ aptopt="-y -q"
 #autoLoginShell="ubuntu"
 #autoLoginShell="gnome-session-fallback"
 autoLoginShell="xfce4-session"
+
+function networkUpMsg(){ echo Network UP\!; } 
 
 ###########################################################################################
 ###########################################################################################
@@ -78,8 +79,20 @@ function setup_Prep_Add_Repos(){
         sed -i '/^deb/{ h; s/^/#/; x; s/quantal/oneiric/; G; }' \
 	"/etc/apt/sources.list.d/uck-team-uck-unstable-quantal.list"
 
+	# Add Adobe Repo
+	add-apt-repository -y "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
+
+	# Add X2GO Repos
+	add-apt-repository -y ppa:x2go/stable
+
+	# Add Grub Customized Repos
+	add-apt-repository -y ppa:danielrichter2007/grub-customizer
+
 	# Add EverPad
 	add-apt-repository -y ppa:nvbn-rm/ppa
+
+	# Add Tweak & MyUnity Repos
+	add-apt-repository -y ppa:tualatrix/ppa
 
 	# Update
 	apt-get ${aptopt} update
@@ -174,14 +187,15 @@ function setup_Must_Have_Tools(){
 					p7zip p7zip-full \
 					google-chrome-stable
 					#default-jre default-jre-headless \
-	# Defaults for vim
-	"${subScriptBase}-defaults_vim.sh" -rr	
 
-	# Defaults for Terminator
-	"${subScriptBase}-defaults_terminator.sh" -rr
-
-	# Defaults for Chrome
-	"${subScriptBase}-defaults_google_chrome.sh" -rr
+	# setup defaults for the following applications
+	while read script; do
+        	"${script:-false}" -rr
+	done < <(
+		for app in google_chrome vim terminator; do
+        		ls -1             "${scriptPath}"/defaults.${app}.sh 2> /dev/null
+        		ls -1 "${scriptPath}"/../defaults/defaults.${app}.sh 2> /dev/null
+		done)
 
 }
 function setup_AMD_Catalyst(){
@@ -374,7 +388,7 @@ function setup_Configure_SSH(){
 	# Disable GSSAPIAuthentication
         sed -i "s/.*GSSAPIAuthentication yes.*/#GSSAPIAuthentication yes/" /etc/ssh/sshd_config
 	# Disable DNS verification
-	sed -i "/^[^#]*UseDNS.*/s/^/#/; $a\\tUseDNS no" /etc/ssh/sshd_config
+	sed -i "/^[^#]*UseDNS.*/s/^/#/; \$aUseDNS no" /etc/ssh/sshd_config
 
 	# Restart service
 	stop ssh

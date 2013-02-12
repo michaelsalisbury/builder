@@ -4,7 +4,10 @@ step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
 
-while read import; do . "${import}"; done < <(ls -1 "${scriptPath}"/functions.*.sh)
+while read import; do
+	. "${import}"
+done < <(ls -1              "${scriptPath}"/functions.*.sh 2> /dev/null
+	 ls -1 "${scriptPath}"/../functions/functions.*.sh 2> /dev/null)
 
 function setup_skel_Structure(){
 	desc Build skel directory structure

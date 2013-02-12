@@ -15,10 +15,8 @@ hwinfo ethtool ipcalc
 tasksel apt-file dlocate software-properties-common # add-apt-repositories
 aptitude wajig
 debconf debconf-utils
-# gnome and unity dekstop registry manipulation
+# gnome and ubuntu dekstop registry manipulation
 gconf-editor
-# gnome and unity desktop visual manipulation
-compizconfig-settings-manager
 
 # compression
 #p7zip p7zip-full
@@ -38,7 +36,7 @@ remmina remmina-plugin-gnome remmina-plugin-nx remmina-plugin-rdp remmina-plugin
 #skype
 
 # pidgin
-#pidgin pidgin-plugin-pack pidgin-sipe pidgin-themes pidgin-twitter pidgin-facebookchat pidgin-encryption pidgin-librvp pidgin-extprefs
+pidgin pidgin-plugin-pack pidgin-sipe pidgin-themes pidgin-twitter pidgin-facebookchat pidgin-encryption pidgin-librvp pidgin-extprefs
 
 # programming
 build-essential
@@ -58,7 +56,7 @@ luckybackup luckybackup-data
 deja-dup
 
 # visualization
-#grace
+grace
 
 # gimp
 #gimp gimp-data gimp-data-extras gimp-dcraw gimp-flegita gimp-gap gimp-gutenprint gimp-lensfun gimp-normalmap gimp-texturize
