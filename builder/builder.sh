@@ -294,7 +294,7 @@ function find_function(){
 		awk '{print $1}'
 		return 0
 	else
-		derr Match Function \"${srch}\" not found\!
+		derr Function Match \"${srch}\" not found\!
 		return 1
 	fi
 }
