@@ -289,7 +289,7 @@ function find_function(){
 		return 0
 	else
 		echo XXX${search}XXX 
-		list_functions | egrep -i "(${search}|${search// /_})"
+		list_functions | cat -n | egrep -i "(${search}|${search// /_})"
 		
 
 	fi
