@@ -283,16 +283,18 @@ function reboot_start(){ reboot_isset && /sbin/reboot || return 1; }
 ###########################################################################################
 ###########################################################################################
 function find_function(){
-	search=$*
-	if [[ "${search}" =~ ^[0-9]*$ ]]; then
-		echo ${search}
+	local srch=$*
+	if [[ "${srch}" =~ ^[0-9]*$ ]]; then
+		echo ${srch}
 		return 0
-	else
-		echo XXX${search}XXX 
-		list_functions | cat -n | egrep -i "(${search}|${search// /_})"
-		
-
+	else (( $(list_functions | egrep -i "(${srch}|${srch// /_})" | wc -l) == 1 )); then
+		list_functions				|\
+		cat -n					|\
+		egrep -i "(${srch}|${srch// /_})"	|\
+		awk '{print $1}'
+		return 0		
 	fi
+	return 1
 }
 function eval_function(){ cat "$buildScriptPipe" | log_output $1 &
 			  eval `name_function $1` &> "$buildScriptPipe"; }
