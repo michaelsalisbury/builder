@@ -76,6 +76,7 @@ function switches(){
                         h)              show_help; disp_functions; echo;;
 			j)		[[ $OPTARG =~ (b|u) ]] && back || next;
 					wrap; disp_functions; echo;;
+                        #i)              step=$OPTARG; eval_function $OPTARG;;
                         i)              step=$OPTARG; eval_function $OPTARG;;
                         l)              disp_functions; echo;;
 			m)		[[ $OPTARG =~ (b|u) ]] && move_up $step   && back
@@ -281,6 +282,16 @@ function reboot_isset(){ [ -f "/tmp/$$REBOOT" ] && return 0 || return 1; }
 function reboot_start(){ reboot_isset && /sbin/reboot || return 1; }
 ###########################################################################################
 ###########################################################################################
+function find_function(){
+	if [[ "$*" =~ ^[0-9]*$ ]]; then
+		echo $*
+		return 0
+	else
+		echo hi
+		
+
+	fi
+}
 function eval_function(){ cat "$buildScriptPipe" | log_output $1 &
 			  eval `name_function $1` &> "$buildScriptPipe"; }
 function name_function(){ list_functions | sed "$1!d"; }
