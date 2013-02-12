@@ -288,8 +288,8 @@ function find_function(){
 		echo ${search}
 		return 0
 	else 
-		list_functions | egrep "${search}"
-		list_functions | egrep "${search// /_}"
+		list_functions | egrep -i "${search}"
+		list_functions | egrep -i "${search// /_}"
 		
 
 	fi
