@@ -26,6 +26,8 @@ aptopt="-y -q"
 #autoLoginShell="gnome-session-fallback"
 autoLoginShell="xfce4-session"
 
+function networkUpMsg(){ echo Network UP\!; } 
+
 ###########################################################################################
 ###########################################################################################
 function setup_Prep_Add_sudo(){
