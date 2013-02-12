@@ -182,13 +182,9 @@ function setup_Must_Have_Tools(){
         	#${script:+.} "${script:-false}" -rr
 	done < <(
 		for app in google_chrome vim terminator; do
-			ls -1 "${scriptPath}"/../defaults/defaults.${app}.sh
-			
-
-		done
-        	#`ls -1             "${scriptPath}"/defaults.{${defaults}}.sh 2> /dev/null`
-        	#`ls -1 "${scriptPath}"/../defaults/defaults.{${defaults}}.sh 2> /dev/null`
-)
+        		ls -1             "${scriptPath}"/defaults.${app}.sh 2> /dev/null
+        		ls -1 "${scriptPath}"/../defaults/defaults.${app}.sh 2> /dev/null
+		done)
 
 	# Defaults for vim
 	#[ -f "defaults.vim.sh" ]
