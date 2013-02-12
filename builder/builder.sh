@@ -332,7 +332,7 @@ function skip_function(){ [[ $1 =~ ^[0-9]+$ ]] && (( $1 <= `last_function` )) ||
 
 ###########################################################################################
 ###########################################################################################
-function is_rebooting(){ rl=(`who -r | awk '{print $2;}'`); (( $rl == 1 || $rl == 6 )); }
+function is_rebooting(){ rl=(`who -r | awk '{print $2;}'`); rl=${rl:- 3}; (( $rl == 1 || $rl == 6 )); }
 function is_finished(){	(( $step > `last_function` )) && return 0 || return 1; }
 function is_unset(){ compgen -A variable | egrep ^$1$ > /dev/null && return 1 || return 0; }
 ###########################################################################################
