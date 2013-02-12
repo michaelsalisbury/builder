@@ -179,7 +179,7 @@ function setup_Must_Have_Tools(){
 	# setup defaults for the following applications
 	while read script; do
         	#${script:+.} "${script:-false}" -rr
-        	bash "${script:-false}" -rr
+        	"${script:-false}" -rr
 	done < <(
 		for app in google_chrome vim terminator; do
         		ls -1             "${scriptPath}"/defaults.${app}.sh 2> /dev/null
