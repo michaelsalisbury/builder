@@ -376,7 +376,7 @@ function setup_Configure_SSH(){
 	# Disable GSSAPIAuthentication
         sed -i "s/.*GSSAPIAuthentication yes.*/#GSSAPIAuthentication yes/" /etc/ssh/sshd_config
 	# Disable DNS verification
-	sed -i "/^[^#]*UseDNS.*/s/^/#/; $aUseDNS no" /etc/ssh/sshd_config
+	sed -i "/^[^#]*UseDNS.*/s/^/#/; \$aUseDNS no" /etc/ssh/sshd_config
 
 	# Restart service
 	stop ssh
