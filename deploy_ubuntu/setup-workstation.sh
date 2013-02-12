@@ -4,6 +4,7 @@ step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
 
+
 subScriptBase="/root/system-setup/`basename ${source}`"
 
 
@@ -176,8 +177,17 @@ function setup_Must_Have_Tools(){
 					p7zip p7zip-full \
 					google-chrome-stable
 					#default-jre default-jre-headless \
+	while read defaults; do
+        	${defaults:+.} "${defaults:-false}" -rr
+	done << DEFAULTS
+        	`ls -1             "${scriptPath}"/defaults*.sh 2> /dev/null`
+        	`ls -1 "${scriptPath}"/../defaults/defaults*.sh 2> /dev/null`
+DEFAULTS
+
+
+
 	# Defaults for vim
-	[ -f 
+	[ -f "defaults.vim.sh" ]
 	#"${subScriptBase}-defaults_vim.sh" -rr
 
 	# Defaults for Terminator
