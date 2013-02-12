@@ -47,10 +47,6 @@ function setup_Prep_Add_SSH_Keys(){
 }
 function setup_Prep_Add_Aliases(){
 	desc Setup Aliases
-
-	echo hello
-
-	return 0
 	cat << EOF > /etc/profile.d/aliases.sh
 alias ll='ls -la --color'
 alias     startXFCE='startxfce4'
