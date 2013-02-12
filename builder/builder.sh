@@ -192,11 +192,11 @@ function test_source(){
 	wget -T 2 -t 2 --spider -v $1 |& egrep '^Remote file exists.$' &> /dev/null && return 0 || return 1
 }
 function sync_source(){
-	if [ "${source:-UNSET}" != "UNSET" ] && test_source "$source"; then
+	if [ "${source:-UNSET}" != "UNSET" ] && test_source "${source}"; then
 		cd "$scriptPath"
 		mesg 80 Syncing :: $source
 		wget -q -O "${scriptName}.new"   "${source}"
-		cat        "${scriptName}.new" > "$scriptName"
+		cat        "${scriptName}.new" > "${scriptName}"
 	else
 		mesg 80 ERROR :: Script source \for $scriptName broken or unset\!
 	fi
