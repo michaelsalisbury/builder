@@ -7,10 +7,10 @@ ln -s ../../../deploy_ubuntu deploys
 ln -s ../DEB .
 ln -s ../wget* .
 echo Copying kickstart templates
-cp               ../local.cfg.template    local.cfg
-cp            ../defaults.cfg.template defaults.cfg
-cp            ../packages.cfg.template packages.cfg
-cp ../post.chroot.setup_workstation.sh post.chroot.setup_workstation.sh
+cp                ../local.cfg.template    local.cfg
+cp             ../defaults.cfg.template defaults.cfg
+cp             ../packages.cfg.template packages.cfg
+cp ../post.chroot.setup_workstation.cfg post.chroot.setup_workstation.cfg
 echo Copying preseed templates
 cp ../preseed/preseed.local.template    local.preseed
 echo Copying CGI templates
