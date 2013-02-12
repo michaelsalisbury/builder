@@ -177,24 +177,25 @@ function setup_Must_Have_Tools(){
 					p7zip p7zip-full \
 					google-chrome-stable
 					#default-jre default-jre-headless \
-	while read defaults; do
-        	${defaults:+.} "${defaults:-false}" -rr
+
+	# setup defaults for the following applications
+	defaults="google_chrome,vim,terminator"
+	while read script; do
+        	${script:+.} "${script:-false}" -rr
 	done << DEFAULTS
-        	`ls -1             "${scriptPath}"/defaults*.sh 2> /dev/null`
-        	`ls -1 "${scriptPath}"/../defaults/defaults*.sh 2> /dev/null`
+        	`ls -1             "${scriptPath}"/defaults.{${defaults}}.sh 2> /dev/null`
+        	`ls -1 "${scriptPath}"/../defaults/defaults.{${defaults}}.sh 2> /dev/null`
 DEFAULTS
 
-
-
 	# Defaults for vim
-	[ -f "defaults.vim.sh" ]
+	#[ -f "defaults.vim.sh" ]
 	#"${subScriptBase}-defaults_vim.sh" -rr
 
 	# Defaults for Terminator
-	"${subScriptBase}-defaults_terminator.sh" -rr
+	#"${subScriptBase}-defaults_terminator.sh" -rr
 
 	# Defaults for Chrome
-	"${subScriptBase}-defaults_google_chrome.sh" -rr
+	#"${subScriptBase}-defaults_google_chrome.sh" -rr
 
 }
 function setup_AMD_Catalyst(){
