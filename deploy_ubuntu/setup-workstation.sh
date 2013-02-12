@@ -163,17 +163,17 @@ function setup_Must_Have_Tools(){
 	waitForNetwork && networkUpMsg || return 1
 	stall 3
 	waitAptgetUpdate
-	apt-get ${aptopt} update
+	#apt-get ${aptopt} update
 	waitAptgetInstall
-	apt-get ${aptopt} install	vim ethtool hwinfo iotop iftop git xclip \
-					terminator multitail everpad \
-					apt-file dlocate wajig aptitude\
-					expect expect-dev \
-					gconf-editor \
-					ipcalc \
-					cups-pdf \
-					p7zip p7zip-full \
-					google-chrome-stable
+	#apt-get ${aptopt} install	vim ethtool hwinfo iotop iftop git xclip \
+	#				terminator multitail everpad \
+	#				apt-file dlocate wajig aptitude\
+	#				expect expect-dev \
+	#				gconf-editor \
+	#				ipcalc \
+	#				cups-pdf \
+	#				p7zip p7zip-full \
+	#				google-chrome-stable
 					#default-jre default-jre-headless \
 
 	# setup defaults for the following applications
