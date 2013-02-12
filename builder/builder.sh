@@ -481,7 +481,7 @@ buildScriptName="$(basename $buildScriptFQFN)"
 buildScriptPath="$(dirname  $buildScriptFQFN)"
 buildScriptPipe="/tmp/$$${buildScriptName}_Pipe"
 mkfifo                 "${buildScriptPipe}"
-buildScriptSrc="http://10.173.119.78/scripts/global/${buildScriptName}"
+buildScriptSrc="http://10.173.119.78/scripts/system-setup/${buildScriptName}"
 
 username=$(who -u | grep "(:" | head -1 | cut -f1 -d" ")
 [ -z "$username" ] && username=root
