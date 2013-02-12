@@ -160,41 +160,30 @@ function setup_Install_Daemon_VBox_Server(){
 function setup_Must_Have_Tools(){
 	desc Install Tools\; vim, ethtool, iotop, iftop, jre, chrome, filezilla 
         ###################################################################################
-	#waitForNetwork && networkUpMsg || return 1
-	#stall 3
-	#waitAptgetUpdate
-	#apt-get ${aptopt} update
-	#waitAptgetInstall
-	#apt-get ${aptopt} install	vim ethtool hwinfo iotop iftop git xclip \
-	#				terminator multitail everpad \
-	#				apt-file dlocate wajig aptitude\
-	#				expect expect-dev \
-	#				gconf-editor \
-	#				ipcalc \
-	#				cups-pdf \
-	#				p7zip p7zip-full \
-	#				google-chrome-stable
+	waitForNetwork && networkUpMsg || return 1
+	stall 3
+	waitAptgetUpdate
+	apt-get ${aptopt} update
+	waitAptgetInstall
+	apt-get ${aptopt} install	vim ethtool hwinfo iotop iftop git xclip \
+					terminator multitail everpad \
+					apt-file dlocate wajig aptitude\
+					expect expect-dev \
+					gconf-editor \
+					ipcalc \
+					cups-pdf \
+					p7zip p7zip-full \
+					google-chrome-stable
 					#default-jre default-jre-headless \
 
 	# setup defaults for the following applications
 	while read script; do
-        	#${script:+.} "${script:-false}" -rr
         	"${script:-false}" -rr
 	done < <(
 		for app in google_chrome vim terminator; do
         		ls -1             "${scriptPath}"/defaults.${app}.sh 2> /dev/null
         		ls -1 "${scriptPath}"/../defaults/defaults.${app}.sh 2> /dev/null
 		done)
-
-	# Defaults for vim
-	#[ -f "defaults.vim.sh" ]
-	#"${subScriptBase}-defaults_vim.sh" -rr
-
-	# Defaults for Terminator
-	#"${subScriptBase}-defaults_terminator.sh" -rr
-
-	# Defaults for Chrome
-	#"${subScriptBase}-defaults_google_chrome.sh" -rr
 
 }
 function setup_AMD_Catalyst(){
