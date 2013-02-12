@@ -160,11 +160,11 @@ function setup_Install_Daemon_VBox_Server(){
 function setup_Must_Have_Tools(){
 	desc Install Tools\; vim, ethtool, iotop, iftop, jre, chrome, filezilla 
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
-	stall 3
-	waitAptgetUpdate
+	#waitForNetwork && networkUpMsg || return 1
+	#stall 3
+	#waitAptgetUpdate
 	#apt-get ${aptopt} update
-	waitAptgetInstall
+	#waitAptgetInstall
 	#apt-get ${aptopt} install	vim ethtool hwinfo iotop iftop git xclip \
 	#				terminator multitail everpad \
 	#				apt-file dlocate wajig aptitude\
