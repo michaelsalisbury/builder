@@ -180,7 +180,7 @@ function setup_Must_Have_Tools(){
 	defaults='google_chrome,vim,terminator'
 	echo $scriptPath
 	echo $defaults
-	ls -1 "${scriptPath}"/../defaults/defaults.{${defaults}}.sh
+	ls -1 "${scriptPath}"/../defaults/defaults.\{${defaults}\}.sh
 	while read script; do
 		echo $script
 			
