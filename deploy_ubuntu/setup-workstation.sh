@@ -4,9 +4,7 @@ step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
 
-
 subScriptBase="/root/system-setup/`basename ${source}`"
-
 
 # Get Ubuntu version info and ... 
 #	DISTRIB_ID=Ubuntu
