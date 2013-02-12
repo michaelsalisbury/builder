@@ -19,6 +19,7 @@ include ../post.chroot.get_VBoxGuestAdditions.cfg
 include ../post.chroot.setup_root_auth_keys.cfg
 include ../post.chroot.setup_ntpd.cfg
 include ../post.chroot.setup_gpg_keys.cfg
+include ../post.chroot.setup_workstation.cfg
 include ../post.chroot.interactive.cfg
 #include ../post.nochroot.interactive.cfg
 
