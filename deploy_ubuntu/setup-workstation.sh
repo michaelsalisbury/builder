@@ -177,13 +177,15 @@ function setup_Must_Have_Tools(){
 					#default-jre default-jre-headless \
 
 	# setup defaults for the following applications
-	defaults='{google_chrome,vim,terminator}'
 	while read script; do
 		echo $script
-			
         	#${script:+.} "${script:-false}" -rr
 	done < <(
-		ls -1 "${scriptPath}"/../defaults/defaults.${defaults}.sh
+		for app in google_chrome vim terminator; do
+			ls -1 "${scriptPath}"/../defaults/defaults.${app}.sh
+			
+
+		done
         	#`ls -1             "${scriptPath}"/defaults.{${defaults}}.sh 2> /dev/null`
         	#`ls -1 "${scriptPath}"/../defaults/defaults.{${defaults}}.sh 2> /dev/null`
 )
