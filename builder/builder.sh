@@ -188,16 +188,11 @@ function make_backup(){
 	cp "$scriptFQFN" "$scriptBackup"
 }
 
-function test_source(){
-	wget -T 2 -t 2 --spider -v $1 |& egrep '^Remote file exists.$' &> /dev/null && return 0 || return 1
-}
+function test_source(){ wget -T 2 -t 2 --spider -v $1 |& egrep '^Remote file exists.$' &> /dev/null && return 0 || return 1; }
 function sync_source(){
-	echo $scriptName
-	echo $scriptPath
-	echo $scriptFQFN
+	# get source URL from script that called the update request
 	eval `sed '/^source=/p;d' "${scriptFQFN}"`
-	echo $source
-
+	# Test and sync script
 	if [ "${source:-UNSET}" != "UNSET" ] && test_source "${source}"; then
 		cd "$scriptPath"
 		mesg 80 Syncing :: $source
@@ -206,7 +201,7 @@ function sync_source(){
 	else
 		mesg 80 ERROR :: Script source \for $scriptName broken or unset\!
 	fi
-
+	# Test and sync builder.sh
 	if [ "`whoami`" != "root" ]; then
 		mesg 80 DENIED :: Your not root.  Use sudo to sync $buildScriptName\!
 	elif [ "${buildScriptSrc:-UNSET}" != "UNSET" ] \
