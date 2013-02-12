@@ -192,6 +192,10 @@ function test_source(){
 	wget -T 2 -t 2 --spider -v $1 |& egrep '^Remote file exists.$' &> /dev/null && return 0 || return 1
 }
 function sync_source(){
+	echo $scriptName
+	echo $scriptPath
+	echo $sctiptFQFN
+
 	if [ "${source:-UNSET}" != "UNSET" ] && test_source "${source}"; then
 		cd "$scriptPath"
 		mesg 80 Syncing :: $source
