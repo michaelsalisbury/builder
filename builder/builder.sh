@@ -194,7 +194,7 @@ function test_source(){
 function sync_source(){
 	echo $scriptName
 	echo $scriptPath
-	echo $sctiptFQFN
+	echo $scriptFQFN
 
 	if [ "${source:-UNSET}" != "UNSET" ] && test_source "${source}"; then
 		cd "$scriptPath"
