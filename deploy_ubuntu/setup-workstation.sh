@@ -79,8 +79,20 @@ function setup_Prep_Add_Repos(){
         sed -i '/^deb/{ h; s/^/#/; x; s/quantal/oneiric/; G; }' \
 	"/etc/apt/sources.list.d/uck-team-uck-unstable-quantal.list"
 
+	# Add Adobe Repo
+	add-apt-repository -y "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
+
+	# Add X2GO Repos
+	add-apt-repository -y ppa:x2go/stable
+
+	# Add Grub Customized Repos
+	add-apt-repository -y ppa:danielrichter2007/grub-customizer
+
 	# Add EverPad
 	add-apt-repository -y ppa:nvbn-rm/ppa
+
+	# Add Tweak & MyUnity Repos
+	add-apt-repository -y ppa:tualatrix/ppa
 
 	# Update
 	apt-get ${aptopt} update
