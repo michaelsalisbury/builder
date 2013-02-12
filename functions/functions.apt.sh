@@ -2,7 +2,6 @@
 skip=( false )
 step=1
 prefix="setup"
-source=http://10.173.119.78/scripts/global/$scriptName
 
 ###########################################################################################
 #                                                             Repo Support
