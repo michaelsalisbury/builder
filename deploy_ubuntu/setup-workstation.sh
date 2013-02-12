@@ -177,7 +177,7 @@ function setup_Must_Have_Tools(){
 					#default-jre default-jre-headless \
 
 	# setup defaults for the following applications
-	defaults="google_chrome,vim,terminator"
+	defaults='google_chrome,vim,terminator'
 	while read script; do
 		echo $script
 			
