@@ -183,7 +183,7 @@ function setup_Must_Have_Tools(){
 			
         	#${script:+.} "${script:-false}" -rr
 	done < <(
-		ls -1 "${scriptPath}"/../defaults/*		
+		ls -1 "${scriptPath}"/../defaults/defaults.${defaults}.sh
         	#`ls -1             "${scriptPath}"/defaults.{${defaults}}.sh 2> /dev/null`
         	#`ls -1 "${scriptPath}"/../defaults/defaults.{${defaults}}.sh 2> /dev/null`
 )
