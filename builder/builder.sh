@@ -292,9 +292,11 @@ function find_function(){
 		cat -n					|\
 		egrep -i "(${srch}|${srch// /_})"	|\
 		awk '{print $1}'
-		return 0		
+		return 0
+	else
+		derr Match Function \"${srch}\" not found\!
+		return 1
 	fi
-	return 1
 }
 function eval_function(){ cat "$buildScriptPipe" | log_output $1 &
 			  eval `name_function $1` &> "$buildScriptPipe"; }
