@@ -76,8 +76,8 @@ function switches(){
                         h)              show_help; disp_functions; echo;;
 			j)		[[ $OPTARG =~ (b|u) ]] && back || next;
 					wrap; disp_functions; echo;;
+                        i)              step=`find_function $OPTARG`; eval_function $step;;
                         #i)              step=$OPTARG; eval_function $OPTARG;;
-                        i)              find_function $OPTARG;;
                         l)              disp_functions; echo;;
 			m)		[[ $OPTARG =~ (b|u) ]] && move_up $step   && back
 					[[ $OPTARG =~ (f|d) ]] && move_down $step && next
