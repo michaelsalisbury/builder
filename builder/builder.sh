@@ -283,11 +283,13 @@ function reboot_start(){ reboot_isset && /sbin/reboot || return 1; }
 ###########################################################################################
 ###########################################################################################
 function find_function(){
-	if [[ "$*" =~ ^[0-9]*$ ]]; then
-		echo $*
+	search=$*
+	if [[ "${search}" =~ ^[0-9]*$ ]]; then
+		echo ${search}
 		return 0
-	else
-		echo hi
+	else 
+		list_functions | egrep "${search}"
+		list_functions | egrep "${search// /_}"
 		
 
 	fi
