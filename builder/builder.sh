@@ -196,11 +196,11 @@ function sync_source(){
 		wget -q -O "${scriptName}.new"   "${source}"
 		cat        "${scriptName}.new" > "$scriptName"
 	else
-		mesg 80 ERROR :: Script source for $scriptName broken or unset\!
+		mesg 80 ERROR :: Script source \for $scriptName broken or unset\!
 	fi
 
 	if [ "`whoami`" != "root" ]; then
-		mesg 80 DENIED :: Your not root.  Use sudo to sync $buildScriptName!
+		mesg 80 DENIED :: Your not root.  Use sudo to sync $buildScriptName\!
 	elif [ "${buildScriptSrc:-UNSET}" != "UNSET" ] \
 	   && test_source "$buildScriptSrc"
 	   then
@@ -209,7 +209,7 @@ function sync_source(){
 		wget -q -O "${buildScriptName}.new"   "$buildScriptSrc"
 		cat        "${buildScriptName}.new" > "$buildScriptFQFN"
 	else
-		mesg 80 ERROR :: Build source for $buildScriptName broken or unset!
+		mesg 80 ERROR :: Build source \for $buildScriptName broken or unset\!
 	fi
 }
 ###########################################################################################
