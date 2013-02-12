@@ -380,6 +380,7 @@ function mesg_base(){	[[ $1 =~ ^[0-9]+ ]] && { mesg_base_width=$1; shift; } || m
 			mesg_base_title_first=${mesg_base_title_first:0:3}
 			mesg_base_title=${*:3:$#-3}
 			mesg_base_title_last=${*:$#}
+			let mesg_base_width-=1
 			echo -n \#; repc $mesg_base_width _
 			echo -n \#; padr $mesg_base_width "$mesg_base_title_last" "$mesg_base_title_first" "$mesg_base_title" 
 			echo -n \#; padl $mesg_base_width " " "$mesg_base_desc"
