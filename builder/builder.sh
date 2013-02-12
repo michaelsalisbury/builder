@@ -287,7 +287,8 @@ function find_function(){
 	if [[ "${search}" =~ ^[0-9]*$ ]]; then
 		echo ${search}
 		return 0
-	else 
+	else
+		echo XXX${search}XXX 
 		list_functions | egrep -i "(${search}|${search// /_})"
 		
 
