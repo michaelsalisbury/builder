@@ -1,0 +1,13 @@
+
+	while read function_name; do
+		echo XXX_${function_name}_XXX
+		#/root/deploys/setup_workstation -i "${function_name}"
+	done << LIST
+		Prep Add Aliases
+		Prep Add Repos
+		Package Autoresponces
+		Must Have Tools
+		Unity Classic Menu
+		X2GO
+		Configure SSH
+LIST
