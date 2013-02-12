@@ -287,7 +287,7 @@ function find_function(){
 	if [[ "${srch}" =~ ^[0-9]*$ ]]; then
 		echo ${srch}
 		return 0
-	else (( $(list_functions | egrep -i "(${srch}|${srch// /_})" | wc -l) == 1 )); then
+	elif (( $(list_functions | egrep -i "(${srch}|${srch// /_})" | wc -l) == 1 )); then
 		list_functions				|\
 		cat -n					|\
 		egrep -i "(${srch}|${srch// /_})"	|\
