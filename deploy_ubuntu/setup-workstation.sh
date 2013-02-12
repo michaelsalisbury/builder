@@ -179,7 +179,9 @@ function setup_Must_Have_Tools(){
 	# setup defaults for the following applications
 	defaults="google_chrome,vim,terminator"
 	while read script; do
-        	${script:+.} "${script:-false}" -rr
+		echo $script
+			
+        	#${script:+.} "${script:-false}" -rr
 	done << DEFAULTS
         	`ls -1             "${scriptPath}"/defaults.{${defaults}}.sh 2> /dev/null`
         	`ls -1 "${scriptPath}"/../defaults/defaults.{${defaults}}.sh 2> /dev/null`
