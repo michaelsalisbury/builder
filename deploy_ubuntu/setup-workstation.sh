@@ -177,7 +177,7 @@ function setup_Must_Have_Tools(){
 					google-chrome-stable
 					#default-jre default-jre-headless \
 	# Defaults for vim
-	"${subScriptBase}-defaults_vim.sh" -rr	
+	#"${subScriptBase}-defaults_vim.sh" -rr
 
 	# Defaults for Terminator
 	"${subScriptBase}-defaults_terminator.sh" -rr
