@@ -694,10 +694,8 @@ function setup_Crossover(){
 	# download crossover
 	wget --progress=bar:force ${url}
 	# install
-	
+	dpkg -i ${version}
 }
-
-
 
 function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
