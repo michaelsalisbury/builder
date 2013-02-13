@@ -638,6 +638,53 @@ function setup_ubuntu_tweak_n_myunity(){
         waitAptgetInstall
         apt-get ${aptopt} install ubuntu-tweak myunity
 }
+function setup_unity_monitors(){
+        desc Setup indicator-multiload indicator-sysmonitor
+        ###################################################################################
+	waitForNetwork || return 1
+        waitAptgetUpdate
+        add-apt-repository -y ppa:indicator-multiload/stable-daily
+        waitAptgetUpdate
+        add-apt-repository -y ppa:alexeftimie/ppa
+        waitAptgetUpdate
+        apt-get -y update
+        waitAptgetInstall
+        apt-get ${aptopt} install indicator-multiload indicator-sysmonitor
+}
+function setup_Crossover(){
+        desc Codeweavers Crossover \for Office
+        ###################################################################################
+	waitForNetwork || return 1
+	# dependencies
+        waitAptgetInstall
+	apt-get ${aptopt} install gdebi libc6-i386 ia32-libs ia32-libs-multiarch \
+				 lib32gcc1 lib32nss-mdns lib32nss-mdns lib32z1 \
+				 python-glade2 lib32asound2
+	# setup working dir
+	mkdir /root/codeweavers_crossover
+	cd    /root/codeweavers_crossover
+	rm -f /root/codeweavers_crossover/*.deb
+	
+	# base url were codeweavers serves it's applications
+	local base_url='http://media.codeweavers.com/pub/crossover/cxlinux/demo/'
+	# download deb list
+	local opt="--spider -r -nd -l 1 --cut-dirs 1 -A deb"
+        wget ${opt} ${base_url} 2>&1 | tee wget.log
+	# sort through architechturally appropriate packages
+	case $(uname -m) in
+                x86_64)         local filter='amd64';;
+                i386|i586|i686) local filter='i386';;
+        esac
+	# get newest version and link
+	local version=$(egrep "Removing.*crossover_[0-9.-]*_${filter}" wget.log | sort | awk 'END{print $2}')
+	local url=$(egrep "http.*${version%?}" wget.log | awk '{print $3}')
+	echo ${version%?}
+	# download crossover
+	wget --progress=bar:force ${url}
+	# install
+	dpkg -i ${version%?}
+}
+
 function setup_adobe(){
         desc Adobe, Java and Flash
         ###################################################################################
@@ -693,53 +740,6 @@ function setup_adobe(){
         #waitAptgetInstall
         #apt-get ${aptopt} install oracle-java8-installer
 }
-function setup_unity_monitors(){
-        desc Setup indicator-multiload indicator-sysmonitor
-        ###################################################################################
-	waitForNetwork || return 1
-        waitAptgetUpdate
-        add-apt-repository -y ppa:indicator-multiload/stable-daily
-        waitAptgetUpdate
-        add-apt-repository -y ppa:alexeftimie/ppa
-        waitAptgetUpdate
-        apt-get -y update
-        waitAptgetInstall
-        apt-get ${aptopt} install indicator-multiload indicator-sysmonitor
-}
-function setup_Crossover(){
-        desc Codeweavers Crossover \for Office
-        ###################################################################################
-	waitForNetwork || return 1
-	# dependencies
-        waitAptgetInstall
-	apt-get ${aptopt} install gdebi libc6-i386 ia32-libs ia32-libs-multiarch \
-				 lib32gcc1 lib32nss-mdns lib32nss-mdns lib32z1 \
-				 python-glade2 lib32asound2
-	# setup working dir
-	mkdir /root/codeweavers_crossover
-	cd    /root/codeweavers_crossover
-	rm -f /root/codeweavers_crossover/*.deb
-	
-	# base url were codeweavers serves it's applications
-	local base_url='http://media.codeweavers.com/pub/crossover/cxlinux/demo/'
-	# download deb list
-	local opt="--spider -r -nd -l 1 --cut-dirs 1 -A deb"
-        wget ${opt} ${base_url} 2>&1 | tee wget.log
-	# sort through architechturally appropriate packages
-	case $(uname -m) in
-                x86_64)         local filter='amd64';;
-                i386|i586|i686) local filter='i386';;
-        esac
-	# get newest version and link
-	local version=$(egrep "Removing.*crossover_[0-9.-]*_${filter}" wget.log | sort | awk 'END{print $2}')
-	local url=$(egrep "http.*${version%?}" wget.log | awk '{print $3}')
-	echo ${version%?}
-	# download crossover
-	wget --progress=bar:force ${url}
-	# install
-	dpkg -i ${version%?}
-}
-
 function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
         ###################################################################################
