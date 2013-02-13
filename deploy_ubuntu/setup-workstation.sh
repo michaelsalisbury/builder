@@ -52,6 +52,7 @@ function setup_Prep_Disable_Guest(){
 }
 function setup_Prep_Disable_Apt_Cacher(){
 	desc disconect from apt-cacher
+        waitForNetwork || return 1
 	sed -i.bk`date "+%s"` '/^Acquire::http::Proxy/ s/^/#/' /etc/apt/apt.conf
 	waitAptgetUpdate
 	apt-get clean
