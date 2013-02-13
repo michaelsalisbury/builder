@@ -4,7 +4,7 @@ step=3
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
 
-function setup_Create_Systemwide_Defaults(){
+function setup_skel_default(){
 	desc Write /etc/vim/vimrc.local
 	cat << END-OF-VIMRC > /etc/vim/vimrc.local
 " Do not wrap text
