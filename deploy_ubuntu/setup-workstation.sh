@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -615,17 +615,17 @@ function setup_Multimedia(){
         waitAptgetInstall
         apt-get ${aptopt} install ubuntu-restricted-extras
 }
-function setup_grub_customizer(){
-        desc Command line app \# \> grub-customizer
-        ###################################################################################
-	waitForNetwork || return 1
-        waitAptgetUpdate
-        /usr/bin/add-apt-repository -y ppa:danielrichter2007/grub-customizer
-        waitAptgetUpdate
-        apt-get update
-        waitAptgetInstall
-        apt-get ${aptopt} install grub-customizer
-}
+#function setup_grub_customizer(){
+#        desc Command line app \# \> grub-customizer
+#        ###################################################################################
+#	waitForNetwork || return 1
+#        waitAptgetUpdate
+#        /usr/bin/add-apt-repository -y ppa:danielrichter2007/grub-customizer
+#        waitAptgetUpdate
+#        apt-get update
+#        waitAptgetInstall
+#        apt-get ${aptopt} install grub-customizer
+#}
 
 function setup_ubuntu_tweak_n_myunity(){
         desc Ubuntu Tweak and MyUnity
