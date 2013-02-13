@@ -645,9 +645,6 @@ function setup_adobe(){
 	waitForNetwork || return 1
 	# Auto-responce
 	# Add Adobe Repo
-	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
-
-	done
 }
 function setup_unity_monitors(){
         desc Setup indicator-multiload indicator-sysmonitor
