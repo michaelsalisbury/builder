@@ -686,7 +686,7 @@ function setup_Crossover(){
 	echo ${version%?}
 	# download crossover
 	rm -f ${version%?}
-	wget ${url}
+	#wget ${url}
 	# install
 	
 }
