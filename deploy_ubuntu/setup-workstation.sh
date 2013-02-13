@@ -658,10 +658,11 @@ function setup_adobe(){
 		apt-get --quiet update
 	done
 	# Add Java Repo
-	if [ ! -f 
-	add-apt-repository -y ppa:ferramroberto/java
-        waitAptgetUpdate
-	apt-get --quiet update
+	if [ ! -f "/etc/apt/sources.list.d/ferramroberto-java-quantal.list" ]; do
+		add-apt-repository -y ppa:ferramroberto/java
+        	waitAptgetUpdate
+		apt-get --quiet update
+	done
 	# Install packages
         waitAptgetInstall
         apt-get ${aptopt} install acroread
