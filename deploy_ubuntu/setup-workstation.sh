@@ -63,7 +63,7 @@ function setup_Prep_Add_Repos(){
 	# Add Oracle VirtualBox Repo
 	echo "deb http://download.virtualbox.org/virtualbox/debian $DISTRIB_CODENAME contrib" > \
 	"/etc/apt/sources.list.d/oracle-virtualbox.list"
-	wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | apt-key add -
+	wget -q -O - http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc | apt-key add -
 
 	# Add Google Chrome Repo
 	echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > \
@@ -80,12 +80,16 @@ function setup_Prep_Add_Repos(){
 	"/etc/apt/sources.list.d/uck-team-uck-unstable-quantal.list"
 
 	# Add Adobe Repo
-	add-apt-repository -y "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner"
+	echo "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner" > \
+	"/etc/apt/sources.list.d/canonical_Adobe.list"
+	apt-get --quiet update
 
 	# Add Medibuntu repo for free and non-free packages like acroread
-	
-	add-apt-repository -y "deb http://packages.medibuntu.org/ $(lsb_release -sc) free non-free"
-	http://packages.medibuntu.org/medibuntu-key.gpg
+	wget -O "/etc/apt/sources.list.d/medibuntu.list" \
+	http://www.medibuntu.org/sources.list.d/$(lsb_release -cs).list
+	apt-get --quiet update
+	apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
+	apt-get --quiet update
 
 	# Add X2GO Repos
 	add-apt-repository -y ppa:x2go/stable
@@ -632,11 +636,25 @@ function setup_adobe(){
         desc "Adobe, Java and Flash"
         ###################################################################################
 	waitForNetwork || return 1
+	# Auto-responce
         echo acroread-common acroread-common/default-viewer select true | debconf-set-select
-        apt-get update
-        add-apt-repository -y "deb http://archive.canonical.com/ubuntu/ $(lsb_release -sc) partner"
-        waitAptgetUpdate
-        sudo apt-get update
+	# Add Adobe Repo
+	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
+		echo "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner" > \
+		"/etc/apt/sources.list.d/canonical_Adobe.list"
+        	waitAptgetUpdate
+		apt-get --quiet update
+	done
+	# Add Medibuntu repo for free and non-free packages like acroread
+	if [ ! -f "/etc/apt/sources.list.d/medibuntu.list" ]; do
+		wget -O "/etc/apt/sources.list.d/medibuntu.list" \
+		http://www.medibuntu.org/sources.list.d/$(lsb_release -cs).list
+        	waitAptgetUpdate
+		apt-get --quiet update
+		apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
+		apt-get --quiet update
+	done
+	# Install packages
         waitAptgetInstall
         apt-get ${aptopt} install acroread
         waitAptgetInstall
