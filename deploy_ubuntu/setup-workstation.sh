@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -48,7 +48,7 @@ function setup_Prep_Add_SSH_Keys(){
 function setup_Prep_Disable_Guest(){
 	desc disable guest login
 	sed  '/^allow-guest=/d'                     /etc/lightdm/lightdm.conf
-	sed  '/\[SeatDefaults\]/aallow-guest=false' /etc/loghtdm/lightdm.conf
+	sed  '/\[SeatDefaults\]/aallow-guest=false' /etc/lightdm/lightdm.conf
 
 	
 
