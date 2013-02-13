@@ -687,7 +687,7 @@ function setup_Crossover(){
 	local url=$(egrep "http.*${version%?}" wget.log | awk '{print $3}')
 	echo ${version%?}
 	# download crossover
-	wget ${url}
+	wget -nv ${url}
 	# install
 	
 }
