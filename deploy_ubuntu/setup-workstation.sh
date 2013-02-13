@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -689,7 +689,7 @@ function setup_Mistake(){
         ###################################################################################
 	waitForNetwork || return 1
 	# Auto-responce
-        #echo acroread-common acroread-common/default-viewer select true | debconf-set-select
+        echo acroread-common acroread-common/default-viewer select true | debconf-set-select
 	# Add Adobe Repo
 	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
 		for repo in								\
