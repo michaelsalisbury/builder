@@ -729,10 +729,6 @@ function setup_Mistake(){
 	# Oracle Java Development Kit JDK X
         waitAptgetInstall
         apt-get ${aptopt} install oracle-java6-installer
-        #waitAptgetInstall
-        #apt-get ${aptopt} install oracle-java7-installer
-        #waitAptgetInstall
-        #apt-get ${aptopt} install oracle-java8-installer
 }
 function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
