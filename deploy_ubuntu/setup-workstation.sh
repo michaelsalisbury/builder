@@ -667,7 +667,7 @@ REPO-LIST
 	done
 	# Add Oracle Java repo
 	if [ ! -f "/etc/apt/sources.list.d/webupd8team-java-quantal.list" ]; do
-		add-apt-repository ppa:webupd8team/java
+		add-apt-repository -y ppa:webupd8team/java
         	waitAptgetUpdate
 		apt-get --quiet update
 	done
@@ -684,7 +684,7 @@ REPO-LIST
 	# Install Firefox Acrobat Plugin
         waitAptgetInstall
         apt-get ${aptopt} install adobe-flashplugin
-	# Oracle Java(TM) Development Kit (JDK) X
+	# Oracle Java Development Kit JDK X
         waitAptgetInstall
         apt-get ${aptopt} install oracle-java6-installer
         #waitAptgetInstall
@@ -698,9 +698,9 @@ function setup_unity_monitors(){
         ###################################################################################
 	waitForNetwork || return 1
         waitAptgetUpdate
-        /usr/bin/add-apt-repository -y ppa:indicator-multiload/stable-daily
+        add-apt-repository -y ppa:indicator-multiload/stable-daily
         waitAptgetUpdate
-        /usr/bin/add-apt-repository -y ppa:alexeftimie/ppa
+        add-apt-repository -y ppa:alexeftimie/ppa
         waitAptgetUpdate
         apt-get -y update
         waitAptgetInstall
