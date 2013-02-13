@@ -1,0 +1,104 @@
+#!/bin/sh
+# (c) Copyright 2002-2008, 2011. CodeWeavers, Inc.
+set -e
+
+# Setup logging
+if [ -n "$CX_LOG" ]
+then
+    [ "$CX_LOG" = "-" ] || exec 2>>"$CX_LOG"
+    echo >&2
+    echo "***** `date`" >&2
+    echo "Starting: $0 $@" >&2
+    set -x
+fi
+
+action="$1"
+oldver="$2"
+
+CX_ROOT="/opt/cxoffice"
+export CX_ROOT
+
+if [ "$mode" = "install" ]
+then
+    if [ -z "$CX_PRODUCT_ID" ]
+    then
+        CX_PRODUCT_ID="cxoffice"
+    fi
+elif [ -f "$CX_ROOT/.productid" ]
+then
+    CX_PRODUCT_ID=`cat "$CX_ROOT/.productid"`
+else
+    CX_PRODUCT_ID="cxoffice"
+fi
+productid="$CX_PRODUCT_ID"
+
+# Keep the check for Loki's .manifest directory to handle upgrades from
+# pre-10.0 versions.
+if [ -d "$CX_ROOT/.manifest" -o -d "$CX_ROOT/.mojosetup" ]
+then
+    if [ -n "$DISPLAY" ]
+    then
+        cxmessage="$CX_ROOT/bin/cxmessage"
+        if [ ! -f "$cxmessage" -o ! -x "$cxmessage" ]
+        then
+            cxmessage="xmessage"
+        fi
+        "$cxmessage" \
+            -title "Unable to install" \
+            -buttons "Abort" \
+            -default "Abort" \
+            "This Debian package cannot be installed on top of a Loki or MojoSetup package." &
+    fi
+    echo "This CrossOver Linux Debian package cannot be installed on top of a Loki or MojoSetup package." >&2
+    exit 1
+fi
+
+case "$action" in
+install|upgrade)
+    if [ "$action" = "install" ]
+    then
+        mode="install"
+    else
+        mode="upgrade"
+    fi
+
+# This script expects CX_ROOT, productid and mode to be set
+
+# Validate the productid
+echo "$productid" | LC_ALL=C egrep '^[a-zA-Z0-9_][a-zA-Z0-9_][a-zA-Z0-9_][a-zA-Z0-9_][a-zA-Z0-9_]*$' >/dev/null
+if [ $? -ne 0 ]
+then
+    echo "The product id '$productid' is not valid" >&2
+    exit 1
+fi
+
+if [ "$mode" = "upgrade" ]
+then
+    if [ -f "$CX_ROOT/.productid" ]
+    then
+        old_productid=`cat "$CX_ROOT/.productid"`
+    else
+        old_productid="cxoffice"
+    fi
+    if [ "$productid" != "$old_productid" ]
+    then
+        echo "An upgrade cannot change the product id" >&2
+        exit 1
+    fi
+fi
+
+# Remove generated files that old packages incorrectly leave around
+rm -f "$CX_ROOT"/support/icons/*.png
+
+    if [ -d "$CX_ROOT/support/dotwine" ]
+    then
+        if [ ! -f "$CX_ROOT/support/dotwine/system.reg" ]
+        then
+            rm -rf "$CX_ROOT/support/dotwine"
+        fi
+    fi
+    ;;
+
+esac
+
+

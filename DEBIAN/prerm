@@ -1,0 +1,74 @@
+#!/bin/sh
+# (c) Copyright 2002-2008, 2011. CodeWeavers, Inc.
+set -e
+
+# Setup logging
+if [ -n "$CX_LOG" ]
+then
+    [ "$CX_LOG" = "-" ] || exec 2>>"$CX_LOG"
+    echo >&2
+    echo "***** `date`" >&2
+    echo "Starting: $0 $@" >&2
+    set -x
+fi
+
+action="$1"
+if [ "$2" = "in-favour" ]
+then
+    # Treating this as an upgrade is less work and safer
+    action="upgrade"
+fi
+
+CX_ROOT="/opt/cxoffice"
+export CX_ROOT
+
+if [ -f "$CX_ROOT/.productid" ]
+then
+    productid=`cat "$CX_ROOT/.productid"`
+else
+    productid="cxoffice"
+fi
+
+if [ "$action" = "remove" ]
+then
+    CX_PURGE="desktopdata"
+
+# This script expects CX_ROOT and productid to be set
+# Note: this script may also be called in case the installation is aborted
+builtin_product_id="cxoffice"
+
+if [ -z "$CX_PURGE" ]
+then
+    CX_PURGE="all"
+fi
+
+if [ "$CX_PURGE" = "desktopdata" -o "$CX_PURGE" = "all" ]
+then
+    "$CX_ROOT/bin/cxtie" --unregister
+    scope="managed"
+    if [ -x "$CX_ROOT/bin/cxmenu" ]
+    then
+        "$CX_ROOT/bin/cxmenu" --removeall --pattern "$productid-" --scope $scope --ignorelist ""
+    fi
+    if [ -x "$CX_ROOT/bin/cxassoc" ]
+    then
+        "$CX_ROOT/bin/cxassoc" --removeall --pattern "$productid-" --scope $scope --ignorelist ""
+    fi
+    if [ -x "$CX_ROOT/bin/cxnsplugin" ]
+    then
+        "$CX_ROOT/bin/cxnsplugin" --removeall --pattern "$productid-" --scope $scope
+    fi
+    rm -f "$CX_ROOT"/share/icons/*.png
+fi
+
+rm -f "$CX_ROOT/lib/python"/*.pyc
+rm -f "$CX_ROOT/lib/wine/winewrapper.exe.so.bak"
+fi
+
+# Automatically added by dh_installdocs
+if [ "$1" = remove ] || [ "$1" = upgrade ] && \
+   which install-docs >/dev/null 2>&1; then
+	install-docs -r ia32-crossover
+fi
+# End automatically added section
+
