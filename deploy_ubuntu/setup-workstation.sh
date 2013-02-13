@@ -632,11 +632,11 @@ function setup_grub_customizer(){
         ###################################################################################
 	waitForNetwork || return 1
         waitAptgetUpdate
-        /usr/bin/add-apt-repository -y ppa:tualatrix/ppa
+        #/usr/bin/add-apt-repository -y ppa:tualatrix/ppa
         waitAptgetUpdate
-        apt-get update
+        #apt-get update
         waitAptgetInstall
-        apt-get ${aptopt} install ubuntu-tweak myunity
+        #apt-get ${aptopt} install ubuntu-tweak myunity
 #}
 function setup_adobe(){
         desc Adobe, Java and Flash
