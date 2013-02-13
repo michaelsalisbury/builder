@@ -709,7 +709,7 @@ function setup_Mistake(){
 		apt-get --quiet update
 		apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
 		apt-get --quiet update
-	done
+	fi
 	# Add Oracle Java repo
 	#if [ ! -f "/etc/apt/sources.list.d/webupd8team-java-quantal.list" ]; do
 		add-apt-repository -y ppa:webupd8team/java
