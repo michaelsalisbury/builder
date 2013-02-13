@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -637,61 +637,6 @@ function setup_ubuntu_tweak_n_myunity(){
         apt-get update
         waitAptgetInstall
         apt-get ${aptopt} install ubuntu-tweak myunity
-}
-function setup_adobe(){
-        desc Adobe, Java and Flash
-        ###################################################################################
-	waitForNetwork || return 1
-	# Auto-responce
-        echo acroread-common acroread-common/default-viewer select true | debconf-set-select
-	# Add Adobe Repo
-	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
-
-	while read repo; do echo ${repo} >> "/etc/apt/sources.list.d/canonical_Adobe.list"
-	done << REPO-LIST
-		deb http://archive.canonical.com/ubuntu precise partner
-		deb-src http://archive.canonical.com/ubuntu precise partner
-		deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
-		deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
-REPO-LIST
-        	waitAptgetUpdate
-		apt-get --quiet update
-	done
-	# Add Medibuntu repo for free and non-free packages like acroread
-	if [ ! -f "/etc/apt/sources.list.d/medibuntu.list" ]; do
-		wget -O "/etc/apt/sources.list.d/medibuntu.list" \
-		http://www.medibuntu.org/sources.list.d/$(lsb_release -cs).list
-        	waitAptgetUpdate
-		apt-get --quiet update
-		apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
-		apt-get --quiet update
-	done
-	# Add Oracle Java repo
-	#if [ ! -f "/etc/apt/sources.list.d/webupd8team-java-quantal.list" ]; do
-		add-apt-repository -y ppa:webupd8team/java
-        	waitAptgetUpdate
-		apt-get --quiet update
-	#done
-	# Install Acrobat Reader
-        waitAptgetInstall
-        apt-get ${aptopt} install acroread
-	# Install Flash
-        waitAptgetInstall
-        apt-get ${aptopt} install flashplugin-installer
-        waitAptgetInstall
-        apt-get ${aptopt} install flashplugin-downloader
-        waitAptgetInstall
-        apt-get ${aptopt} install flashplugin-nonfree-extrasound
-	# Install Firefox Acrobat Plugin
-        waitAptgetInstall
-        apt-get ${aptopt} install adobe-flashplugin
-	# Oracle Java Development Kit JDK X
-        waitAptgetInstall
-        apt-get ${aptopt} install oracle-java6-installer
-        #waitAptgetInstall
-        #apt-get ${aptopt} install oracle-java7-installer
-        #waitAptgetInstall
-        #apt-get ${aptopt} install oracle-java8-installer
 }
 function setup_unity_monitors(){
         desc Setup indicator-multiload indicator-sysmonitor
