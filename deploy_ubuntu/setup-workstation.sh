@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -58,7 +58,7 @@ EOF
 }
 function setup_Prep_Add_Repos(){
         desc Prep: Add repos
-        waitForNetwork && networkUpMsg || return 1
+        waitForNetwork || return 1
 
 	# Add Oracle VirtualBox Repo
 	echo "deb http://download.virtualbox.org/virtualbox/debian $DISTRIB_CODENAME contrib" > \
@@ -100,7 +100,7 @@ function setup_Prep_Add_Repos(){
 function setup_Package_Autoresponces(){
         desc Prep \for EULA and other apt-get prompts
 	###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 	# debconf-show --listdbs
 	# debconf-show --listowners | sort
         echo hddtemp hddtemp/daemon select false | debconf-set-selections
@@ -137,7 +137,7 @@ function setup_Package_Gnome_Defaults(){
 }
 function setup_Install_Daemons(){
         desc openssh apache2 nfs tftp
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 	waitAptgetInstall
         apt-get ${aptopt} install openssh-server
         apt-get ${aptopt} install apache2
@@ -172,7 +172,7 @@ function setup_Install_Daemon_VBox_Server(){
 function setup_Must_Have_Tools(){
 	desc vim, ethtool, iotop, iftop, jre, chrome
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 	stall 3
 	waitAptgetUpdate
 	apt-get ${aptopt} update
@@ -230,7 +230,7 @@ function setup_UCK_Server(){
 function setup_Add_Desktop_xfce(){
 	desc "XFCE Shells"
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 	stall 3
 	waitAptgetInstall
         apt-get ${aptopt} install xfce4 xfce4-goodies xfwm4 xfwm4-themes backstep
@@ -240,7 +240,7 @@ function setup_Add_Desktop_xfce(){
 function setup_Add_Desktop_gnome_shells(){
 	desc "Gnome Shells"
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
         waitAptgetInstall
 	apt-get ${aptopt} install expect
         waitAptgetInstall
@@ -297,7 +297,7 @@ function setup_Synergy(){
 function setup_VBox_Additions(){
         desc Install Virtual Box Linux Additions
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 	stall 3
 	# Prep for vbox extentions
 	waitAptgetUpdate
@@ -349,7 +349,7 @@ function setup_VBox_Additions(){
 function setup_X2GO(){
 	desc "X2GO Server+Client"
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 	stall 3
         waitAptgetUpdate
         /usr/bin/add-apt-repository -y ppa:x2go/stable
@@ -397,7 +397,7 @@ function setup_Configure_SSH(){
 }
 function setup_Add_Service_nfs(){
         desc Install nfs-kernel-server \& Modify /etc/exports
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 	waitAptgetInstall 
         apt-get ${aptopt} install nfs-kernel-server
 	# Enable service to start at boot
@@ -416,7 +416,7 @@ function setup_Add_Service_nfs(){
 	start nfs-kernel-server
 }
 function setup_Add_Service_tftp_PXE(){
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 	desc Install tftp
 	waitAptgetInstall 
         apt-get ${aptopt} install tftpd-hpa syslinux
@@ -593,7 +593,7 @@ END-OF-SED
 function setup_Multimedia(){
 	desc DVD support
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 	waitAptgetInstall
         apt-get ${aptopt} install libdvdread4
         /usr/share/doc/libdvdread4/install-css.sh
@@ -603,7 +603,7 @@ function setup_Multimedia(){
 function setup_grub_customizer(){
         desc Command line app \# \> grub-customizer
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
         waitAptgetUpdate
         /usr/bin/add-apt-repository -y ppa:danielrichter2007/grub-customizer
         waitAptgetUpdate
@@ -615,7 +615,7 @@ function setup_grub_customizer(){
 function setup_ubuntu_tweak_n_myunity(){
         desc Ubuntu Tweak and MyUnity
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
         waitAptgetUpdate
         /usr/bin/add-apt-repository -y ppa:tualatrix/ppa
         waitAptgetUpdate
@@ -626,7 +626,7 @@ function setup_ubuntu_tweak_n_myunity(){
 function setup_adobe(){
         desc "Adobe, Java and Flash"
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
         echo acroread-common acroread-common/default-viewer select true | debconf-set-select
         apt-get update
         add-apt-repository -y "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
@@ -653,7 +653,7 @@ function setup_adobe(){
 function setup_unity_monitors(){
         desc Setup indicator-multiload indicator-sysmonitor
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
         waitAptgetUpdate
         /usr/bin/add-apt-repository -y ppa:indicator-multiload/stable-daily
         waitAptgetUpdate
@@ -666,7 +666,7 @@ function setup_unity_monitors(){
 function setup_Crossover(){
         desc Codeweavers Crossover \for Office
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 
 
 
@@ -679,7 +679,7 @@ function setup_Crossover(){
 function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
         ###################################################################################
-	waitForNetwork && networkUpMsg || return 1
+	waitForNetwork || return 1
 	apt_clean_n_update
 	apt_update_n_upgrade
 }
