@@ -47,8 +47,8 @@ function setup_Prep_Add_SSH_Keys(){
 }
 function setup_Prep_Disable_Guest(){
 	desc disable guest login
-	sed -i.bk`date "%+s"` '/^allow-guest=/d'                     /etc/lightdm/lightdm.conf
-	sed -i.bk`date "%+s"` '/\[SeatDefaults\]/aallow-guest=false' /etc/lightdm/lightdm.conf
+	sed -i.bk`date "+%s"` '/^allow-guest=/d'                     /etc/lightdm/lightdm.conf
+	sed -i.bk`date "+%s"` '/\[SeatDefaults\]/aallow-guest=false' /etc/lightdm/lightdm.conf
 }
 function setup_Prep_Add_Aliases(){
 	desc Setup Aliases
