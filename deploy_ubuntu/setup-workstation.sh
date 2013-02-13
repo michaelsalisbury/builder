@@ -674,15 +674,15 @@ function setup_Crossover(){
 	local base_url='http://media.codeweavers.com/pub/crossover/cxlinux/demo/'
 	# download deb list
 	local opt="--spider -r -nd -l 1 --cut-dirs 1 -A deb"
-        wget ${opt} ${base_url} 2>&1 | tee wgetlog
+        wget ${opt} ${base_url} 2>&1 | tee wget.log
 	# sort through architechturally appropriate packages
 	case $(uname -m) in
                 x86_64)         local filter='amd64';;
                 i386|i586|i686) local filter='i386';;
         esac
 	# get newest version and link
-	local version=$(egrep "Removing.*crossover_[0-9.-]*_${filter}" log | sort | awk 'END{print $2}')
-	local url=$(egrep "http.*${version%?}" log | awk '{print $3}')
+	local version=$(egrep "Removing.*crossover_[0-9.-]*_${filter}" wget.log | sort | awk 'END{print $2}')
+	local url=$(egrep "http.*${version%?}" wget.log | awk '{print $3}')
 	# download crossover
 	wget ${url}
 	# install
