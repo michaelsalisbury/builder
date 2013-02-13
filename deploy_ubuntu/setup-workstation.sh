@@ -647,13 +647,13 @@ function setup_adobe(){
 	# Add Adobe Repo
 	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
 
-#	while read repo; do echo ${repo} >> "/etc/apt/sources.list.d/canonical_Adobe.list"
-#	done << REPO-LIST
-#		deb http://archive.canonical.com/ubuntu precise partner
-#		deb-src http://archive.canonical.com/ubuntu precise partner
-#		deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
-#		deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
-#REPO-LIST
+	while read repo; do echo ${repo} >> "/etc/apt/sources.list.d/canonical_Adobe.list"
+	done << REPO-LIST
+		deb http://archive.canonical.com/ubuntu precise partner
+		deb-src http://archive.canonical.com/ubuntu precise partner
+		deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
+		deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
+REPO-LIST
         	waitAptgetUpdate
 		apt-get --quiet update
 	done
