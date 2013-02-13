@@ -689,7 +689,7 @@ function setup_adobe(){
         ###################################################################################
 	waitForNetwork || return 1
 	# Auto-responce
-        echo acroread-common acroread-common/default-viewer select true | debconf-set-select
+        #echo acroread-common acroread-common/default-viewer select true | debconf-set-select
 	# Add Adobe Repo
 	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
 		for repo in								\
