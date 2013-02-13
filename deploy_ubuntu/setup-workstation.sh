@@ -82,14 +82,14 @@ function setup_Prep_Add_Repos(){
 	# Add Adobe Repo
 	echo "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner" > \
 	"/etc/apt/sources.list.d/canonical_Adobe.list"
-	apt-get --quiet update
+	echo "deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner" > \
+	"/etc/apt/sources.list.d/canonical_Adobe.list"
 
 	# Add Medibuntu repo for free and non-free packages like acroread
 	wget -O "/etc/apt/sources.list.d/medibuntu.list" \
 	http://www.medibuntu.org/sources.list.d/$(lsb_release -cs).list
 	apt-get --quiet update
 	apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
-	apt-get --quiet update
 
 	# Add X2GO Repos
 	add-apt-repository -y ppa:x2go/stable
