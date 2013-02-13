@@ -704,6 +704,8 @@ function setup_adobe(){
         	#waitAptgetUpdate
 		#apt-get --quiet update
 	#done
+}
+finction setup_crap(){
 	# Add Medibuntu repo for free and non-free packages like acroread
 	if [ ! -f "/etc/apt/sources.list.d/medibuntu.list" ]; do
 		wget -O "/etc/apt/sources.list.d/medibuntu.list" \
@@ -713,8 +715,6 @@ function setup_adobe(){
 		apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
 		apt-get --quiet update
 	done
-}
-finction setup_crap(){
 	# Add Oracle Java repo
 	if [ ! -f "/etc/apt/sources.list.d/webupd8team-java-quantal.list" ]; do
 		add-apt-repository -y ppa:webupd8team/java
