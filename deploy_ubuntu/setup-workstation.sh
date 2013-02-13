@@ -91,9 +91,6 @@ function setup_Prep_Add_Repos(){
 	apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
 	apt-get --quiet update
 
-	# Java repo
-	add-apt-repository -y ppa:ferramroberto/java
-
 	# Add X2GO Repos
 	add-apt-repository -y ppa:x2go/stable
 
