@@ -80,7 +80,7 @@ function setup_Prep_Add_Repos(){
 	"/etc/apt/sources.list.d/uck-team-uck-unstable-quantal.list"
 
 	# Add Adobe Repo
-	add-apt-repository -y "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
+	add-apt-repository -y "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner"
 
 	# Add X2GO Repos
 	add-apt-repository -y ppa:x2go/stable
