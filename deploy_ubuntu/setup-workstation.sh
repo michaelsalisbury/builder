@@ -94,6 +94,9 @@ REPO-LIST
 	apt-get --quiet update
 	apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
 
+	# Oracle Java
+	add-apt-repository ppa:webupd8team/java
+
 	# Add X2GO Repos
 	add-apt-repository -y ppa:x2go/stable
 
@@ -643,8 +646,13 @@ function setup_adobe(){
         echo acroread-common acroread-common/default-viewer select true | debconf-set-select
 	# Add Adobe Repo
 	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
-		echo "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner" > \
-		"/etc/apt/sources.list.d/canonical_Adobe.list"
+	while read repo; do echo ${repo} >> "/etc/apt/sources.list.d/canonical_Adobe.list"
+	done << REPO-LIST
+		deb http://archive.canonical.com/ubuntu precise partner
+		deb-src http://archive.canonical.com/ubuntu precise partner
+		deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
+		deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
+REPO-LIST
         	waitAptgetUpdate
 		apt-get --quiet update
 	done
