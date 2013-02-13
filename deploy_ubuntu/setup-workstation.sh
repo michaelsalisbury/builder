@@ -701,8 +701,8 @@ function setup_adobe(){
 		deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
 		deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
 REPO-LIST
-        	waitAptgetUpdate
-		apt-get --quiet update
+waitAptgetUpdate
+apt-get --quiet update
 	done
 }
 finction setup_crap(){
