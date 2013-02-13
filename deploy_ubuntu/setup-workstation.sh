@@ -670,6 +670,8 @@ function setup_Crossover(){
 	# setup working dir
 	mkdir /root/codeweavers_crossover
 	cd    /root/codeweavers_crossover
+	rm -f /root/codeweavers/*.deb
+	
 	# base url were codeweavers serves it's applications
 	local base_url='http://media.codeweavers.com/pub/crossover/cxlinux/demo/'
 	# download deb list
@@ -685,7 +687,6 @@ function setup_Crossover(){
 	local url=$(egrep "http.*${version%?}" wget.log | awk '{print $3}')
 	echo ${version%?}
 	# download crossover
-	rm -f ${version%?}
 	#wget ${url}
 	# install
 	
