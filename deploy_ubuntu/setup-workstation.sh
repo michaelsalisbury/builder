@@ -639,7 +639,7 @@ function setup_ubuntu_tweak_n_myunity(){
         apt-get ${aptopt} install ubuntu-tweak myunity
 }
 function setup_adobe(){
-        desc "Adobe, Java and Flash"
+        desc Adobe, Java and Flash
         ###################################################################################
 	waitForNetwork || return 1
 	# Auto-responce
