@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -684,7 +684,7 @@ function setup_Crossover(){
 	# install
 	dpkg -i ${version%?}
 }
-setup_Mistake(){
+function setup_Mistake(){
         desc Adobe, Java and Flash
         ###################################################################################
 	waitForNetwork || return 1
