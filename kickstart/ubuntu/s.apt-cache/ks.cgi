@@ -12,7 +12,7 @@ include ../defaults.cfg.template
 include packages.cfg
 
 #############################################################################
-include ../post.chroot.get_VBoxGuestAdditions.cfg
+include ../post.chroot.setup_VBoxGuestAdditions.cfg
 include ../post.chroot.setup_root_auth_keys.cfg
 include ../post.chroot.setup_ntpd.cfg
 #include ../post.chroot.interactive.cfg

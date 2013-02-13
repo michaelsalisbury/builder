@@ -13,7 +13,7 @@ cp             ../packages.cfg.template packages.cfg
 cp ../post.chroot.setup_workstation.cfg post.chroot.setup_workstation.cfg
 cp     ../post.chroot.setup_runonce.cfg post.chroot.setup_runonce.cfg
 echo Copying preseed templates
-cp ../preseed/preseed.local.template    local.preseed
+cp    ../preseed/preseed.local.template    local.preseed
 echo Copying CGI templates
-cp                 ../ks.sh.template       ks.sh
-cp    ../preseed/preseed.sh.template  preseed.sh
+cp                  ../ks.cgi.template        ks.cgi
+cp     ../preseed/preseed.cgi.template   preseed.cgi

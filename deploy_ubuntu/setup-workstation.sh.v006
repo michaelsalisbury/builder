@@ -32,9 +32,13 @@ function networkUpMsg(){ echo Network UP\!; }
 function setup_Prep_Add_sudo(){
 	desc Prep: Enable sudo wihout password \(2 prompts\)
 	while read username; do
-		[[ "`whoami`" != "root" ]] && local sudo='sudo' || unset sudo
-		${sudo} sed -i  "/^${username}/d"                       /etc/sudoers
-		${sudo} sed -i "\$a${username} ALL=(ALL) NOPASSWD: ALL" /etc/sudoers
+		if [ "`whoami`" == "root" ]; then
+			sed -i "/^${username}/d" /etc/sudoers
+			echo -e "\n${username} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+		else
+			sudo sed -i "/^${username}/d" /etc/sudoers
+			echo -e "\n${username} ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers
+		fi
 	done < <(
 		awk -F : '/:1000:/{print $1}' /etc/passwd
 		#echo localcosadmin
