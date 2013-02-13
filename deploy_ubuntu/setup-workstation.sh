@@ -674,7 +674,7 @@ function setup_Crossover(){
 	local base_url='http://media.codeweavers.com/pub/crossover/cxlinux/demo/'
 	# download deb list
 	local opt="--spider -r -nd -l 1 --cut-dirs 1 -A deb"
-        wget ${opt} ${base_url} 2>&1 | tee wget.log
+        #wget ${opt} ${base_url} 2>&1 | tee wget.log
 	# sort through architechturally appropriate packages
 	case $(uname -m) in
                 x86_64)         local filter='amd64';;
