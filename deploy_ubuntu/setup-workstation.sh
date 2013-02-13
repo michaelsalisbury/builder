@@ -651,9 +651,9 @@ function setup_adobe(){
         apt-get ${aptopt} install openjdk-7-jre
 }
 function setup_unity_monitors(){
-	waitForNetwork && networkUpMsg || return 1
-        desc "Setup indicator-multiload indicator-sysmonitor"
+        desc Setup indicator-multiload indicator-sysmonitor
         ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
         waitAptgetUpdate
         /usr/bin/add-apt-repository -y ppa:indicator-multiload/stable-daily
         waitAptgetUpdate
@@ -662,6 +662,16 @@ function setup_unity_monitors(){
         apt-get -y update
         waitAptgetInstall
         apt-get ${aptopt} install indicator-multiload indicator-sysmonitor
+}
+function setup_Crossover(){
+        desc Codeweavers Crossover \for Office
+        ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
+
+
+
+
+
 }
 
 
