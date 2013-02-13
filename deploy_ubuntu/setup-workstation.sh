@@ -667,6 +667,9 @@ function setup_Crossover(){
         desc Codeweavers Crossover \for Office
         ###################################################################################
 	waitForNetwork || return 1
+	# dependencies
+        waitAptgetInstall
+	apt-get ${aptopt} install gdebi
 	# setup working dir
 	mkdir /root/codeweavers_crossover
 	cd    /root/codeweavers_crossover
