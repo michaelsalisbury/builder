@@ -684,6 +684,7 @@ function setup_Crossover(){
 	local version=$(egrep "Removing.*crossover_[0-9.-]*_${filter}" wget.log | sort | awk 'END{print $2}')
 	local url=$(egrep "http.*${version%?}" wget.log | awk '{print $3}')
 	# download crossover
+	rm -f ${version%?}
 	wget ${url}
 	# install
 	
