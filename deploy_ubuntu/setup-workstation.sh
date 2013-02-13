@@ -122,6 +122,9 @@ function setup_Package_Autoresponces(){
 	echo gdm shared/default-x-display-manager select lightdm | debconf-set-selections
 	echo lightdm shared/default-x-display-manager select lightdm | debconf-set-selections
         echo acroread-common acroread-common/default-viewer select true | debconf-set-selections
+	echo oracle-java6-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
+	echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
+	echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
         echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 }
 function setup_Package_Holds(){
@@ -689,6 +692,9 @@ function setup_adobe(){
 	waitForNetwork || return 1
 	# Auto-responce
         echo acroread-common acroread-common/default-viewer select true | debconf-set-selections
+	echo oracle-java6-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
+	echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
+	echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
 	# Add Adobe Repo
 	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; then
 		for repo in								\
