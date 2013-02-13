@@ -136,7 +136,7 @@ function setup_Package_Gnome_Defaults(){
 
 }
 function setup_Install_Daemons(){
-        desc openssh-server apache2 nfs-kernel-server tftpd-hpa
+        desc openssh apache2 nfs tftp
 	waitForNetwork && networkUpMsg || return 1
 	waitAptgetInstall
         apt-get ${aptopt} install openssh-server
