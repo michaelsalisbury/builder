@@ -85,7 +85,7 @@ function setup_Prep_Add_Repos(){
 	# Add X2GO Repos
 	add-apt-repository -y ppa:x2go/stable
 
-	# Add Grub Customized Repos
+	# Add Grub Customizer Repos
 	add-apt-repository -y ppa:danielrichter2007/grub-customizer
 
 	# Add EverPad
@@ -600,6 +600,18 @@ function setup_Multimedia(){
         waitAptgetInstall
         apt-get ${aptopt} install ubuntu-restricted-extras
 }
+function setup_grub_customizer(){
+        desc 'Command line app # > grub-customizer'
+        ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
+        waitAptgetUpdate
+        /usr/bin/add-apt-repository -y ppa:danielrichter2007/grub-customizer
+        waitAptgetUpdate
+        apt-get update
+        waitAptgetInstall
+        apt-get ${aptopt} install grub-customizer
+}
+
 
 
 function setup_Clean_Update_Upgrade(){
