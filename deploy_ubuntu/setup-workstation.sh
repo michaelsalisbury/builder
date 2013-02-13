@@ -705,8 +705,7 @@ function setup_adobe(){
 #function setup_crap(){
 	# Add Medibuntu repo for free and non-free packages like acroread
 	if [ ! -f "/etc/apt/sources.list.d/medibuntu.list" ]; do
-		wget -O "/etc/apt/sources.list.d/medibuntu.list" \
-		"http://www.medibuntu.org/sources.list.d/`lsb_release -cs`.list"
+		wget -O "/etc/apt/sources.list.d/medibuntu.list" "http://www.medibuntu.org/sources.list.d/`lsb_release -cs`.list"
         	waitAptgetUpdate
 		apt-get --quiet update
 		apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
