@@ -638,6 +638,7 @@ function setup_ubuntu_tweak_n_myunity(){
         waitAptgetInstall
         apt-get ${aptopt} install ubuntu-tweak myunity
 }
+
 function setup_adobe(){
         desc Adobe, Java and Flash
         ###################################################################################
@@ -649,7 +650,6 @@ function setup_adobe(){
         	waitAptgetUpdate
 		apt-get --quiet update
 	done
-	# Add Medibuntu repo for free and non-free packages like acroread
 }
 function setup_unity_monitors(){
         desc Setup indicator-multiload indicator-sysmonitor
