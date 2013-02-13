@@ -95,7 +95,7 @@ REPO-LIST
 	apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
 
 	# Oracle Java
-	add-apt-repository ppa:webupd8team/java
+	add-apt-repository -y ppa:webupd8team/java
 
 	# Add X2GO Repos
 	add-apt-repository -y ppa:x2go/stable
