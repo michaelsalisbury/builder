@@ -629,7 +629,7 @@ function setup_adobe(){
 	waitForNetwork || return 1
         echo acroread-common acroread-common/default-viewer select true | debconf-set-select
         apt-get update
-        add-apt-repository -y "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
+        add-apt-repository -y "deb http://archive.canonical.com/ubuntu/ $(lsb_release -sc) partner"
         waitAptgetUpdate
         sudo apt-get update
         waitAptgetInstall
