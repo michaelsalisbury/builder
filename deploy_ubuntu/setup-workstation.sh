@@ -668,6 +668,8 @@ function setup_Crossover(){
         ###################################################################################
 	waitForNetwork || return 1
 
+http://media.codeweavers.com/pub/crossover/cxlinux/demo/ia32-crossover_12.1.0-1_amd64.deb
+
 
 
 
