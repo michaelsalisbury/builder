@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -701,8 +701,8 @@ function setup_adobe(){
 		waitAptgetUpdate
 		apt-get --quiet update
 	done
-}
-function setup_crap(){
+#}
+#function setup_crap(){
 	# Add Medibuntu repo for free and non-free packages like acroread
 	if [ ! -f "/etc/apt/sources.list.d/medibuntu.list" ]; do
 		wget -O "/etc/apt/sources.list.d/medibuntu.list" \
