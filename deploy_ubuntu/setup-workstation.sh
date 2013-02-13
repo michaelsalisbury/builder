@@ -83,7 +83,9 @@ function setup_Prep_Add_Repos(){
 	add-apt-repository -y "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner"
 
 	# Add Medibuntu repo for free and non-free packages like acroread
+	
 	add-apt-repository -y "deb http://packages.medibuntu.org/ $(lsb_release -sc) free non-free"
+	http://packages.medibuntu.org/medibuntu-key.gpg
 
 	# Add X2GO Repos
 	add-apt-repository -y ppa:x2go/stable
