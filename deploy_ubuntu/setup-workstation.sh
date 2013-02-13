@@ -53,8 +53,11 @@ function setup_Prep_Disable_Guest(){
 function setup_Prep_Disable_Apt_Cacher(){
 	desc disconect from apt-cacher
 	sed -i.bk`date "+%s"` '/^Acquire::http::Proxy/ s/^/#/' /etc/apt/apt.conf
+	waitAptgetUpdate
 	apt-get clean
+	waitAptgetUpdate
 	apt-get autoclean
+	waitAptgetUpdate
 	apt-get update
 }
 function setup_Prep_Hostname(){
