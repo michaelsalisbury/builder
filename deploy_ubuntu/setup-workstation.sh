@@ -45,6 +45,15 @@ function setup_Prep_Add_SSH_Keys(){
 	desc Add SSH Keys to root \& all user with uid \>= 1000
 	set_ssh_authorized_keys	all
 }
+function setup_Prep_Disable_Guest(){
+	desc disable guest login
+	sed  '/^allow-guest=/d'                     /etc/lightdm/lightdm.conf
+	sed  '/\[SeatDefaults\]/aallow-guest=false' /etc/loghtdm/lightdm.conf
+
+	
+
+
+}
 function setup_Prep_Add_Aliases(){
 	desc Setup Aliases
 	cat << EOF > /etc/profile.d/aliases.sh
