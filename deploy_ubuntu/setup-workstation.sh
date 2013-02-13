@@ -667,13 +667,26 @@ function setup_Crossover(){
         desc Codeweavers Crossover \for Office
         ###################################################################################
 	waitForNetwork || return 1
-
-http://media.codeweavers.com/pub/crossover/cxlinux/demo/ia32-crossover_12.1.0-1_amd64.deb
-
-
-
-
-
+	# setup working dir
+	mkdir /root/codeweavers_crossover
+	cd    /root/codeweavers_crossover
+	# base url were codeweavers serves it's applications
+	local base_url='http://media.codeweavers.com/pub/crossover/cxlinux/demo/'
+	# download deb list
+	local opt="--spider -r -nd -l 1 --cut-dirs 1 -A deb"
+        wget ${opt} ${base_url} 2>&1 | tee wgetlog
+	# sort through architechturally appropriate packages
+	case $(uname -m) in
+                x86_64)         local filter='amd64';;
+                i386|i586|i686) local filter='i386';;
+        esac
+	# get newest version and link
+	local version=$(egrep "Removing.*crossover_[0-9.-]*_${filter}" log | sort | awk 'END{print $2}')
+	local url=$(egrep "http.*${version%?}" log | awk '{print $3}')
+	# download crossover
+	wget ${url}
+	# install
+	
 }
 
 
