@@ -612,7 +612,7 @@ function setup_grub_customizer(){
         apt-get ${aptopt} install grub-customizer
 }
 
-funtion setup_ubuntu_tweak_n_myunity(){
+function setup_ubuntu_tweak_n_myunity(){
         desc 'Ubuntu Tweak and MyUnity'
         ###################################################################################
 	waitForNetwork && networkUpMsg || return 1
