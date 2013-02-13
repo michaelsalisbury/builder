@@ -645,7 +645,7 @@ function setup_adobe(){
 	# Auto-responce
         echo acroread-common acroread-common/default-viewer select true | debconf-set-select
 	# Add Adobe Repo
-	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
+	#if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
 
 	while read repo; do echo ${repo} >> "/etc/apt/sources.list.d/canonical_Adobe.list"
 	done << REPO-LIST
@@ -656,7 +656,7 @@ function setup_adobe(){
 REPO-LIST
         	waitAptgetUpdate
 		apt-get --quiet update
-	done
+	#done
 	# Add Medibuntu repo for free and non-free packages like acroread
 	if [ ! -f "/etc/apt/sources.list.d/medibuntu.list" ]; do
 		wget -O "/etc/apt/sources.list.d/medibuntu.list" \
