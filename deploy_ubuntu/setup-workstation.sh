@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -52,8 +52,7 @@ function setup_Prep_Disable_Guest(){
 }
 function setup_Prep_Disable_Apt_Cacher(){
 	desc disconect from apt-cacher
-	
-
+	sed -i.bk`date "+%s"` '/^Acquire::http::Proxy/ s/^/#/' /etc/apt/apt.conf
 }
 function setup_Prep_Hostname(){
 	desc \set hostname to vendor serial: Dell
