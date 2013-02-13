@@ -590,6 +590,17 @@ END-OF-SED
 	ufw allow in on eth1 from any to any port 514
 	ufw --force reload
 }
+function setup_Multimedia(){
+	desc DVD support
+        ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
+	waitAptgetInstall
+        apt-get ${aptopt} install libdvdread4
+        /usr/share/doc/libdvdread4/install-css.sh
+        waitAptgetInstall
+        apt-get ${aptopt} install ubuntu-restricted-extras
+}
+
 
 function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
