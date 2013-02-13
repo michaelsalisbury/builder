@@ -654,8 +654,8 @@ function setup_adobe(){
 #		deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
 #		deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
 #REPO-LIST
-        	waitAptgetUpdate
-		apt-get --quiet update
+        	#waitAptgetUpdate
+		#apt-get --quiet update
 	#done
 	# Add Medibuntu repo for free and non-free packages like acroread
 	if [ ! -f "/etc/apt/sources.list.d/medibuntu.list" ]; do
