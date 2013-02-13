@@ -657,6 +657,11 @@ function setup_adobe(){
 		apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
 		apt-get --quiet update
 	done
+	# Add Java Repo
+	if [ ! -f 
+	add-apt-repository -y ppa:ferramroberto/java
+        waitAptgetUpdate
+	apt-get --quiet update
 	# Install packages
         waitAptgetInstall
         apt-get ${aptopt} install acroread
