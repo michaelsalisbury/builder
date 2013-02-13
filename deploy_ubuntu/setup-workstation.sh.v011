@@ -647,8 +647,6 @@ function setup_adobe(){
 	# Add Adobe Repo
 	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
 
-        	waitAptgetUpdate
-		apt-get --quiet update
 	done
 }
 function setup_unity_monitors(){
