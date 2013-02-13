@@ -691,7 +691,6 @@ REPO-LIST
         #apt-get ${aptopt} install oracle-java7-installer
         #waitAptgetInstall
         #apt-get ${aptopt} install oracle-java8-installer
-
 }
 function setup_unity_monitors(){
         desc Setup indicator-multiload indicator-sysmonitor
