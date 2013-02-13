@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -723,11 +723,7 @@ function setup_adobe(){
         apt-get ${aptopt} install acroread
 	# Install Flash
         waitAptgetInstall
-        apt-get ${aptopt} install flashplugin-installer
-        waitAptgetInstall
-        apt-get ${aptopt} install flashplugin-downloader
-        waitAptgetInstall
-        apt-get ${aptopt} install flashplugin-nonfree-extrasound
+        apt-get ${aptopt} install flashplugin-installer flashplugin-downloader flashplugin-nonfree-extrasound
 	# Install Firefox Acrobat Plugin
         waitAptgetInstall
         apt-get ${aptopt} install adobe-flashplugin
