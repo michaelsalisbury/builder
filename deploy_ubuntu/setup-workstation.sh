@@ -665,6 +665,10 @@ REPO-LIST
 		apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
 		apt-get --quiet update
 	done
+
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get update
+sudo apt-get install oracle-java7-installer
 	# Install packages
         waitAptgetInstall
         apt-get ${aptopt} install acroread
