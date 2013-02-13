@@ -671,23 +671,27 @@ REPO-LIST
         	waitAptgetUpdate
 		apt-get --quiet update
 	done
-	# Install packages
+	# Install Acrobat Reader
         waitAptgetInstall
         apt-get ${aptopt} install acroread
+	# Install Flash
         waitAptgetInstall
         apt-get ${aptopt} install flashplugin-installer
         waitAptgetInstall
         apt-get ${aptopt} install flashplugin-downloader
         waitAptgetInstall
         apt-get ${aptopt} install flashplugin-nonfree-extrasound
+	# Install Firefox Acrobat Plugin
         waitAptgetInstall
         apt-get ${aptopt} install adobe-flashplugin
-        apt-get update
-        apt-get ${aptopt} install sun-java6-jdk sun-java6-plugin
+	# Oracle Java(TM) Development Kit (JDK) X
         waitAptgetInstall
-        apt-get ${aptopt} install openjdk-6-jre
-        waitAptgetInstall
-        apt-get ${aptopt} install openjdk-7-jre
+        apt-get ${aptopt} install oracle-java6-installer
+        #waitAptgetInstall
+        #apt-get ${aptopt} install oracle-java7-installer
+        #waitAptgetInstall
+        #apt-get ${aptopt} install oracle-java8-installer
+
 }
 function setup_unity_monitors(){
         desc Setup indicator-multiload indicator-sysmonitor
