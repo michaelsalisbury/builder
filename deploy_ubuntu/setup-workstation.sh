@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -734,7 +734,7 @@ setup_Mistake(){
         #waitAptgetInstall
         #apt-get ${aptopt} install oracle-java8-installer
 }
-setup_Clean_Update_Upgrade(){
+function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
         ###################################################################################
 	waitForNetwork || return 1
