@@ -612,6 +612,55 @@ function setup_grub_customizer(){
         apt-get ${aptopt} install grub-customizer
 }
 
+n setup_ubuntu_tweak_n_myunity(){
+        desc 'Ubuntu Tweak and MyUnity'
+        ###################################################################################
+        waitAptgetUpdate
+        /usr/bin/add-apt-repository -y ppa:tualatrix/ppa
+        waitAptgetUpdate
+        apt-get update
+        waitAptgetInstall
+        apt-get ${aptopt} install ubuntu-tweak myunity
+}
+function setup_adobe(){
+        desc "Adobe, Java and Flash"
+        ###################################################################################
+        echo acroread-common acroread-common/default-viewer select true | debconf-set-select
+        apt-get update
+        add-apt-repository -y "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
+        waitAptgetUpdate
+        sudo apt-get update
+        waitAptgetInstall
+        apt-get ${aptopt} install acroread
+        waitAptgetInstall
+        apt-get ${aptopt} install flashplugin-installer
+        waitAptgetInstall
+        apt-get ${aptopt} install flashplugin-downloader
+        waitAptgetInstall
+        apt-get ${aptopt} install flashplugin-nonfree-extrasound
+        waitAptgetInstall
+        apt-get ${aptopt} install adobe-flashplugin
+        /usr/bin/add-apt-repository -y ppa:ferramroberto/java
+        apt-get update
+        apt-get ${aptopt} install sun-java6-jdk sun-java6-plugin
+        waitAptgetInstall
+        apt-get ${aptopt} install openjdk-6-jre
+        waitAptgetInstall
+        apt-get ${aptopt} install openjdk-7-jre
+}
+function setup_unity_monitors(){
+        desc "Setup indicator-multiload indicator-sysmonitor"
+        ###################################################################################
+        waitAptgetUpdate
+        /usr/bin/add-apt-repository -y ppa:indicator-multiload/stable-daily
+        waitAptgetUpdate
+        /usr/bin/add-apt-repository -y ppa:alexeftimie/ppa
+        waitAptgetUpdate
+        apt-get -y update
+        waitAptgetInstall
+        apt-get ${aptopt} install indicator-multiload indicator-sysmonitor
+}
+
 
 
 function setup_Clean_Update_Upgrade(){
