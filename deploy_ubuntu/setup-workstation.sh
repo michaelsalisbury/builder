@@ -627,7 +627,7 @@ function setup_grub_customizer(){
         apt-get ${aptopt} install grub-customizer
 }
 
-function setup_ubuntu_tweak_n_myunity(){
+#function setup_ubuntu_tweak_n_myunity(){
         desc Ubuntu Tweak and MyUnity
         ###################################################################################
 	waitForNetwork || return 1
@@ -637,7 +637,7 @@ function setup_ubuntu_tweak_n_myunity(){
         apt-get update
         waitAptgetInstall
         apt-get ${aptopt} install ubuntu-tweak myunity
-}
+#}
 function setup_adobe(){
         desc Adobe, Java and Flash
         ###################################################################################
