@@ -192,7 +192,7 @@ function setup_Must_Have_Tools(){
 	while read script; do
         	"${script:-false}" -rr
 	done < <(
-		for app in google_chrome vim terminator; do
+		for app in google_chrome vim terminator top; do
         		ls -1             "${scriptPath}"/defaults.${app}.sh 2> /dev/null
         		ls -1 "${scriptPath}"/../defaults/defaults.${app}.sh 2> /dev/null
 		done)
