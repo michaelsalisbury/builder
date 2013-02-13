@@ -684,7 +684,7 @@ function setup_Crossover(){
 	# install
 	dpkg -i ${version%?}
 }
-function setup_adobe(){
+function setup_Adobe(){
         desc Adobe, Java and Flash
         ###################################################################################
 	waitForNetwork || return 1
