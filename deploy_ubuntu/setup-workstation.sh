@@ -601,7 +601,7 @@ function setup_Multimedia(){
         apt-get ${aptopt} install ubuntu-restricted-extras
 }
 function setup_grub_customizer(){
-        desc 'Command line app # > grub-customizer'
+        desc 'Command line app \# \> grub-customizer'
         ###################################################################################
 	waitForNetwork && networkUpMsg || return 1
         waitAptgetUpdate
