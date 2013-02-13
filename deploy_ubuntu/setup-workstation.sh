@@ -669,7 +669,7 @@ function setup_Crossover(){
 	waitForNetwork || return 1
 	# dependencies
         waitAptgetInstall
-	apt-get ${aptopt} install gdebi
+	apt-get ${aptopt} install gdebi libc6-i386
 	# setup working dir
 	mkdir /root/codeweavers_crossover
 	cd    /root/codeweavers_crossover
