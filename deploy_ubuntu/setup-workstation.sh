@@ -702,7 +702,7 @@ function setup_Mistake(){
 		apt-get --quiet update
 	#done
 	# Add Medibuntu repo for free and non-free packages like acroread
-	if true; do 
+	if true; then
 	#[ -f "/etc/apt/sources.list.d/medibuntu.list" ]
 		wget -O "/etc/apt/sources.list.d/medibuntu.list" "http://www.medibuntu.org/sources.list.d/`lsb_release -cs`.list"
         	waitAptgetUpdate
