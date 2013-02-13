@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -627,17 +627,17 @@ function setup_grub_customizer(){
         apt-get ${aptopt} install grub-customizer
 }
 
-#function setup_ubuntu_tweak_n_myunity(){
+function setup_ubuntu_tweak_n_myunity(){
         desc Ubuntu Tweak and MyUnity
         ###################################################################################
 	waitForNetwork || return 1
         waitAptgetUpdate
-        #/usr/bin/add-apt-repository -y ppa:tualatrix/ppa
+        /usr/bin/add-apt-repository -y ppa:tualatrix/ppa
         waitAptgetUpdate
-        #apt-get update
+        apt-get update
         waitAptgetInstall
-        #apt-get ${aptopt} install ubuntu-tweak myunity
-#}
+        apt-get ${aptopt} install ubuntu-tweak myunity
+}
 function setup_adobe(){
         desc Adobe, Java and Flash
         ###################################################################################
@@ -647,13 +647,13 @@ function setup_adobe(){
 	# Add Adobe Repo
 	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
 
-#	while read repo; do echo ${repo} >> "/etc/apt/sources.list.d/canonical_Adobe.list"
-#	done << REPO-LIST
-#		deb http://archive.canonical.com/ubuntu precise partner
-#		deb-src http://archive.canonical.com/ubuntu precise partner
-#		deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
-#		deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
-#REPO-LIST
+	while read repo; do echo ${repo} >> "/etc/apt/sources.list.d/canonical_Adobe.list"
+	done << REPO-LIST
+		deb http://archive.canonical.com/ubuntu precise partner
+		deb-src http://archive.canonical.com/ubuntu precise partner
+		deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
+		deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
+REPO-LIST
         	waitAptgetUpdate
 		apt-get --quiet update
 	done
