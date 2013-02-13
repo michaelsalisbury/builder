@@ -667,11 +667,11 @@ function setup_adobe(){
 		apt-get --quiet update
 	done
 	# Add Oracle Java repo
-	if [ ! -f "/etc/apt/sources.list.d/webupd8team-java-quantal.list" ]; do
+	#if [ ! -f "/etc/apt/sources.list.d/webupd8team-java-quantal.list" ]; do
 		add-apt-repository -y ppa:webupd8team/java
         	waitAptgetUpdate
 		apt-get --quiet update
-	done
+	#done
 	# Install Acrobat Reader
         waitAptgetInstall
         apt-get ${aptopt} install acroread
