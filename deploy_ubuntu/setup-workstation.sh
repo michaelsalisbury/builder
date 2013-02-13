@@ -80,10 +80,13 @@ function setup_Prep_Add_Repos(){
 	"/etc/apt/sources.list.d/uck-team-uck-unstable-quantal.list"
 
 	# Add Adobe Repo
-	echo "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner" > \
-	"/etc/apt/sources.list.d/canonical_Adobe.list"
-	echo "deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner" > \
-	"/etc/apt/sources.list.d/canonical_Adobe.list"
+	while read repo; do echo ${repo} >> "/etc/apt/sources.list.d/canonical_Adobe.list"
+	done << REPO-LIST
+		deb http://archive.canonical.com/ubuntu precise partner
+		deb-src http://archive.canonical.com/ubuntu precise partner
+		deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
+		deb-src http://archive.canonical.com/ubuntu $(lsb_release -sc) partner
+REPO-LIST
 
 	# Add Medibuntu repo for free and non-free packages like acroread
 	wget -O "/etc/apt/sources.list.d/medibuntu.list" \
