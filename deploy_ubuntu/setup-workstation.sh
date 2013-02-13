@@ -170,7 +170,7 @@ function setup_Install_Daemon_VBox_Server(){
 }
 
 function setup_Must_Have_Tools(){
-	desc Install Tools\; vim, ethtool, iotop, iftop, jre, chrome, filezilla 
+	desc vim, ethtool, iotop, iftop, jre, chrome, filezilla 
         ###################################################################################
 	waitForNetwork && networkUpMsg || return 1
 	stall 3
