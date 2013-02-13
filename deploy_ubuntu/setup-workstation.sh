@@ -669,8 +669,9 @@ function setup_Crossover(){
 	waitForNetwork || return 1
 	# dependencies
         waitAptgetInstall
-	apt-get ${aptopt} install gdebi libc6-i386 ia32-libs lib32gcc1 lib32nss-mdns \
-				 lib32nss-mdns lib32z1 python-glade2 lib32asound2
+	apt-get ${aptopt} install gdebi libc6-i386 ia32-libs ia32-libs-multiarch \
+				 lib32gcc1 lib32nss-mdns lib32nss-mdns lib32z1 \
+				 python-glade2 lib32asound2
 	# setup working dir
 	mkdir /root/codeweavers_crossover
 	cd    /root/codeweavers_crossover
