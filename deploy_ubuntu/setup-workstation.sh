@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -612,7 +612,7 @@ function setup_grub_customizer(){
         apt-get ${aptopt} install grub-customizer
 }
 
-n setup_ubuntu_tweak_n_myunity(){
+funtion setup_ubuntu_tweak_n_myunity(){
         desc 'Ubuntu Tweak and MyUnity'
         ###################################################################################
         waitAptgetUpdate
