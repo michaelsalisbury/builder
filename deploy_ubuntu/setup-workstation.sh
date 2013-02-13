@@ -684,7 +684,7 @@ function setup_Crossover(){
 	# install
 	dpkg -i ${version%?}
 }
-function setup_Adobe(){
+function setup_adobe(){
         desc Adobe, Java and Flash
         ###################################################################################
 	waitForNetwork || return 1
@@ -702,7 +702,7 @@ function setup_Adobe(){
 		apt-get --quiet update
 	done
 }
-finction setup_crap(){
+function setup_crap(){
 	# Add Medibuntu repo for free and non-free packages like acroread
 	if [ ! -f "/etc/apt/sources.list.d/medibuntu.list" ]; do
 		wget -O "/etc/apt/sources.list.d/medibuntu.list" \
