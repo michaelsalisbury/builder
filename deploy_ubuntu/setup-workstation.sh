@@ -91,6 +91,9 @@ function setup_Prep_Add_Repos(){
 	apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
 	apt-get --quiet update
 
+	# Java repo
+	add-apt-repository -y ppa:ferramroberto/java
+
 	# Add X2GO Repos
 	add-apt-repository -y ppa:x2go/stable
 
@@ -665,7 +668,6 @@ function setup_adobe(){
         apt-get ${aptopt} install flashplugin-nonfree-extrasound
         waitAptgetInstall
         apt-get ${aptopt} install adobe-flashplugin
-        /usr/bin/add-apt-repository -y ppa:ferramroberto/java
         apt-get update
         apt-get ${aptopt} install sun-java6-jdk sun-java6-plugin
         waitAptgetInstall
