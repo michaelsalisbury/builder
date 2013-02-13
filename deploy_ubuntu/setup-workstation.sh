@@ -615,6 +615,7 @@ function setup_grub_customizer(){
 funtion setup_ubuntu_tweak_n_myunity(){
         desc 'Ubuntu Tweak and MyUnity'
         ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
         waitAptgetUpdate
         /usr/bin/add-apt-repository -y ppa:tualatrix/ppa
         waitAptgetUpdate
@@ -625,6 +626,7 @@ funtion setup_ubuntu_tweak_n_myunity(){
 function setup_adobe(){
         desc "Adobe, Java and Flash"
         ###################################################################################
+	waitForNetwork && networkUpMsg || return 1
         echo acroread-common acroread-common/default-viewer select true | debconf-set-select
         apt-get update
         add-apt-repository -y "deb http://archive.canonical.com/ $(lsb_release -sc) partner"
@@ -649,6 +651,7 @@ function setup_adobe(){
         apt-get ${aptopt} install openjdk-7-jre
 }
 function setup_unity_monitors(){
+	waitForNetwork && networkUpMsg || return 1
         desc "Setup indicator-multiload indicator-sysmonitor"
         ###################################################################################
         waitAptgetUpdate
