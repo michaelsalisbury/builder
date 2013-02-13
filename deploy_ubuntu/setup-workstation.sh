@@ -691,7 +691,7 @@ function setup_Mistake(){
 	# Auto-responce
         echo acroread-common acroread-common/default-viewer select true | debconf-set-select
 	# Add Adobe Repo
-	#if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; do
+	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; then
 		for repo in								\
 		"deb http://archive.canonical.com/ubuntu precise partner"		\
 		"deb-src http://archive.canonical.com/ubuntu precise partner"		\
@@ -700,10 +700,9 @@ function setup_Mistake(){
 		do echo ${repo} >> "/etc/apt/sources.list.d/canonical_Adobe.list"; done
 		waitAptgetUpdate
 		apt-get --quiet update
-	#done
+	fi
 	# Add Medibuntu repo for free and non-free packages like acroread
-	if true; then
-	#[ -f "/etc/apt/sources.list.d/medibuntu.list" ]
+	if [ -f "/etc/apt/sources.list.d/medibuntu.list" ]; then
 		wget -O "/etc/apt/sources.list.d/medibuntu.list" "http://www.medibuntu.org/sources.list.d/`lsb_release -cs`.list"
         	waitAptgetUpdate
 		apt-get --quiet update
@@ -711,11 +710,11 @@ function setup_Mistake(){
 		apt-get --quiet update
 	fi
 	# Add Oracle Java repo
-	#if [ ! -f "/etc/apt/sources.list.d/webupd8team-java-quantal.list" ]; do
+	if [ ! -f "/etc/apt/sources.list.d/webupd8team-java-quantal.list" ]; then
 		add-apt-repository -y ppa:webupd8team/java
         	waitAptgetUpdate
 		apt-get --quiet update
-	#done
+	fi
 	# Install Acrobat Reader
         waitAptgetInstall
         apt-get ${aptopt} install acroread
