@@ -146,7 +146,7 @@ function setup_Install_Daemons(){
 	#apt-get ${aptopt} install 
 }
 function setup_Install_Daemon_VBox_Server(){
-        desc Install VirtualBox Host
+        desc VirtualBox Host Server
         ###################################################################################
 	# get latest version info
         local latest=`wget -O - -o /dev/null http://download.virtualbox.org/virtualbox/LATEST.TXT`
