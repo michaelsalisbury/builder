@@ -50,6 +50,16 @@ function setup_Prep_Disable_Guest(){
 	sed -i.bk`date "+%s"` '/^allow-guest=/d'                     /etc/lightdm/lightdm.conf
 	sed -i.bk`date "+%s"` '/\[SeatDefaults\]/aallow-guest=false' /etc/lightdm/lightdm.conf
 }
+function setup_Prep_Disable_Apt_Cacher(){
+	desc disconect from apt-cacher
+	
+
+}
+function setup_Prep_Hostname(){
+	desc \set hostname to vendor serial: Dell
+
+
+}
 function setup_Prep_Add_Aliases(){
 	desc Setup Aliases
 	cat << EOF > /etc/profile.d/aliases.sh
