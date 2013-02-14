@@ -170,6 +170,11 @@ function setup_Package_Autoresponces(){
 	echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
 	echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
         echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
+	# Output debconf settings to verify changes made above
+	debconf-show --listowners |\
+	egrep "(hddtemp|gdm|lightdm|acroread|oracle|ttf)" |\
+	awk '{print "debconf-show "$0" | sed \"s/^/"$1"\t/\"  " }' |\
+	bash
 }
 function setup_Package_Holds(){
 	desc Apt package holds
