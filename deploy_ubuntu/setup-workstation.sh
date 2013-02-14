@@ -57,14 +57,13 @@ function setup_Prep_Disable_Apt_Cacher(){
 	# Backup and comment out all entries
 	egrep -l -R '^Acquire' /etc/apt |\
 	xargs -i@ sed -i.bk`date "+%s"` '/^Acquire/ s/^/#/' @
-
-	#sed -i.bk`date "+%s"` '/^Acquire::http::Proxy/ s/^/#/' /etc/apt/apt.conf
-	#waitAptgetUpdate
-	#apt-get clean
-	#waitAptgetUpdate
-	#apt-get autoclean
-	#waitAptgetUpdate
-	#apt-get update
+	# Refresh apt cache and update
+	waitAptgetUpdate
+	apt-get clean
+	waitAptgetUpdate
+	apt-get autoclean
+	waitAptgetUpdate
+	apt-get update
 }
 function setup_Prep_Hostname(){
 	desc \set hostname to vendor serial: Dell
