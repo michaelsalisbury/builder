@@ -57,11 +57,17 @@ function setup_Prep_Tweak_Apt_Cacher(){
 	# Find apt cacher client config and append changes
 	read -d $'' new_entries << END-OF-ENTRIES
 Acquire::http::Timeout "2";
-Acquire::http::Proxy::download.oracle.com "DIRECT";
 END-OF-ENTRIES
-	new_entries=${new_entries//$'\n'/\\\n} ### prep variable for sed append ###
+	new_entries=${new_entries//$'\n'/\\\n} ### prep variable for multi-line sed append ###
 	egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
 	xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${new_entries}" @
+	# Refresh apt cache and update
+	waitAptgetUpdate
+	apt-get clean
+	waitAptgetUpdate
+	apt-get autoclean
+	waitAptgetUpdate
+	apt-get update
 }
 function setup_Prep_Disable_Apt_Cacher(){
 	desc disconect from apt-cacher
