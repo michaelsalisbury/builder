@@ -1,1 +1,0 @@
-../../../deploy_ubuntu/setup-workstation.sh
