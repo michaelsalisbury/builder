@@ -55,17 +55,12 @@ function setup_Prep_Tweak_Apt_Cacher(){
 	desc append options to apt cacher client config
         waitForNetwork || return 1
 	# Find apt cacher client config and append changes
-	read 
-
+	read -d $'' new_entries << END-OF-ENTRIES
+Acquire::http::Timeout "2";
+Acquire::http::Proxy::download.oracle.com "DIRECT";
+END-OF-ENTRIES
 	egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
-	while read apt_conf; do
-		while read new_entry; do
-			sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${new_entry}" "${apt_conf}"
-		done << LIST-OF-ENTRIES
-			Acquire::http::Timeout "2";
-			Acquire::http::Proxy::download.oracle.com "DIRECT";
-LIST-OF-ENTRIES
-	done
+	xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${new_entrys}" @
 }
 function setup_Prep_Disable_Apt_Cacher(){
 	desc disconect from apt-cacher
