@@ -55,6 +55,7 @@ function setup_Prep_Tweak_Apt_Cacher(){
 	desc append options to apt cacher client config
         waitForNetwork || return 1
 	# Find apt cacher client config and append changes
+	read 
 
 	egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
 	while read apt_conf; do
