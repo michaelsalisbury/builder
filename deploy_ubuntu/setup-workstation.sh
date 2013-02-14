@@ -417,10 +417,12 @@ function setup_X2GO(){
         ###################################################################################
 	waitForNetwork || return 1
 	stall 3
-        waitAptgetUpdate
-        /usr/bin/add-apt-repository -y ppa:x2go/stable
-        waitAptgetUpdate
-        apt-get ${aptopt} update
+	if ! ls /etc/apt/sources.list.d/x2go-stabe* &> /dev/null; then
+        	waitAptgetUpdate
+        	/usr/bin/add-apt-repository -y ppa:x2go/stable
+        	waitAptgetUpdate
+        	apt-get ${aptopt} update
+	fi
         waitAptgetInstall
         apt-get ${aptopt} install python-software-properties
         apt-cache search x2go
@@ -670,10 +672,12 @@ function setup_grub_customizer(){
         desc Command line app \# \> grub-customizer
         ###################################################################################
 	waitForNetwork || return 1
-	waitAptgetUpdate
-        /usr/bin/add-apt-repository -y ppa:danielrichter2007/grub-customizer
-        waitAptgetUpdate
-        apt-get update
+	if ! ls /etc/apt/sources.list.d/danielrichter* &> /dev/null; then
+		waitAptgetUpdate
+        	/usr/bin/add-apt-repository -y ppa:danielrichter2007/grub-customizer
+	        waitAptgetUpdate
+        	apt-get update
+	fi
         waitAptgetInstall
         apt-get ${aptopt} install grub-customizer
 }
@@ -682,10 +686,12 @@ function setup_ubuntu_tweak_n_myunity(){
         desc Ubuntu Tweak and MyUnity
         ###################################################################################
 	waitForNetwork || return 1
-        waitAptgetUpdate
-        /usr/bin/add-apt-repository -y ppa:tualatrix/ppa
-        waitAptgetUpdate
-        apt-get update
+	if ! ls /etc/apt/sources.list.d/tualatrix* &> /dev/null; then
+        	waitAptgetUpdate
+	        /usr/bin/add-apt-repository -y ppa:tualatrix/ppa
+	        waitAptgetUpdate
+        	apt-get update
+	fi
         waitAptgetInstall
         apt-get ${aptopt} install ubuntu-tweak myunity
 }
@@ -693,12 +699,21 @@ function setup_unity_monitors(){
         desc Setup indicator-multiload indicator-sysmonitor
         ###################################################################################
 	waitForNetwork || return 1
-        waitAptgetUpdate
-        add-apt-repository -y ppa:indicator-multiload/stable-daily
-        waitAptgetUpdate
-        add-apt-repository -y ppa:alexeftimie/ppa
-        waitAptgetUpdate
-        apt-get -y update
+	if ! ls /etc/apt/sources.list.d/indicator-multiload* &> /dev/null; then
+        	waitAptgetUpdate
+        	add-apt-repository -y ppa:indicator-multiload/stable-daily
+		local update=true
+	fi
+	if ! ls /etc/apt/sources.list.d/alexeftimie* &> /dev/null; then
+		waitAptgetUpdate
+	        add-apt-repository -y ppa:alexeftimie/ppa
+		local update=true
+	fi
+	# Run apt-get update if new repo were added
+	if ${update:- false}; then
+	        waitAptgetUpdate
+        	apt-get -y update
+	fi
         waitAptgetInstall
         apt-get ${aptopt} install indicator-multiload indicator-sysmonitor
 }
@@ -745,30 +760,35 @@ function setup_adobe(){
 	echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
 	echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
 	# Add Adobe Repo
-	if [ ! -f "/etc/apt/sources.list.d/canonical_Adobe.list" ]; then
+	if ! ls /etc/apt/sources.list.d/canonical* &> /dev/null; then
 		for repo in								\
+		sed -i.save 's/^/#/' "/etc/apt/sources.list.d/canonical_Adobe.list"
 		"deb http://archive.canonical.com/ubuntu precise partner"		\
 		"deb-src http://archive.canonical.com/ubuntu precise partner"		\
 		"deb http://archive.canonical.com/ubuntu `lsb_release -sc` partner"	\
 		"deb-src http://archive.canonical.com/ubuntu `lsb_release -sc` partner"
 		do echo ${repo} >> "/etc/apt/sources.list.d/canonical_Adobe.list"; done
-		waitAptgetUpdate
-		apt-get --quiet update
+		local update=true
+	fi
+	# Add Oracle Java repo
+	if ! ls /etc/apt/sources.list.d/webupd8team-java* &> /dev/null; then
+		add-apt-repository -y ppa:webupd8team/java
+		local update=true
 	fi
 	# Add Medibuntu repo for free and non-free packages like acroread
-	if [ ! -f "/etc/apt/sources.list.d/medibuntu.list" ]; then
+	if ! ls /etc/apt/sources.list.d/medibuntu* &> /dev/null; then
 		wget -O "/etc/apt/sources.list.d/medibuntu.list" "http://www.medibuntu.org/sources.list.d/`lsb_release -cs`.list"
         	waitAptgetUpdate
 		apt-get --quiet update
 		apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
-		apt-get --quiet update
+		local update=true
 	fi
-	# Add Oracle Java repo
-	if [ ! -f "/etc/apt/sources.list.d/webupd8team-java-quantal.list" ]; then
-		add-apt-repository -y ppa:webupd8team/java
-        	waitAptgetUpdate
-		apt-get --quiet update
+	# Run apt-get update if new repo were added
+	if ${update:- false}; then
+	        waitAptgetUpdate
+        	apt-get -y update
 	fi
+        waitAptgetInstall
 	# Install Acrobat Reader
         waitAptgetInstall
         apt-get ${aptopt} install acroread flashplugin-installer
