@@ -51,6 +51,20 @@ function setup_Prep_Disable_Guest(){
 	sed -i.bk`date "+%s"` '/^allow-guest=/d'                     /etc/lightdm/lightdm.conf
 	sed -i.bk`date "+%s"` '/\[SeatDefaults\]/aallow-guest=false' /etc/lightdm/lightdm.conf
 }
+function setup_Prep_Tweak_Apt_Cacher(){
+	desc append options to apt cacher client config
+        waitForNetwork || return 1
+	# Find apt cacher client config and append changes
+	while read new_entry; do
+		egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
+		xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${new_entry}" @
+
+
+	done << LIST-OF-ENTRIES
+		Acquire::http::Timeout "2";
+		Acquire::http::Proxy::download.oracle.com "DIRECT";
+LIST-OF-ENTRIES
+}
 function setup_Prep_Disable_Apt_Cacher(){
 	desc disconect from apt-cacher
         waitForNetwork || return 1
@@ -755,10 +769,9 @@ function setup_adobe(){
         waitAptgetInstall
         apt-get ${aptopt} install adobe-flashplugin
 	# Modify of apt-cacher client setting required for Oracle Java Install
-	egrep -l -R '^Acquire::Proxy' /etc/apt |\
-	xargs -i@ sed -i.bk`date "+%s"` '/^Acquire/ s/^/#/' @
-	
-	
+	local oracleProxy='Acquire::http::Proxy::download.oracle.com "DIRECT";'
+	egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
+	xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${oracleProxy}" @
 	# Oracle Java Development Kit JDK X
         waitAptgetInstall
         apt-get ${aptopt} install oracle-java6-installer
