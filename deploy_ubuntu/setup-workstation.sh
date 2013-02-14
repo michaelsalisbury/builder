@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 #source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -55,15 +55,15 @@ function setup_Prep_Tweak_Apt_Cacher(){
 	desc append options to apt cacher client config
         waitForNetwork || return 1
 	# Find apt cacher client config and append changes
-	while read new_entry; do
-		egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
-		xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${new_entry}" @
-
-
-	done << LIST-OF-ENTRIES
-		Acquire::http::Timeout "2";
-		Acquire::http::Proxy::download.oracle.com "DIRECT";
+	egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
+	while read apt_conf; do
+		while read new_entry; do
+			sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${new_entry}" "${apt_conf}"
+		done << LIST-OF-ENTRIES
+			Acquire::http::Timeout "2";
+			Acquire::http::Proxy::download.oracle.com "DIRECT";
 LIST-OF-ENTRIES
+	done
 }
 function setup_Prep_Disable_Apt_Cacher(){
 	desc disconect from apt-cacher
