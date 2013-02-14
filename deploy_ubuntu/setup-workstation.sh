@@ -54,9 +54,10 @@ function setup_Prep_Disable_Guest(){
 function setup_Prep_Disable_Apt_Cacher(){
 	desc disconect from apt-cacher
         waitForNetwork || return 1
-	while read file; do
-		echo $file
-	done < <(egrep -l -R '^Acquire' /etc/apt)
+	# Backup and comment out all entries
+	#egrep -l -R '^Acquire' /etc/apt |\
+	#xargs -i@ sed -i.bk`date "+%s"` '/^Acquire/ s/^/#/' @
+	sed -R  '/^Acquire/ s/^/#/' /etc/apt
 
 	#sed -i.bk`date "+%s"` '/^Acquire::http::Proxy/ s/^/#/' /etc/apt/apt.conf
 	#waitAptgetUpdate
