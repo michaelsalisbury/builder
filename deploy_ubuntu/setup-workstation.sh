@@ -60,7 +60,7 @@ Acquire::http::Timeout "2";
 Acquire::http::Proxy::download.oracle.com "DIRECT";
 END-OF-ENTRIES
 	egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
-	xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${new_entrys}" @
+	xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${new_entries}" @
 }
 function setup_Prep_Disable_Apt_Cacher(){
 	desc disconect from apt-cacher
