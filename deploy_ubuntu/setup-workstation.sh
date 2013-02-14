@@ -2,7 +2,8 @@
 skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
-source=http://10.173.119.78/scripts/system-setup/$scriptName
+#source=http://10.173.119.78/scripts/system-setup/$scriptName
+source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/builder/$scriptName
 
 subScriptBase="/root/system-setup/`basename ${source}`"
 
@@ -743,10 +744,10 @@ function setup_adobe(){
 	fi
 	# Install Acrobat Reader
         waitAptgetInstall
-        apt-get ${aptopt} install acroread
+        apt-get ${aptopt} install acroread flashplugin-installer
 	# Install Flash
         waitAptgetInstall
-        apt-get ${aptopt} install flashplugin-installer flashplugin-downloader flashplugin-nonfree-extrasound
+        apt-get ${aptopt} install flashplugin-downloader flashplugin-nonfree-extrasound
 	# Install Firefox Acrobat Plugin
         waitAptgetInstall
         apt-get ${aptopt} install adobe-flashplugin
