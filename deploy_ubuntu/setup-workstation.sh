@@ -59,6 +59,7 @@ function setup_Prep_Tweak_Apt_Cacher(){
 Acquire::http::Timeout "2";
 Acquire::http::Proxy::download.oracle.com "DIRECT";
 END-OF-ENTRIES
+	new_entries=${new_entries//$'\n'/\\\n} ### prep variable for sed append ###
 	egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
 	xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${new_entries}" @
 }
