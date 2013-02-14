@@ -19,7 +19,7 @@ include ../post.chroot.setup_ntpd.cfg
 include ../post.chroot.setup_workstation_wo-Proxy.cfg
 include ../post.chroot.setup_workstation_w-Proxy.cfg
 include ../post.chroot.setup_runonce.cfg
-include ../post.chroot.interactive.cfg
+#include ../post.chroot.interactive.cfg
 #include ../post.nochroot.interactive.cfg
 
 #############################################################################
