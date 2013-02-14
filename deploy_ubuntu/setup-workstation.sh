@@ -123,6 +123,7 @@ function setup_Prep_Add_Repos(){
 	"/etc/apt/sources.list.d/uck-team-uck-unstable-quantal.list"
 
 	# Add Adobe Repo
+	sed -i.save 's/^/#/' "/etc/apt/sources.list.d/canonical_Adobe.list"
 	for repo in								\
 	"deb http://archive.canonical.com/ubuntu precise partner"		\
 	"deb-src http://archive.canonical.com/ubuntu precise partner"		\
