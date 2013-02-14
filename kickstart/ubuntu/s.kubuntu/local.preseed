@@ -21,5 +21,5 @@ tasksel tasksel/first multiselect Kubuntu full
 
 
 # Network name preseed config
-d-i netcfg/get_hostname string DLPBMM1-ubuntu-test-deploy
+d-i netcfg/get_hostname string DLPBMM1-kubuntu-test-deploy
 d-i netcfg/get_domain string   cos.ucf.edu
