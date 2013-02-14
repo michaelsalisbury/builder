@@ -754,6 +754,11 @@ function setup_adobe(){
 	# Install Firefox Acrobat Plugin
         waitAptgetInstall
         apt-get ${aptopt} install adobe-flashplugin
+	# Modify of apt-cacher client setting required for Oracle Java Install
+	egrep -l -R '^Acquire::Proxy' /etc/apt |\
+	xargs -i@ sed -i.bk`date "+%s"` '/^Acquire/ s/^/#/' @
+	
+	
 	# Oracle Java Development Kit JDK X
         waitAptgetInstall
         apt-get ${aptopt} install oracle-java6-installer
