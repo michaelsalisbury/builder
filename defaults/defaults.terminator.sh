@@ -114,7 +114,7 @@ function setup_runonce_layout(){
 			xargs basename)
 	#cmd=${cmd//\/bin\/bash/}
 	#cmd=${cmd//${buildScriptFQFN}/}
-	basname ${buildScriptName} .sh
+	basename ${buildScriptName} .sh
 	echo $pcmd
 	basename `ps -o cmd -p $(ps -o ppid --no-heading -p $$) | awk '{print $3}'` .sh	
 
