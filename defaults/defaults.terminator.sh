@@ -111,7 +111,7 @@ function setup_runonce_layout(){
 
 	# get calling funtion log path
 	local ppid=$(ps -o ppid --no-heading -p $$)
-	ps -o  cmd --no-heading -p ${ppid} |\
+	ps -o  cmd --no-heading -p `ps -o ppid --no-heading -p $$` |\
 	sed "s|/bin/bash||;s|${buildScriptFQFN}||;s|.sh.*||" |\
 	xargs basename
 	#cmd=${cmd//\/bin\/bash/}
