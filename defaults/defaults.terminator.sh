@@ -118,7 +118,7 @@ function setup_runonce_layout(){
 	echo $pcmd
 	local plog="/var/log/$(basename ${buildScriptName} .sh)_${pcmd}/${pcmd}"
 	echo $plog
-	ls plog
+	ls $plog
 	basename `ps -o cmd -p $(ps -o ppid --no-heading -p $$) | awk '{print $3}'` .sh	
 
 }
