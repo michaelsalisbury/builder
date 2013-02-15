@@ -74,12 +74,26 @@ function apt_get_version(){
 
 function apt_clean_n_update(){
 	desc Apt clean \& update
+	waitAptgetUpdate
 	apt-get clean
+	waitAptgetUpdate
+	apt-get autoclean
 	waitAptgetUpdate
 	apt-get -y -q update
 }
 function apt_update_n_upgrade(){
 	desc Apt update \& upgrade
+	waitAptgetUpdate
+	apt-get -y -q update
+	waitAptgetInstall
+	apt-get -y -q upgrade
+}
+function apt_clean_update_upgrade(){
+	desc Apt clean \& update
+	waitAptgetUpdate
+	apt-get clean
+	waitAptgetUpdate
+	apt-get autoclean
 	waitAptgetUpdate
 	apt-get -y -q update
 	waitAptgetInstall
