@@ -97,35 +97,32 @@ function setup_Prep_Config_Autostart(){
 	desc Tail logs and sys resouces at logon
 	# asume that the first user created is the system admin
 	read user uid gid home < <(get_user_details 1000)
-	# autostart setup directory for Unity/GNOME
+	local desktop='.config/autostart/terminator-deploy.desktop'
+	# setup autostart directory for Unity/GNOME, XFCE (Xubuntu) and KDE (Kubuntu)
 	su ${user} << END-OF-MKDIR
 	mkdir ${home}/.config/autostart
+	louch ${home}/${desktop}
+	mkdir -p ${home}/.config/xfce4/autostart
+	mkdir -p ${home}/.kde/Autostart
+	ln ${home}/${desktop} ${home}/.config/xfce4/autostart/.
+	ln ${home}/${desktop} ${home}/.kde/Autostart/.
 END-OF-MKDIR
-	# autostart terminator -l deploy
-	su ${user} << END-OF-RUNONCE.DESKTOP
-	cat << END-OF-DESKTOP_ENTRY > ${home}/.config/autostart/runonce.desktop
+	# autostart terminator -l Deploy desktop config file
+	su ${user} << END-OF-TERMINATOR.DESKTOP
+	cat << END-OF-DESKTOP_ENTRY > ${home}/${desktop}
 [Desktop Entry]
 Type=Application
-Exec=gnome-terminal --geometry=80x30+0+0 -e "tail -f /var/log/${scrLogPath}/${scriptName}"
+Exec=/usr/bin/terminator -l Deploy
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
-Name[en_US]=${scriptName}
-Name=runonce-12.04.sh
-Comment[en_US]=Tail runonce-12.04.sh
-Comment=Tail ${scriptName}
-
+Name[en_US]=Terminator-Deploy
+Name=Terminator-Deploy
+Comment[en_US]=Terminator Deploy Layout
+Comment=Terminator Deploy Layout
 END-OF-DESKTOP_ENTRY
-END-OF-RUNONCE.DESKTOP
-	# autostart setup directory for XFCE (Xubuntu)
+END-OF-TERMINATOR.DESKTOP
 	su ${user} << END-OF-MKDIR
-	mkdir -p ${home}/.config/xfce4/autostart
-	ln ${home}/.config/autostart/{top,syslog,runonce}* ${home}/.config/xfce4/autostart/.
-END-OF-MKDIR
-	# autostart setup directory for KDE (Kubuntu)
-	su ${user} << END-OF-MKDIR
-	mkdir -p ${home}/.kde/Autostart
-	ln ${home}/.config/autostart/{top,syslog,runonce}* ${home}/.config/xfce4/autostart/.
 END-OF-MKDIR
 }
 
