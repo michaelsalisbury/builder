@@ -101,37 +101,7 @@ function setup_Prep_Config_Autostart(){
 	su ${user} << END-OF-MKDIR
 	mkdir ${home}/.config/autostart
 END-OF-MKDIR
-	# autostart top
-	su ${user} << END-OF-TOP.DESKTOP
-	cat << END-OF-DESKTOP_ENTRY > ${home}/.config/autostart/top.desktop
-[Desktop Entry]
-Type=Application
-Exec=gnome-terminal --geometry=80x50+1000 -e top
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name[en_US]=top
-Name=top
-Comment[en_US]=top
-Comment=top
-END-OF-DESKTOP_ENTRY
-END-OF-TOP.DESKTOP
-	# autostart tail /var/log/syslog
-	su ${user} << END-OF-SYSLOG.DESKTOP
-	cat << END-OF-DESKTOP_ENTRY > ${home}/.config/autostart/syslog.desktop
-[Desktop Entry]
-Type=Application
-Exec=gnome-terminal --geometry=80x30+0+1000 -e "tail -f /var/log/syslog"
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name[en_US]=syslog
-Name=syslog
-Comment[en_US]=Tail syslog
-Comment=Tail syslog
-END-OF-DESKTOP_ENTRY
-END-OF-SYSLOG.DESKTOP
-	# autostart tail /var/log/$scrLogPath/$scriptName
+	# autostart terminator -l deploy
 	su ${user} << END-OF-RUNONCE.DESKTOP
 	cat << END-OF-DESKTOP_ENTRY > ${home}/.config/autostart/runonce.desktop
 [Desktop Entry]
