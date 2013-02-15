@@ -875,8 +875,7 @@ function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
         ###################################################################################
 	waitForNetwork || return 1
-	apt_clean_n_update
-	apt_update_n_upgrade
+	apt_clean_update_upgrade
 }
 
 function waitForNetwork(){
