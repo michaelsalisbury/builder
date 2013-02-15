@@ -101,7 +101,7 @@ function setup_Prep_Config_Autostart(){
 	# setup autostart directory for Unity/GNOME, XFCE (Xubuntu) and KDE (Kubuntu)
 	su ${user} << END-OF-MKDIR
 	mkdir ${home}/.config/autostart
-	louch ${home}/${desktop}
+	touch ${home}/${desktop}
 	mkdir -p ${home}/.config/xfce4/autostart
 	mkdir -p ${home}/.kde/Autostart
 	ln ${home}/${desktop} ${home}/.config/xfce4/autostart/.
