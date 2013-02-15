@@ -468,15 +468,20 @@ function waitAptgetInstall(){
         done
 }
 function waitForNetwork(){
-	[[ "$1" =~ ^[0-9]+ ]] && local timeout=$(( `date "+%s"` + $1 )) || local timeout=$(( `date "+%s"` + 300 ))
+	[[ "$1" =~ ^[0-9]+ ]]	&& local timeout=$(( `date "+%s"` +  $1 )) \
+				|| local timeout=$(( `date "+%s"` + 300 ))
+	# Lookup local path to command "host"
 	local cmd=( `whereis -b host` )
+	# If command "host" is missing throw error
 	if (( ${#cmd[@]} == 1 )); then
 		derr The command \"host\" missing or not installed
 		return 1
 	fi
 	local cnt=0
 	echo -n .
+	# Loop for duration of timeout period
 	while (( `date "+%s"` < $timeout )); do
+		# Loop threw listed domains testing to see if they resolv
 		while read dom; do
 			if ${cmd[1]} -W 3 $dom |& grep "has address" &> /dev/null; then
 				let cnt++
@@ -491,31 +496,8 @@ function waitForNetwork(){
 			wikipedia.org
 			sourceforge.net
 END-OF-DOMAIN-LIST
+		# Exit with a positive return if we get 5 or more DNS responces
 		(( $cnt >= 5 )) && return 0
-	done
-	return 1
-}
-function waitForNetwork2(){
-	[[ "$1" =~ ^[0-9]+ ]] && wfn_timeout=$(( `date "+%s"` + $1 )) || wfn_timeout=$(( `date "+%s"` + 300 ))
-	wfn_DNSS=( 10.171.92.40 8.8.8.8 10.171.92.41 8.8.4.4 )
-	if [ ! -f `whereis -b nslookup | awk '{print $2}'`"" ]; then
-		derr The command \"nslookup\" missing or not installed
-		return 1
-	fi
-	wfn_cnt=0
-	echo -n .
-	while (( `date "+%s"` < $wfn_timeout )); do
-		for wfn_ip in ${wfn_DNSS[*]}; do
-			if `nslookup -timeout=1 amazon.com $wfn_ip \
-			    |& egrep "^Non-authoritative answer:$" \
-			    > /dev/null`; then
-				let wfn_cnt++
-				echo -n .
-			else
-				echo -n !
-			fi
-		done
-		(( $wfn_cnt >= 2 )) && return 0
 	done
 	return 1
 }
