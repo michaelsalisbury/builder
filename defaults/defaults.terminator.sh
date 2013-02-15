@@ -109,6 +109,11 @@ function setup_runonce_layout(){
 	echo " PPID" = `ps -o pid,ppid,cmd --no-heading -p $(ps $opts -p $$)`
 	echo "PPPID" = `ps -o pid,ppid,cmd --no-heading -p $(ps $opts -p $(ps $opts -p $$))`
 
+	# get calling funtion log path
+	local PPID=$(ps -o ppid --no-heading -p $$)
+	local  CMD=$(ps -o  cmd --no-heading -p ${PPID})
+	CMD=${CMD//\bin\bash/}
+	echo $CMD
 	basename `ps -o cmd -p $(ps -o ppid --no-heading -p $$) | awk '{print $3}'` .sh	
 
 }
