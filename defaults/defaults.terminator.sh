@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false )
+skip=( false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -64,7 +64,7 @@ function setup_make_Config(){
       order = 0
       parent = child2
       title = cmd
-      command = 'cd ${ppath}; /bin/bash -l'
+      command = /usr/bin/sudo /bin/bash -c 'cd ${ppath}; /bin/bash -l'
     [[[terminal4]]]
       profile = default
       type = Terminal
