@@ -1,9 +1,9 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 #source=http://10.173.119.78/scripts/system-setup/$scriptName
-source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/deploys/$scriptName
+source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/builder/$scriptName
 
 subScriptBase="/root/system-setup/`basename ${source}`"
 
@@ -14,15 +14,14 @@ subScriptBase="/root/system-setup/`basename ${source}`"
 #	DISTRIB_DESCRIPTION="Ubuntu 11.10"
 while read import; do
 	${import:+.} "${import:-false}"
-done < <(
-	ls -1                           /etc/lsb-release 2> /dev/null
-	ls -1              "${scriptPath}"/functions*.sh 2> /dev/null
-	ls -1 "${scriptPath}"/../functions/functions*.sh 2> /dev/null
-)
+done << IMPORTS
+	/etc/lsb-release
+	`ls -1              "${scriptPath}"/functions*.sh 2> /dev/null`
+	`ls -1 "${scriptPath}"/../functions/functions*.sh 2> /dev/null`
+IMPORTS
 	#`ls -1    functions/functions*.sh 2> /dev/null`
 
 aptopt="-y -q"
-autoLoginUser="localcosadmin"
 #autoLoginShell="ubuntu"
 #autoLoginShell="gnome-session-fallback"
 autoLoginShell="xfce4-session"
@@ -84,68 +83,6 @@ function setup_Prep_Disable_Apt_Cacher(){
 	waitAptgetUpdate
 	apt-get update
 }
-function setup_Prep_Enable_Autologin(){
-	desc Auto logon sys admin
-	# setup autologin user
-	/usr/lib/lightdm/lightdm-set-defaults --autologin ${autoLoginUser}
-	# setup autologin timeout
-	cp /etc/lightdm/lightdm.conf                          /etc/lightdm/lightdm.bk`date "+%s"`
-	sed -i '/^autologin-user-timeout=/d'                  /etc/lightdm/lightdm.conf
-	sed -i '/^\[SeatDefaults\]/aautologin-user-timeout=3' /etc/lightdm/lightdm.conf
-}
-function setup_Prep_Config_Autostart(){
-	desc Tail logs and sys resouces at logon
-	# asume that the first user created is the system admin
-	read user uid gid home < <(get_user_details 1000)
-	# autostart top
-	su ${user} << END-OF-TOP.DESKTOP
-	mkdir ${home}/.config/autostart
-	cat << END-OF-DESKTOP_ENTRY > ${home}/.config/autostart/top.desktop
-[Desktop Entry]
-Type=Application
-Exec=gnome-terminal --geometry=80x50+1000 -e top
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name[en_US]=top
-Name=top
-Comment[en_US]=top
-Comment=top
-END-OF-DESKTOP_ENTRY
-END-OF-TOP.DESKTOP
-	# autostart tail /var/log/syslog
-	su ${user} << END-OF-SYSLOG.DESKTOP
-	cat << END-OF-DESKTOP_ENTRY > ${home}/.config/autostart/syslog.desktop
-[Desktop Entry]
-Type=Application
-Exec=gnome-terminal --geometry=80x30+0+1000 -e "tail -f /var/log/syslog"
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name[en_US]=syslog
-Name=syslog
-Comment[en_US]=Tail syslog
-Comment=Tail syslog
-END-OF-DESKTOP_ENTRY
-END-OF-SYSLOG.DESKTOP
-	# autostart tail /var/log/$scrLogPath/$scriptName
-	su ${user} << END-OF-RUNONCE.DESKTOP
-	cat << END-OF-DESKTOP_ENTRY > ${home}/.config/autostart/runonce.desktop
-[Desktop Entry]
-Type=Application
-Exec=gnome-terminal --geometry=80x30+0+0 -e "tail -f /var/log/${scrLogPath}/${scriptName}"
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name[en_US]=${scriptName}
-Name=runonce-12.04.sh
-Comment[en_US]=Tail runonce-12.04.sh
-Comment=Tail ${scriptName}
-
-END-OF-DESKTOP_ENTRY
-END-OF-RUNONCE.DESKTOP
-}
-
 function setup_Prep_Hostname(){
 	desc \set hostname to vendor serial: Dell
 
@@ -429,6 +366,8 @@ function setup_VBox_Additions(){
 	waitForNetwork || return 1
 	stall 3
 	# Prep for vbox extentions
+	waitAptgetUpdate
+	apt-get ${aptopt} update
 	waitAptgetInstall
 	local kernel_headers=$(apt-cache search "linux-headers-$(uname -r)" | awk '{print $1}')
 	apt-get ${aptopt} install make gcc dkms $kernel_headers xserver-xorg xserver-xorg-core
