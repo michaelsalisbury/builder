@@ -17,6 +17,12 @@ function setup_skel_Structure(){
 }
 function setup_make_Config(){
 	desc Setting up default config
+	# Get parent script log path
+	local pcmd=$(ps -o  cmd --no-heading -p `ps -o ppid --no-heading -p $$`	|\
+			sed "s|/bin/bash||;s|${buildScriptFQFN}||;s|.sh.*||"	|\
+			xargs basename)
+	local plog="/var/log/$(basename ${buildScriptName} .sh)_${pcmd}/${pcmd}"
+	# write config
 	cat << END-OF-CONFIG > /etc/skel/.config/terminator/config
 [global_config]
 [keybindings]
@@ -57,7 +63,7 @@ function setup_make_Config(){
       order = 0
       parent = child2
       title = cmd
-      command = 'cd /root/deploys; /bin/bash -l'
+      command = 'cd deploys; /bin/bash -l'
     [[[terminal4]]]
       profile = default
       type = Terminal
@@ -71,7 +77,7 @@ function setup_make_Config(){
       order = 1
       parent = child5
       title = runonce
-      command = tail -f /var/log/syslog
+      command = tail -f ${plog}
     [[[terminal6]]]
       profile = default
       type = Terminal
@@ -109,17 +115,7 @@ function setup_runonce_layout(){
 	echo " PPID" = `ps -o pid,ppid,cmd --no-heading -p $(ps $opts -p $$)`
 	echo "PPPID" = `ps -o pid,ppid,cmd --no-heading -p $(ps $opts -p $(ps $opts -p $$))`
 
-	local pcmd=$(ps -o  cmd --no-heading -p `ps -o ppid --no-heading -p $$`	|\
-			sed "s|/bin/bash||;s|${buildScriptFQFN}||;s|.sh.*||"	|\
-			xargs basename)
-	#cmd=${cmd//\/bin\/bash/}
-	#cmd=${cmd//${buildScriptFQFN}/}
-	basename ${buildScriptName} .sh
-	echo $pcmd
-	local plog="/var/log/$(basename ${buildScriptName} .sh)_${pcmd}/${pcmd}"
-	echo $plog
-	ls $plog
-	basename `ps -o cmd -p $(ps -o ppid --no-heading -p $$) | awk '{print $3}'` .sh	
+
 
 }
 
