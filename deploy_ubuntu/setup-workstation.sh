@@ -161,7 +161,7 @@ END-OF-MKDIR
 
 function setup_Prep_Hostname(){
 	desc \set hostname to vendor serial: Dell
-	echo "  PPI" = `ps -o pid,ppid,cmd --no-heading -p $$`
+	echo "  PID" = `ps -o pid,ppid,cmd --no-heading -p $$`
 	echo " PPID" = `ps -o pid,ppid,cmd --no-heading -p $(ps $opts -p $$)`
 	echo "PPPID" = `ps -o pid,ppid,cmd --no-heading -p $(ps $opts -p $(ps $opts -p $$))`
 	${scriptPath}/../defaults/defaults.terminator.sh -i layout
