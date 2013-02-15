@@ -114,7 +114,7 @@ function setup_runonce_layout(){
 	local  cmd=$(ps -o  cmd --no-heading -p ${ppid})
 	cmd=${cmd//\/bin\/bash/}
 	cmd=${cmd//${buildScriptFQFN}/}
-	cmd=${cmd[0]}
+	cmd=( ${cmd} )
 	echo $cmd
 	basename `ps -o cmd -p $(ps -o ppid --no-heading -p $$) | awk '{print $3}'` .sh	
 
