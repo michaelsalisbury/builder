@@ -1,5 +1,5 @@
-#!/bin/builder.sh
-skip=( false false false false )
+
+skip#!/bin/builder.sh=( false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -24,43 +24,68 @@ function setup_make_Config(){
   [[default]]
     copy_on_selection = True
     use_system_font = False
-    font = Monospace 13
+    font = Monospace 14
     scrollbar_position = hidden
     scrollback_infinite = True
+    login_shell = True
 [layouts]
-  [[default]]
+  [[Deploy]]
     [[[child0]]]
-      position = 74:29
+      position = 2113:155
       type = Window
       order = 0
       parent = ""
-      size = 1846, 1051
+      size = 1855, 1056
     [[[child1]]]
-      position = 923
-      type = HPaned
+      position = 614
+      type = VPaned
       order = 0
       parent = child0
-    [[[child3]]]
-      position = 525
-      type = VPaned
-      order = 1
-      parent = child1
-    [[[terminal2]]]
-      profile = hp-dv6tqe
-      type = Terminal
+    [[[child2]]]
+      position = 927
+      type = HPaned
       order = 0
       parent = child1
-    [[[terminal5]]]
-      profile = hp-dv6tqe
-      type = Terminal
+    [[[child5]]]
+      position = 927
+      type = HPaned
       order = 1
-      parent = child3
-      command = tail -f /var/log/messages /var/log/httpd/access_log
+      parent = child1
+    [[[terminal3]]]
+      profile = default
+      type = Terminal
+      order = 0
+      parent = child2
+      title = cmd
+      command = 'cd /root/deploys; /bin/bash -l'
     [[[terminal4]]]
-      profile = hp-dv6tqe
+      profile = default
+      type = Terminal
+      order = 1
+      parent = child2
+      title = top
+      command = top
+    [[[terminal7]]]
+      profile = default
+      type = Terminal
+      order = 1
+      parent = child5
+      title = runonce
+      command = tail -f /var/log/syslog
+    [[[terminal6]]]
+      profile = default
       type = Terminal
       order = 0
-      parent = child3
+      parent = child5
+      title = syslog
+      command = tail -f /var/log/syslog
+  [[default]]
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+    [[[window0]]]
+      type = Window
+      parent = ""
 [plugins]
 END-OF-CONFIG
 	chmod 700 /etc/skel/.config/terminator/config
@@ -77,3 +102,16 @@ END-OF-CMDS
 )
 	done
 }
+function setup_runonce_layout(){
+	desc layout
+
+}
+
+
+
+
+
+
+
+
+
