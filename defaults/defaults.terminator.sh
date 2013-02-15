@@ -1,5 +1,6 @@
 
-skip#!/bin/builder.sh=( false false false false )
+skip
+#!/bin/builder.sh=( false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
