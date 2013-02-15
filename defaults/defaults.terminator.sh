@@ -109,32 +109,4 @@ END-OF-CMDS
 )
 	done
 }
-function setup_runonce_layout(){
-	desc layout
-	opts='-o ppid --no-heading'
-	echo "  PID" = `ps -o pid,ppid,cmd --no-heading -p $$`
-	echo " PPID" = `ps -o pid,ppid,cmd --no-heading -p $(ps $opts -p $$)`
-	echo "PPPID" = `ps -o pid,ppid,cmd --no-heading -p $(ps $opts -p $(ps $opts -p $$))`
-
-	local pFQFN=$(ps -o  cmd --no-heading -p `ps -o ppid --no-heading -p $$`|\
-			sed "s|/bin/bash||;s|${buildScriptFQFN}||;s|.sh.*||")
-	local pcmd=$(basename ${pFQFN})
-	local ppath=$(dirname ${pFQFN})
-	local plog="/var/log/$(basename ${buildScriptName} .sh)_${pcmd}/${pcmd}"
-
-
-	echo $pcmd
-	echo $ppath
-	# write config
-
-
-}
-
-
-
-
-
-
-
-
 
