@@ -161,6 +161,10 @@ END-OF-MKDIR
 
 function setup_Prep_Hostname(){
 	desc \set hostname to vendor serial: Dell
+	echo PID = $$
+	echo PPID = `ps -o ppid,cmd --no-heading -p $$`
+	echo func
+	${scriptPath}/../defaults/defaults.terminator.sh -i layout
 
 
 }
