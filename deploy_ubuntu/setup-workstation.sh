@@ -862,9 +862,10 @@ function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
         ###################################################################################
 	waitForNetwork || return 1
-	apt_clean_update_upgrade
+	echo up
+	#apt_clean_update_upgrade
 }
 
-function waitForNetwork(){
-	mesg Network up
-}
+#function waitForNetwork(){
+#	mesg Network up
+#}
