@@ -112,7 +112,7 @@ END-OF-MKDIR
 	cat << END-OF-DESKTOP_ENTRY > ${home}/${desktop}
 [Desktop Entry]
 Type=Application
-Exec=/usr/bin/terminator -l Deploy
+Exec=/usr/bin/terminator -m -l Deploy
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
@@ -383,6 +383,8 @@ function setup_Unity_Classic_Menu(){
         apt-get ${aptopt} install python-gmenu
         mkdir /root/Downloads
         cd    /root/Downloads
+        waitAptgetInstall
+	apt-get ${aptopt} install python-appindicator	
         wget https://launchpad.net/~diesch/+archive/testing/+build/3076110/+files/classicmenu-indicator_0.07_all.deb
         waitAptgetInstall
         dpkg -i classicmenu-indicator_0.07_all.deb
