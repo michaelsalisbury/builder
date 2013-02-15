@@ -104,7 +104,8 @@ END-OF-CMDS
 }
 function setup_runonce_layout(){
 	desc layout
-
+	echo PID = $$
+	echo PPID = `ps -o ppid,cmd --no-heading -p $$`
 }
 
 
