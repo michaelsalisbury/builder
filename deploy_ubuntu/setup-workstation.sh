@@ -97,9 +97,12 @@ function setup_Prep_Config_Autostart(){
 	desc Tail logs and sys resouces at logon
 	# asume that the first user created is the system admin
 	read user uid gid home < <(get_user_details 1000)
+	# autostart setup directory for Unity/GNOME
+	su ${user} << END-OF-MKDIR
+	mkdir ${home}/.config/autostart
+END-OF-MKDIR
 	# autostart top
 	su ${user} << END-OF-TOP.DESKTOP
-	mkdir ${home}/.config/autostart
 	cat << END-OF-DESKTOP_ENTRY > ${home}/.config/autostart/top.desktop
 [Desktop Entry]
 Type=Application
@@ -144,6 +147,16 @@ Comment=Tail ${scriptName}
 
 END-OF-DESKTOP_ENTRY
 END-OF-RUNONCE.DESKTOP
+	# autostart setup directory for XFCE (Xubuntu)
+	su ${user} << END-OF-MKDIR
+	mkdir -p ${home}/.config/xfce4/autostart
+	ln ${home}/.config/autostart/{top,syslog,runonce}* ${home}/.config/xfce4/autostart/.
+END-OF-MKDIR
+	# autostart setup directory for KDE (Kubuntu)
+	su ${user} << END-OF-MKDIR
+	mkdir -p ${home}/.kde/Autostart
+	ln ${home}/.config/autostart/{top,syslog,runonce}* ${home}/.config/xfce4/autostart/.
+END-OF-MKDIR
 }
 
 function setup_Prep_Hostname(){
