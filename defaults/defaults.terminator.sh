@@ -18,10 +18,10 @@ function setup_skel_Structure(){
 function setup_make_Config(){
 	desc Setting up default config
 	# Get parent script log path
-	local pFQFN=$(ps -o  cmd --no-heading -p `ps -o ppid --no-heading -p $$`|\
-			sed "s|/bin/bash||;s|${buildScriptFQFN}||;s|.sh.*||")
+	local ppid=$(ps -o ppid --no-heading -p $$)
+	local pFQFN=$(ps -o  cmd --no-heading -p $ppid | sed "s|/bin/bash||;s|${buildScriptFQFN}||;s|.sh.*||")
 	local pcmd=$(basename ${pFQFN})
-	local ppath$(dirname  ${pFQFN})
+	local ppath=$(dirname ${pFQFN})
 	local plog="/var/log/$(basename ${buildScriptName} .sh)_${pcmd}/${pcmd}"
 	# write config
 	cat << END-OF-CONFIG > /etc/skel/.config/terminator/config
@@ -64,7 +64,7 @@ function setup_make_Config(){
       order = 0
       parent = child2
       title = cmd
-      command = 'cd deploys; /bin/bash -l'
+      command = 'cd ${ppath}; /bin/bash -l'
     [[[terminal4]]]
       profile = default
       type = Terminal
