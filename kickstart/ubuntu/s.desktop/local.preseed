@@ -1,9 +1,9 @@
 # https://help.ubuntu.com/10.04/installation-guide/i386/preseed-contents.html
 #############################################################################
 # Apt-Cache Server
-d-i mirror/http/proxy string http://10.173.119.78:3142/
+#d-i mirror/http/proxy string http://10.173.119.78:3142/
 #d-i mirror/http/proxy string http://10.173.119.72:3142/
-#d-i mirror/http/proxy string http://192.168.253.3:3142/
+d-i mirror/http/proxy string http://192.168.253.3:3142/
 
 # Primary instalation task
 #tasksel tasksel/first multiselect Basic Ubuntu Server
@@ -21,5 +21,7 @@ tasksel tasksel/first multiselect Ubuntu desktop
 
 
 # Network name preseed config
-d-i netcfg/get_hostname string DLPBMM1-ubuntu-test-deploy
-d-i netcfg/get_domain string   cos.ucf.edu
+#d-i netcfg/get_hostname string DLPBMM1-ubuntu-test-deploy
+#d-i netcfg/get_domain string   cos.ucf.edu
+d-i netcfg/get_hostname string Unity
+d-i netcfg/get_domain string   pig.pie

@@ -11,6 +11,7 @@ cp                         ../local.cfg.template    local.cfg
 cp                      ../defaults.cfg.template defaults.cfg
 cp                      ../packages.cfg.template packages.cfg
 cp ../post.chroot.setup_workstation_wo-Proxy.cfg post.chroot.setup_workstation_wo-Proxy.cfg
+cp ../post.chroot.setup_workstation_w-ProxyC.cfg post.chroot.setup_workstation_w-ProxyC.cfg
 cp  ../post.chroot.setup_workstation_w-Proxy.cfg post.chroot.setup_workstation_w-Proxy.cfg
 cp              ../post.chroot.setup_runonce.cfg post.chroot.setup_runonce.cfg
 echo Copying preseed templates
