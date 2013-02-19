@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Depends on cifs-utils and winbind
+# Ubuntu 12.10 does not support options; forceuid, forcegid
+
+username=$(whoami)
+uid=$(cat /etc/passwd | grep ${username} | cut -d: -f3)
+gid=$(cat /etc/passwd | grep ${username} | cut -d: -f4)
+home=$(cat /etc/passwd | grep ${username} | cut -d: -f6)
+groupname=$(cat /etc/group | grep ${gid} | cut -d: -f1)
+
+
+#echo $username
+#echo $uid
+#echo $home
+#exit 0
+
+opt=(
+iocharset=utf8
+file_mode=0750
+dir_mode=0750
+uid=${uid}
+forceuid=${uid}
+gid=${gid}
+forcegid=${gid}
+sec=ntlmssp
+)
+opt=(
+iocharset=utf8
+file_mode=0750
+dir_mode=0750
+uid=${uid}
+gid=${gid}
+sec=ntlmssp
+noperm
+nounix
+)
+opt=${opt[*]}
+opt=${opt// /,}
+
+#echo $username
+#echo $uid
+#echo $home
+#echo $opt
+
+while read cred; do
+	echo '######################################################################'
+	echo
+	cred=${cred##*/}
+	fldr=${cred%-*}
+	fldr=${fldr#*-}
+	cred="credentials=${home}/${cred}"
+	echo ${cred}
+	while read share; do
+		name=${share##*/}
+		echo "${share}	${home}/${fldr}/${name}"
+		#echo ${opt},credentials=${home}/${cred}
+		sudo umount -v             "${home}/${fldr}/${name}"
+		sudo umount -v             "${home}/${fldr}/${name}"
+		mkdir -pv                  "${home}/${fldr}/${name}"
+		
+		echo sudo mount.cifs "${share}" "${home}/${fldr}/${name}" -o ${opt},${cred}
+		sudo mount.cifs "${share}" "${home}/${fldr}/${name}" -o ${opt},${cred}
+	done < <(cat ${home}/.cifs-${fldr}-shares)
+done < <(ls ${home}/.cifs-*-cred)
