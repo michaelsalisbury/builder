@@ -12,12 +12,12 @@ done < <(ls -1              "${scriptPath}"/functions.*.sh 2> /dev/null
 function setup_skel_Structure(){
 	desc Build skel directory structure
 	mkdir -p   /etc/skel/.scripts
-	chmod 750  /etc/skel/.scripts
+	chmod 700  /etc/skel/.scripts
 	mkdir -p   /etc/skel/.logs
-	chmod 750  /etc/skel/.logs
+	chmod 700  /etc/skel/.logs
 	local scriptBase=$(basename "${scriptName}" .sh)
-	cp "${scriptPath}/${scriptBase}.exp" /etc/skel/.scripts/.
-	chmod 750 "/etc/skel/.scripts/${scriptBase}.exp"
+	cp "${scriptPath}/${scriptBase}.exp" /etc/skel/.scripts/openconnect.exp
+	chmod u+x                            /etc/skel/.scripts/openconnect.exp
 	touch      /etc/skel/.vpn.conf
 	chmod 600  /etc/skel/.vpn.conf
 	touch      /etc/sudoers.d/openconnect
@@ -27,9 +27,9 @@ function setup_skel_Structure(){
 function setup_make_Config(){
 	desc Setting up default config
 	cat << END-OF-ALIASES > /etc/profile.d/openconnect
-alias vpnc='\${HOME}/.scripts/${scriptBase}.exp &> \${HOME}/.logs/${scriptBase} &'
+alias vpnc='\${HOME}/.scripts/openconnect.exp &> \${HOME}/.logs/openconnect &'
 alias vpnd='killall openconnect'
-alias vpns='ifconfig tun; tail \${HOME}/.logs/${scriptBase}'
+alias vpns='ifconfig tun; tail \${HOME}/.logs/openconnect'
 END-OF-ALIASES
 	cat << END-OF-VPNCONF >> /etc/skel/.vpn.conf
 username = [NID]
@@ -42,24 +42,23 @@ END-OF-VPNCONF
 %openconnect ALL=(root) NOPASSWD:/usr/sbin/openconnect
 %openconnect ALL=(root) NOPASSWD:/usr/bin/killall openconnect
 END-OF-SUDOERS
-	# Modify /etc/addusers.conf to include new group openconnect
-	sed -i '/^.*EXTRA_GROUPS=/ s/^[# ]*//'             /etc/addusers.conf
-	sed -i '/^EXTRA_GROUPS=/   s/"$/ openconnect"/'    /etc/addusers.conf
-	sed -i '/^ADD_EXTRA_GROUPS=.*/cADD_EXTRA_GROUPS=1' /etc/addusers.conf
+	# Modify /etc/adduser.conf to include new group openconnect
+	add_default_group openconnect
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
 	local scriptBase=$(basename "${scriptName}" .sh)
 	get_user_details all | while read user uid gid home; do
+		usermod -a -G openconnect ${user}
 		su -m ${user} < <(cat << END-OF-CMDS
 			mkdir -p  "${home}/.scripts
-			chmod 750 "${home}/.scripts
+			chmod 700 "${home}/.scripts
 			mkdir -p  "${home}/.logs
-			chmod 750 "${home}/.logs
-			cp "/etc/skel/.scrips/${scriptBase}.exp" "${home}/.scripts/.
-			chmod 750                                "${home}/.scripts/${scriptBase}.exp"
-			cp "/etc/skel/.vpn.conf"                 "${home}/."
-			chmod 600                                "${home}/.vpn.conf"
+			chmod 700 "${home}/.logs
+			cp "/etc/skel/.scrips/openconnect.exp" "${home}/.scripts/.
+			chmod 700                              "${home}/.scripts/openconnect.exp"
+			cp "/etc/skel/.vpn.conf"               "${home}/."
+			chmod 600                              "${home}/.vpn.conf"
 END-OF-CMDS
 )
 	done

@@ -20,6 +20,8 @@ debconf debconf-utils
 gconf-editor
 # gnome and unity desktop visual manipulation
 compizconfig-settings-manager
+# cifs
+samba cifs-utils winbind
 
 # VPN
 openconnect

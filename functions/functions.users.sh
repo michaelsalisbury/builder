@@ -32,20 +32,35 @@ function get_user_details(){
 	local ID=$1
 	shopt -s nocasematch
 	if [ "$ID" == "all" ]; then
-		cat /etc/passwd | awk -F: -f <(cat << END-OF-SED
-			{if (((\$3 >= 1000)||(\$1 == "root"))&&(\$1 != "nobody"))
-				{print \$1" "\$3" "\$4" "\$6;}
-			}
-END-OF-SED
-		)
+		read -d $'' awk << END-OF-AWK
+		{if (((\$3 >= 1000)||(\$1 == "root"))&&(\$1 != "nobody"))
+			{print \$1" "\$3" "\$4" "\$6;}
+		}
+END-OF-AWK
 	else
-		cat /etc/passwd | awk -F: -f <(cat << END-OF-SED
-			{if ((\$1 == "$ID")||(\$3 == "$ID"))
-				{print \$1" "\$3" "\$4" "\$6;}
-			}
-END-OF-SED
-		)
+		read -d $'' awk1 << END-OF-AWK
+		{if ((\$1 == "$ID")||(\$3 == "$ID"))
+			{print \$1" "\$3" "\$4" "\$6;}
+		}
+END-OF-AWK
 	fi
 	shopt -u nocasematch
+	awk -F: "${awk}" /etc/passwd
 }
-
+function add_default_group(){
+	local group=$1
+	sed -i "/^.*EXTRA_GROUPS=/s/^[# ]*//"                     /etc/adduser.conf
+        sed -i "/^EXTRA_GROUPS=/{/${group}/!s/\"$/ ${group}\"/;}" /etc/adduser.conf
+        sed -i '/^ADD_EXTRA_GROUPS=.*/cADD_EXTRA_GROUPS=1'        /etc/adduser.conf
+}
+function del_default_group(){
+	local group=$1
+	local groups=$(sed '/^EXTRA_GROUPS.*/p;d' /etc/adduser.conf)
+	if [[ "${groups}" =~ ^$ ]]; then
+		return 0;
+	elif [[ "${group}" =~ "${group}" ]]; then
+		sed -i "/^EXTRA_GROUPS.*${group}/s/[ ]?${group}//" /etc/adduser.conf
+		return $?
+	fi
+	return 1
+}
