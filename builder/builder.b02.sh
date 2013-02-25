@@ -302,6 +302,7 @@ function find_function(){
 }
 function eval_function(){ cat "$buildScriptPipe" | log_output $1 &
 			  eval `name_function $1` &> "$buildScriptPipe"; 
+			  name_function $1
 			  echo $?
 
 }
