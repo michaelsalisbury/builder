@@ -1,5 +1,5 @@
 #!/bin/builder.b02.sh
-skip=( false false )
+skip=( false false false false false )
 step=2
 prefix="setup"
 
@@ -13,7 +13,7 @@ prefix="setup"
 function setup_A(){
 	echo $FUNCNAME
 }
-function setup_B){
+function setup_B(){
 	echo $FUNCNAME
 }
 function setup_C(){
