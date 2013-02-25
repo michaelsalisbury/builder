@@ -86,7 +86,7 @@ function switches(){
 					disp_functions; echo;;
 			n)		skip || eval_function $step; next; wrap; disp_functions; echo;;
                         s)              show_help; 
-					[ $OPTARG == a ] && OPTARG=0;
+					#[ $OPTARG == a ] && OPTARG=0;
 					skip_function $OPTARG; disp_functions; echo;;
                         r)              rset;
 					[ $OPTARG == r ] && return 1;
