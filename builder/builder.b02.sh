@@ -363,7 +363,7 @@ function skip_function(){
 		
 		*)	local func=`find_function $1`
 			[[ $func =~ ^[0-9]+$ ]] && (( $func <= `last_function` )) || return 1
-			(( func )) && ! skip[0]=false	
+			(( func )) && skip[0]=false	
 			${skip[$func]} && skip[$func]=false || skip[$func]=true
 			fixs;; 
 	esac	
