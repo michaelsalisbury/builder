@@ -78,6 +78,7 @@ function switches(){
 					wrap; disp_functions; echo;;
 			i)		step=`find_function $OPTARG`
 					eval_function $step
+					
 					ls -l `log_get_name $step`
 					;;
 			#i)		find_function $OPTARG		\
@@ -266,6 +267,13 @@ function move_up(){
 }
 ###########################################################################################
 ###########################################################################################
+function log_is_empty(){  local log=`log_get_name $1`
+			  [ -f "${log}" ] && {
+				
+
+
+			  }
+}
 function log_tail_main(){ [ -f "$scrLogFQFN" ] && tail -n +1 -f "$scrLogFQFN" || \
 		          desc 50 Log \"$scrLogFQFN\" unavailable!; }
 function log_tail_func(){ [ -f "`log_get_name $1`" ] && tail -n +1 -f "`log_get_name $1`" || \
