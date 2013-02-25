@@ -360,9 +360,9 @@ function disp_functions(){
 function skip_function(){
 	case $1 in
 		a)	skip_function 0;;
-		*)	local step=`find_function $1`
-			[[ $step =~ ^[0-9]+$ ]] && (( $step <= `last_function` )) || return 1
-			${skip[$step]} && skip[$step]=false || skip[$step]=true
+		*)	local func=`find_function $1`
+			[[ $func =~ ^[0-9]+$ ]] && (( $func <= `last_function` )) || return 1
+			${skip[$func]} && skip[$func]=false || skip[$func]=true
 			fixs;; 
 	esac	
 }
