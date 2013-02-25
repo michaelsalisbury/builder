@@ -76,7 +76,10 @@ function switches(){
                         h)              show_help; disp_functions; echo;;
 			j)		[[ $OPTARG =~ (b|u) ]] && back || next;
 					wrap; disp_functions; echo;;
-			i)		eval_function `find_function $OPTARG` || disp_functions;;
+			i)		step=`find_function $OPTARG`
+					eval_function $step
+					log_get_name $step
+					;;
 			#i)		find_function $OPTARG		\
 			#		&& eval_function `find_function $OPTARG` \
 			#		|| disp_functions;;
@@ -302,9 +305,6 @@ function find_function(){
 }
 function eval_function(){ cat "$buildScriptPipe" | log_output $1 &
 			  eval `name_function $1` &> "$buildScriptPipe"; 
-			  eval bogus
-			  echo $?
-
 }
 function name_function(){ list_functions | sed "$1!d"; }
 function last_function(){ list_functions | wc -l; }
