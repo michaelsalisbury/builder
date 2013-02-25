@@ -78,8 +78,8 @@ function switches(){
 					wrap; disp_functions; echo;;
 			i)		step=`find_function $OPTARG`
 					eval_function $step
-					
-					ls -l `log_get_name $step`
+					log_is_empty $step && disp_functions	
+					#ls -l `log_get_name $step`
 					;;
 			#i)		find_function $OPTARG		\
 			#		&& eval_function `find_function $OPTARG` \
