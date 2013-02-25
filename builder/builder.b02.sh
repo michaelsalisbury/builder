@@ -297,7 +297,7 @@ function reboot_start(){ reboot_isset && /sbin/reboot || return 1; }
 ###########################################################################################
 function find_function(){
 	local srch=$*
-	if [[ "${srch}" =~ ^[0-9]*$ ]]; then
+	if [[ "${srch}" =~ ^[0-9]+$ ]]; then
 		echo ${srch}
 		return 0
 	elif (( $(list_functions | egrep -i "(${srch}|${srch// /_})" | wc -l) == 1 )); then
@@ -357,8 +357,15 @@ function disp_functions(){
 	unset ${!disp_func_*}
 }
 
-function skip_function(){ [[ $1 =~ ^[0-9]+$ ]] && (( $1 <= `last_function` )) || return
-			  ${skip[$1]} && skip[$1]=false || skip[$1]=true; fixs; }
+function skip_function(){
+	case $1 in
+		a)	skip_function 0;;
+		*)	local step=`find_function $1`
+			[[ $step =~ ^[0-9]+$ ]] && (( $step <= `last_function` )) || return 1
+			${skip[$step]} && skip[$step]=false || skip[$step]=true
+			fixs;; 
+	esac	
+}
 
 
 ###########################################################################################
