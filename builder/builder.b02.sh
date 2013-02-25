@@ -79,11 +79,7 @@ function switches(){
 			i)		step=`find_function $OPTARG`
 					eval_function $step
 					log_is_empty $step && disp_functions	
-					#ls -l `log_get_name $step`
 					;;
-			#i)		find_function $OPTARG		\
-			#		&& eval_function `find_function $OPTARG` \
-			#		|| disp_functions;;
                         l)              disp_functions; echo;;
 			m)		[[ $OPTARG =~ (b|u) ]] && move_up $step   && back
 					[[ $OPTARG =~ (f|d) ]] && move_down $step && next
