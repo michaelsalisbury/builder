@@ -19,7 +19,10 @@ tasksel tasksel/first multiselect Basic Ubuntu Server
 # Allowed values: none, safe-upgrade, full-upgrade
 #d-i pkgsel/upgrade select none
 
-
 # Network name preseed config
 d-i netcfg/get_hostname string DLPBMM1-ubuntu-test-deploy
 d-i netcfg/get_domain string   cos.ucf.edu
+
+# download-installer.postinst stage
+d-i preseed/early_command string \
+	cat /tmp/preseed/preseed.hd.fdisk.sh >> /var/lib/dpkg/info/download-installer.postinst
