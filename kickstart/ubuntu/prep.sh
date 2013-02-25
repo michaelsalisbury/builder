@@ -5,6 +5,7 @@ ln -s ../../../builder .
 ln -s ../../../functions .
 ln -s ../../../defaults .
 ln -s ../../../deploy_ubuntu deploys
+ln -s ../preseed .
 ln -s ../DEB .
 ln -s ../wget* .
 ##############################################################################

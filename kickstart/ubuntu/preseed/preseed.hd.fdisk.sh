@@ -1,0 +1,163 @@
+#!/bin/sh
+
+to_K () { local size=$1; echo $(( size *  1000 )); }
+in_K () { local size=$1; echo $(( size /  1000 )); }
+to_M () { local size=$1; echo $(( size * (1000 * 1000) )); }
+in_M () { local size=$1; echo $(( size / (1000 * 1000) )); }
+to_G () { local size=$1; echo $(( size * (1000 * 1000 * 1000) )); }
+in_G () { local size=$1; echo $(( size / (1000 * 1000 * 1000) )); }
+
+stall () {
+	local delay=${1:- 5}
+	for ((i=$delay; i > 0; i--)); do echo -n ${i}..; sleep 1; done
+	echo
+	return 0
+}
+
+get_primary_disk () {
+	#echo /dev/sda
+	list-devices disk | head -1 
+}
+has_extended_part () {
+	local dev=$1
+	local cnt=$(fdisk -l $dev | sed "\|${dev}[1-4][ \t].*Extended|p;d" | wc -l)
+	(( cnt )) \
+		&& return 0 \
+		|| return 1
+}
+get_units () {
+	local dev=$1
+	fdisk -lu $dev  | sed '/^Units/{ s/.*=//; s/[^0-9]//g p};d'
+}
+get_primary_part_list () {
+	local dev=$1
+	fdisk -l | sed "\|^${dev}[1-4][ \t]|{ s/ .*// p }; d"
+}
+get_disk_size () {
+	local dev=$1
+	fdisk -lu $dev | sed '/Disk.*bytes/ { s/[:, ][:, ]*/:/g;   p };d' | cut -d: -f5
+}
+get_part_size () {
+	local dev=$1
+	get_disk_size $dev
+}
+get_disk_used () {
+	local dev=$1
+	local parts=$(get_primary_part_list $dev)
+	for part in $parts; do
+		local size=$(get_part_size $part)
+		local total=$(( total + size ))
+	done
+	echo ${total:- 0}
+}
+get_disk_free () {
+	local dev=$1
+	local size=$(get_disk_size $dev)
+	local used=$(get_disk_used $dev)
+	local diff=$(( size - used ))
+	echo $diff
+}
+has_free_space () {
+	local dev=$1
+	local min=${2:- $(to_G 10)} # 1 gig
+	local free=$(get_disk_free $dev)
+	(( free > min )) \
+		&& return 0 \
+		|| return 1
+}
+get_primary_part_free_cnt () {
+	local dev=$1
+	local cnt=$(get_primary_part_cnt $dev)
+	local cnt=$(( 4 - cnt ))
+	echo $cnt
+}
+has_primary_part_free () {
+	local dev=$1
+	local parts=${2:- 1}
+	local cnt=$(get_primary_part_free_cnt $dev)
+	(( cnt >= ${parts} )) \
+		&& return 0 \
+		|| return 1
+}
+get_primary_part_cnt () {
+	local dev=$1
+	local cnt=$(get_primary_part_list $dev | wc -l)
+	echo $cnt
+}
+has_primary_parts () {
+	local dev=$1
+	local parts=${2:- 1}
+	local cnt=$(get_primary_part_cnt $dev)
+	(( cnt >= ${parts} )) \
+		&& return 0 \
+		|| return 1
+}
+analyze () {
+	local dev=$(get_primary_disk)
+	# Set hard drive to configure
+	echo Free Space on \"${dev}\" :: $(in_G $(get_disk_free $dev))
+	echo d-i partman-auto/disk string $dev | debconf-set-selections
+	echo
+	has_free_space      $dev $(to_G 10) || {
+		echo ERROR! :: Not enough free space\; Standard layout will wipe out all data on hard drive \"${dev}\".
+		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
+		stall 10
+		return 0
+	}
+	has_primary_parts     $dev            || {
+		echo ERROR! :: No free primary partitions\; Standard layout will wipe out all data on hard drive \"${dev}\".
+		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
+		stall 10
+		return 0
+	}
+	has_primary_part_free $dev 4          && {
+		echo Drive empty\; Standard layout will be used on hard drive \"${dev}\".
+		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
+		echo d-i partman/choose_partition select Finish partitioning and write changes to disk | debconf-set-selections
+		stall 10
+		return 0
+	}
+	has_primary_part_free $dev 3          && {
+		echo 3 Free Primary Partitions\; Extended partition layout will be used on hard drive \"${dev}\".
+		debconf-set-selections /tmp/preseed/preseed.hd.free_extended.cfg
+		stall 10
+		return 0
+	}
+	has_primary_part_free $dev 2          && {
+		has_extended_part $dev        && {
+			echo 2 Free Primary Partitions\; Layout without /boot or extended partition will be used on hard drive \"${dev}\".
+			debconf-set-selections /tmp/preseed/preseed.hd.free_wo-extended.cfg
+			stall 10
+			return 0
+		} || {
+			echo 2 Free Primary Partitions\; Extended partition layout will be used on hard drive \"${dev}\".
+			#debconf-set-selections /tmp/preseed/preseed.hd.free_extended.cfg
+			stall 10
+			return 0
+		}
+	}
+	has_primary_part_free $dev 1          && {
+		echo 1 Free Primary Partition\; Layout without /boot, extended partition or swap will be used on hard drive \"${dev}\".
+		debconf-set-selections /tmp/preseed/preseed.hd.free_wo-swap.cfg
+		stall 10
+		return 0
+	}
+}
+analyze $@
+#!/bin/sh
+# This is the trick â automatically switch to 6th console
+# and redirect all input/output
+exec < /dev/tty6 > /dev/tty6 2> /dev/tty6
+chvt 6
+
+# Analyze the primary hard drive and determin appropriate layout
+echo Analyze the primary hard drive and determin appropriate layout
+analyze $@
+
+# Interact with the install
+echo Welcome to your preseed early instalation interactive shell...
+/bin/sh
+
+# Then switch back to Anaconda on the first console
+chvt 1
+exec < /dev/tty1 > /dev/tty1 2> /dev/tty1

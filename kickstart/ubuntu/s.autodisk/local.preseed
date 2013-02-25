@@ -6,10 +6,10 @@
 d-i mirror/http/proxy string http://192.168.253.3:3142/
 
 # Primary instalation task
-#tasksel tasksel/first multiselect Basic Ubuntu Server
+tasksel tasksel/first multiselect Basic Ubuntu Server
 #tasksel tasksel/first multiselect Xubuntu desktop
 #tasksel tasksel/first multiselect Ubuntu desktop
-tasksel tasksel/first multiselect Kubuntu full
+#tasksel tasksel/first multiselect Kubuntu full
 #tasksel tasksel/first multiselect lamp-server, print-server
 
 # Individual additional packages to install
@@ -21,5 +21,15 @@ tasksel tasksel/first multiselect Kubuntu full
 
 
 # Network name preseed config
-d-i netcfg/get_hostname string DLPBMM1-kubuntu-test-deploy
+d-i netcfg/get_hostname string DLPBMM1-ubuntu-test-deploy
 d-i netcfg/get_domain string   cos.ucf.edu
+
+# download-installer.postinst stage
+#d-i preseed/early_command string \
+#	cat /tmp/preseed/preseed.download-installer.postinst.cfg >> /var/lib/dpkg/info/download-installer.postinst	;\
+#	cat /tmp/preseed/preseed.interactive.cfg                 >> /var/lib/dpkg/info/download-installer.postinst	;\
+#	debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg 							;\
+#	sh /tmp/preseed/preseed.interactive.cfg
+d-i preseed/early_command string \
+	cat /tmp/preseed/preseed.hd.fdisk.sh >> /var/lib/dpkg/info/download-installer.postinst
+
