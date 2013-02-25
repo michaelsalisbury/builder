@@ -139,24 +139,5 @@ analyze () {
 		#stall 10
 	fi
 }
-#analyze $@
-#cat /tmp/preseed/preseed.hd.fdisk.sh | sed '/^#analyze/,$d' > /tmp/preseed/test
-
-# This is the trick â automatically switch to 6th console
-# and redirect all input/output
-#exec < /dev/tty6 > /dev/tty6 2> /dev/tty6
-#chvt 6
-
-
-# Interact with the install
-#echo Welcome to your preseed early instalation interactive shell...
-#/bin/sh
-
-# Then switch back to Anaconda on the first console
-#chvt 1
-#exec < /dev/tty1 > /dev/tty1 2> /dev/tty1
-
-# Analyze the primary hard drive and determin appropriate layout
-#echo Analyze the primary hard drive and determin appropriate layout
 analyze $@
-
+cat /tmp/preseed/preseed.hd.fdisk.sh | sed '/^#analyze/,$d' > /tmp/preseed/test.fdisk.sh
