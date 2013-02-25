@@ -60,6 +60,7 @@ function switches(){
 	`switch_set_default e s`
 	`switch_set_default j f`
 	`switch_set_default r X`
+	`switch_set_default s a`
 	
 	#switches_verifier "$@"
 	local OPTIND=
