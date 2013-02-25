@@ -361,7 +361,9 @@ function skip_function(){
 	case $1 in
 		a)	skip_function 0;;
 		d)	skip=( ${skip[@]//*/true} )
-			fix;;
+			fixs;;
+		e)	skip=( ${skip[@]//*/false} )
+			fixs;;
 		*)	local func=`find_function $1`
 			[[ $func =~ ^[0-9]+$ ]] && (( $func <= `last_function` )) || return 1
 			(( func )) && ! ${skip[0]} && skip[0]=true
