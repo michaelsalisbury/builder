@@ -301,7 +301,10 @@ function find_function(){
 	fi
 }
 function eval_function(){ cat "$buildScriptPipe" | log_output $1 &
-			  eval `name_function $1` &> "$buildScriptPipe"; }
+			  eval `name_function $1` &> "$buildScriptPipe"; 
+			  echo $?
+
+}
 function name_function(){ list_functions | sed "$1!d"; }
 function last_function(){ list_functions | wc -l; }
 function show_function(){ type -a `name_function $1` | sed '1d;2s/^/function /'; }
