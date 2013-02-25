@@ -32,6 +32,4 @@ d-i netcfg/get_domain string   cos.ucf.edu
 #	sh /tmp/preseed/preseed.interactive.cfg
 
 d-i preseed/early_command string \
-	cat /tmp/preseed/preseed.hd.fdisk.sh >> /var/lib/dpkg/info/download-installer.postinst ;\
-	sh /tmp/preseed/preseed.interactive.cfg
-
+	cat /tmp/preseed/preseed.hd.fdisk.sh >> /var/lib/dpkg/info/download-installer.postinst
