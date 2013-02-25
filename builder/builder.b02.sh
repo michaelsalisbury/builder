@@ -268,11 +268,15 @@ function move_up(){
 ###########################################################################################
 ###########################################################################################
 function log_is_empty(){  local log=`log_get_name $1`
-			  [ -f "${log}" ] && {
-				
-
-
-			  }
+			  if [ -f "${log}" ]; then
+				local size=`du -b "${log}" | cut -f1`
+				if (( size )); then
+					return 1
+				else
+					rm -f "${log}"
+					return 0
+				fi
+			  fi
 }
 function log_tail_main(){ [ -f "$scrLogFQFN" ] && tail -n +1 -f "$scrLogFQFN" || \
 		          desc 50 Log \"$scrLogFQFN\" unavailable!; }
