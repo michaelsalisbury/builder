@@ -122,9 +122,6 @@ function switches(){
 				i)	$FUNCNAME -$switches_last_option "${switches_piped}"
 					;;
 			esac
-			#echo $switches_piped
-			#for switches_argument in $switches_piped
-		#done < <(cat)
 		done < <(cat | tr "\"" "\n" | sed '/^$/d'  )
 	fi
 
