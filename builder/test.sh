@@ -1,6 +1,6 @@
 #!/bin/builder.b02.sh
-skip=( false false false false false )
-step=2
+skip=( true false true false false )
+step=1
 prefix="setup"
 
 
@@ -10,15 +10,15 @@ prefix="setup"
 
 
 
-function setup_A(){
+function setup_A_alpha(){
 	echo $FUNCNAME
 }
-function setup_B(){
+function setup_B_beta(){
 	echo $FUNCNAME
 }
-function setup_C(){
+function setup_C_charly(){
 	echo $FUNCNAME
 }
-function setup_D(){
+function setup_D_david(){
 	echo $FUNCNAME
 }
