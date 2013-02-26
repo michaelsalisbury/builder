@@ -356,7 +356,7 @@ function find_function(){
 		local P="-v P=${prefix}"
 		local S="-v S=${srch}"
 		local L="list_functions"
-if list_functions | awk $P $S 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print c}'
+#if list_functions | awk $P $S 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print c}'
 
 		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 		echo -n
