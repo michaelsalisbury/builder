@@ -133,7 +133,7 @@ function switches(){
 			#echo $switches_piped
 			#for switches_argument in $switches_piped
 		#done < <(cat)
-		done < <(cat | tr "\"" \G )
+		done < <(cat)
 	fi
 
 	return 0
