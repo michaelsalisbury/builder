@@ -124,6 +124,7 @@ function switches(){
 
 	#list_functions | cat -n | awk '{print "local "$2"="$1";"}'
 	list_functions | awk '{print NR" "$0}'
+	list_functions | awk '/setup_E/{print NR" "$0}'
 	#eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 	#echo $setup_E
 	return 0
