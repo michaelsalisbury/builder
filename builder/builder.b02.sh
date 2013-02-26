@@ -123,8 +123,9 @@ function switches(){
 	fi
 
 	#list_functions | cat -n | awk '{print "local "$2"="$1";"}'
-	eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
-	echo $setup_E
+	list_functions | awk '{print $0 NR}'
+	#eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
+	#echo $setup_E
 	return 0
 }
 ###########################################################################################
@@ -326,6 +327,7 @@ function find_function(){
 	if [[ "${srch}" =~ ^[0-9]+$ ]]; then
 		echo ${srch}
 	else
+		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 		echo -n
 		#local -A function_list
 		#local    function_list_count++
