@@ -122,7 +122,7 @@ function switches(){
 		done < <(cat)
 	fi
 
-	echo $*
+	echo ${*// /_}
 
 	return 0
 
