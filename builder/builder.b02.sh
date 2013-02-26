@@ -116,14 +116,14 @@ function switches(){
 
 	# Test for piped extra cmd line arguments and apply to last cmd line switch
 	if readlink /proc/$$/fd/0 | egrep -q "^pipe:"; then
-		while read switches_piped; do
+		while read -a switches_piped; do
 			case $switches_last_option in
-				i)	if (( `find_function $switches_piped` )); then
-						$FUNCNAME -$switches_last_option "$switches_piped"	
+				i)	if (( `find_function ${switches_piped[@]}` )); then
+						$FUNCNAME -$switches_last_option "${switches_piped[@]}"	
 					else
-						for switches_piped_arg in "$switches_piped"; do
+						for switches_piped_arg in ${switches_piped[@]}; do
 							echo $switches_piped_arg
-							$FUNCNAME -$switches_last_option $switches_piped_arg
+							$FUNCNAME -$switches_last_option "$switches_piped_arg"
 						done
 					fi
 					;;
