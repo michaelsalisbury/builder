@@ -124,10 +124,11 @@ function switches(){
 
 	#echo ${*// /_}
 
-	local O="-v S=E -v P=${prefix} -v T=true -v F=false"
 	local L="list_functions"
-	$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{print c}'
+	local O="-v S=E -v P=${prefix} -v T=true -v F=false"
 	$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{r=(c==1)?T:F;print r}'
+	$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{print (c==1)?T:F}'
+	$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{print c}'
 
 	
 
@@ -353,10 +354,12 @@ function find_function(){
 		echo ${srch}
 	else
 		#if list_functions | awk -v "SRCH=${srch}" '/^setup_E$/{print NR" "$0}'
-		local P="-v P=${prefix}"
-		local S="-v S=${srch}"
+		local O="-v P=${prefix} S=${srch} -v T=true -v F=false"
+		#$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{r=(c==1)?T:F;print r}'
 		local L="list_functions"
-		#if (( `$L | awk $P $S 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print c}'` == 1 )); then
+		if `$L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{p=(c==1)?T:F;print p}'`; then
+			echo
+		fi
 
 		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 		echo -n
