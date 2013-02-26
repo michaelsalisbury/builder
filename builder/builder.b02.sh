@@ -124,10 +124,11 @@ function switches(){
 
 	#echo ${*// /_}
 
-	local S="-v S=epsil"
+	local S="-v S=E"
 	local P="-v P=${prefix}"
 	local L="list_functions"
 	$L | awk $P $S 'BEGIN{R=P".*"S} $0~R {c++}END{print c}'
+	$L | awk $P $S 'BEGIN{R=P".*"S} $0~R {c++}END{r=(c==1)?"true":"false";print r}'
 	$L | awk $P $S 'BEGIN{R=P".*"S} $0~R {c++}END{r=(c==1)?"true":"false";print r}'
 
 	
