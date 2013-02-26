@@ -122,7 +122,7 @@ function switches(){
 		done < <(cat)
 	fi
 
-	list_functions
+	list_functions | cat -n
 	return 0
 }
 ###########################################################################################
