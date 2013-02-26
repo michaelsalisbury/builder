@@ -324,14 +324,12 @@ function find_function(){
 	if [[ "${srch}" =~ ^[0-9]+$ ]]; then
 		echo ${srch}
 	else
-		local -A function_list
-		local    function_list_count++
-		for function_name in `list_functions`
-			function_list[${function_name}]=$(( 
-
-
-
-
+		#local -A function_list
+		#local    function_list_count++
+		#for function_name in `list_functions`; do
+		#	function_list[${function_name}]=$(( function_list_count++ ))
+		#done
+		list_functions | cat -n
 	fi
 
 	if (( $(list_functions | egrep -i "(${srch}|${srch// /_})" | wc -l) == 1 )); then
