@@ -357,7 +357,7 @@ function find_function(){
 		local O="-v P=${prefix} S=${srch} -v T=true -v F=false"
 		#$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{r=(c==1)?T:F;print r}'
 		local L="list_functions"
-		if `$L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print (c==1)?T:F}'`; then
+		if `$L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print(c==1)?T:F}'`; then
 			echo
 		fi
 
