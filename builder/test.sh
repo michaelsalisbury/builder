@@ -22,3 +22,9 @@ function setup_C_charly(){
 function setup_D_david(){
 	echo $FUNCNAME
 }
+function setup_E(){
+	echo $FUNCNAME
+}
+function setup_E_epsilon(){
+	echo $FUNCNAME
+}
