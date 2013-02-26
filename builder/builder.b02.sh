@@ -122,7 +122,7 @@ function switches(){
 				i)	if (( `find_function ${switches_piped[@]}` )); then
 						$FUNCNAME -$switches_last_option "${switches_piped[@]}"	
 					else
-						for switches_piped_arg in "${switches_piped[@]}"; do
+						for switches_piped_arg in ${switches_piped[@]}; do
 							echo $switches_piped_arg
 							$FUNCNAME -$switches_last_option "$switches_piped_arg"
 						done
