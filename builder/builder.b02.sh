@@ -362,11 +362,11 @@ function find_function(){
 		elif `$L | awk $O 'BEGIN{R="^"P"_"tolower(S)"$"} tolower($0)~R {c++}END{print(c==1)?T:F}'`; then
 		      $L | awk $O 'BEGIN{R="^"P"_"tolower(S)"$"} tolower($0)~R {print NR}'
 		# test case sensative search
-		elif `$L | awk $O 'BEGIN{R="^"P".*"S} $0~R {c++}END{print(c==1)?T:F}'`; then
-		      $L | awk $O 'BEGIN{R="^"P".*"S} $0~R {print NR}'
+		elif `$L | awk $O 'BEGIN{R="^"P"_.*"S} $0~R {c++}END{print(c==1)?T:F}'`; then
+		      $L | awk $O 'BEGIN{R="^"P"_.*"S} $0~R {print NR}'
 		# test case insensative search
-		elif `$L | awk $O 'BEGIN{R="^"P".*"tolower(S)} tolower($0)~R {c++}END{print(c==1)?T:F}'`; then
-		      $L | awk $O 'BEGIN{R="^"P".*"tolower(S)} tolower($0)~R {c++}END{print(c==1)?T:F}'
+		elif `$L | awk $O 'BEGIN{R="^"P"_.*"tolower(S)} tolower($0)~R {c++}END{print(c==1)?T:F}'`; then
+		      $L | awk $O 'BEGIN{R="^"P"_.*"tolower(S)} tolower($0)~R {c++}END{print(c==1)?T:F}'
 		# if no matches return zero
 		else
 			echo 0
