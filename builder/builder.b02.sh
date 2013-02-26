@@ -122,7 +122,7 @@ function switches(){
 		done < <(cat)
 	fi
 
-	list_functions | cat -n | awk '{print $2}'
+	list_functions | cat -n | awk '{print "find_"$2"="$1}'
 	return 0
 }
 ###########################################################################################
