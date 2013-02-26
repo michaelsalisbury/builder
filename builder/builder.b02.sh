@@ -324,6 +324,7 @@ function find_function(){
 	if [[ "${srch}" =~ ^[0-9]+$ ]]; then
 		echo ${srch}
 	else
+		echo -n
 		#local -A function_list
 		#local    function_list_count++
 		#for function_name in `list_functions`; do
