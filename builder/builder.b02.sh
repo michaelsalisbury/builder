@@ -358,7 +358,7 @@ function find_function(){
 		#
 		if   `$L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print(c==1)?T:F}'`; then
 		      $L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {print NR}'
-		elif  
+		else
 			echo 0
 		fi
 	fi
