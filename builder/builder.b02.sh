@@ -353,7 +353,7 @@ function find_function(){
 	if [[ "${srch}" =~ ^[0-9]+$ ]]; then
 		echo ${srch}
 	else
-		local O="-v P=${prefix} S=${srch} -v T=true -v F=false"
+		local O="-v P=${prefix} -v S=${srch} -v T=true -v F=false"
 		local L="list_functions"
 		#
 		if   `$L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print(c==1)?T:F}'`; then
