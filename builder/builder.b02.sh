@@ -104,7 +104,7 @@ function switches(){
                 esac
         done
 	
-	# Shift to non parced options
+	# Shift to non parced command line arguments, apply the last command switch to all extra cmd line arguments
 	#echo OPTION = $switches_last_option
 	#echo OPTARG = $switches_last_optarg
 	#echo shift = $(( OPTIND - 1 ))
