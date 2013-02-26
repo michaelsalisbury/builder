@@ -102,6 +102,8 @@ function switches(){
         done
 	
 	# Shift to non parced options
+	echo OPTION = $OPTION
+	echo OPTARG = $OPTARG
 	echo shift = $(( OPTIND - 1 ))
 	shift $(( OPTIND - 1 ))
 	echo options = $@
