@@ -125,7 +125,7 @@ function switches(){
 			#echo $switches_piped
 			#for switches_argument in $switches_piped
 		#done < <(cat)
-		done < <(cat | tr "\"" "\n")
+		done < <(cat | tr "\"" "\n" | sed '/^$/d'  )
 	fi
 
 	return 0
