@@ -104,23 +104,23 @@ function switches(){
                 esac
         done
 	
-	# Shift to non parced command line arguments, apply the last command switch to all extra cmd line arguments
 	#echo OPTION = $switches_last_option
 	#echo OPTARG = $switches_last_optarg
 	#echo shift = $(( OPTIND - 1 ))
 	#echo options = $@
 	#echo count = ${#@}
 
+	# Shift to non parced command line arguments, apply the last command switch to all extra cmd line arguments
 	shift $(( OPTIND - 1 ))
 	for switches_argument in $@; do	$FUNCNAME -$switches_last_option $switches_argument; done
 
+	# Test for piped extra cmd line arguments and apply to last cmd line switch
 	if readlink /proc/$$/fd/0 | egrep -q "^pipe:"; then
-		cat
+		while read switches_piped; do
+			echo $switches_piped
+			#for switches_argument in $switches_piped
+		done < <(cat)
 	fi
-	#while read switches_piped; do
-	#	echo $switches_piped
-		#for switches_argument in $switches_piped
-	#done
 
 
 	return 0
