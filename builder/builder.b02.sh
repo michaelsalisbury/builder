@@ -125,7 +125,7 @@ function switches(){
 	#list_functions | cat -n | awk '{print "local "$2"="$1";"}'
 	#list_functions | awk '{print NR" "$0}'
 	#list_functions | awk '/^setup_E$/{print NR" "$0}'
-	local srch=setup_E
+	local srch=setup_e
 	#list_functions | awk -v SRCH="${srch}" '/^setup_${SRCH}$/{print NR" "$0}'
 	#list_functions | awk -v SRCH="${srch}" '/^setup_\${SRCH}$/{print NR" "$0}'
 	#list_functions | awk -v SRCH="${srch}" '/^setup_E$/{print NR" "$0" "SRCH }'
