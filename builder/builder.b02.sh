@@ -366,7 +366,7 @@ function find_function(){
 		      $L | awk $O 'BEGIN{R="^"P"_.*"S} $0~R {print NR}'
 		# test case insensative search
 		elif `$L | awk $O 'BEGIN{R="^"P"_.*"tolower(S)} tolower($0)~R {c++}END{print(c==1)?T:F}'`; then
-		      $L | awk $O 'BEGIN{R="^"P"_.*"tolower(S)} tolower($0)~R {c++}END{print(c==1)?T:F}'
+		      $L | awk $O 'BEGIN{R="^"P"_.*"tolower(S)} tolower($0)~R {print NR}'
 		# if no matches return zero
 		else
 			echo 0
