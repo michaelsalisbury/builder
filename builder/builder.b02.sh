@@ -67,8 +67,8 @@ function switches(){
 	local OPTARG=
 	while getopts "b:cd:e:hj:i:lm:nr:s:t:uw:" OPTION
                do
-		local switches_option=$OPTION
-		local switches_optarg=$OPTARG
+		local switches_last_option=$OPTION
+		local switches_last_optarg=$OPTARG
                 case $OPTION in
 			b)		[ "${OPTARG}" == k ] && make_backup || make_backup "$OPTARG";;
 			c)		skip || eval_function $step; disp_functions; echo;;
@@ -110,7 +110,10 @@ function switches(){
 	shift $(( OPTIND - 1 ))
 	echo options = $@
 	echo count = ${#@}
-
+	echo $FUNCNAME
+	for switches_option in $@; do
+		echo $switches_option
+	done
 	return 0
 }
 ###########################################################################################
