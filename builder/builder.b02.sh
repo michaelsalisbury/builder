@@ -354,7 +354,7 @@ function find_function(){
 		#if list_functions | awk -v "SRCH=${srch}" '/^setup_E$/{print NR" "$0}'
 		local  PRX="-v  PRX=${prefix}"
 		local SRCH="-v SRCH=${srch}"
-		if list_functions | awk -v PRX=${prefix} -v SRCH=${srch} '$0 ~ PRX".*"SRCH {count++ } END{print count}'
+		#if list_functions | awk -v PRX=${prefix} -v SRCH=${srch} '$0 ~ PRX".*"SRCH {count++ } END{print count}'
 
 		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 		echo -n
