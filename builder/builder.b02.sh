@@ -330,9 +330,7 @@ function find_function(){
 		egrep -i "(${srch}|${srch// /_})"	|\
 		awk '{print $1}'
 	else
-			
-		derr Function match \"${srch}\" not found\!
-		return 1
+		echo 0	
 	fi
 }
 function eval_function(){ cat "$buildScriptPipe" | log_output $1 &
