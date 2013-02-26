@@ -100,6 +100,8 @@ function switches(){
                         ?)              show_help; disp_functions; echo;;
                 esac
         done
+	echo 
+
 	return 0
 }
 ###########################################################################################
