@@ -128,6 +128,7 @@ function switches(){
 	local P="-v P=${prefix}"
 	local L="list_functions"
 	$L | awk $P $S 'BEGIN{R=P".*"S} $0~R {c++}END{print c}'
+	$L | awk $P $S 'BEGIN{R=P".*"S} $0~R {c++}END{c==1?print "true":print "false"}'
 
 	
 
@@ -356,7 +357,7 @@ function find_function(){
 		local P="-v P=${prefix}"
 		local S="-v S=${srch}"
 		local L="list_functions"
-#if list_functions | awk $P $S 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print c}'
+		#if (( `$L | awk $P $S 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print c}'` == 1 )); then
 
 		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 		echo -n
