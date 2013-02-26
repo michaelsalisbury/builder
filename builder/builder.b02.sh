@@ -126,7 +126,7 @@ function switches(){
 
 	local S="-v S=epsil"
 	local P="-v P=${prefix}"
-	list_functions | awk $P $S 'BEGIN{R=P".*"S} $0~R {c++}END{print c}'
+	list_functions | awk $P $S 'BEGIN{R=P\.\*S} $0~R {c++}END{print c}'
 
 	
 
