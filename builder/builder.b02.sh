@@ -109,6 +109,7 @@ function switches(){
 	echo shift = $(( OPTIND - 1 ))
 	shift $(( OPTIND - 1 ))
 	echo options = $@
+	echo count = ${#@}
 
 	return 0
 }
