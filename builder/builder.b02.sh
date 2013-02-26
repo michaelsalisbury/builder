@@ -117,6 +117,7 @@ function switches(){
 	# Test for piped extra cmd line arguments and apply to last cmd line switch
 	if readlink /proc/$$/fd/0 | egrep -q "^pipe:"; then
 		while read switches_piped; do
+			echo ALL = $switches_piped
 			case $switches_last_option in
 				i)	$FUNCNAME -$switches_last_option "${switches_piped}"
 					;;
