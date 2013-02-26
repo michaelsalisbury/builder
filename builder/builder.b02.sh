@@ -117,40 +117,16 @@ function switches(){
 	# Test for piped extra cmd line arguments and apply to last cmd line switch
 	if readlink /proc/$$/fd/0 | egrep -q "^pipe:"; then
 		while read switches_piped; do
+			case $switches_last_option in
+				i)	if (( `find_function $switches_piped` ))
+
+					;;
+			esac
 			echo $switches_piped
 			#for switches_argument in $switches_piped
 		done < <(cat)
 	fi
 
-	#echo ${*// /_}
-
-	local L="list_functions"
-	local O="-v S=epsil -v P=${prefix} -v T=true -v F=false"
-	$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{r=(c==1)?T:F;print r}'
-	$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{print(c==1)?T:F}'
-	$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{print c}'
-
-	
-
-
-	return 0
-
-	#list_functions | cat -n | awk '{print "local "$2"="$1";"}'
-	#list_functions | awk '{print NR" "$0}'
-	#list_functions | awk '/^setup_E$/{print NR" "$0}'
-	local srch=epsil
-	#list_functions | awk -v SRCH="${srch}" '/^setup_${SRCH}$/{print NR" "$0}'
-	#list_functions | awk -v SRCH="${srch}" '/^setup_\${SRCH}$/{print NR" "$0}'
-	#list_functions | awk -v SRCH="${srch}" '/^setup_E$/{print NR" "$0" "SRCH }'
-	list_functions | awk -v SRCH="${srch}" 'BEGIN{REG="^"SRCH"$"} $0 ~ REG {print NR" "$0" "SRCH }'
-	list_functions | awk -v SRCH="${srch}" 'BEGIN{REG="^"SRCH"$"} $0 ~ REG {count++ } END{print count}'
-	list_functions | awk -v SRCH="${srch}" 'BEGIN{REG="^"SRCH} $0 ~ REG {count++ } END{print count}'
-	list_functions | awk -v SRCH="${srch}" 'BEGIN{REG="^"tolower(SRCH)} tolower($0) ~ REG {count++ } END{print count}'
-	list_functions | awk -v PRX=${prefix} -v SRCH="${srch}" 'BEGIN{REG=SRCH} $0 ~ REG {count++ } END{print count}'
-	list_functions | awk -v PRX=${prefix} -v SRCH="${srch}" '$0 ~ PRX".*"SRCH {count++ } END{print count}'
-	
-	#eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
-	#echo $setup_E
 	return 0
 }
 ###########################################################################################
