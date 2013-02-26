@@ -330,6 +330,7 @@ function find_function(){
 		#	function_list[${function_name}]=$(( function_list_count++ ))
 		#done
 		list_functions | cat -n
+		echo hey
 	fi
 
 	if (( $(list_functions | egrep -i "(${srch}|${srch// /_})" | wc -l) == 1 )); then
