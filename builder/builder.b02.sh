@@ -122,7 +122,7 @@ function switches(){
 		done < <(cat)
 	fi
 
-	list_functions | cat -n | awk '{print "local "$2"="$1}'
+	#list_functions | cat -n | awk '{print "local "$2"="$1";"}'
 	return 0
 }
 ###########################################################################################
