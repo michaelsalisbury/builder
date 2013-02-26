@@ -124,9 +124,9 @@ function switches(){
 
 	#echo ${*// /_}
 
-	local SRCH="-v SRCH=epsil"
-	local  PRX="-v PRX=${prefix}"
-	list_functions | awk $PRX $SRCH 'BEGIN{R=PRX".*"SRCH} $0~R {c++}END{print c}'
+	#local SRCH="-v SRCH=epsil"
+	#local  PRX="-v PRX=${prefix}"
+	#list_functions | awk $PRX $SRCH 'BEGIN{R=PRX".*"SRCH} $0~R {c++}END{print c}'
 
 	
 
