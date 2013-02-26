@@ -114,7 +114,9 @@ function switches(){
 	shift $(( OPTIND - 1 ))
 	for switches_argument in $@; do	$FUNCNAME -$switches_last_option $switches_argument; done
 
-	readlink /proc/$$/fd/0
+	if readlink /proc/$$/fd/0 | egrep -q "^pipe:"; then
+		cat
+	fi
 	#while read switches_piped; do
 	#	echo $switches_piped
 		#for switches_argument in $switches_piped
