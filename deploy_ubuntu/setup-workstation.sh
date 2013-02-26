@@ -317,6 +317,10 @@ function setup_Must_Have_Tools(){
 					cups-pdf \
 					p7zip p7zip-full \
 					google-chrome-stable
+	waitAptgetInstall
+	apt-get ${aptopt} install	skype
+
+
 					#default-jre default-jre-headless \
 
 	# setup defaults for the following applications
