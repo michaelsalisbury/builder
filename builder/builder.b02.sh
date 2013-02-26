@@ -116,7 +116,8 @@ function switches(){
 
 
 	while read switches_piped; do
-		for switches_argument in $switches_piped
+		echo $switches_piped
+		#for switches_argument in $switches_piped
 	done
 
 
