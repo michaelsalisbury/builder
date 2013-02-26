@@ -105,8 +105,8 @@ function switches(){
         done
 	
 	# Shift to non parced options
-	echo OPTION = $switches_last_option
-	echo OPTARG = $switches_last_optarg
+	#echo OPTION = $switches_last_option
+	#echo OPTARG = $switches_last_optarg
 	#echo shift = $(( OPTIND - 1 ))
 	#echo options = $@
 	#echo count = ${#@}
