@@ -65,6 +65,7 @@ function switches(){
 	#switches_verifier "$@"
 	local OPTIND=
 	local OPTARG=
+	local OPTION=
 	while getopts "b:cd:e:hj:i:lm:nr:s:t:uw:" OPTION
                do
 		local switches_last_option=$OPTION
@@ -104,16 +105,14 @@ function switches(){
         done
 	
 	# Shift to non parced options
-	echo OPTION = $switches_option
-	echo OPTARG = $switches_optarg
-	echo shift = $(( OPTIND - 1 ))
+	#echo OPTION = $switches_option
+	#echo OPTARG = $switches_optarg
+	#echo shift = $(( OPTIND - 1 ))
+	#echo options = $@
+	#echo count = ${#@}
+
 	shift $(( OPTIND - 1 ))
-	echo options = $@
-	echo count = ${#@}
-	echo $FUNCNAME
-	for switches_option in $@; do
-		echo $switches_option
-	done
+	for switches_argument in $@; do	$FUNCNAME $switches_last_option $switches_argument; done
 	return 0
 }
 ###########################################################################################
