@@ -123,6 +123,8 @@ function switches(){
 	fi
 
 	#list_functions | cat -n | awk '{print "local "$2"="$1";"}'
+	eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
+	echo $setup_E
 	return 0
 }
 ###########################################################################################
