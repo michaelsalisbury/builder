@@ -100,7 +100,11 @@ function switches(){
                         ?)              show_help; disp_functions; echo;;
                 esac
         done
-	echo 
+	
+	# Shift to non parced options
+	echo shift = $(( OPTIND - 1 ))
+	shift $(( OPTIND - 1 ))
+	echo options = $@
 
 	return 0
 }
