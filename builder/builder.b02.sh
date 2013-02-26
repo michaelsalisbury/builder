@@ -118,6 +118,7 @@ function switches(){
 	if readlink /proc/$$/fd/0 | egrep -q "^pipe:"; then
 		while read -a switches_piped; do
 			echo ALL = ${switches_piped[@]}
+			echo 2 = ${switches_piped[2]}
 			case $switches_last_option in
 				i)	if (( `find_function ${switches_piped[@]}` )); then
 						$FUNCNAME -$switches_last_option "${switches_piped[@]}"	
