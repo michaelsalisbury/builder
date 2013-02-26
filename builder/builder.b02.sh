@@ -328,6 +328,9 @@ function find_function(){
 	if [[ "${srch}" =~ ^[0-9]+$ ]]; then
 		echo ${srch}
 	else
+		#if list_functions | awk -v "SRCH=${srch}" '/^setup_E$/{print NR" "$0}'
+
+
 		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 		echo -n
 		#local -A function_list
