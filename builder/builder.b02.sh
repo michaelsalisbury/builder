@@ -325,9 +325,9 @@ function find_function(){
 		echo ${srch}
 	else
 		local -A function_list
-		
+		local    function_list_count++
 		for function_name in `list_functions`
-
+			function_list[${function_name}]=$(( 
 
 
 
