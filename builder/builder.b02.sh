@@ -355,11 +355,19 @@ function find_function(){
 	else
 		local O="-v P=${prefix} -v S=${srch} -v T=true -v F=false"
 		local L="list_functions"
-		#
+		# test case sensative exact match
 		if   `$L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print(c==1)?T:F}'`; then
 		      $L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {print NR}'
+		# test case insensative exact match
 		elif `$L | awk $O 'BEGIN{R="^"P"_"tolower(S)"$"} tolower($0)~R {c++}END{print(c==1)?T:F}'`; then
 		      $L | awk $O 'BEGIN{R="^"P"_"tolower(S)"$"} tolower($0)~R {print NR}'
+		# test case sensative search
+		elif `$L | awk $O 'BEGIN{R="^"P".*"S} $0~R {c++}END{print(c==1)?T:F}'`; then
+		      $L | awk $O 'BEGIN{R="^"P".*"S} $0~R {print NR}'
+		# test case insensative search
+		elif `$L | awk $O 'BEGIN{R="^"P".*"tolower(S)} tolower($0)~R {c++}END{print(c==1)?T:F}'`; then
+		      $L | awk $O 'BEGIN{R="^"P".*"tolower(S)} tolower($0)~R {c++}END{print(c==1)?T:F}'
+		# if no matches return zero
 		else
 			echo 0
 		fi
