@@ -126,7 +126,8 @@ function switches(){
 
 	local S="-v S=epsil"
 	local P="-v P=${prefix}"
-	list_functions | awk $P $S 'BEGIN{R=P".*"S} $0~R {c++}END{print c}'
+	local L="list_functions"
+	$L | awk $P $S 'BEGIN{R=P".*"S} $0~R {c++}END{print c}'
 
 	
 
@@ -354,7 +355,8 @@ function find_function(){
 		#if list_functions | awk -v "SRCH=${srch}" '/^setup_E$/{print NR" "$0}'
 		local P="-v P=${prefix}"
 		local S="-v S=${srch}"
-#if list_functions | awk $P $S 'BEGIN{R="^"P"_"SRCH {c++}END{print c}'
+		local L="list_functions"
+if list_functions | awk $P $S 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print c}'
 
 		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 		echo -n
