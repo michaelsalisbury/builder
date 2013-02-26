@@ -122,6 +122,10 @@ function switches(){
 		done < <(cat)
 	fi
 
+	echo $*
+
+	return 0
+
 	#list_functions | cat -n | awk '{print "local "$2"="$1";"}'
 	#list_functions | awk '{print NR" "$0}'
 	#list_functions | awk '/^setup_E$/{print NR" "$0}'
@@ -341,6 +345,7 @@ function find_function(){
 	else
 		#if list_functions | awk -v "SRCH=${srch}" '/^setup_E$/{print NR" "$0}'
 
+	list_functions | awk -v PRX=${prefix} -v SRCH="${srch}" '$0 ~ PRX".*"SRCH {count++ } END{print count}'
 
 		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 		echo -n
