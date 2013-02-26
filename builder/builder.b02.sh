@@ -323,6 +323,22 @@ function find_function(){
 	local srch=$*
 	if [[ "${srch}" =~ ^[0-9]+$ ]]; then
 		echo ${srch}
+	else
+		local -A function_list
+
+
+
+
+
+
+	fi
+	elif (( $(list_functions | egrep -i "^${srch}$" | wc -l) == 1 )); then
+		list_functions		|\
+		cat -n			|\
+		egrep -i "^${srch}$"	|\
+		awk '{print $1}'
+		
+
 	elif (( $(list_functions | egrep -i "(${srch}|${srch// /_})" | wc -l) == 1 )); then
 	#elif (( $(list_functions | egrep -i "^(${srch}|${srch// /_})$" | wc -l) == 1 )); then
 		list_functions				|\
