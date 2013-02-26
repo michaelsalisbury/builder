@@ -67,6 +67,8 @@ function switches(){
 	local OPTARG=
 	while getopts "b:cd:e:hj:i:lm:nr:s:t:uw:" OPTION
                do
+		local switches_option=$OPTION
+		local switches_optarg=$OPTARG
                 case $OPTION in
 			b)		[ "${OPTARG}" == k ] && make_backup || make_backup "$OPTARG";;
 			c)		skip || eval_function $step; disp_functions; echo;;
@@ -102,8 +104,8 @@ function switches(){
         done
 	
 	# Shift to non parced options
-	echo OPTION = $OPTION
-	echo OPTARG = $OPTARG
+	echo OPTION = $switches_option
+	echo OPTARG = $switches_optarg
 	echo shift = $(( OPTIND - 1 ))
 	shift $(( OPTIND - 1 ))
 	echo options = $@
