@@ -113,6 +113,13 @@ function switches(){
 
 	shift $(( OPTIND - 1 ))
 	for switches_argument in $@; do	$FUNCNAME -$switches_last_option $switches_argument; done
+
+
+	while read switches_piped; do
+		for switches_argument in $switches_piped
+	done
+
+
 	return 0
 }
 ###########################################################################################
