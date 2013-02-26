@@ -126,7 +126,7 @@ function switches(){
 
 	local SRCH="-v SRCH=epsil"
 	local  PRX="-v PRX=${prefix}"
-	list_functions | awk $PRX $SRCH '$0 ~ PRX".*"SRCH {c++ } END{print c}'
+	list_functions | awk $PRX $SRCH 'BEGIN{R=PRX".*"SRCH} $0~R {c++ } END{print c}'
 
 	
 
@@ -354,7 +354,7 @@ function find_function(){
 		#if list_functions | awk -v "SRCH=${srch}" '/^setup_E$/{print NR" "$0}'
 		local  PRX="-v  PRX=${prefix}"
 		local SRCH="-v SRCH=${srch}"
-#if list_functions | awk $PRX $SRCH '$0 ~ PRX".*"SRCH {cnt++ } END{print count}'
+#if list_functions | awk $PRX $SRCH '$0 ~ PRX".*"SRCH {c++} END{print c}'
 
 		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 		echo -n
