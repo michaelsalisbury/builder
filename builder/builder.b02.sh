@@ -122,7 +122,14 @@ function switches(){
 		done < <(cat)
 	fi
 
-	echo ${*// /_}
+	#echo ${*// /_}
+
+	local SRCH="-v SRCH=epsil"
+	local  PRX="-v PRX=${prefix}"
+	list_functions | awk $PRX $SRCH '$0 ~ PRX".*"SRCH {count++ } END{print count}'
+
+	
+
 
 	return 0
 
@@ -339,13 +346,15 @@ function reboot_start(){ reboot_isset && /sbin/reboot || return 1; }
 ###########################################################################################
 ###########################################################################################
 function find_function(){
-	local srch=$*
+	local opts=$*
+	local srch=${opts// /_}
 	if [[ "${srch}" =~ ^[0-9]+$ ]]; then
 		echo ${srch}
 	else
 		#if list_functions | awk -v "SRCH=${srch}" '/^setup_E$/{print NR" "$0}'
-
-	list_functions | awk -v PRX=${prefix} -v SRCH="${srch}" '$0 ~ PRX".*"SRCH {count++ } END{print count}'
+		local  PRX="-v  PRX=${prefix}"
+		local SRCH="-v SRCH=${srch}"
+		if list_functions | awk -v PRX=${prefix} -v SRCH=${srch} '$0 ~ PRX".*"SRCH {count++ } END{print count}'
 
 		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 		echo -n
