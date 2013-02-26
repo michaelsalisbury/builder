@@ -131,6 +131,7 @@ function switches(){
 	#list_functions | awk -v SRCH="${srch}" '/^setup_E$/{print NR" "$0" "SRCH }'
 	list_functions | awk -v SRCH="${srch}" 'BEGIN{REG="^"SRCH"$"} $0 ~ REG {print NR" "$0" "SRCH }'
 	list_functions | awk -v SRCH="${srch}" 'BEGIN{REG="^"SRCH"$"} $0 ~ REG {count++ } END{print count}'
+	list_functions | awk -v SRCH="${srch}" 'BEGIN{REG="^"SRCH} $0 ~ REG {count++ } END{print count}'
 	
 	#eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
 	#echo $setup_E
