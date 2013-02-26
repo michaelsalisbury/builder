@@ -127,7 +127,7 @@ function switches(){
 	local O="-v S=E -v P=${prefix} -v T=true -v F=false"
 	local L="list_functions"
 	$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{print c}'
-	$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{r=(c==1)?"true":"false";print r}'
+	$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{r=(c==1)?T:F;print r}'
 
 	
 
