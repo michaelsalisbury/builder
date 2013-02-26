@@ -353,31 +353,14 @@ function find_function(){
 	if [[ "${srch}" =~ ^[0-9]+$ ]]; then
 		echo ${srch}
 	else
-		#if list_functions | awk -v "SRCH=${srch}" '/^setup_E$/{print NR" "$0}'
 		local O="-v P=${prefix} S=${srch} -v T=true -v F=false"
-		#$L | awk $O 'BEGIN{R=P".*"S} $0~R {c++}END{r=(c==1)?T:F;print r}'
 		local L="list_functions"
-		if `$L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print(c==1)?T:F}'`; then
-			echo
+		#
+		if   `$L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print(c==1)?T:F}'`; then
+		      $L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {print NR}'
+		elif  
+			echo 0
 		fi
-
-		eval `list_functions | cat -n | awk '{print "local "$2"="$1";"}'`
-		echo -n
-		#local -A function_list
-		#local    function_list_count++
-		#for function_name in `list_functions`; do
-		#	function_list[${function_name}]=$(( function_list_count++ ))
-		#done
-	fi
-
-	if (( $(list_functions | egrep -i "(${srch}|${srch// /_})" | wc -l) == 1 )); then
-	#elif (( $(list_functions | egrep -i "^(${srch}|${srch// /_})$" | wc -l) == 1 )); then
-		list_functions				|\
-		cat -n					|\
-		egrep -i "(${srch}|${srch// /_})"	|\
-		awk '{print $1}'
-	else
-		echo 0	
 	fi
 }
 function eval_function(){ cat "$buildScriptPipe" | log_output $1 &
