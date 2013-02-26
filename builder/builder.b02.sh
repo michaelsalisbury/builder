@@ -325,7 +325,7 @@ function find_function(){
 		echo ${srch}
 	else
 		local -A function_list
-
+		for function_name in `list_functions`
 
 
 
