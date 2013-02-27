@@ -98,6 +98,39 @@ has_primary_parts () {
 		&& return 0 \
 		|| return 1
 }
+msg () {
+	local message=$*
+	local delay=$(echo $(seq 10 -1 1))
+	echo "${message}" > /tmp/preseed/preseed.txt
+	echo             >> /tmp/preseed/preseed.txt
+
+
+
+
+	# build script
+	cat << END-OF-MSG > /tmp/preseed/preseed.msg.sh
+	# jump to tty6 to display message
+	exec < /dev/tty6 > /dev/tty6 2> /dev/tty6
+	chvt 6
+	# display message
+	echo
+	cat /tmp/preseed/preseed.txt
+	echo
+	# delay
+	for i in ${delay}; do
+		echo -n \${i}..
+		sleep 1
+	done
+	echo
+	stall 10
+	# jump back to anaconda and preseed
+	chvt 1
+	exec < /dev/tty1 > /dev/tty1 2> /dev/tty1
+	exit 0
+END-OF-MSG
+	# execute script
+	/bin/sh /tmp/preseed/preseed.msg.sh
+}
 analyze () {
 	local dev=$(get_primary_disk)
 	# Set hard drive to configure
@@ -105,18 +138,22 @@ analyze () {
 	echo d-i partman-auto/disk string $dev > /tmp/preseed/preseed.hd.disk.cfg
 	debconf-set-selections                   /tmp/preseed/preseed.hd.disk.cfg
 	echo
+	msg Test\, this is only a diagnostic message\!
+
 	if ! has_free_space $dev $(to_G 10); then
 		echo ERROR! :: Not enough free space\; Standard layout will wipe out all data on hard drive \"${dev}\".
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
+		debconf-set-selections /tmp/preseed/preseed.hd.partman_prompt.cfg
 		#stall 10
 	elif has_primary_parts $dev 4; then
 		echo ERROR! :: No free primary partitions\; Standard layout will wipe out all data on hard drive \"${dev}\".
+		debconf-set-selections /tmp/preseed/preseed.hd.partman_prompt.cfg
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
 		#stall 10
 	elif has_primary_part_free $dev 4; then
 		echo Drive empty\; Standard layout will be used on hard drive \"${dev}\".
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
-		debconf-set-selections /tmp/preseed/preseed.hd.choose_partition.cfg
+		debconf-set-selections /tmp/preseed/preseed.hd.partman_no-prompt.cfg
 		#stall 10
 	elif has_primary_part_free $dev 3; then
 		echo 3 Free Primary Partitions\; Extended partition layout will be used on hard drive \"${dev}\".

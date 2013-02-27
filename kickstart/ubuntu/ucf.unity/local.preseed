@@ -25,4 +25,5 @@ d-i netcfg/get_domain string   cos.ucf.edu
 
 # download-installer.postinst stage
 d-i preseed/early_command string \
-	cat /tmp/preseed/preseed.hd.fdisk.sh >> /var/lib/dpkg/info/download-installer.postinst
+	cat /tmp/preseed/preseed.hd.fdisk.sh \
+	>> /var/lib/dpkg/info/download-installer.postinst
