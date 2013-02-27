@@ -1,5 +1,5 @@
-#!/bin/builder.b02.sh
-skip=( true false true false false )
+#!/bin/builder.beta.sh
+skip=( true true false true true true true )
 step=1
 prefix="setup"
 

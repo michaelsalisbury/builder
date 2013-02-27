@@ -80,18 +80,16 @@ function switches(){
                         h)              show_help; disp_functions; echo;;
 			j)		[[ $OPTARG =~ (b|u) ]] && back || next;
 					wrap; disp_functions; echo;;
-			i)		step=`find_function $OPTARG`
-					eval_function $step
-					log_is_empty $step && disp_functions	
-					;;
+			i)		local index=`find_function $OPTARG`
+					(( index )) && eval_function $index || disp_functions 
+					(( index )) && log_is_empty  $index && disp_functions;;
                         l)              disp_functions; echo;;
 			m)		[[ $OPTARG =~ (b|u) ]] && move_up $step   && back
 					[[ $OPTARG =~ (f|d) ]] && move_down $step && next
 					disp_functions; echo;;
 			n)		skip || eval_function $step; next; wrap; disp_functions; echo;;
-                        s)              show_help; 
-					#[ $OPTARG == a ] && OPTARG=0;
-					skip_function $OPTARG; disp_functions; echo;;
+                        s)              skip_function $OPTARG || show_help
+					disp_functions; echo;;
                         r)              rset;
 					[ $OPTARG == r ] && return 1;
 					[ $OPTARG == l ] && log_clear;
@@ -104,27 +102,25 @@ function switches(){
                 esac
         done
 	
-	#echo OPTION = $switches_last_option
-	#echo OPTARG = $switches_last_optarg
-	#echo shift = $(( OPTIND - 1 ))
-	#echo options = $@
-	#echo count = ${#@}
-
-	# Shift to non parced command line arguments, apply the last command switch to all extra cmd line arguments
+	# Shift to non parced command line arguments
 	shift $(( OPTIND - 1 ))
-	for switches_arg in $@; do $FUNCNAME -$switches_last_option $switches_arg; done
+
+	# If there are any extra cmd line arguments apply the last command switch
+	(( ${#@} )) && for args in "$@"; do
+		case ${switches_last_option:- null} in
+			i|s)	$FUNCNAME -$switches_last_option "$args";;
+		esac
+	done
 
 	# Test for piped extra cmd line arguments and apply to last cmd line switch
 	if readlink /proc/$$/fd/0 | egrep -q "^pipe:"; then
-		while read switches_piped; do
-			echo ALL = $switches_piped
-			case $switches_last_option in
-				i)	$FUNCNAME -$switches_last_option "${switches_piped}"
-					;;
-			esac
-		done < <(cat | tr "\"" "\n" | sed '/^$/d'  )
+		case ${switches_last_option:- null} in	
+			i|s)	while read args; do
+					$FUNCNAME -$switches_last_option "${args}"
+				done < <(cat | sed 's/\(^"\|"$\)//g;s/ *" */\n/g;') # splits lines at quotes, removes leading and trailing spaces
+				;;
+		esac
 	fi
-
 	return 0
 }
 ###########################################################################################
