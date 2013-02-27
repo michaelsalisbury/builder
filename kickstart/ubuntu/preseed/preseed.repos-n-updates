@@ -7,10 +7,6 @@ d-i apt-setup/multiverse boolean true
 d-i apt-setup/non-free   boolean true
 d-i apt-setup/contrib    boolean true
 
-# Adobe Reader
-d-i apt-setup/local10/comment    string Adobe-Reader
-d-i apt-setup/local10/repository string deb http://archive.canonical.com/ quantal partner
-
 # Auto Responces
 acroread-common acroread-common/default-viewer                    select true
 ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true
