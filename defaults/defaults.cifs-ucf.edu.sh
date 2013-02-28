@@ -60,7 +60,7 @@ END-OF-CONF
 %cifs ALL=(root) NOPASSWD:/sbin/mount.cifs
 %cifs ALL=(root) NOPASSWD:/bin/umount -t cifs -v /home/*
 END-OF-SUDOERS
-	cat << END-OF-DESKTOP > /etc/skel/.config/autostart
+	cat << END-OF-DESKTOP > /etc/xdg/autostart/mount.domain_cifs.desktop
 [Desktop Entry]
 Type=Application
 Exec=/bin/bash -c \\\${HOME}/.scripts/mount.domain_cifs.sh

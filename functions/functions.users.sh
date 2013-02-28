@@ -38,7 +38,7 @@ function get_user_details(){
 		}
 END-OF-AWK
 	else
-		read -d $'' awk1 << END-OF-AWK
+		read -d $'' awk << END-OF-AWK
 		{if ((\$1 == "$ID")||(\$3 == "$ID"))
 			{print \$1" "\$3" "\$4" "\$6;}
 		}

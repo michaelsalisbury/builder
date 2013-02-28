@@ -60,16 +60,12 @@ function switches(){
 	`switch_set_default e s`
 	`switch_set_default j f`
 	`switch_set_default r X`
-	`switch_set_default s a`
 	
 	#switches_verifier "$@"
 	local OPTIND=
 	local OPTARG=
-	local OPTION=
 	while getopts "b:cd:e:hj:i:lm:nr:s:t:uw:" OPTION
                do
-		local switches_last_option=$OPTION
-		local switches_last_optarg=$OPTARG
                 case $OPTION in
 			b)		[ "${OPTARG}" == k ] && make_backup || make_backup "$OPTARG";;
 			c)		skip || eval_function $step; disp_functions; echo;;
@@ -80,16 +76,18 @@ function switches(){
                         h)              show_help; disp_functions; echo;;
 			j)		[[ $OPTARG =~ (b|u) ]] && back || next;
 					wrap; disp_functions; echo;;
-			i)		local index=`find_function $OPTARG`
-					(( index )) && eval_function $index || disp_functions 
-					(( index )) && log_is_empty  $index && disp_functions;;
+			i)		find_function $OPTARG		\
+					&& step=`find_function $OPTARG`	\
+					&& eval_function $step		\
+					|| disp_functions;;
                         l)              disp_functions; echo;;
 			m)		[[ $OPTARG =~ (b|u) ]] && move_up $step   && back
 					[[ $OPTARG =~ (f|d) ]] && move_down $step && next
 					disp_functions; echo;;
 			n)		skip || eval_function $step; next; wrap; disp_functions; echo;;
-                        s)              skip_function $OPTARG || show_help
-					disp_functions; echo;;
+                        s)              show_help; 
+					[ $OPTARG == a ] && OPTARG=0;
+					skip_function $OPTARG; disp_functions; echo;;
                         r)              rset;
 					[ $OPTARG == r ] && return 1;
 					[ $OPTARG == l ] && log_clear;
@@ -101,26 +99,6 @@ function switches(){
                         ?)              show_help; disp_functions; echo;;
                 esac
         done
-	
-	# Shift to non parced command line arguments
-	shift $(( OPTIND - 1 ))
-
-	# If there are any extra cmd line arguments apply the last command switch
-	(( ${#@} )) && for args in "$@"; do
-		case ${switches_last_option:- null} in
-			i|s)	$FUNCNAME -$switches_last_option "$args";;
-		esac
-	done
-
-	# Test for piped extra cmd line arguments and apply to last cmd line switch
-	if readlink /proc/$$/fd/0 | egrep -q "^pipe:"; then
-		case ${switches_last_option:- null} in	
-			i|s)	while read args; do
-					$FUNCNAME -$switches_last_option "${args}"
-				done < <(cat | sed 's/\(^"\|"$\)//g;s/ *" */\n/g;') # splits lines at quotes, removes leading and trailing spaces
-				;;
-		esac
-	fi
 	return 0
 }
 ###########################################################################################
@@ -150,14 +128,12 @@ function include(){
 			chmod 777 "$scrLogPath"
 		fi
 		scrLogFQFN="$scrLogPath/${scriptName%.*}"
-
 		. "$scriptFQFN"
 		is_unset prefix	&& { prefix="setup"; sed -i "1aprefix=\"setup\""      "$scriptFQFN"; }
 		is_unset step	&& { step=1;         sed -i "1astep=1"                "$scriptFQFN"; }
 		is_unset skip	&& { skip=( 0 `seq $(last_function)` )
 				     skip=( ${skip[*]/*/false} )
-		                     sed -i "1askip=\( ${skip[*]} \)" "$scriptFQFN"; }
-		
+				                     sed -i "1askip=\( ${skip[*]} \)" "$scriptFQFN"; }
 		if ! (( ${#skip[*]} > `last_function` )); then 
 			for index in $(seq ${#skip[*]} `last_function`); do
 				skip[$index]=false
@@ -287,17 +263,6 @@ function move_up(){
 }
 ###########################################################################################
 ###########################################################################################
-function log_is_empty(){  local log=`log_get_name $1`
-			  if [ -f "${log}" ]; then
-				local size=`du -b "${log}" | cut -f1`
-				if (( size )); then
-					return 1
-				else
-					rm -f "${log}"
-					return 0
-				fi
-			  fi
-}
 function log_tail_main(){ [ -f "$scrLogFQFN" ] && tail -n +1 -f "$scrLogFQFN" || \
 		          desc 50 Log \"$scrLogFQFN\" unavailable!; }
 function log_tail_func(){ [ -f "`log_get_name $1`" ] && tail -n +1 -f "`log_get_name $1`" || \
@@ -320,34 +285,23 @@ function reboot_start(){ reboot_isset && /sbin/reboot || return 1; }
 ###########################################################################################
 ###########################################################################################
 function find_function(){
-	local opts=$*
-	local srch=${opts// /_}
-	if [[ "${srch}" =~ ^[0-9]+$ ]]; then
+	local srch=$*
+	if [[ "${srch}" =~ ^[0-9]*$ ]]; then
 		echo ${srch}
+		return 0
+	elif (( $(list_functions | egrep -i "(${srch}|${srch// /_})" | wc -l) == 1 )); then
+		list_functions				|\
+		cat -n					|\
+		egrep -i "(${srch}|${srch// /_})"	|\
+		awk '{print $1}'
+		return 0
 	else
-		local O="-v P=${prefix} -v S=${srch} -v T=true -v F=false"
-		local L="list_functions"
-		# test case sensative exact match
-		if   `$L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {c++}END{print(c==1)?T:F}'`; then
-		      $L | awk $O 'BEGIN{R="^"P"_"S"$"} $0~R {print NR}'
-		# test case insensative exact match
-		elif `$L | awk $O 'BEGIN{R="^"P"_"tolower(S)"$"} tolower($0)~R {c++}END{print(c==1)?T:F}'`; then
-		      $L | awk $O 'BEGIN{R="^"P"_"tolower(S)"$"} tolower($0)~R {print NR}'
-		# test case sensative search
-		elif `$L | awk $O 'BEGIN{R="^"P"_.*"S} $0~R {c++}END{print(c==1)?T:F}'`; then
-		      $L | awk $O 'BEGIN{R="^"P"_.*"S} $0~R {print NR}'
-		# test case insensative search
-		elif `$L | awk $O 'BEGIN{R="^"P"_.*"tolower(S)} tolower($0)~R {c++}END{print(c==1)?T:F}'`; then
-		      $L | awk $O 'BEGIN{R="^"P"_.*"tolower(S)} tolower($0)~R {print NR}'
-		# if no matches return zero
-		else
-			echo 0
-		fi
+		derr Function match \"${srch}\" not found\!
+		return 1
 	fi
 }
 function eval_function(){ cat "$buildScriptPipe" | log_output $1 &
-			  eval `name_function $1` &> "$buildScriptPipe"; 
-}
+			  eval `name_function $1` &> "$buildScriptPipe"; }
 function name_function(){ list_functions | sed "$1!d"; }
 function last_function(){ list_functions | wc -l; }
 function show_function(){ type -a `name_function $1` | sed '1d;2s/^/function /'; }
@@ -391,23 +345,8 @@ function disp_functions(){
 	unset ${!disp_func_*}
 }
 
-function skip_function(){
-	case "$*" in
-		a)	${skip[0]} && skip[0]=false || skip[0]=true
-			fixs;;
-		d)	skip=( ${skip[@]//*/true} )
-			fixs;;
-		e)	skip=( ${skip[@]//*/false} )
-			fixs;;
-		*)	local func=`find_function "$*"`
-			[[ $func =~ ^[0-9]+$ ]] && (( $func <= `last_function` )) || return 1
-			if (( func )); then
-				! ${skip[0]} && skip[0]=true
-				${skip[$func]} && skip[$func]=false || skip[$func]=true
-				fixs
-			fi;;
-	esac	
-}
+function skip_function(){ [[ $1 =~ ^[0-9]+$ ]] && (( $1 <= `last_function` )) || return
+			  ${skip[$1]} && skip[$1]=false || skip[$1]=true; fixs; }
 
 
 ###########################################################################################
@@ -425,7 +364,7 @@ function back(){ let step--; fixs; }
 function next(){ let step++; fixs; }
 function rset(){ step=1; fixs; }
 
-function fixs(){ sed -i "/^skip=/cskip=\( ${skip[*]} \)" "$scriptFQFN"; }
+function fixs(){ sed -i "/^step=/s/.*/step=${step}/;/^skip=/s/.*/skip=( ${skip[*]} )/" "$scriptFQFN"; }
 ###########################################################################################
 ###########################################################################################
 function time_stamp(){ date +%m.%d\ %T.$(m=`date +%N`; echo ${m:0:2}); }

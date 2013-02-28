@@ -89,7 +89,8 @@ function switches(){
 					disp_functions; echo;;
 			n)		skip || eval_function $step; next; wrap; disp_functions; echo;;
                         s)              skip_function $OPTARG || show_help
-					disp_functions; echo;;
+					disp_functions; echo
+					;;
                         r)              rset;
 					[ $OPTARG == r ] && return 1;
 					[ $OPTARG == l ] && log_clear;
@@ -392,14 +393,14 @@ function disp_functions(){
 }
 
 function skip_function(){
-	case "$*" in
+	case $1 in
 		a)	${skip[0]} && skip[0]=false || skip[0]=true
 			fixs;;
 		d)	skip=( ${skip[@]//*/true} )
 			fixs;;
 		e)	skip=( ${skip[@]//*/false} )
 			fixs;;
-		*)	local func=`find_function "$*"`
+		*)	local func=`find_function $1`
 			[[ $func =~ ^[0-9]+$ ]] && (( $func <= `last_function` )) || return 1
 			if (( func )); then
 				! ${skip[0]} && skip[0]=true

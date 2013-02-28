@@ -150,14 +150,12 @@ function include(){
 			chmod 777 "$scrLogPath"
 		fi
 		scrLogFQFN="$scrLogPath/${scriptName%.*}"
-
 		. "$scriptFQFN"
 		is_unset prefix	&& { prefix="setup"; sed -i "1aprefix=\"setup\""      "$scriptFQFN"; }
 		is_unset step	&& { step=1;         sed -i "1astep=1"                "$scriptFQFN"; }
 		is_unset skip	&& { skip=( 0 `seq $(last_function)` )
 				     skip=( ${skip[*]/*/false} )
-		                     sed -i "1askip=\( ${skip[*]} \)" "$scriptFQFN"; }
-		
+				                     sed -i "1askip=\( ${skip[*]} \)" "$scriptFQFN"; }
 		if ! (( ${#skip[*]} > `last_function` )); then 
 			for index in $(seq ${#skip[*]} `last_function`); do
 				skip[$index]=false
@@ -392,20 +390,17 @@ function disp_functions(){
 }
 
 function skip_function(){
-	case "$*" in
-		a)	${skip[0]} && skip[0]=false || skip[0]=true
-			fixs;;
+	case $1 in
+		a)	skip_function 0;;
 		d)	skip=( ${skip[@]//*/true} )
 			fixs;;
 		e)	skip=( ${skip[@]//*/false} )
 			fixs;;
-		*)	local func=`find_function "$*"`
+		*)	local func=`find_function $1`
 			[[ $func =~ ^[0-9]+$ ]] && (( $func <= `last_function` )) || return 1
-			if (( func )); then
-				! ${skip[0]} && skip[0]=true
-				${skip[$func]} && skip[$func]=false || skip[$func]=true
-				fixs
-			fi;;
+			(( func )) && ! ${skip[0]} && skip[0]=true
+			${skip[$func]} && skip[$func]=false || skip[$func]=true
+			fixs;; 
 	esac	
 }
 
@@ -425,7 +420,7 @@ function back(){ let step--; fixs; }
 function next(){ let step++; fixs; }
 function rset(){ step=1; fixs; }
 
-function fixs(){ sed -i "/^skip=/cskip=\( ${skip[*]} \)" "$scriptFQFN"; }
+function fixs(){ sed -i "/^step=/s/.*/step=${step}/;/^skip=/s/.*/skip=( ${skip[*]} )/" "$scriptFQFN"; }
 ###########################################################################################
 ###########################################################################################
 function time_stamp(){ date +%m.%d\ %T.$(m=`date +%N`; echo ${m:0:2}); }

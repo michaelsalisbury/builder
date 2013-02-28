@@ -98,23 +98,46 @@ has_primary_parts () {
 		&& return 0 \
 		|| return 1
 }
+cmd () {
+	cat << END-OF-MSG > /tmp/preseed/preseed.cmd.sh
+	# jump to tty6 to display message
+	exec < /dev/tty6 > /dev/tty6 2> /dev/tty6
+	chvt 6
+	# Welcome to your early preseed interactive shell.
+	echo
+	/bin/sh
+	# jump back to anaconda and preseed
+	chvt 1
+	exec < /dev/tty1 > /dev/tty1 2> /dev/tty1
+	exit 0
+END-OF-MSG
+	# execute script
+	/bin/sh /tmp/preseed/preseed.cmd.sh
+}
 msg () {
-	local message=$*
-	local delay=$(echo $(seq 10 -1 1))
-	echo "${message}" > /tmp/preseed/preseed.txt
-	echo             >> /tmp/preseed/preseed.txt
-
-
-
-
+	# write long messages to /tmp/preseed/preseed.txt before calling this function
+	# get delay
+	if echo "$1" | egrep -q '^[0-9]+$'; then
+		local delay=$(echo $(seq $1 -1 1))
+		shift
+	else
+		local delay=$(echo $(seq 10 -1 1))
+	fi
+	# get message after shift if delay specified
+	local message="$@"
 	# build script
 	cat << END-OF-MSG > /tmp/preseed/preseed.msg.sh
 	# jump to tty6 to display message
 	exec < /dev/tty6 > /dev/tty6 2> /dev/tty6
 	chvt 6
-	# display message
+	# display short message
 	echo
-	cat /tmp/preseed/preseed.txt
+	echo "${message}"
+	echo
+	# display long message
+	touch  /tmp/preseed/preseed.txt
+	cat    /tmp/preseed/preseed.txt
+	rm -f  /tmp/preseed/preseed.txt
 	echo
 	# delay
 	for i in ${delay}; do
@@ -122,7 +145,7 @@ msg () {
 		sleep 1
 	done
 	echo
-	stall 10
+	#/bin/sh
 	# jump back to anaconda and preseed
 	chvt 1
 	exec < /dev/tty1 > /dev/tty1 2> /dev/tty1
@@ -131,48 +154,59 @@ END-OF-MSG
 	# execute script
 	/bin/sh /tmp/preseed/preseed.msg.sh
 }
+msg_basic_layout () {
+	local message=$@
+		cat << END-OF-MESSAGE >> /tmp/preseed/preseed.txt
+$(fdisk -lu $dev)
+
+
+Basic layout has been selected for hard drive partitioning scheme.
+This will wipe out all data on hard drive "${dev}" if you proceed.
+Switching to interactive command to effect changes; fdisk etc.
+Type "exit" when done and deploy will proceed.
+Type "reboot" to start over and re-detect appropriate layout.
+END-OF-MESSAGE
+	msg ${message}
+}
 analyze () {
 	local dev=$(get_primary_disk)
 	# Set hard drive to configure
-	echo Free Space on \"${dev}\" :: $(in_M $(get_disk_free $dev))
+	msg 5 Free Space on \"${dev}\" :: $(in_M $(get_disk_free $dev))M
 	echo d-i partman-auto/disk string $dev > /tmp/preseed/preseed.hd.disk.cfg
 	debconf-set-selections                   /tmp/preseed/preseed.hd.disk.cfg
-	echo
-	msg Test\, this is only a diagnostic message\!
 
 	if ! has_free_space $dev $(to_G 10); then
-		echo ERROR! :: Not enough free space\; Standard layout will wipe out all data on hard drive \"${dev}\".
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
 		debconf-set-selections /tmp/preseed/preseed.hd.partman_prompt.cfg
-		#stall 10
+		msg_basic_layout 30 ERROR\! :: Not enough free space\!
+		cmd 
 	elif has_primary_parts $dev 4; then
-		echo ERROR! :: No free primary partitions\; Standard layout will wipe out all data on hard drive \"${dev}\".
-		debconf-set-selections /tmp/preseed/preseed.hd.partman_prompt.cfg
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
-		#stall 10
+		debconf-set-selections /tmp/preseed/preseed.hd.partman_prompt.cfg
+		msg_basic_layout ERROR\! :: No free primary partitions\!
+		cmd
 	elif has_primary_part_free $dev 4; then
-		echo Drive empty\; Standard layout will be used on hard drive \"${dev}\".
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
 		debconf-set-selections /tmp/preseed/preseed.hd.partman_no-prompt.cfg
-		#stall 10
+		msg 20 Drive empty\; Basic layout will be used on hard drive \"${dev}\".
 	elif has_primary_part_free $dev 3; then
-		echo 3 Free Primary Partitions\; Extended partition layout will be used on hard drive \"${dev}\".
 		debconf-set-selections /tmp/preseed/preseed.hd.free_extended.cfg
-		#stall 10
+		msg 30 3 Free Primary Partitions\; Extended partition layout will be used on hard drive \"${dev}\".
 	elif has_primary_part_free $dev 2; then
 		if has_extended_part $dev; then
-			echo 2 Free Primary Partitions\; Layout without /boot or extended partition will be used on hard drive \"${dev}\".
 			debconf-set-selections /tmp/preseed/preseed.hd.free_wo-extended.cfg
-			#stall 10
+			debconf-set-selections /tmp/preseed/preseed.hd.partman_no-prompt.cfg
+			msg 30 2 Free Primary Partitions\; Layout without /boot or extended partition will be used on hard drive \"${dev}\".
+			cmd
 		else
-			echo 2 Free Primary Partitions\; Extended partition layout will be used on hard drive \"${dev}\".
 			debconf-set-selections /tmp/preseed/preseed.hd.free_extended.cfg
-			#stall 10
+			msg 30 2 Free Primary Partitions\; Extended partition layout will be used on hard drive \"${dev}\".
 		fi
 	elif has_primary_part_free $dev 1; then
-		echo 1 Free Primary Partition\; Layout without /boot, extended partition or swap will be used on hard drive \"${dev}\".
 		debconf-set-selections /tmp/preseed/preseed.hd.free_wo-swap.cfg
-		#stall 10
+		debconf-set-selections /tmp/preseed/preseed.hd.partman_no-prompt.cfg
+		msg 30 1 Free Primary Partition\; Layout without /boot, extended partition or swap will be used on hard drive \"${dev}\".
+		cmd
 	fi
 }
 analyze $@
