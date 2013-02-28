@@ -1,0 +1,29 @@
+#!/bin/bash
+
+
+mysql -u root --password=1qaz@WSX << END-OF-SQL
+use owncloud;
+
+DROP TRIGGER IF EXISTS oc_tr_newusers;
+DROP TRIGGER IF EXISTS oc_tr_useradd;
+DROP TRIGGER IF EXISTS oc_tr_userdel;
+DELIMITER |
+CREATE TRIGGER oc_tr_useradd BEFORE INSERT ON oc_users
+	FOR EACH ROW BEGIN
+		set @line = CONCAT('user_added ', NEW.uid);
+		SELECT @line INTO OUTFILE '/tmp/owncloud_log';
+	END;
+|
+CREATE TRIGGER oc_tr_userdel AFTER DELETE ON oc_users
+	FOR EACH ROW BEGIN
+		set @line = CONCAT('user_removed ', OLD.uid);
+		SELECT @line INTO OUTFILE '/tmp/owncloud_log';
+	END;
+|
+
+
+DELIMITER ;
+
+
+
+END-OF-SQL
