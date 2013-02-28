@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -13,7 +13,7 @@ source=http://10.173.119.78/scripts/system-setup/$scriptName
 
 
 
-function extras_main () {
+extras_main () {
 	[ -z "$1" ] && cat ${scriptPath}/${scriptName} | sed "/^[^]]*desc /{s|desc ||;s|'||g;s|\;.*||;p};d" && exit 0
 	step=$1
 
@@ -69,7 +69,7 @@ function extras_main () {
 #function repc(){ echo `seq $1` | sed "s/ /$2/g;s/[^$2]//g"; }
 #function desc(){ echo; line="#### $@ $(repc 100 '#')"; echo ${line:0:100}; echo; }
 
-function setup_all_intel(){
+setup_all_intel(){
 	desc all intel
 	(	${scriptPath}/${scriptName} 30
 		${scriptPath}/${scriptName} 36
@@ -82,12 +82,12 @@ function setup_all_intel(){
 }
 
 
-function setup_vbox(){
+setup_vbox(){
 	wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add -
 	apt-get update
 	apt-get -y -q install --reinstall virtualbox virtualbox-guest-additions virtualbox-guest-additions-iso
 }
-function setup_crossover(){
+setup_crossover(){
 	#########################################################################
 	cd ~/Downloads
 	wget http://${localWWW}/ia32-crossover_11.2.0-1_amd64.deb
@@ -102,7 +102,7 @@ function setup_crossover(){
 	echo "Now run the following command as a regular user (the user who needs office)"
 	echo /opt/cxoffice/bin/cxtie --open=~/Downloads/CrossOverOffice2010.tie
 }
-function setup_auto_archive_patch(){
+setup_auto_archive_patch(){
 	if [ "$(whoami)" == "root" ]; then
 		while [ ! -d "/home/${UserName:-null}" ]; do
 			echo -n "Please enter the name of the \"USER\" to patch. > "
@@ -143,7 +143,7 @@ END-OF-REG
 
 
 
-function setup_intel(){
+setup_intel(){
 		# Parallel Studio XE 2013 w/spi update2 for intel64
 		# Parallel Studio XE 2013 Update1 for intel64
 		ver='parallel_studio_xe_2011_sp1_update2_intel64'
@@ -167,7 +167,7 @@ EOF
 		cd ${ver}
 		./install.sh -s ../silent.intel
 }
-function setup_intel_paths(){
+setup_intel_paths(){
 		cat << EOF > /etc/profile.d/intel.csh
 /bin/bash /etc/profile.d/intel.sh
 EOF
@@ -185,7 +185,7 @@ EOF
 		ldconfig
 }
 
-function setup_openmpi_intel(){
+setup_openmpi_intel(){
 		#########################################################################
 		### Compile OpenMPI for Inetl fortran and C #############################
 		cd ~/Downloads
@@ -218,7 +218,7 @@ function setup_openmpi_intel(){
 		make all install
 }
 
-function setup_openmpi_intel_paths(){
+setup_openmpi_intel_paths(){
 		#########################################################################
 		cat << EOF >> /etc/profile.d/openMPI.csh
 /bin/bash /etc/profile.d/openMPI.sh
@@ -230,7 +230,7 @@ export LD_LIBRARY_PATH="/opt/openmpi-intel2011/lib""\$LDP"
 EOF
 }
 
-function setup_mpich2_intel(){
+setup_mpich2_intel(){
 	#########################################################################
 	### Compile MPICH2 for Inetl fortran and C ##############################
 	ver='mpich2-1.4.1p1'
@@ -252,7 +252,7 @@ function setup_mpich2_intel(){
 			--with-mpe		\
 			--prefix=${install_dir}
 }
-function setup_mpich2_gnu(){
+setup_mpich2_gnu(){
 	#########################################################################
 	### Compile MPICH2 for gfortran and gcc #################################
 	ver='mpich2-1.4.1p1'
@@ -271,7 +271,7 @@ function setup_mpich2_gnu(){
 			--enable-smpcoll	\
 			--prefix=${install_dir}
 }
-function setup_mpich2(){
+setup_mpich2(){
 	rm -rf "${install_dir}"
 	mkdir  "${install_dir}"
 	cd        ~/Downloads
@@ -287,7 +287,7 @@ make_mpich2(){
 	./configure $*
 	make; make install
 }
-function setup_lammps_intel(){
+setup_lammps_intel(){
 		#########################################################################
 		#apt-get -y install git-all libjpeg8 libjpeg62 libjpeg8-dev libjpeg62-dev
 		apt-get -y install git-all libjpeg8 libjpeg62 libjpeg8-dev --force-yes --fix-missing
@@ -333,7 +333,7 @@ EOF
 export PATH="/opt/lammps/bin"":\$PATH"
 EOF
 }
-function setup_lammps_gnu(){
+setup_lammps_gnu(){
 		#########################################################################
 		apt-get -y install git-all libjpeg8 libjpeg62 libjpeg8-dev libjpeg62-dev
 		cd     ~/Downloads
@@ -376,7 +376,7 @@ export PATH="/opt/lammps/bin"":\$PATH"
 EOF
 }
 
-function setup_gromacs_intel(){
+setup_gromacs_intel(){
 		#########################################################################
 		ver='gromacs-4.5.5'
 		install_dir='/opt/gromacs/build-intel'
@@ -395,7 +395,7 @@ function setup_gromacs_intel(){
 		opts="--prefix=${install_dir} --with-fft=mkl"
 		setup_gromacs
 }
-function setup_gromacs_gnu(){
+setup_gromacs_gnu(){
 		#########################################################################
 		ver='gromacs-4.5.5'
 		install_dir='/opt/gromacs/build-intel'
@@ -420,7 +420,7 @@ make_gromacs(){
 	./configure $*
 	make -j${CPU_COUNT}; make install
 }
-function setup_gromacs(){
+setup_gromacs(){
 		#########################################################################
 		cd     ~/Downloads
 		rm -f ~/Downloads/${ver}.tar.gz*
@@ -438,7 +438,7 @@ function setup_gromacs(){
 		make_gromacs ${opts} --disable-float --enable-mpi --program-suffix=_ddmpi &> ~/logs/${ver}-ddmpi
 		#########################################################################
 }
-function setup_espresso_intel(){
+setup_espresso_intel(){
 		#########################################################################
 		### Compile QUANTUM ESPRESO with MPICH2 and INTEL Fortran ###############
                 rm    ~/logs/espresso*
@@ -503,7 +503,7 @@ export PATH="/opt/espresso/qe5.0/bin"":\$PATH"
 EOF
 }
 
-function setup_gotoblas2_intel(){
+setup_gotoblas2_intel(){
 	#########################################################################
 	### Compile GotoBlas2 with MPICH2 and Intel #############################
 	ver='GotoBLAS2-1.13'
@@ -522,7 +522,7 @@ function setup_gotoblas2_intel(){
 	#########################################################################
 	setup_gotoblas2
 }
-function setup_gotoblas2(){
+setup_gotoblas2(){
 		opt='/opt/GotoBlas2'
 		rm if                                    /opt/gotoblas
 		ln -s    /opt/GotoBlas2/${ver}-NoThreads /opt/gotoblas
@@ -547,7 +547,7 @@ function setup_gotoblas2(){
 		make ${blas_opts}              &> ~/logs/${ver}-AllThreads
 		#########################################################################
 }
-function setup_mpich2_gnu_paths(){
+setup_mpich2_gnu_paths(){
                 #########################################################################
                 cat << EOF > /etc/profile.d/mpich2-gnu.csh
 /bin/bash /etc/profile.d/mpich2-gnu.sh
@@ -557,7 +557,7 @@ export PATH="/opt/mpich2-gnu/bin"":\$PATH"
 export LD_LIBRARY_PATH="/opt/mpich2-gnu/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
 EOF
 }
-function setup_mpich2_intel_paths(){
+setup_mpich2_intel_paths(){
                 cat << EOF > /etc/profile.d/mpich2.csh
 /bin/bash /etc/profile.d/mpich2.sh
 EOF
@@ -566,7 +566,7 @@ export PATH="/opt/mpich2/bin"":\$PATH"
 export LD_LIBRARY_PATH="/opt/mpich2/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
 EOF
 }
-function setup_fftw2_intel(){
+setup_fftw2_intel(){
         ver='fftw-2.1.5'
         install_dir="/usr/local/${ver}"
         export CC=icc
@@ -579,7 +579,7 @@ function setup_fftw2_intel(){
         export CXXFLAGS='-shared-intel -O3 -fPIC'
         setup_fftw2
 }
-function setup_fftw2_gnu(){
+setup_fftw2_gnu(){
         #########################################################################
         ver='fftw-2.1.5'
         install_dir="/usr/local/${ver}_gnu"
@@ -593,7 +593,7 @@ function setup_fftw2_gnu(){
         export   FFLAGS='-O3 -fPIC'
         setup_fftw2
 }
-function setup_fftw2(){
+setup_fftw2(){
         #########################################################################
         fftw_opts="--prefix=${install_dir} --enable-shared --enable-threads --enable-type-prefix"
         #########################################################################
@@ -618,7 +618,7 @@ export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PA
 EOF
 }
 
-function setup_fftw3_gnu(){
+setup_fftw3_gnu(){
 	#########################################################################
 	ver='fftw-3.3'
 	install_dir="/usr/local/${ver}_gnu"
@@ -632,7 +632,7 @@ function setup_fftw3_gnu(){
 	export   FFLAGS='-O3 -fPIC'
 	setup_fftw	
 }
-function setup_fftw3_intel(){
+setup_fftw3_intel(){
 	ver='fftw-3.3'
 	install_dir="/usr/local/${ver}"
 	export CC=icc
@@ -648,7 +648,7 @@ function setup_fftw3_intel(){
 make_fftw(){	make clean;		make distclean;		./configure $*
 		make -j${CPU_COUNT};	make install
 }
-function setup_fftw(){
+setup_fftw(){
 	#########################################################################
 	fftw_opts="--prefix=${install_dir} --enable-shared --enable-threads"
 	#########################################################################
@@ -674,7 +674,7 @@ function setup_fftw(){
 export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
 EOF
 }
-function setup_tcl_gnu(){
+setup_tcl_gnu(){
         #########################################################################
         ver='tcl8.5.9-src'
         install_dir="/usr/local/${ver}_gnu"
@@ -689,7 +689,7 @@ function setup_tcl_gnu(){
         setup_fftw
 }
 
-function setup_tcl_intel(){
+setup_tcl_intel(){
 	ver='tcl8.5.9-src'
 	install_dir="/usr/local/${ver}"
 	export CC=icc
@@ -705,7 +705,7 @@ function setup_tcl_intel(){
 make_tcl(){    make clean;             make distclean;         ./configure $*
                 make -j${CPU_COUNT};    make install
 }
-function setup_tcl(){
+setup_tcl(){
         #########################################################################
         tcl_opts="--prefix=${install_dir} --enable-64bit --enable-shared --enable-threads"
         #########################################################################
@@ -727,7 +727,7 @@ export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PA
 EOF
 }
 
-function setup_namd_intel(){
+setup_namd_intel(){
 	#########################################################################
 	export CC=icc
 	export CXX=icpc
@@ -821,7 +821,7 @@ EOF
 
 }
 
-function setup_auto_update(){
+setup_auto_update(){
 	#########################################################################
 	apt-get -y --force-yes install unattended-upgrades
 	cat << EOF > /etc/apt/apt.conf.d/50unattended-upgrades
@@ -846,7 +846,7 @@ EOF
 	echo "/etc/apt/apt.conf.d/10periodic"
 	echo "/etc/update-manager/release-upgrades"
 }
-function setup_xfce(){
+setup_xfce(){
 	cd ~/Downloads
 	apt-get -y install xubuntu-desktop
 	#########################################################################
@@ -869,7 +869,7 @@ function setup_xfce(){
 
 
 }
-function setup_QL(){
+setup_QL(){
 	add-apt-repository -y ppa:indicator-multiload/stable-daily
 	apt-get -y update
 	apt-get install indicator-multiload
