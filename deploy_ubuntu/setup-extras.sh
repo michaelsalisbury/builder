@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -9,7 +9,7 @@ source=http://10.173.119.78/scripts/system-setup/$scriptName
 #username=$(who -u | grep "(:" | head -1 | cut -f1 -d" ")
 #userhome="$(cat /etc/passwd | grep $username | cut -f6 -d:)"
 #CPU_COUNT=$(cat /proc/cpuinfo | grep processor | wc -l)
-#localWWW="10.173.119.78/packages"
+localWWW='10.173.119.78/packages/Computation'
 
 
 
@@ -80,7 +80,49 @@ function setup_all_intel(){
 		${scriptPath}/${scriptName} 35
 	) &> ~/logs/Setup_All_Packages_Compiled_With_Intel
 }
+function setup_generate_package_diff(){
+	desc Create Package Install List \(must be root\)
+	#########################################################################
+	[[ $(whoami) =~ ^root$ ]] || { echo Your not root, EXITING\!; retun 1; }
+	if [ ! -f "/root/packages.old" ]; then
+		echo Old package list does not exist.
+		echo Generate \"packages.old\" from cmd \(dpkg --get-selections\) on old machine.
+		echo EXITING\!
+		return 1
+	fi
+	# Generate a list of currently installed packages
+	dpkg --get-selections                              > /root/packages.new
 
+	# Generate a list of missing packages
+	echo                                               > /root/packages.diff
+	while read package install; do
+        	if ! egrep -q "^$package[[:space:]]*install" /root/packages.new; then
+        	        echo -n .
+        	        echo $package                     >> /root/packages.diff
+        	fi
+	done < <(cat                                         /root/packages.old)
+	echo
+
+	# Verify which missing packages are available from the currently installed repos
+	while read package; do
+	        while read available; do
+	                # Add the package names to an array
+	                echo -n "$available .. "
+	                packages[cnt++]=$available
+	        # Search for package availability within the installed repos
+	        done < <(apt-cache search ${package} | awk -v PACKAGE=${package} '$1 ~ "^"PACKAGE"$"{print $1}')
+	# Read the list of missing packages
+	done < <(cat packages.diff | sed '/^$/d')
+
+	echo
+	echo
+	echo Writing install list to \"packages.install\"
+	echo
+	# Write the array of installable packages to a file
+	for package in ${packages[*]}; do
+	        echo "$package install"
+	done | column -t | tee packages.install
+}
 
 function setup_vbox(){
 	wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add -
@@ -146,8 +188,12 @@ END-OF-REG
 function setup_intel(){
 		# Parallel Studio XE 2013 w/spi update2 for intel64
 		# Parallel Studio XE 2013 Update1 for intel64
-		ver='parallel_studio_xe_2011_sp1_update2_intel64'
-		ver='parallel_studio_xe_2013_update1'
+		local ver='parallel_studio_xe_2011_sp1_update2_intel64'
+		local ver='parallel_studio_xe_2013_update1'
+		PSET_SERIAL_NUMBER=N433-DZFZTG33
+		local ver='parallel_studio_xe_2013_update2'
+		PSET_SERIAL_NUMBER=N433-DZFZTG33 
+		local localWWW='10.173.119.78/packages/Computation'
 		cd ~/Downloads
 		#wget http://registrationcenter-download.intel.com/akdlm/irc_nas/2504/parallel_studio_xe_2011_sp1_update2_intel64.tgz
 
@@ -156,7 +202,7 @@ function setup_intel(){
 		gzip -d ${ver}.tgz
 		tar xvf ${ver}.tar
 		cat << EOF >> silent.intel
-PSET_SERIAL_NUMBER=N433-DZFZTG33
+PSET_SERIAL_NUMBER=${PSET_SERIAL_NUMBER}
 ACTIVATION=serial_number
 CONTINUE_WITH_INSTALLDIR_OVERWRITE=yes
 CONTINUE_WITH_OPTIONAL_ERROR=yes
