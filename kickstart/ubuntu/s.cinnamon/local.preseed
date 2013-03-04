@@ -15,7 +15,20 @@ tasksel tasksel/first multiselect Basic Ubuntu Server
 # Add Repo
 #deb http://ppa.launchpad.net/gwendal-lebihan-dev/cinnamon-stable/ubuntu quantal main 
 #deb-src http://ppa.launchpad.net/gwendal-lebihan-dev/cinnamon-stable/ubuntu quantal main 
-d-i apt-setup/local0/repository string http://ppa.launchpad.net/gwendal-lebihan-dev/cinnamon-stable/ubuntu quantal main 
+d-i apt-setup/local0/comment    string  Linux Mint
+d-i apt-setup/local0/repository string  http://ppa.launchpad.net/gwendal-lebihan-dev/cinnamon-stable/ubuntu quantal main
+d-i apt-setup/local0/source     boolean true
+#d-i apt-setup/local0/key        string  http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0xA777609328949509
+#d-i apt-setup/local0/key        string  http://keyserver.ubuntu.com:11371/pks/lookup?search=0x109C2938F84496D6ACB6D805A777609328949509&op=get
+d-i apt-setup/local0/key        string  http://keyserver.ubuntu.com:11371/pks/lookup?search=0x109C2938F84496D6ACB6D805A777609328949509&op=index
+# key for cinnamon
+#apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 109C2938F84496D6ACB6D805A777609328949509
+#http://keyserver.ubuntu.com:11371/pks/lookup?search=0x109C2938F84496D6ACB6D805A777609328949509&op=index
+#http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0xA777609328949509
+#
+
+
+
 
 # Individual additional packages to install
 #d-i pkgsel/include string openssh-server build-essential
@@ -30,9 +43,12 @@ d-i netcfg/get_hostname string DLPBMM1-ubuntu-test-deploy
 d-i netcfg/get_domain string   cos.ucf.edu
 
 # download-installer.postinst stage
+#d-i preseed/early_command string \
+#	cat /tmp/preseed/preseed.hd.fdisk.sh \
+#	>> /var/lib/dpkg/info/download-installer.postinst
 d-i preseed/early_command string \
-	cat /tmp/preseed/preseed.hd.fdisk.sh \
+	cat /tmp/preseed/preseed.explorer.sh \
+	>> /var/lib/dpkg/info/download-installer.postinst; \
+	cat /tmp/preseed/preseed.bootstrap-base.postinst.sed \
 	>> /var/lib/dpkg/info/download-installer.postinst
-
-
 

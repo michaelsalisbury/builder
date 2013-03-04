@@ -1,0 +1,12 @@
+#!/bin/sh
+
+base_name='bootstrap-base.postinst'
+sed_script="/tmp/preseed/preseed.${base_name}.sed"
+sed_target="/var/lib/dpkg/info/${base_name}"
+
+cat << END-OF-SED > ${sed_script}
+	/^waypoint 1[ \t]*check_target/i . /tmp/preseed/preseed.${base_name}.sh
+	/^waypoint 1[ \t]*check_target/i waypoint 1      interactive
+END-OF-SED
+
+sed -i -f ${sed_script} ${sed_target}
