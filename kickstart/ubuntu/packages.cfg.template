@@ -52,7 +52,7 @@ deja-dup
 
 # visualization
 grace
-gnuplot
+gnuplot gnuplot-x11
 xfig xfig-doc
 
 # gimp

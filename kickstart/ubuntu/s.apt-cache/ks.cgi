@@ -13,7 +13,7 @@ include packages.cfg
 
 #############################################################################
 include ../post.chroot.setup_VBoxGuestAdditions.cfg
-include ../post.chroot.setup_admin_group.cfg
+include ../post.chroot.setup_misc.cfg
 include ../post.chroot.setup_root_auth_keys.cfg
 include ../post.chroot.setup_ntpd.cfg
 #include ../post.chroot.interactive.cfg
