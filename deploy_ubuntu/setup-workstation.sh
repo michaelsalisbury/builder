@@ -34,6 +34,7 @@ function setup_Prep_Add_sudo(){
 		[[ "`whoami`" != "root" ]] && local sudo='sudo' || unset sudo
 		echo "${username} ALL=(ALL) NOPASSWD: ALL" | ${sudo} tee       /etc/sudoers.d/admin
 		                                             ${sudo} chmod 440 /etc/sudoers.d/admin
+                                                             ${sudo} usermod -a -G admin ${username} 
 		#${sudo} sed -i  "/^${username}/d"                       /etc/sudoers
 		#${sudo} sed -i "\$a${username} ALL=(ALL) NOPASSWD: ALL" /etc/sudoers
 	done < <(
@@ -462,8 +463,12 @@ function setup_VBox_Additions(){
         wget -nv http://download.virtualbox.org/virtualbox/${version}/${iso}
 	
 	# Add vbox user and group to specific uid and gid 
-	useradd  -u 130 -g 1 -M -d /var/run/vboxadd -s /bin/false vboxadd
-	groupadd -g 130                                           vboxsf
+	local ID=$(free_ID_pair 100)
+	useradd  -u $ID -g 1 -M -d /var/run/vboxadd -s /bin/false vboxadd
+	groupadd -g $ID                                           vboxsf
+
+	# Modify /etc/adduser.conf to include new group vboxsf
+	add_default_group vboxsf
 
 	# Mount VBoxGuestAdditions ISO
 	umount                                        /root/vbox_guest_additions/ISO

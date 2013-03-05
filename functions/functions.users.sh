@@ -64,3 +64,38 @@ function del_default_group(){
 	fi
 	return 1
 }
+function free_ID_pair(){
+	local ID=${1:-\1}
+
+	if ! awk -F: '{print $3}' /etc/passwd | egrep -q ^${ID}$ \
+	&& ! awk -F: '{print $3}' /etc/group  | egrep -q ^${ID}$ ; then
+		echo $ID
+		return 0
+	else
+		let ID++
+		free_ID_pair $ID $MAX
+	fi
+}
+function free_group_ID(){
+	local ID=${1:-\1}
+
+	if ! awk -F: '{print $3}' /etc/group  | egrep -q ^${ID}$ ; then
+		echo $ID
+		return 0
+	else
+		let ID++
+		free_group_ID $ID $MAX
+	fi
+}
+function free_user_ID(){
+	local ID=${1:-\1}
+
+	if ! awk -F: '{print $3}' /etc/passwd | egrep -q ^${ID}$ ; then
+		echo $ID
+		return 0
+	else
+		let ID++
+		free_user_ID $ID $MAX
+	fi
+}
+

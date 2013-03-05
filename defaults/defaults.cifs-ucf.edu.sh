@@ -39,11 +39,11 @@ function setup_skel_Structure(){
 	chmod 700  /etc/skel/.config/xfce4
 	mkdir -p   /etc/skel/.kde/Autostart
 	chmod 700  /etc/skel/.kde
-	groupadd -g 141 cifs
+	groupadd -g $(free_group_ID 100) cifs
 }
 function setup_make_Config(){
 	desc Setting up default config
-	cat << END-OF-ALIASES > /etc/profile.d/cifs
+	cat << END-OF-ALIASES > /etc/profile.d/cifs.sh
 alias    mount.d='\${HOME}/.scripts/mount.domain_cifs.sh'
 alias  mount.dom='\${HOME}/.scripts/mount.domain_cifs.sh'
 alias domain.mnt='\${HOME}/.scripts/mount.domain_cifs.sh'

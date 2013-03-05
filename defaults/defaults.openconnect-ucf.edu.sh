@@ -22,11 +22,11 @@ function setup_skel_Structure(){
 	chmod 600  /etc/skel/.vpn.conf
 	touch      /etc/sudoers.d/openconnect
 	chmod 440  /etc/sudoers.d/openconnect
-	groupadd -g 140 openconnect
+	groupadd -g $(free_group_ID 100) openconnect
 }
 function setup_make_Config(){
 	desc Setting up default config
-	cat << END-OF-ALIASES > /etc/profile.d/openconnect
+	cat << END-OF-ALIASES > /etc/profile.d/openconnect.sh
 alias vpnc='\${HOME}/.scripts/openconnect.exp &> \${HOME}/.logs/openconnect &'
 alias vpnd='killall openconnect'
 alias vpns='ifconfig tun; tail \${HOME}/.logs/openconnect'
