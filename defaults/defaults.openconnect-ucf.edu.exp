@@ -162,7 +162,9 @@ Server certificate verify failed: signer not found\r
 Connected to HTTPS on ucfvpn-1.vpn.ucf.edu\r
 GET https://ucfvpn-1.vpn.ucf.edu/+webvpn+/index.html\r
 Please enter your username and password.\r
-GROUP: \[ucffaculty|ucfstudent\]:"
+GROUP: \["
+#ucffaculty|ucfstudent\]:"
+expect *
 send -- "$group\r"
 expect -exact "$group\r
 Username:"
@@ -170,20 +172,4 @@ send -- "$username\r"
 expect -exact "$username\r
 Password:"
 send -- "$password\r"
-expect -exact "\r
-POST https://ucfvpn-1.vpn.ucf.edu/+webvpn+/index.html\r
-Got CONNECT response: HTTP/1.1 200 OK\r
-CSTP connected. DPD 30, Keepalive 20\r
-Connect Banner:\r
-| You are now connected to UCF's Faculty/Staff VPN Server.\r
-| \r
-| Virtual Private Network (VPN) access is only permitted for active UCF students, faculty, staff, and explicitly authorized third parties.\r
-| \r
-| Any unauthorized use or access of this system constitutes computer trespass - a federal felony - and is in violation of international, federal, state, and local statutes.\r
-| \r
-\r
-RTNETLINK answers: File exists\r
-Connected tun1 as 172.31.7.81, using SSL\r
-Established DTLS connection (using OpenSSL)\r
-"
 expect eof

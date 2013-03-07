@@ -18,8 +18,8 @@ function setup_skel_Structure(){
 	local scriptBase=$(basename "${scriptName}" .sh)
 	cp "${scriptPath}/${scriptBase}.exp" /etc/skel/.scripts/openconnect.exp
 	chmod u+x                            /etc/skel/.scripts/openconnect.exp
-	touch      /etc/skel/.vpn.conf
-	chmod 600  /etc/skel/.vpn.conf
+	touch      /etc/skel/.vpn.cred
+	chmod 600  /etc/skel/.vpn.cred
 	touch      /etc/sudoers.d/openconnect
 	chmod 440  /etc/sudoers.d/openconnect
 	groupadd -g $(free_group_ID 100) openconnect
@@ -27,11 +27,12 @@ function setup_skel_Structure(){
 function setup_make_Config(){
 	desc Setting up default config
 	cat << END-OF-ALIASES > /etc/profile.d/openconnect.sh
+alias vpno='openconnect \$(awk -F'\''[= ]*'\'' '\''/^url/{print \$2}'\'' .vpn.cred)'
 alias vpnc='\${HOME}/.scripts/openconnect.exp &> \${HOME}/.logs/openconnect &'
-alias vpnd='killall openconnect'
+alias vpnd='sudo killall openconnect'
 alias vpns='ifconfig tun; tail \${HOME}/.logs/openconnect'
 END-OF-ALIASES
-	cat << END-OF-VPNCONF >> /etc/skel/.vpn.conf
+	cat << END-OF-VPNCONF >> /etc/skel/.vpn.cred
 username = [NID]
 password = [***]
 group    = [ucffaculty|ucfstudent]
