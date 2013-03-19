@@ -20,6 +20,8 @@ debconf debconf-utils
 gconf-editor
 # gnome and unity desktop visual manipulation
 compizconfig-settings-manager
+# gnome fallback desktop
+gnome-session-fallback
 # cifs
 samba cifs-utils winbind
 
@@ -27,7 +29,7 @@ samba cifs-utils winbind
 openconnect
 
 # compression
-p7zip p7zip-full pigz
+p7zip p7zip-full pigz unrar-free
 
 # Remote connections
 remmina remmina-plugin-nx remmina-plugin-rdp remmina-plugin-vnc

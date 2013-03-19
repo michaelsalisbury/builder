@@ -2,7 +2,7 @@
 skip=( false )
 step=1
 prefix="setup"
-source=http://10.173.119.78/scripts/global/$scriptName
+source=http://10.173.119.78/scripts/system-setup/$scriptName
 
 ###########################################################################################
 #                                                                Uncategorized
@@ -151,4 +151,47 @@ Usr     fieldscur=ABDECGfhijlopqrstuvyzMKNWX
         summclr=3, msgsclr=3, headclr=2, taskclr=3
 END-OF-TOPRC
 }
+###########################################################################################
+#                                                                xinit
+###########################################################################################
+function xinit_start(){
+	local user=${1:- root}
+	xinit 	/bin/su ${user} -c \
+		"/usr/bin/gnome-session --session=gnome-classic" \
+		-- :1 vt8 &> /dev/null &
+}
+function xinit_stop(){
+	local user=${1:- root}
+	#xhost +SI:localuser:${user}
+	export DISPLAY=:1
+	su ${user} -c "gnome-session-quit --no-prompt"
+}
+function xinit_run(){
+	local user=${1:- root}
+	# test if arg 1 is a local user, shift if true
+	egrep -q "^$1" /etc/passwd && shift || local user=root
+        # preserve quotes
+	local CMD=( "${@}" )
+	local CMD=( ${CMD[@]//\ /::SPACE::} )
+	local CMD=( ${CMD[@]/#/\\\\$'"'} )
+	local CMD=( ${CMD[@]/%/\\\\$'"'} )
+	local CMD=( ${CMD[@]//::SPACE::/\ } )
+	#xhost +SI:localuser:${user}
+	export DISPLAY=:1
+	read -d $'' CMDS << END-OF-CMDS
+        	for x in {10..1}; do
+        	        echo -n \\\\\$x..
+        	        sleep .5
+        	done;	echo
 
+		/bin/bash -c '${CMD[@]}'
+
+        	for x in {5..1}; do
+        	        echo -n \\\\\$x..
+        	        sleep .5
+        	done;	echo
+END-OF-CMDS
+	cat << END-OF-SU | su ${user}
+		terminator -m -e "${CMDS}"
+END-OF-SU
+}

@@ -1,6 +1,6 @@
 #!/bin/builder.sh
 skip=( true true true false false true false )
-step=1
+step=7
 prefix="setup"
 
 

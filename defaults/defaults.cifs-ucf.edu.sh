@@ -27,8 +27,8 @@ function setup_skel_Structure(){
 	mkdir -p   /etc/skel/.logs
 	chmod 700  /etc/skel/.logs
 	local scriptBase=$(basename "${scriptName}" .sh)
-	cp "${scriptPath}/${scriptBase}.mount" /etc/skel/.scripts/mount.domain_cifs.sh
-	chmod u+x                              /etc/skel/.scripts/mount.domain_cifs.sh
+	cp "${scriptPath}/${scriptBase}.mount.sh" /etc/skel/.scripts/mount.domain_cifs.sh
+	chmod u+x                                 /etc/skel/.scripts/mount.domain_cifs.sh
 	for domain in $g_domains; do
 		touch     /etc/skel/.cifs-${domain}-cred
 		chmod 600 /etc/skel/.cifs-${domain}-cred
@@ -86,10 +86,10 @@ function setup_distribute_Config(){
 			chmod 750 "${home}/.scripts
 			mkdir -p  "${home}/.logs
 			chmod 750 "${home}/.logs
-			cp "/etc/skel/.scrips/mount.domain_cifs.sh" "${home}/.scripts/.
-			chmod 750                                   "${home}/.scripts/mount.domain_cifs.sh"
-			cp "/etc/skel/.cifs-*"                      "${home}/."
-			chmod 600                                   "${home}/.cifs-*
+			cp "/etc/skel/.scripts/mount.domain_cifs.sh" "${home}/.scripts/.
+			chmod 750                                    "${home}/.scripts/mount.domain_cifs.sh"
+			cp "/etc/skel/.cifs-*"                       "${home}/."
+			chmod 600                                    "${home}/.cifs-*
 END-OF-CMDS
 )
 	done
