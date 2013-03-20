@@ -6,6 +6,8 @@ source=http://10.173.119.78/scripts/system-setup/$scriptName
 
 function setup_Create_Systemwide_Defaults(){
 	desc Write /etc/vim/vimrc.local
+	touch     /etc/skel/.viminfo
+	chmod 600 /etc/skel/.viminfo
 	cat << END-OF-VIMRC > /etc/vim/vimrc.local
 " Do not wrap text
 :set nowrap!

@@ -104,7 +104,7 @@ function cat_preferences(){
       "homepage_is_newtabpage": true,
       "session": {
          "restore_on_startup": 4,
-         "urls_to_restore_on_startup": [ "http://golug.org/", "http://tomshardware.com/", "https://www.google.com/" ]
+         "urls_to_restore_on_startup": [ "http://www.cos.ucf.edu/", "http://www.cos.ucf.edu/it/", "https://www.google.com/" ]
       }
    },
    "browser": {

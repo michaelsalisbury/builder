@@ -43,9 +43,13 @@ function setup_Prep_Add_sudo(){
 		#echo msalisbury
 	)
 }
-
+function setup_Prep_Policy_Changes(){
+	desc Prep: Make system wide Policy changes
+	# Command      Policy File     Action  Old              New
+	policy_change  NetworkManager  system  auth_admin_keep  yes
+}
 function setup_Prep_UCF(){
-	desc openconnect, cifs
+	desc Prep: openconnect, cifs
 	# setup defaults for the following applications
 		read -d $'' apps << EOL
 			openconnect-ucf.edu
@@ -60,7 +64,7 @@ EOL
 		done
 }
 function setup_Prep_Add_SSH_Keys(){
-	desc Add SSH Keys to root \& all user with uid \>= 1000
+	desc Prep: Add SSH Keys to root \& all user with uid \>= 1000
 	set_ssh_authorized_keys	all
 }
 function setup_Prep_Disable_Guest(){

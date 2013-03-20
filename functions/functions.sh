@@ -195,3 +195,69 @@ END-OF-CMDS
 		terminator -m -e "${CMDS}"
 END-OF-SU
 }
+###########################################################################################
+#                                                                Ubuntu Policy
+###########################################################################################
+function policy_change(){
+	default_policy_folder="/usr/share/polkit-1/actions"
+	#policy="/usr/share/polkit-1/actions/org.freedesktop.NetworkManager.policy"
+	#action="org.freedesktop.NetworkManager.settings.modify.system"
+
+	find_policy="NetworkManager"
+	find_action="system"
+	old="auth_admin_keep"
+	new="yes"
+	find_policy="$1"
+	find_action="$2"
+	old="$3"
+	new="$4"
+
+	# verify all command arguments have deen supplied
+	if [ -z "${find_policy}" ] ||\
+	   [ -z "${find_action}" ] ||\
+	   [ -z "${old}" ]         ||\
+	   [ -z "${new}" ]; then
+		echo ERROR! all command arguments not supplied!
+		return 1
+	fi
+
+	# verify policy
+	if [ -f "${find_policy}" ]; then
+		policy=${find_policy}
+	elif [ -f "${default_policy_folder}/${find_policy}" ]; then
+		policy="${default_policy_folder}/${find_policy}"
+	elif (( 1  ==  $(ls -1 "${default_policy_folder}" | egrep "${find_policy}" | wc -l) )); then
+		policy=$(ls -1 "${default_policy_folder}" | egrep "${find_policy}")
+		policy="${default_policy_folder}/${policy}"
+	else
+		echo ERROR! Policy File NOT found for search \"${find_policy}\"\!
+		return 1
+	fi
+
+	# verify action
+	if (( 1 == $(cat "${policy}" | grep "action id" | egrep "${find_action}" | wc -l) )); then
+		action=$(cat "${policy}"		|\
+			grep "action id"		|\
+			egrep "${find_action}"		|\
+			sed 's/.*id="\(.*\)">.*/\1/'	)
+	elif (( 1 == $(cat "${policy}" | grep "action id" | egrep "${find_policy}.*${find_action}" | wc -l) )); then
+		action=$(cat "${policy}"		|\
+			grep "action id"		|\
+			egrep "${find_action}"		|\
+			sed 's/.*id="\(.*\)">.*/\1/'	)
+	else
+		echo ERROR! Action ID \"${find_action}\" NOT found in Policy File \"${policy}\"\!
+		return 1
+	fi
+
+	# find line number to change
+	line=$(	cat -n "${policy}"		|\
+		grep "action id\|allow_active"	|\
+		egrep -A1 "${action}"		|\
+		tail -1				|\
+		awk '{print $1}'		)
+
+	# make change
+	sed -i "${line}{ s/${old}/${new}/; }" "${policy}"
+}	
+

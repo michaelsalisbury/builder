@@ -172,4 +172,6 @@ send -- "$username\r"
 expect -exact "$username\r
 Password:"
 send -- "$password\r"
+expect -exect "\r"
+expect *
 expect eof
