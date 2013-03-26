@@ -10,7 +10,7 @@ done < <(
 )
 
 # GLOBAL VARIABLES
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -35,13 +35,39 @@ function setup_Prep_Add_sudo(){
 		echo "${username} ALL=(ALL) NOPASSWD: ALL" | ${sudo} tee       /etc/sudoers.d/admin
 		                                             ${sudo} chmod 440 /etc/sudoers.d/admin
                                                              ${sudo} usermod -a -G admin ${username} 
-		#${sudo} sed -i  "/^${username}/d"                       /etc/sudoers
-		#${sudo} sed -i "\$a${username} ALL=(ALL) NOPASSWD: ALL" /etc/sudoers
-	done < <(
-		awk -F : '/:1000:/{print $1}' /etc/passwd
-		#echo localcosadmin
-		#echo msalisbury
-	)
+                                                             ${sudo} usermod -a -G sudo  ${username} 
+	done < <(awk -F : '/:1000:/{print $1}' /etc/passwd)
+}
+function setup_Prep_Basic_Firewall(){
+	desc Prep: Enable basic firewall
+	# To enable or disable modify /etc/ufw/ufw.conf
+	# Rules are stored in /lib/ufw/user.rules and /lib/ufw/user6.rules
+	# Custom rules like masquerade can be added to /etc/
+	waitAptgetInstall
+        apt-get ${aptopt} install gufw
+	local ufw='/usr/sbin/ufw'
+	$ufw enable
+	$ufw status verbose
+	$ufw allow ssh
+	$ufw allow from 10.173.119.64/26 to any port ssh	# COSIT Service Desk
+	$ufw allow from 10.173.152.0/24  to any port ssh	# PS 1st Floor
+	$ufw allow from 10.173.153.0/24  to any port ssh	# PS 2nd Floor Cluster
+	$ufw allow from 10.173.154.0/24  to any port ssh	# PS 2nd Floor
+	$ufw allow from 10.173.156.0/24  to any port ssh	# PS 3rd Floor
+	$ufw allow from 10.173.161.0/24  to any port ssh	# PS 3rd Floor Cluster
+	$ufw allow from 10.173.158.0/24  to any port ssh	# PS 4th Floor
+	$ufw allow from 10.173.117.0/24  to any port ssh	# MAP
+	$ufw allow from 10.173.160.0/24  to any port ssh	# MAP Cluster
+	$ufw allow from 10.173.252.0/24  to any port ssh	# Chemistry
+	$ufw allow from 10.173.252.0/24  to any port ssh	# Chemistry
+	$ufw allow from 10.36.0.0/18     to any port ssh	# WiFi
+	$ufw allow from 10.173.252.0/24  to any port ssh	# VPN
+	#$ufw allow http
+	#$ufw allow https
+	#$ufw allow nfs		#ufw allow from 0.0.0.0/0 to any port 2049
+	#$ufw allow sunrpc	#ufw allow from 0.0.0.0/0 to any port 111
+	#$ufw allow 13025	#ufw allow from 0.0.0.0/0 to any port 13025
+	$ufw --force reload
 }
 function setup_Prep_Policy_Changes(){
 	desc Prep: Make system wide Policy changes
