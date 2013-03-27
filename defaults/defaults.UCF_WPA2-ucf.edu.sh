@@ -13,9 +13,22 @@ done < <(ls -1              "${scriptPath}"/functions.*.sh 2> /dev/null
 function setup_make_Config(){
 	desc Setting up default config
 	local scriptBase=$(basename "${scriptName}" .sh)
-	# get UCF certificate
-	local caPath='/usr/share/ca-certificates/ucf.edu/UCF-WPA2_comodo_incommonca.crt'
-        cp "${scriptPath}/${scriptBase}.crt" "${caPath}"
+	# import UCF certificate
+	local caPath='/usr/share/ca-certificates/ucf.edu'
+	local caFile='UCF-WPA2_comodo_incommonca.crt'
+	mkdir -p "${caPath}"
+        cp "${scriptPath}/${scriptBase}.crt" "${caPath}/${caFile}"
+
+	# intigrate UCF certificate
+	echo $(basename "${caPath}")/${caFile} >> /etc/ca-certificates.conf
+	/usr/sbin/update-ca-certificates --fresh
+
+	# test for wireless adapter
+	if ! nm-tool | egrep -q "Type:[[:space:]]*802.11"; then
+		echo ERROR\! No Wireless Adapter Found.
+		return 1
+	fi
+	
 	# get local wifi apater mac address
 	local MAC=$(nm-tool |\
 		awk '/Type:[[:space:]]*802.11/,/HW Address/{if($0~"HW Address")print $3}')
@@ -49,31 +62,5 @@ password=
 
 [ipv4]
 method=auto
-
-
-
 END-OF-SYSTEM-CONNECTION
-
-
-
-
 }
-function setup_distribute_Config(){
-	desc setting up default config \for existing users
-	local scriptBase=$(basename "${scriptName}" .sh)
-	get_user_details all | while read user uid gid home; do
-		usermod -a -G cifs ${user}
-		su -m ${user} < <(cat << END-OF-CMDS
-			mkdir -p  "${home}/.scripts
-			chmod 750 "${home}/.scripts
-			mkdir -p  "${home}/.logs
-			chmod 750 "${home}/.logs
-			cp "/etc/skel/.scripts/mount.domain_cifs.sh" "${home}/.scripts/.
-			chmod 750                                    "${home}/.scripts/mount.domain_cifs.sh"
-			cp "/etc/skel/.cifs-*"                       "${home}/."
-			chmod 600                                    "${home}/.cifs-*
-END-OF-CMDS
-)
-	done
-}
-
