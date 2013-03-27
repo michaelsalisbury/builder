@@ -13,6 +13,12 @@ source_app=http://10.173/119.78/packages/Computation/vmd-1.9.1.bin.LINUXAMD64.op
 
 function setup_make_Config(){
 	desc Setting up default config
+	# install dependencies for OPENGL FLTK TK NETCDF TCL
+	apt-get install libfltk1.3 libfltk1.3-dev libfltk-*1.3 \
+			tcl tcl-dev \
+			tk  tk-dev \
+			netcdf* libnetcdf*
+
 	# get vmd
 	mkdir /opt/vmd
 	cd    /opt/vmd
@@ -20,8 +26,11 @@ function setup_make_Config(){
 	rm -f "${source_app_file}"
 	wget  "${source_app}"
 	tar -zxf "${source_app_file}"
-	local    source_app_path=
-	
+	local    source_app_path=$(find ./* -maxdepth 1 -type d -cmin 1)
 
-
+	# setup vmd
+	cd "${source_app_path}"
+	./configure LINUXAMD64 OPENGL FLTK TK NETCDF TCL
+	cd src
+	make install
 }
