@@ -54,6 +54,7 @@ deja-dup
 
 # visualization
 grace
+qtiplot
 gnuplot gnuplot-x11
 xfig xfig-doc
 
