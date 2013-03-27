@@ -14,6 +14,13 @@ source_app=http://10.173/119.78/packages/Computation/vmd-1.9.1.bin.LINUXAMD64.op
 function setup_make_Config(){
 	desc Setting up default config
 	# get vmd
+	mkdir /opt/vmd
+	cd    /opt/vmd
+	local    source_app_file=$(basename "${source_app}")
+	rm -f "${source_app_file}"
+	wget  "${source_app}"
+	tar -zxf "${source_app_file}"
+	
 
 
 }
