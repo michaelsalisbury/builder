@@ -74,6 +74,7 @@ lyx
 dvipost
 texlive texlive-full texlive-sciences texlive-xetex texlive-fonts-extra texlive-formats-extra texlive-latex-extra
 texmacs texmacs-extra-fonts
+texworks
 latex2html latex2rtf writer2latex
 
 # fonts and other doc support
