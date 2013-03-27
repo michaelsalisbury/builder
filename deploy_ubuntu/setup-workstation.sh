@@ -80,7 +80,7 @@ function setup_Prep_UCF(){
 		read -d $'' apps << EOL
 			openconnect-ucf.edu
 			cifs-ucf.edu
-			UCF-WPA2-ucf.edu
+			UCF_WPA2-ucf.edu
 EOL
 	# locate and run installers
 		for app in $apps; do
