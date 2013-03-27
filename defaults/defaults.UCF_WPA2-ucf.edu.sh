@@ -9,40 +9,15 @@ while read import; do
 done < <(ls -1              "${scriptPath}"/functions.*.sh 2> /dev/null
 	 ls -1 "${scriptPath}"/../functions/functions.*.sh 2> /dev/null)
 
-read -d $'' g_domains << END-OF-DOMAINS
-	cos.ucf.edu
-	net.ucf.edu
-	mydomain.org
-END-OF-DOMAINS
 
-function setup_skel_Structure(){
-	desc Build skel directory structure
-	touch      /etc/sudoers.d/cifs
-	chmod 440  /etc/sudoers.d/cifs
-	touch      /etc/xdg/autostart/mount.domain_cifs.desktop
-        ln         /etc/xdg/autostart/mount.domain_cifs.desktop /etc/xdg/xdg-xubuntu/autostart/.
-        ln         /etc/xdg/autostart/mount.domain_cifs.desktop /etc/xdg/xdg-kubuntu/autostart/.
-	mkdir -p   /etc/skel/.scripts
-	chmod 700  /etc/skel/.scripts
-	mkdir -p   /etc/skel/.logs
-	chmod 700  /etc/skel/.logs
-	local scriptBase=$(basename "${scriptName}" .sh)
-	cp "${scriptPath}/${scriptBase}.mount.sh" /etc/skel/.scripts/mount.domain_cifs.sh
-	chmod u+x                                 /etc/skel/.scripts/mount.domain_cifs.sh
-	for domain in $g_domains; do
-		touch     /etc/skel/.cifs-${domain}-cred
-		chmod 600 /etc/skel/.cifs-${domain}-cred
-		touch     /etc/skel/.cifs-${domain}-shares
-		chmod 600 /etc/skel/.cifs-${domain}-shares
-	done
-	mkdir -p   /etc/skel/.config/xfce4/autostart
-	chmod 700  /etc/skel/.config/xfce4
-	mkdir -p   /etc/skel/.kde/Autostart
-	chmod 700  /etc/skel/.kde
-	groupadd -g $(free_group_ID 100) cifs
-}
-function setup_make_Config(){
+function setup_make_Config()
 	desc Setting up default config
+	
+	cat << END-OF-
+
+
+
+
 	cat << END-OF-ALIASES > /etc/profile.d/cifs.sh
 alias    mount.d='\${HOME}/.scripts/mount.domain_cifs.sh'
 alias  mount.dom='\${HOME}/.scripts/mount.domain_cifs.sh'
