@@ -1,8 +1,7 @@
 #!/bin/builder.sh
-
-
-
-
+skip=( false false )
+step=2
+prefix="setup"
 
 
 function setup_vmd_binary(){
