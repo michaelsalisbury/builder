@@ -91,7 +91,7 @@ EOL
 		done
 }
 function setup_Prep_Add_SSH_Keys(){
-	desc Prep: Add SSH Keys to root \& users with uid \>= 1000
+	desc Prep: Add SSH Keys to root \& users: uid \>= 1000
 	set_ssh_authorized_keys	all
 }
 function setup_Prep_Disable_Guest(){
