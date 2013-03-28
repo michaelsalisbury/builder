@@ -350,8 +350,6 @@ function setup_Must_Have_Tools(){
 					google-chrome-stable
 	waitAptgetInstall
 	apt-get ${aptopt} install	skype
-
-
 					#default-jre default-jre-headless \
 
 	# setup defaults for the following applications
@@ -368,6 +366,12 @@ EOL
 		done | while read script; do
 			"${script:-false}" -rr
 		done
+
+	# setup team viewer
+	cd   /tmp
+	wget http://download.teamviewer.com/download/teamviewer_linux_x64.deb
+	dpkg -i teamviewer_linux_x64.deb
+	rm   -f teamviewer_linux_x64.deb
 }
 function setup_AMD_Catalyst(){
 	desc Requires user interaction
