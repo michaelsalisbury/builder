@@ -34,8 +34,9 @@ function setup_Prep_Add_sudo(){
 		[[ "`whoami`" != "root" ]] && local sudo='sudo' || unset sudo
 		echo "${username} ALL=(ALL) NOPASSWD: ALL" | ${sudo} tee       /etc/sudoers.d/admin
 		                                             ${sudo} chmod 440 /etc/sudoers.d/admin
-                                                             ${sudo} usermod -a -G admin ${username} 
-                                                             ${sudo} usermod -a -G sudo  ${username} 
+		for group in adm admin sudo syslog; do
+			${sudo} usermod -a -G $group ${username}
+		done
 	done < <(awk -F : '/:1000:/{print $1}' /etc/passwd)
 }
 function setup_Prep_Basic_Firewall(){
