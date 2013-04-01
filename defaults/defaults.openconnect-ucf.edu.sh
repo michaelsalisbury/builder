@@ -28,6 +28,7 @@ function setup_make_Config(){
 	desc Setting up default config
 	cat << END-OF-ALIASES > /etc/profile.d/openconnect.sh
 alias vpno='openconnect \$(awk -F'\''[= ]*'\'' '\''/^url/{print \$2}'\'' .vpn.cred)'
+#alias vpnc='\${HOME}/.scripts/openconnect.exp &\| tail -a \${HOME}/.logs/openconnect'
 alias vpnc='\${HOME}/.scripts/openconnect.exp &> \${HOME}/.logs/openconnect &'
 alias vpnd='sudo killall openconnect'
 alias vpns='ifconfig tun; tail \${HOME}/.logs/openconnect'
