@@ -1,0 +1,177 @@
+#!/usr/bin/expect -f
+proc cred_format {} {
+	puts "----------------------------------------------------"
+	puts "username = \[NID\]"
+	puts "password = \[***\]"
+	puts "group    = \[ucffaculty\|ucfstudent\]"
+	puts "url      = ucfvpn-1.vpn.ucf.edu"
+	puts "----------------------------------------------------"
+}
+
+set home $env(HOME)
+set cred "$home/.vpn.cred"
+if [file isfile $cred] {
+	puts ""
+	puts "Using credentials file \"$cred\" to connect..."
+	puts ""
+	flush stdout
+} else {
+	puts ""
+	puts "Credentials file missing, exiting!"
+	puts ""
+	puts "Please create \"~/.vpn.cred\" in the following format;"
+	cred_format
+	puts ""
+	flush stdout
+	exit 1
+}
+
+set file_name "$cred"
+set fp        [open "$file_name" r]
+set file_data [read  $fp]
+set lines     [split $file_data "\n"]
+close $fp
+
+foreach line $lines {
+	set words [split $line =]
+	set match [string trim [lindex $words 0]]
+	switch -glob $match {
+		username	{set username [lindex $words 1]}
+		password	{set password [lindex $words 1]}
+		group		{set group    [lindex $words 1]}
+		url		{set url      [lindex $words 1]}
+
+	}
+	#puts "$line"
+	#puts "0=[lindex $words 0]"
+	#puts "1=[lindex $words 1]"
+	#puts "2=[lindex $words 2]"
+}
+
+set username [string trim $username]
+set password [string trim $password]
+set group    [string trim $group]
+set url      [string trim $url]
+
+if { "$group" != "ucfstudent" && "$group" != "ucffaculty" } {
+	puts "The group field of your credentials file is mangled and reads \"$group\"."
+	puts "Correct this to be either \"ucffaculty\" or \"ucfstudent\"."
+	puts ""
+	set group ""
+}
+if { [string length $username] == 0 } {
+	puts "The username field of your credentials file is empty please correct."
+	puts ""
+}
+if { [regexp {[\[\]]} $username] } { 
+	puts "The username (NID) should not be in square brackets, please remove surrounding brackets."
+	puts ""
+	set username ""
+}
+if { [string length $password] == 0 } {
+	puts "The password field of your credentials file is empty please correct."
+	puts ""
+}
+if { [regexp {^\[} $password] || [regexp {\]$} $password] } { 
+	puts "The password should not be in square brackets, please remove surrounding brackets."
+	puts ""
+	set username ""
+}
+if { [string length $url] == 0 } {
+	puts "The url field of your credentials file is empty please correct."
+	puts ""
+}
+if { [string length $username] == 0 ||
+     [string length $password] == 0 ||
+     [string length $group] == 0    ||
+     [string length $url] == 0      } {
+	puts "The correct credentials file format is as fololows"
+	cred_format
+	puts ""
+	flush stdout
+	exit 1
+}
+
+#puts "cred     = $cred"
+#puts "home     = $home"
+#puts "username = $username"
+#puts "password = $password"
+#puts "group    = $group"
+#puts "url      = $url"
+#flush stdout
+#expect "\n"
+
+# Expect and autoexpect were both written by Don Libes, NIST.
+#
+# Note that autoexpect does not guarantee a working script.  It
+# necessarily has to guess about certain things.  Two reasons a script
+# might fail are:
+#
+# 1) timing - A surprising number of programs (rn, ksh, zsh, telnet,
+# etc.) and devices discard or ignore keystrokes that arrive "too
+# quickly" after prompts.  If you find your new script hanging up at
+# one spot, try adding a short sleep just before the previous send.
+# Setting "force_conservative" to 1 (see below) makes Expect do this
+# automatically - pausing briefly before sending each character.  This
+# pacifies every program I know of.  The -c flag makes the script do
+# this in the first place.  The -C flag allows you to define a
+# character to toggle this mode off and on.
+
+set force_conservative 0  ;# set to 1 to force conservative mode even if
+			  ;# script wasn't run conservatively originally
+if {$force_conservative} {
+	set send_slow {1 .1}
+	proc send {ignore arg} {
+		sleep .1
+		exp_send -s -- $arg
+	}
+}
+
+#
+# 2) differing output - Some programs produce different output each time
+# they run.  The "date" command is an obvious example.  Another is
+# ftp, if it produces throughput statistics at the end of a file
+# transfer.  If this causes a problem, delete these patterns or replace
+# them with wildcards.  An alternative is to use the -p flag (for
+# "prompt") which makes Expect only look for the last line of output
+# (i.e., the prompt).  The -P flag allows you to define a character to
+# toggle this mode off and on.
+#
+# Read the man page for more info.
+#
+# -Don
+
+
+set timeout -1
+spawn sudo openconnect $url
+match_max 100000
+expect -exact "Attempting to connect to 132.170.0.11:443\r
+SSL negotiation with ucfvpn-1.vpn.ucf.edu\r
+Server certificate verify failed: signer not found\r
+\r
+Certificate from VPN server \"ucfvpn-1.vpn.ucf.edu\" failed verification.\r
+Reason: signer not found\r
+Enter 'yes' to accept, 'no' to abort; anything else to view: "
+send -- "yes\r"
+expect -exact "yes\r
+Connected to HTTPS on ucfvpn-1.vpn.ucf.edu\r
+GET https://ucfvpn-1.vpn.ucf.edu/\r
+Got HTTP response: HTTP/1.0 302 Object Moved\r
+SSL negotiation with ucfvpn-1.vpn.ucf.edu\r
+Server certificate verify failed: signer not found\r
+Connected to HTTPS on ucfvpn-1.vpn.ucf.edu\r
+GET https://ucfvpn-1.vpn.ucf.edu/+webvpn+/index.html\r
+Please enter your username and password.\r
+GROUP: \["
+#ucffaculty|ucfstudent\]:"
+expect *
+send -- "$group\r"
+expect -exact "$group\r
+Username:"
+send -- "$username\r"
+expect -exact "$username\r
+Password:"
+send -- "$password\r"
+expect -exect "\r"
+expect *
+expect eof
