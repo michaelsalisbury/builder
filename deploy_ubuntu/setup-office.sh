@@ -48,14 +48,16 @@ function main(){
 		 initialize_wine
 		    rebuild_wine_menus
 		      tweak_wine_desktop_configs
-		set_default_mime_config
+		        xdg_mime_default_config
 	fi
 }
-function (){
-
-
-
-
+function xdg_mime_default_config(){
+	xdg-mime default wine-extension-doc.desktop  application/msword
+	xdg-mime default wine-extension-docx.desktop application/vnd.openxmlformats-officedocument.wordprocessingml.document
+	xdg-mime default wine-extension-xls.desktop  application/vnd.ms-excel
+	xdg-mime default wine-extension-xlsx.desktop application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+	xdg-mime default wine-extension-ppt.desktop  application/vnd.ms-powerpoint
+	xdg-mime default wine-extension-pptx.desktop application/vnd.openxmlformats-officedocument.presentationml.presentation
 }
 function initialize_wine(){
 		echo -n ${HOME} :: Initializing wine .
