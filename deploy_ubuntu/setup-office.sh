@@ -48,7 +48,14 @@ function main(){
 		 initialize_wine
 		    rebuild_wine_menus
 		      tweak_wine_desktop_configs
+		set_default_mime_config
 	fi
+}
+function (){
+
+
+
+
 }
 function initialize_wine(){
 		echo -n ${HOME} :: Initializing wine .
