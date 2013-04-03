@@ -27,7 +27,7 @@ function setup_make_Config(){
 	rm -f    "${source_app_file}"
 	wget     "${source_app}"
 	tar -zxf "${source_app_file}"
-	local       source_app_path=$(find ./* -maxdepth 1 -type d -cmin 1)
+	local       source_app_path=$(find ./* -maxdepth 0 -type d -cmin 1)
 
 	# setup vmd
 	cd "${source_app_path}"
