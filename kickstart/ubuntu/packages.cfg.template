@@ -11,7 +11,7 @@ expect expect-dev
 terminator multitail
 incron
 # hardware diagnostics and detection
-hwinfo ethtool ipcalc
+hwinfo ethtool ipcalc smartmontools
 # debian package managment helpers
 tasksel apt-file dlocate software-properties-common # add-apt-repositories
 aptitude wajig
