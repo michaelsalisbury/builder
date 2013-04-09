@@ -49,12 +49,12 @@ while read cred; do
                   mnt="${home}/${fldr}/${name}"
                 match="(has been unmounted|not mounted)"
                 for t in {0..10}; do
-                        sudo umount -t cifs -v "${mnt}" |& egrep "${match}" &> /dev/null && break
+                        sudo umount -t cifs -v "${mnt}" 2>&1 | egrep "${match}" &> /dev/null && break
                         echo ERROR :: umount loop \#$t
                 done
                 mkdir -pv "${mnt}"
 
-                sudo mount.cifs "${share}" "${mnt}" -o ${opt},${cred} 2&>1
+                sudo mount.cifs "${share}" "${mnt}" -o ${opt},${cred} 2>&1
                 ! (( $? )) && task="SUCCESSFUL" || task="FAILED"
 
                 echo "      SHARE = ${share}"
