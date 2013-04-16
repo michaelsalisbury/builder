@@ -349,9 +349,15 @@ function setup_Must_Have_Tools(){
 					cups-pdf \
 					p7zip p7zip-full \
 					google-chrome-stable
+	# clean up
+	waitAptgetInstall
+	apt-get ${aptopt} -i install
+	waitAptgetInstall
+	apt-get ${aptopt} upgrade
+
+	# skype	
 	waitAptgetInstall
 	apt-get ${aptopt} install	skype
-					#default-jre default-jre-headless \
 
 	# setup defaults for the following applications
 		read -d $'' apps << EOL
@@ -373,6 +379,11 @@ EOL
 	wget http://download.teamviewer.com/download/teamviewer_linux_x64.deb
 	dpkg -i teamviewer_linux_x64.deb
 	rm   -f teamviewer_linux_x64.deb
+	# clean up
+	waitAptgetInstall
+	apt-get ${aptopt} -i install
+	waitAptgetInstall
+	apt-get ${aptopt} upgrade
 }
 function setup_AMD_Catalyst(){
 	desc Requires user interaction
