@@ -102,4 +102,8 @@
 	apt-get -y  install indicator-workspaces
 	apt-get -yf install
 
-
+# Caffeine Indicator (prevent or delay workstation sleep)
+	add-apt-repository -y ppa:caffeine-developers/ppa
+	apt-get update
+	apt-get -y  install caffeine
+	apt-get -yf install
