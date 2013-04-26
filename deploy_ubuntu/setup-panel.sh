@@ -3,14 +3,23 @@
 
 # CPUFreq
 
-	#sudo add-apt-repository ppa:artfwo/ppa
+	#sudo add-apt-repository -y ppa:artfwo/ppa
 	#sudo apt-get update
-	#sudo apt-get install indicator-cpufreq
+	#sudo apt-get -y install indicator-cpufreq
+	#sudo apt-get -yf install
 
 # System Load Indicator
-sudo add-apt-repository ppa:indicator-multiload/stable-daily
-sudo apt-get update
-sudo apt-get install indicator-multiload
+	sudo add-apt-repository -y ppa:indicator-multiload/stable-daily
+	sudo apt-get update
+	sudo apt-get -y install indicator-multiload
+	sudo apt-get -yf install
 
 # Stack Exchange Applet Indicator
+	#apt-get install stackapplet
+	#sudo apt-get -yf install
 
+# Virtual Box Indicator
+	sudo add-apt-repository -y ppa:michael-astrapi/ppa
+	sudo apt-get update
+	sudo apt-get -y install indicator-virtualbox
+	sudo apt-get -yf install
