@@ -96,5 +96,10 @@
 	apt-get -y  install indicator-notifications
 	apt-get -yf install
 
+# Workspace Indicator
+	add-apt-repository -y ppa:geod/ppa-geod
+	apt-get update
+	apt-get -y  install indicator-workspaces
+	apt-get -yf install
 
 
