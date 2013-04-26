@@ -23,3 +23,9 @@
 	sudo apt-get update
 	sudo apt-get -y install indicator-virtualbox
 	sudo apt-get -yf install
+
+# Keylick indicator (num-lock, tab-lock, scroll-lock)
+	sudo add-apt-repository -y ppa:tsbarnes/indicator-keylock
+	sudo apt-get update
+	sudo apt-get -y install indicator-keylock
+	sudo apt-get -yf install
