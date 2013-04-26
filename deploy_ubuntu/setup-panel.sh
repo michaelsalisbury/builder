@@ -68,9 +68,21 @@
 	apt-get -y  install google-tasks-indicator
 	apt-get -yf install
 
+# Google Calendar Indicator
+	apt-get install calendar-indicator
+	apt-get -yf install
+
 # Ubuntu One Indicator
 	add-apt-repository -y ppa:rye/ubuntuone-extras
 	apt-get update
 	apt-get -y  install indicator-ubuntuone
 	apt-get -yf install
+
+# Hardware Sensors
+	add-apt-repository -y ppa:alexmurray/indicator-sensors
+	apt-get update
+	apt-get -y install indicator-sensors
+	apt-get -yf install
+
+
 
