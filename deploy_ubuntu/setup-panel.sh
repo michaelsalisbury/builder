@@ -68,4 +68,9 @@
 	apt-get -y  install google-tasks-indicator
 	apt-get -yf install
 
+# Ubuntu One Indicator
+	add-apt-repository -y ppa:rye/ubuntuone-extras
+	apt-get update
+	apt-get -y  install indicator-ubuntuone
+	apt-get -yf install
 
