@@ -51,7 +51,7 @@
 # LAPTOP -Brighness Indicator
 	add-apt-repository -y ppa:jan-simon/indicator-brightness
 	apt-get update
-	apt-get -y install indicator-brightness
+	apt-get -y  install indicator-brightness
 	apt-get -yf install
 
 # My Weather Indicator Applet
@@ -75,7 +75,7 @@
 	apt-get -yf install
 
 # Google Calendar Indicator
-	apt-get install calendar-indicator
+	apt-get -y  install calendar-indicator
 	apt-get -yf install
 
 # Ubuntu One Indicator
@@ -87,7 +87,13 @@
 # Hardware Sensors
 	add-apt-repository -y ppa:alexmurray/indicator-sensors
 	apt-get update
-	apt-get -y install indicator-sensors
+	apt-get -y  install indicator-sensors
+	apt-get -yf install
+
+# System notifications
+	add-apt-repository -y ppa:jconti/recent-notifications
+	apt-get update
+	apt-get -y  install indicator-notifications
 	apt-get -yf install
 
 
