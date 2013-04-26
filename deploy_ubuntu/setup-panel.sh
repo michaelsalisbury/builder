@@ -120,3 +120,10 @@
 	apt-get -y  install syspeek
 	apt-get -yf install
 
+# Desktop NOVA Wallpaper reotator https://sites.google.com/site/haliner/desktopnova
+	add-apt-repository -y ppa:michael-astrapi/ppa
+	apt-get update
+	apt-get -y  install desktopnova desktopnova-module-gnome
+	apt-get -y  install indicator-desktopnova
+	apt-get -yf install
+
