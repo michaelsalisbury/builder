@@ -107,3 +107,10 @@
 	apt-get update
 	apt-get -y  install caffeine
 	apt-get -yf install
+
+# Cut and Past manager
+	add-apt-repository -y ppa:hel-sheep/pastie
+	apt-get update
+	apt-get -y  install pastie
+	apt-get -yf install
+
