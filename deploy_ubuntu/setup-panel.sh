@@ -48,6 +48,12 @@
 	apt-get -y  install battery-status
 	apt-get -yf install
 
+# LAPTOP -Brighness Indicator
+	add-apt-repository -y ppa:jan-simon/indicator-brightness
+	apt-get update
+	apt-get -y install indicator-brightness
+	apt-get -yf install
+
 # My Weather Indicator Applet
         add-apt-repository -y ppa:noobslab/indicators
         apt-get update
