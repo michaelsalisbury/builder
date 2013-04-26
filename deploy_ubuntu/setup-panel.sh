@@ -114,3 +114,9 @@
 	apt-get -y  install pastie
 	apt-get -yf install
 
+# System Peek System utilization
+	sudo add-apt-repository ppa:vicox/syspeek
+	apt-get update
+	apt-get install syspeek
+	apt-get -yf install
+
