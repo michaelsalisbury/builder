@@ -54,4 +54,18 @@
         apt-get -y  install my-weather-indicator
 	apt-get -yf install
 
+# Another Weather Indicator Ubuntu Repo
+	apt-get -y  install indicator-weather
+	apt-get -yf install
+
+# System Monitor Indicator
+	add-apt-repository -y ppa:alexeftimie/ppia
+	apt-get update
+	apt-get -y  install indicator-sysmonitor
+	apt-get -yf install
+
+# Google Task Indicator
+	apt-get -y  install google-tasks-indicator
+	apt-get -yf install
+
 
