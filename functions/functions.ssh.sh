@@ -5,8 +5,8 @@ DOM='ucf.edu'
 
 function main(){
 
-
-
+	echo ${FUNCNAME}
+	return 0
 	PUSH_KEYS
 	return 0
 	
@@ -70,10 +70,17 @@ function SSH_COPY_ID_VIA_SUDO(){
 		echo ${USERNAME}_HAS_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
 	# if the host grants access via the default key run ssh-copy-id without expect
 	elif ! HOST_NEEDS_SSHKEY ${SUDOUSER} ${IP}; then
-		cat "${KEY}" | ssh ${SUDOUSER}@${IP} "cat | sudo tee -a 
-		ssh-copy-id ${KEY:+-i ${KEY}} ${USERNAME}@${IP} &> /dev/null\
-			&& echo ${USERNAME}_GRANTED_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
-			|| echo ERROR_SSH_COPY_ID_FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+		cat "${KEY}" | ssh ${SUDOUSER}@${IP}\
+		"cat | sudo tee -a \$(awk -F: '/^${USERNAME}:/{print $6}' /etc/passwd)/.ssh/authorized_keys"
+		# verify access
+		HOST_NEEDS_SSHKEY ${USERNAME} ${IP} ${KEY:+"${KEY}"}\
+			&& echo ERROR_SSH_COPY_ID_FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
+			|| echo ${USERNAME}_GRANTED_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+	# if the host requires a password for access via the SUDOUSER then verify password
+	elif SSH_VERIFY_PASSWORD ${SUDOUSER} ${IP} ${PASSWORD}; then
+		echo ERROR
+
+
 
 	
 
