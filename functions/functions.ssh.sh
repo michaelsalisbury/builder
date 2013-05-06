@@ -7,9 +7,9 @@ function main(){
 
 
 
-	SSH_VERIFY_PASSWORD $(whoami) 10.173.161.50 'COSTech2010!'
-	SSH_VERIFY_PASSWORD $(whoami) 10.173.161.50 'COSTech2010\!'
-	SSH_VERIFY_PASSWORD $(whoami) 10.173.161.50 'COSTblaech2010\!'
+	SSH_VERIFY_PASSWORD $(whoami) 10.173.161.50 'COSTech2010!' && echo pass good || echo pass bad
+	SSH_VERIFY_PASSWORD $(whoami) 10.173.161.50 'COSTech2010\!' && echo pass good || echo pass bad
+	SSH_VERIFY_PASSWORD $(whoami) 10.173.161.50 'COSTblaech2010\!' && echo pass good || echo pass bad
 	return 0
 
 	PUSH_KEYS
