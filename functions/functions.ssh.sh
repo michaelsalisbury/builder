@@ -34,7 +34,7 @@ function PUSH_KEYS(){
 		#GET_HOST_ENTRY ${IP} ${DOM}
 	done < <(cat /etc/hosts | awk '/^[0-9].*/{print $1}')
 
-	local PASSWORDS=([root]='1qaz@WSX')
+	local -A PASSWORDS=([root]='1qaz@WSX')
 	PASSWORDS+=([localcosadmin]='COSTech2010!')
 	
 	local IP=10.173.161.50
