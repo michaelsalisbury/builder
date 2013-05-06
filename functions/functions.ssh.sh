@@ -149,10 +149,10 @@ match_max 100000
 expect *
 expect  -exact "password: "
 send -- "${PASSWORD}\r"
-expect *
-send -- "exit\r"
 expect eof
 END-OF-EXPECT
+#expect *
+#send -- "exit\r"
 }
 function GET_EXPECT_SSH_COPY_ID(){
 	local USERNAME=$1
