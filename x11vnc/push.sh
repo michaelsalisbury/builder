@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo ${BASH_SOURCE}
+echo $(basename "$(readlink -f ${BASH_SOURCE})")
 
 
 exit 1
