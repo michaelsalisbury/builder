@@ -7,8 +7,8 @@ function main(){
 
 
 
-	#PUSH_KEYS
-	#return 0
+	PUSH_KEYS
+	return 0
 	
 	GET_HOSTNAME_SIMPLE 10.173.158.26 ${DOM}
 	GET_HOSTNAME_DOM    10.173.158.26 ${DOM}
@@ -33,11 +33,16 @@ function PUSH_KEYS(){
 		GET_HOST_ENTRY ${IP} ${DOM}
 	done < <(cat /etc/hosts | awk '/^[0-9].*/{print $1}')
 
+	local PASSWORDS=([root]='1qaz@WSX')
+	PASSWORDS+=([localcosadmin]='COSTech2010!')
 	
-
+	local IP=10.173.161.50
 	for USERNAME in root localcosadmin; do
+		SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORDS[${USERNAME}]}\
+			&& echo pass is good for ${USERNAME}\
+			|| echo pass is broken for ${USERNAME}
 		for KEY in ~/.ssh/id_rsa ~/.ssh/id_rsa.2945star /home/localcosadmin/.ssh/id_rsa  ; do
-			echo $USERNAME $KEY		
+			echo $USERNAME $KEY
 
 		done
 	done
