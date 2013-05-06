@@ -59,7 +59,7 @@ function SSH_COPY_ID_VIA_SUDO(){
 	# verify that KEY file exists
 	if [ ! -f "${KEY}" ]; then
 		echo key \"${KEY}\" missing\!\! 1>&2
-		echo ERROR_SSH_COPY_ID_FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+		echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
 		return 1
 	# verify that host is up via echo responce
 	elif ! IP_IS_UP ${IP}; then
@@ -74,12 +74,12 @@ function SSH_COPY_ID_VIA_SUDO(){
 		"cat | sudo tee -a \$(awk -F: '/^${USERNAME}:/{print $6}' /etc/passwd)/.ssh/authorized_keys"
 		# verify access
 		HOST_NEEDS_SSHKEY ${USERNAME} ${IP} ${KEY:+"${KEY}"}\
-			&& echo ERROR_SSH_COPY_ID_FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
+			&& echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
 			|| echo ${USERNAME}_GRANTED_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
 	# if the host requires a password for access via the SUDOUSER then verify password
-	elif SSH_VERIFY_PASSWORD ${SUDOUSER} ${IP} ${PASSWORD}; then
-		echo ERROR
-
+	elif ! SSH_VERIFY_PASSWORD ${SUDOUSER} ${IP} ${PASSWORD}; then
+		echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}_VIA_PASSWORD
+	
 
 
 	
@@ -97,7 +97,7 @@ function SSH_COPY_ID(){
 	# verify that KEY file exists
 	if [ ! -f "${KEY}" ]; then
 		echo key \"${KEY}\" missing\!\! 1>&2
-		echo ERROR_SSH_COPY_ID_FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+		echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
 		return 1
 	# verify that host is up via echo responce
 	elif ! IP_IS_UP ${IP}; then
@@ -110,16 +110,16 @@ function SSH_COPY_ID(){
 	elif ! HOST_NEEDS_SSHKEY ${USERNAME} ${IP}; then
 		ssh-copy-id ${KEY:+-i ${KEY}} ${USERNAME}@${IP} &> /dev/null\
 			&& echo ${USERNAME}_GRANTED_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
-			|| echo ERROR_SSH_COPY_ID_FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+			|| echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
 	# verify ssh username and password before running expect script
 	elif ! SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD}; then
-		echo ERROR_SSH_COPY_ID_FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+		echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
 		return 1
 	# copy ssh key via expect script
 	else
 		expect <(GET_EXPECT_SSH_COPY_ID ${USERNAME} ${IP} ${PASSWORD} ${KEY}) &> /dev/null\
 			&& echo ${USERNAME}_GRANTED_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
-			|| echo ERROR_SSH_COPY_ID_FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+			|| echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
 	fi
 } 
 function SSH_VERIFY_PASSWORD(){
