@@ -30,7 +30,8 @@ function PUSH_KEYS(){
 	local HOSTFILE=${1:- /etc/hosts}
 	[ ! -f "${HOSTFILE}" ] && local HOSTFILE=/etc/hosts
 	while read IP; do
-		GET_HOST_ENTRY ${IP} ${DOM}
+		echo $IP
+		#GET_HOST_ENTRY ${IP} ${DOM}
 	done < <(cat /etc/hosts | awk '/^[0-9].*/{print $1}')
 
 	local PASSWORDS=([root]='1qaz@WSX')
@@ -38,6 +39,7 @@ function PUSH_KEYS(){
 	
 	local IP=10.173.161.50
 	for USERNAME in root localcosadmin; do
+		echo password for ${USERNAME} is ${PASSWORDS[${USERNAME}]}
 		SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORDS[${USERNAME}]}\
 			&& echo pass is good for ${USERNAME}\
 			|| echo pass is broken for ${USERNAME}
