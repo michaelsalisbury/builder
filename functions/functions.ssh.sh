@@ -33,8 +33,8 @@ function PUSH_KEYS(){
 		GET_HOST_ENTRY ${IP} ${DOM}
 	done < <(cat /etc/hosts | awk '/^[0-9].*/{print $1}')
 
-	for USERNAME in root $(whoami); do
-		for KEY in ~/.ssh/id_rsa ~/.ssh/id_rsa.2945star; do
+	for USERNAME in root localcosadmin; do
+		for KEY in ~/.ssh/id_rsa ~/.ssh/id_rsa.2945star  ; do
 			echo $USERNAME $KEY		
 
 		done
@@ -46,7 +46,6 @@ function SSH_COPY_ID(){
 	local PASSWORD=$3
 	local KEY=${4:-$(find ~/.ssh/id_rsa.pub)}
 	local KEY="${KEY%.pub}.pub"
-	echo KEY :: $KEY
 	# verify that KEY file exists
 	if [ ! -f "${KEY}" ]; then
 		echo key \"${KEY}\" missing\!\! 1>&2
