@@ -33,8 +33,10 @@ function PUSH_KEYS(){
 		GET_HOST_ENTRY ${IP} ${DOM}
 	done < <(cat /etc/hosts | awk '/^[0-9].*/{print $1}')
 
+	
+
 	for USERNAME in root localcosadmin; do
-		for KEY in ~/.ssh/id_rsa ~/.ssh/id_rsa.2945star  ; do
+		for KEY in ~/.ssh/id_rsa ~/.ssh/id_rsa.2945star /home/localcosadmin/.ssh/id_rsa  ; do
 			echo $USERNAME $KEY		
 
 		done
