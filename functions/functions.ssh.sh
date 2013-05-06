@@ -79,7 +79,10 @@ function SSH_COPY_ID_VIA_SUDO(){
 	# if the host requires a password for access via the SUDOUSER then verify password
 	elif ! SSH_VERIFY_PASSWORD ${SUDOUSER} ${IP} ${PASSWORD}; then
 		echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}_VIA_PASSWORD
-	
+	# if host sudo user :
+	else
+
+			
 
 
 	
