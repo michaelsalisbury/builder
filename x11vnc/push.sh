@@ -1,11 +1,10 @@
 #!/bin/bash
 
-echo $(dirname "$(readlink -f ${BASH_SOURCE})")
+foldername=$(dirname "$(readlink -f ${BASH_SOURCE})")
+packagename=$(basename "${foldername}")
 
-
-exit 1
 # create tgz
-tar -zcvf 
+tar -zcvf "${packagename}.tgz" *
 
 
 
