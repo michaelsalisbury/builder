@@ -45,6 +45,7 @@ function SSH_COPY_ID(){
 	local IP=$2
 	local PASSWORD=$3
 	local KEY=${4:-$(find ~/.ssh/id_rsa)}
+	echo $KEY
 	local KEY=${4:+"${4%.pub}.pub"}
 	# verify that KEY file exists
 	if [ ! -f "${KEY}" ]; then
