@@ -49,6 +49,38 @@ function PUSH_KEYS(){
 		done
 	done
 }
+function SSH_COPY_ID_VIA_SUDO(){
+	local USERNAME=$1
+	local IP=$2
+	local PASSWORD=$3
+	local SUDOUSER=$4
+	local KEY=${5:-$(find ~/.ssh/id_rsa.pub)}
+	local KEY="${KEY%.pub}.pub"
+	# verify that KEY file exists
+	if [ ! -f "${KEY}" ]; then
+		echo key \"${KEY}\" missing\!\! 1>&2
+		echo ERROR_SSH_COPY_ID_FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+		return 1
+	# verify that host is up via echo responce
+	elif ! IP_IS_UP ${IP}; then
+		echo "${IP}_DOWN"
+		return 1
+	# verify that host needs the ssh key in the first place
+	elif ! HOST_NEEDS_SSHKEY ${USERNAME} ${IP} ${KEY:+"${KEY}"}; then
+		echo ${USERNAME}_HAS_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+	# if the host grants access via the default key run ssh-copy-id without expect
+	elif ! HOST_NEEDS_SSHKEY ${SUDOUSER} ${IP}; then
+		cat "${KEY}" | ssh ${SUDOUSER}@${IP} "cat | sudo tee -a 
+		ssh-copy-id ${KEY:+-i ${KEY}} ${USERNAME}@${IP} &> /dev/null\
+			&& echo ${USERNAME}_GRANTED_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
+			|| echo ERROR_SSH_COPY_ID_FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+
+	
+
+
+
+	fi
+}
 function SSH_COPY_ID(){
 	local USERNAME=$1
 	local IP=$2
