@@ -150,6 +150,8 @@ expect *
 expect  -exact "password: "
 send -- "${PASSWORD}\r"
 expect eof
+catch wait result
+exit [lindex $result 3]
 END-OF-EXPECT
 #expect *
 #send -- "exit\r"
@@ -168,6 +170,8 @@ expect *
 expect  -exact "password: "
 send -- "${PASSWORD}\r"
 expect eof
+catch wait result
+exit [lindex $result 3]
 END-OF-EXPECT
 }
 
