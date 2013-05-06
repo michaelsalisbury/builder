@@ -1,5 +1,10 @@
 #!/bin/bash
 
+while read import; do
+	. "${import}"
+done < <(ls -1              "${scriptPath}"/functions.*.sh 2> /dev/null
+	 ls -1 "${scriptPath}"/../functions/functions.*.sh 2> /dev/null)
+
 foldername=$(dirname "$(readlink -f ${BASH_SOURCE})")
 packagename=$(basename "${foldername}")
 
