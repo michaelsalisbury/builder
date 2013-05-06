@@ -7,14 +7,8 @@ function main(){
 
 
 
-	SSH_VERIFY_PASSWORD $(whoami) 10.173.161.50 'COSTech2010!' && echo pass good || echo pass bad
-	SSH_VERIFY_PASSWORD $(whoami) 10.173.161.50 'COSTech2010\!' && echo pass good || echo pass bad
-	SSH_VERIFY_PASSWORD $(whoami) 10.173.161.50 '1qaz\@WSX' && echo pass good || echo pass bad
-	SSH_VERIFY_PASSWORD $(whoami) 10.173.161.50 'COSTblaech2010\!' && echo pass good || echo pass bad
-	return 0
-
-	PUSH_KEYS
-	return 0
+	#PUSH_KEYS
+	#return 0
 	
 	GET_HOSTNAME_SIMPLE 10.173.158.26 ${DOM}
 	GET_HOSTNAME_DOM    10.173.158.26 ${DOM}
