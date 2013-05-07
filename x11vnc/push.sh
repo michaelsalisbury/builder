@@ -27,7 +27,7 @@ PATH-LIST
 # host list to rsync updates to
 while read IP HOST OTHER; do
 	echo -n $IP
-	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo ::GOOD 
+	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo ::GOOD[$HOST] 
 
 done << HOST-LIST
 	10.171.252.38	dr-richardson-ch0	vnmrs500	BTMZRW1.cos.ucf.edu
