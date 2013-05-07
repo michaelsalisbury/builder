@@ -28,7 +28,7 @@ PATH-LIST
 while read IP HOST OTHER; do
 	echo -n $IP
 	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo -n ::GOOD[$HOST]
-	HOST_NEEDS_SSHKEY   ${USERNAME} ${IP} ${PASSWORD} && echo -n ::NEEDS_KEY
+	HOST_NEEDS_SSHKEY   ${USERNAME} ${IP}             && echo -n ::NEEDS_KEY
 	echo
 
 done << HOST-LIST
