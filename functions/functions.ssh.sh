@@ -81,7 +81,7 @@ function SSH_COPY_ID_VIA_SUDO(){
 		echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}_VIA_PASSWORD
 	# if host sudo user :
 	else
-
+		echo
 			
 
 
