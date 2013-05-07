@@ -191,7 +191,10 @@ function GET_EXPECT_SSH_VERIFY_PASSWORD(){
 	cat << END-OF-EXPECT
 #!/usr/bin/expect -f
 set timeout -1
-spawn ssh -o NumberOfPasswordPrompts=1 -o PubkeyAuthentication=no ${USERNAME}@${IP} exit
+spawn ssh -o NumberOfPasswordPrompts=1\
+          -o PubkeyAuthentication=no\
+          -o HostbasedAuthentication=no\
+          ${USERNAME}@${IP} exit
 match_max 100000
 expect *
 expect  -exact "password: "
