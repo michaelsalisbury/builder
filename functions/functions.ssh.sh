@@ -141,7 +141,7 @@ function HOST_NEEDS_SSHKEY(){
 	local KEY=${3%.pub}
 	[ -n "${KEY}" ] && [ ! -f "${KEY}" ] && { echo key \"${KEY}\" missing\!\! 1>&2; return 1;}
 	#return 1
-	if $(ssh ${KEY:+-i "${KEY}"} -l ${USERNAME} -o passwordauthentication=no ${IP} logout) &> /dev/null; then
+	if $(ssh ${KEY:+-i "${KEY}"} -l ${USERNAME} -o passwordauthentication=no ${IP} exit) &> /dev/null; then
 		return 1
 	else
 		return 0
