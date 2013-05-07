@@ -156,7 +156,7 @@ function GET_HOST_ENTRY(){
 	fi
 }
 function IP_IS_UP(){
-	ping -W 1 -c 1 $1 &> /dev/null	\
+	ping -W 2 -c 1 $1 &> /dev/null	\
 		&& return 0		\
 		|| return 1
 }
