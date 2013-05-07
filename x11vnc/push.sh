@@ -21,12 +21,14 @@ PATH-LIST
 
 
 # host list to rsync updates to
-while read IP; do
-	
+while read IP HOST OTHER; do
+	echo $IP	
 
 done << HOST-LIST
-
-
-
+	10.171.252.38	dr-richardson-ch0	vnmrs500	BTMZRW1.cos.ucf.edu
+	10.171.252.95	dr-richardson-ch1	mercury300	5T2TNC1.cos.ucf.edu
+	10.173.152.119	dr-richardson-ps	avance400	BTN0SW1.cos.ucf.edu
+	10.173.156.190	dr-jameshopper-nmr	Agilent-NMR	2UA20814VX.cos.ucf.edu
+	10.173.152.117	dr-bochen-nmr		SSNMR
 HOST-LIST
 
