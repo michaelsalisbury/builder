@@ -29,7 +29,7 @@ while read IP HOST OTHER; do
 	echo -n $IP
 	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo -n ::GOOD[$HOST]
 	SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD}
-	SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD}
+	SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD} "~/.ssh/ir_rsa.localcosadmin"
 	SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD}
 	echo
 
