@@ -1,6 +1,7 @@
 #!/bin/bash
 
 while read import; do
+	echo $import
 	. "${import}"
 done < <(ls -1              "${scriptPath}"/functions.*.sh 2> /dev/null
 	 ls -1 "${scriptPath}"/../functions/functions.*.sh 2> /dev/null)
