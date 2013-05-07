@@ -130,7 +130,8 @@ function SSH_VERIFY_PASSWORD(){
 	local IP=$2
 	local PASSWORD=$3
 	! IP_IS_UP ${IP} && { echo IP \"${IP}\" is inaccesable\! 1>&2; return 1;}
-	expect <(GET_EXPECT_SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD}) &> /dev/null\
+	#expect <(GET_EXPECT_SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD}) &> /dev/null\
+	expect <(GET_EXPECT_SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD})\
 		&& return 0\
 		|| { echo username[${USERNAME}] or password[${PASSWORD}] is incorrect\! 1>&2; return 1;}
 }
