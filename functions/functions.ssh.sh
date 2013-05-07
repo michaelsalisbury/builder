@@ -142,7 +142,10 @@ function HOST_NEEDS_SSHKEY(){
 	[ -n "${KEY}" ] && [ ! -f "${KEY}" ] && { echo key \"${KEY}\" missing\!\! 1>&2; return 1;}
 	#return 0
 	if ssh ${KEY:+-i "${KEY}"} -l ${USERNAME} -o passwordauthentication=no ${IP} logout &> /dev/null; then
-		return 1; else return 0; fi
+		return 1
+	else
+		return 0
+	fi
 }
 function GET_HOST_ENTRY(){
 	local IP=$1
