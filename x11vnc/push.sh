@@ -20,9 +20,13 @@ done << PATH-LIST
 PATH-LIST
 
 
+USERNAME=localcosadmin
+PASSWORD='COSTech2010\!'
+
 # host list to rsync updates to
 while read IP HOST OTHER; do
-	echo $IP	
+	echo -n $IP
+	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo ::GOOD 
 
 done << HOST-LIST
 	10.171.252.38	dr-richardson-ch0	vnmrs500	BTMZRW1.cos.ucf.edu
