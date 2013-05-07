@@ -28,7 +28,7 @@ PATH-LIST
 while read IP HOST OTHER; do
 	echo $HOST
 	echo $IP
-	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo -n ::GOOD[$HOST]
+	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo ::GOOD[$HOST]
 	if HOST_NEEDS_SSHKEY   ${USERNAME} ${IP} "/root/.ssh/id_rsa"; then
 		echo ::NEEDSKEY
 	else
