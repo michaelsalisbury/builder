@@ -26,7 +26,7 @@ PATH-LIST
 
 # host list to rsync updates to
 while read IP HOST OTHER; do
-	echo $OTHER
+	echo $HOST
 	echo -n $IP
 	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo -n ::GOOD[$HOST]
 	HOST_NEEDS_SSHKEY   ${USERNAME} ${IP} "/root/.ssh/id_rsa" && echo -n ::NEEDSKEY || echo -n ::HASKEY
