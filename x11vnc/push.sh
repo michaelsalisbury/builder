@@ -29,9 +29,9 @@ while read IP HOST OTHER; do
 	echo -n $IP
 	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo ::GOOD[$HOST]
 	#SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD} "/root/.ssh/id_rsa"
-	SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD} "/home/localcosadmin/.ssh/id_rsa"
+	#SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD} "/home/localcosadmin/.ssh/id_rsa"
 	#SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD} "/home/localcosadmin/.ssh/id_rsa.2945star"
-	echo
+	echo 123
 done << HOST-LIST
 	10.171.252.38	dr-richardson-ch0	vnmrs500	BTMZRW1.cos.ucf.edu
 	10.171.252.95	dr-richardson-ch1	mercury300	5T2TNC1.cos.ucf.edu
