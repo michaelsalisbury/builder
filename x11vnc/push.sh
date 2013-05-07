@@ -1,13 +1,17 @@
 #!/bin/bash
 
+scriptName=$(basename  "$(readlink -f ${BASH_SOURCE})")
+scriptPath=$(dirname   "$(readlink -f ${BASH_SOURCE})")
+packagename=$(basename "${scriptPath}")
+
+USERNAME=localcosadmin
+PASSWORD='COSTech2010\!'
+
 while read import; do
 	echo $import
 	. "${import}"
 done < <(ls -1              "${scriptPath}"/functions.*.sh 2> /dev/null
 	 ls -1 "${scriptPath}"/../functions/functions.*.sh 2> /dev/null)
-
-foldername=$(dirname "$(readlink -f ${BASH_SOURCE})")
-packagename=$(basename "${foldername}")
 
 # create tgz
 tar -zcvf "${packagename}.tgz" *
@@ -19,10 +23,6 @@ done << PATH-LIST
 	/var/www/packages/Apps_Linux
 
 PATH-LIST
-
-
-USERNAME=localcosadmin
-PASSWORD='COSTech2010\!'
 
 # host list to rsync updates to
 while read IP HOST OTHER; do
