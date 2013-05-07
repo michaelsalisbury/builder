@@ -27,10 +27,10 @@ PATH-LIST
 # host list to rsync updates to
 while read IP HOST OTHER; do
 	echo -n $IP
-	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo -n ::GOOD[$HOST]
+	SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD} && echo ::GOOD[$HOST]
 	SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD}
-	SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD} "~/.ssh/ir_rsa.localcosadmin"
-	SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD}
+	SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD} "/home/localcosadmin/.ssh/id_rsa"
+	SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD} "/home/localcosadmin/.ssh/id_rsa.2945star"
 	echo
 
 done << HOST-LIST
