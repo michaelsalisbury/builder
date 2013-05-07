@@ -193,7 +193,8 @@ function GET_EXPECT_SSH_VERIFY_PASSWORD(){
 set timeout -1
 spawn ssh -o NumberOfPasswordPrompts=1\
           -o PubkeyAuthentication=no\
-          -o HostbasedAuthentication=no\
+          -o UserKnownHostsFile=/dev/null\
+          -o StrictHostKeyChecking=no\
           ${USERNAME}@${IP} exit
 match_max 100000
 expect *
