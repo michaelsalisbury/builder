@@ -1,4 +1,5 @@
 #!/bin/builder.sh
+# GLOBAL VARIABLES
 skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
