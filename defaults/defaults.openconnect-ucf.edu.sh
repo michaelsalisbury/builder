@@ -52,6 +52,7 @@ END-OF-SUDOERS
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
+	chmod +r /etc/skel/.vpn.cred
 	local scriptBase=$(basename "${scriptName}" .sh)
 	get_user_details all | while read user uid gid home; do
 		usermod -a -G openconnect ${user}
@@ -60,12 +61,13 @@ function setup_distribute_Config(){
 			chmod 700 "${home}/.scripts"
 			mkdir -p  "${home}/.logs"
 			chmod 700 "${home}/.logs"
-			cp "/etc/skel/.scrips/openconnect.exp" "${home}/.scripts/".
-			chmod 700                              "${home}/.scripts/openconnect.exp"
-			cp "/etc/skel/.vpn.cred"               "${home}/".
-			chmod 600                              "${home}/.vpn.cred"
+			cp "/etc/skel/.scripts/openconnect.exp" "${home}/.scripts/".
+			chmod 700                               "${home}/.scripts/openconnect.exp"
+			cp "/etc/skel/.vpn.cred"                "${home}/".
+			chmod 600                               "${home}/.vpn.cred"
 END-OF-CMDS
 )
 	done
+	chmod 600 /etc/skel/.vpn.cred
 }
 
