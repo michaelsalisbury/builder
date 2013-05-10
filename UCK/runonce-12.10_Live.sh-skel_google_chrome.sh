@@ -2,7 +2,7 @@
 
 # IMPORTANT: Includes must be placed before global variables like "skip" & "step"
 #while read import; do
-#	${import:+/bin/bash} "${import:-false}"
+#	source <(sed '1,/^function/{/^function/p;d}' "${import}")
 #done < <(ls -1              "${scriptPath}"/functions.*.sh 2> /dev/null
 #	 ls -1 "${scriptPath}"/../functions/functions.*.sh 2> /dev/null)
 
