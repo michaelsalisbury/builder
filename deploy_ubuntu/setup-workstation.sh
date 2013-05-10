@@ -350,6 +350,8 @@ function setup_Must_Have_Tools(){
 					p7zip p7zip-full \
 					google-chrome-stable
 	# clean up
+	waitAptgetUpdate
+	apt-file ${aptopt} update
 	waitAptgetInstall
 	apt-get ${aptopt} -i install
 	waitAptgetInstall
