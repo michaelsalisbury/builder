@@ -62,8 +62,8 @@ function setup_distribute_Config(){
 			chmod 700 "${home}/.logs
 			cp "/etc/skel/.scrips/openconnect.exp" "${home}/.scripts/.
 			chmod 700                              "${home}/.scripts/openconnect.exp"
-			cp "/etc/skel/.vpn.conf"               "${home}/."
-			chmod 600                              "${home}/.vpn.conf"
+			cp "/etc/skel/.vpn.cred"               "${home}/."
+			chmod 600                              "${home}/.vpn.cred"
 END-OF-CMDS
 )
 	done
