@@ -383,7 +383,7 @@ EOL
 	rm   -f teamviewer_linux_x64.deb
 	# clean up
 	waitAptgetInstall
-	apt-get ${aptopt} -i install
+	apt-get ${aptopt} -f install
 	waitAptgetInstall
 	apt-get ${aptopt} upgrade
 }
