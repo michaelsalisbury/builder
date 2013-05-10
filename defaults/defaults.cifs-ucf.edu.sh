@@ -1,4 +1,6 @@
 #!/bin/builder.sh
+
+# IMPORTANT: Includes must be placed before global variables like "skip" & "step"
 skip=( false false false false )
 step=1
 prefix="setup"
