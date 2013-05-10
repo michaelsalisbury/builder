@@ -353,7 +353,7 @@ function setup_Must_Have_Tools(){
 	waitAptgetUpdate
 	apt-file ${aptopt} update
 	waitAptgetInstall
-	apt-get ${aptopt} -i install
+	apt-get ${aptopt} -f install
 	waitAptgetInstall
 	apt-get ${aptopt} upgrade
 
