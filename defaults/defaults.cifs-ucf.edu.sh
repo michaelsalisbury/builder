@@ -85,16 +85,17 @@ function setup_distribute_Config(){
 	get_user_details all | while read user uid gid home; do
 		usermod -a -G cifs ${user}
 		su -m ${user} < <(cat << END-OF-CMDS
-			mkdir -p  "${home}/.scripts
-			chmod 750 "${home}/.scripts
-			mkdir -p  "${home}/.logs
-			chmod 750 "${home}/.logs
-			cp "/etc/skel/.scripts/mount.domain_cifs.sh" "${home}/.scripts/.
+			mkdir -p  "${home}/.scripts"
+			chmod 750 "${home}/.scripts"
+			mkdir -p  "${home}/.logs"
+			chmod 750 "${home}/.logs"
+			cp "/etc/skel/.scripts/mount.domain_cifs.sh" "${home}/.scripts/".
 			chmod 750                                    "${home}/.scripts/mount.domain_cifs.sh"
-			cp "/etc/skel/.cifs-*"                       "${home}/."
-			chmod 600                                    "${home}/.cifs-*
+			cp "/etc/skel/.cifs-"*                       "${home}/".
+			chmod 600                                    "${home}/.cifs-"*
 END-OF-CMDS
 )
 	done
+	chmod 600 /etc/skel/.cifs-*
 }
 
