@@ -85,7 +85,7 @@ function setup_distribute_Config(){
 	local scriptBase=$(basename "${scriptName}" .sh)
 	get_user_details all | while read user uid gid home; do
 		usermod -a -G cifs ${user}
-		su -m ${user} < <(cat << END-OF-CMDS
+		su -m -s /bin/bash ${user} < <(cat << END-OF-CMDS
 			mkdir -p  "${home}/.scripts"
 			chmod 750 "${home}/.scripts"
 			mkdir -p  "${home}/.logs"
