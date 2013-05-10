@@ -2,7 +2,7 @@
 
 # IMPORTANT: Includes must be placed before global variables like "skip" & "step"
 while read import; do
-	${import:+.} "${import:-false}"
+	${import:+/bin/bash} "${import:-false}"
 done < <(
 	ls -1                           /etc/lsb-release 2> /dev/null
 	ls -1              "${scriptPath}"/functions*.sh 2> /dev/null
