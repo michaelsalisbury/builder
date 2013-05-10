@@ -55,15 +55,14 @@ function setup_distribute_Config(){
 	local scriptBase=$(basename "${scriptName}" .sh)
 	get_user_details all | while read user uid gid home; do
 		usermod -a -G openconnect ${user}
-		su -m -s /bin/bash ${user} < <(
-			cat << END-OF-CMDS
-			mkdir -p  "${home}/.scripts
-			chmod 700 "${home}/.scripts
-			mkdir -p  "${home}/.logs
-			chmod 700 "${home}/.logs
-			cp "/etc/skel/.scrips/openconnect.exp" "${home}/.scripts/.
+		su -m -s /bin/bash ${user} < <(cat << END-OF-CMDS
+			mkdir -p  "${home}/.scripts"
+			chmod 700 "${home}/.scripts"
+			mkdir -p  "${home}/.logs"
+			chmod 700 "${home}/.logs"
+			cp "/etc/skel/.scrips/openconnect.exp" "${home}/.scripts/".
 			chmod 700                              "${home}/.scripts/openconnect.exp"
-			cp "/etc/skel/.vpn.cred"               "${home}/."
+			cp "/etc/skel/.vpn.cred"               "${home}/".
 			chmod 600                              "${home}/.vpn.cred"
 END-OF-CMDS
 )
