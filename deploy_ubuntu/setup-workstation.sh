@@ -4,10 +4,10 @@
 while read import; do
         source <(sed '1,/^function/{/^function/p;d}' "${import}")
 done < <(
-	ls -1                           /etc/lsb-release 2> /dev/null
 	ls -1              "${scriptPath}"/functions*.sh 2> /dev/null
 	ls -1 "${scriptPath}"/../functions/functions*.sh 2> /dev/null
 )
+	source /etc/lsb-release
 
 # GLOBAL VARIABLES
 skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
