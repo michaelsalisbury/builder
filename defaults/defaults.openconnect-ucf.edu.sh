@@ -55,7 +55,7 @@ function setup_distribute_Config(){
 	local scriptBase=$(basename "${scriptName}" .sh)
 	get_user_details all | while read user uid gid home; do
 		usermod -a -G openconnect ${user}
-		su -m ${user} < <(cat << END-OF-CMDS
+		su -m ${user} -s /bin/bash  < <(cat << END-OF-CMDS
 			mkdir -p  "${home}/.scripts
 			chmod 700 "${home}/.scripts
 			mkdir -p  "${home}/.logs
