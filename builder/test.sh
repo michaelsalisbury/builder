@@ -7,7 +7,6 @@ prefix="setup"
 function setup_A_alpha(){
 	echo $FUNCNAME
 }
-hello
 function setup_B_beta(){
 	echo $FUNCNAME
 }
