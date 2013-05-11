@@ -199,6 +199,9 @@ function setup_Prep_Add_Repos(){
         desc Prep: Add repos
         waitForNetwork || return 1
 
+	# Disable upgrades
+	sed -i '/^Prompt=/c\never' /etc/update-manager/release-upgrades
+
 	# Add Oracle VirtualBox Repo
 	echo "deb http://download.virtualbox.org/virtualbox/debian $DISTRIB_CODENAME contrib" > \
 	"/etc/apt/sources.list.d/oracle-virtualbox.list"
