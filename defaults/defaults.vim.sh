@@ -17,6 +17,8 @@ function setup_Create_Systemwide_Defaults(){
 	touch     /etc/skel/.viminfo
 	chmod 600 /etc/skel/.viminfo
 	cat << END-OF-VIMRC > /etc/vim/vimrc.local
+
+
 " Do not wrap text
 :set nowrap!
 " Toggle word wrap by pressing F2
