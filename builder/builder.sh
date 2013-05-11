@@ -154,8 +154,8 @@ function include(){
 		scrLogFQFN="$scrLogPath/${scriptName%.*}"
 
 		# Import functions from calling script
-		. "$scriptFQFN"
-
+		#. "$scriptFQFN"
+		
 
 
 
