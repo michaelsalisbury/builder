@@ -131,17 +131,18 @@ function include(){
 		scriptFQFN="$(readlink -fn $1)"
 		scriptName="$(basename $scriptFQFN)"
 		scriptPath="$(dirname  $scriptFQFN)"
-		
+		# Install builder script to /bin via hard link		
 		if [ ! -f "/bin/$buildScriptName" ]; then
 			ln "$buildScriptFQFN" "/bin/$buildScriptName"
 			mesg 80 Hard link setup: $buildScriptFQFN \>\> /bin/$buildScriptName
 		fi
+		# Add #!/bin/builderScriptName to the head of the calling script
 		if [ -n "`sed \"1!d;/#!\/bin\/$buildScriptName/d\" \"$scriptFQFN\"`" ]; then
 			sed -i "1{s|^[^ ]*|#!/bin/$buildScriptName|;}" "$scriptFQFN"
 			mesg 80 Fixed script line 1 to read: \#\!/bin/$buildScriptName
 			return 1
 		fi
-	
+		
 		scrLogPath="/var/log/${buildScriptName%.*}_${scriptName%.*}"
 		if [ "`whoami`" != "root" ]; then
 			sudo mkdir -p  "$scrLogPath"
