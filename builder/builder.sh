@@ -155,7 +155,14 @@ function include(){
 
 		# Import functions from calling script
 		#. "$scriptFQFN"
-		
+		source <(sed "${scriptFQFN}" -f <(cat << END-OF-SED
+			/^skip=/p
+			/^step=/p
+			/^prefix=/p
+			/^function\s/,/^}/p
+			d
+END-OF-SED
+		))
 
 
 
