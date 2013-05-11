@@ -142,7 +142,7 @@ function include(){
 			mesg 80 Fixed script line 1 to read: \#\!/bin/$buildScriptName
 			return 1
 		fi
-		
+		# Setup logs
 		scrLogPath="/var/log/${buildScriptName%.*}_${scriptName%.*}"
 		if [ "`whoami`" != "root" ]; then
 			sudo mkdir -p  "$scrLogPath"
@@ -153,7 +153,15 @@ function include(){
 		fi
 		scrLogFQFN="$scrLogPath/${scriptName%.*}"
 
+		# Import functions from calling script
 		. "$scriptFQFN"
+
+
+
+
+		#  
+
+
 		is_unset prefix	&& { prefix="setup"; sed -i "1aprefix=\"setup\""      "$scriptFQFN"; }
 		is_unset step	&& { step=1;         sed -i "1astep=1"                "$scriptFQFN"; }
 		is_unset skip	&& { skip=( 0 `seq $(last_function)` )
