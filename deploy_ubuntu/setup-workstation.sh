@@ -233,7 +233,18 @@ function setup_Prep_Add_Repos(){
 	# Add Medibuntu repo for free and non-free packages like acroread
 	wget -O "/etc/apt/sources.list.d/medibuntu.list" \
 	http://www.medibuntu.org/sources.list.d/$(lsb_release -cs).list
-	apt-get --quiet update
+	#apt-get --quiet update
+	apt-get update	 -o Dir::Etc::sourcelist="sources.list.d/medibuntu.list"\
+			 -o Dir::Etc::sourceparts="-"\
+			 -o APT::Get::List-Cleanup="0"
+	#get key
+	local key=$(apt-get update\
+			-o Dir::Etc::sourcelist="sources.list.d/medibuntu.list"\
+			-o Dir::Etc::sourceparts="-"\
+			-o APT::Get::List-Cleanup="0"\
+			2>&1 1> /dev/null |\
+			sed '/GPG error:/s/.*BADSIG\s\([0-9A-Z]*\)\s.*/\1/p;d')
+	#apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 2EBC26B60C5A2783
 	apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
 
 	# Oracle Java
