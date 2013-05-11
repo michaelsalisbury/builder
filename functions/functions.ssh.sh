@@ -229,4 +229,4 @@ exit [lindex \$result 3]
 END-OF-EXPECT
 }
 
-main "$@"
+#main "$@"
