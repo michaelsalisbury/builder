@@ -17,7 +17,8 @@ function setup_Create_Systemwide_Defaults(){
 	touch     /etc/skel/.viminfo
 	chmod 600 /etc/skel/.viminfo
 	cat << END-OF-VIMRC > /etc/vim/vimrc.local
-
+" Change comment highlighting from dark blue to dark green
+highlight Comment ctermfg=DarkGreen
 
 " Do not wrap text
 :set nowrap!
