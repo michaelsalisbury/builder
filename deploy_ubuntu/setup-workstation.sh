@@ -935,12 +935,18 @@ function setup_adobe(){
 	# Install Acrobat Reader
         waitAptgetInstall
         apt-get ${aptopt} install acroread flashplugin-installer
+        waitAptgetInstall
+	apt-get ${aptopt} autoremove	
 	# Install Flash
         waitAptgetInstall
         apt-get ${aptopt} install flashplugin-downloader flashplugin-nonfree-extrasound
+        waitAptgetInstall
+	apt-get ${aptopt} autoremove	
 	# Install Firefox Acrobat Plugin
         waitAptgetInstall
         apt-get ${aptopt} install adobe-flashplugin
+        waitAptgetInstall
+	apt-get ${aptopt} autoremove	
 	# Modify of apt-cacher client setting required for Oracle Java Install
 	local oracleProxy='Acquire::http::Proxy::download.oracle.com "DIRECT";'
 	egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
@@ -948,6 +954,8 @@ function setup_adobe(){
 	# Oracle Java Development Kit JDK X
         waitAptgetInstall
         apt-get ${aptopt} install oracle-java6-installer
+        waitAptgetInstall
+	apt-get ${aptopt} autoremove	
         #waitAptgetInstall
         #apt-get ${aptopt} install oracle-java7-installer
         #waitAptgetInstall
