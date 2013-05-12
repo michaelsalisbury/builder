@@ -6,9 +6,9 @@ declare -A includes
 function main(){
 
 	import test.sh
-	#typeset -f | sed -n -e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/p";
 	#typeset -f | sed -n -e "/^{/,/^}/!s/[[:space:]].*//p" -e "/import/d"
-	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" -e "/import/d"
+	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" -e "/import/d"
+	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" 
 }
 function import(){
 	local scriptFQFN=$(readlink -nf "$1")
