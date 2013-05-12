@@ -27,6 +27,7 @@ function import(){
 		### LOOP B ### use the find command to expand the include line and list all the matching files
 		while read include_file; do
 			if [ -f "${include_file}" ]; then
+				# verify that the file to be sourced has not already been processed
 				if ${includes[${include_file}]:-false}; then
 					echo Include file \"${include_file}\" has already been processed. 1>&2
 					continue
@@ -40,7 +41,7 @@ function import(){
 
 
 					### LOOP C ##########################################################################################################
-					done
+					done < <(sed "${include_file}" 
 				
 					#source <(sed "${scriptFQFN}" -f <(cat << END-OF-SED
 					#	/^skip=/p
