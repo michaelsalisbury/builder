@@ -16,8 +16,8 @@ function import(){
 		if [ "${include_line:0:1}" != "/" ]; then
 			include_line=${scriptPATH}/${include_line}
 		fi
-		echo ${include_line}
-		continue 
+		#echo ${include_line}
+		#continue 
 
 		while read file; do
 			if [ -f "${file}" ]; then
