@@ -392,7 +392,8 @@ function dump_functions(){ step=1
 #function list_functions(){ sed "/^function $prefix/!d;s|.*\($prefix.*\)(.*|\1|" "$scriptFQFN"; }
 function list_functions(){
 	sed "{scriptFQFN}"\
-		-e "/^function $prefix/!d;s|.*[[:space:]]\($prefix.*\)[[[:space:]](].*|\1|"
+		-e "/^function $prefix/!d"\
+		-e "s|^[[:space:]]*function[[:space:]]*\(${prefix}[^()[:space:]]*\).*|\1|"
 }
 
 function disp_functions(){
