@@ -47,7 +47,7 @@ function include_functions(){
 
 	### LOOP A ##########################################################################################################
 	done < <(sed "${include_file}"\
-			-e "/^[[:space:]]*function[[:space:]]\+[^()[:space:]]\+[[:space:]]*()/!d"
+			-e "/^[[:space:]]*function[[:space:]]\+[^()[:space:]]\+[[:space:]]*()/!d"\
 			-e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/p")
 
 	return 0
