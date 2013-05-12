@@ -1,5 +1,21 @@
 #!/bin/bash
 
+function main(){
+
+	import test.sh
+
+
+
+}
+function import(){
+	local scriptFQFN=$1
+	
+
+
+
+
+
+
 while read line; do
 	line=${line// /\"\ \"}
 	while read file; do
@@ -20,3 +36,5 @@ while read line; do
 
 
 done < <(sed test.sh -e '/^function includes/,/^}/p;d' | sed '1d;$d')
+}
+main "$@"
