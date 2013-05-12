@@ -166,8 +166,9 @@ END-OF-SED
 		# Import Global Variables
 		source <(sed "${scriptFQFN}" -e '/^function global_variables/,/^}/p;d')
 
+		# list includes
 
-			/^function\s/,/^}/p
+		#			/^function\s/,/^}/p
 
 		#  
 
