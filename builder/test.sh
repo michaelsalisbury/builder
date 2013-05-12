@@ -8,6 +8,7 @@ function includes(){
 	../functions/functions*.sh
 	../functions/functions.sh
 	../tmp/folder*/*
+	../tmp/folder01/file03 03
 }
 function global_variables(){
 	var_1=one
