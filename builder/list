@@ -23,7 +23,7 @@ function import(){
 		while read include_file; do
 			if [ -f "${include_file}" ]; then
 				if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
-					
+					sed "${include_file}" 	
 					echo BUILDER :: ${include_file}
 				elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
 					echo ___BASH :: ${include_file}
