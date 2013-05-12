@@ -10,6 +10,52 @@ function main(){
 	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" -e "/import/d"
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
 }
+function include_file(){
+	local include_file=$(readlink -nf "$1")
+	local include_path=$(dirname "${include_file}")
+
+	if ${includes[${include_file}]:-false}; then
+		echo Include file \"${include_file}\" has already been processed. 1>&2
+		continue
+	else
+		includes[${include_file}]=true
+	fi
+	if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
+		### LOOP C ### Parse functions to be sourced to ensure no duplicates
+		include_functions "${include_file}"
+ 
+
+
+		echo BUILDER :: ${include_file}
+	elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
+		#source "${include_file}"
+		echo ___BASH :: ${include_file}
+	else
+		#source "${include_file}"
+		echo ___FILE :: ${include_file}
+	fi
+
+}
+function include_functions(){
+	local include_file=$(readlink -nf "$1")
+	local include_path=$(dirname "${include_file}")
+
+	while read function_name; do
+			echo $function_name
+
+
+
+	### LOOP A ##########################################################################################################
+	done < <(sed "${include_file}" -n -e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/p")
+
+	
+
+
+
+}
+
+
+
 function import(){
 	local scriptFQFN=$(readlink -nf "$1")
 	local scriptPATH=$(dirname "${scriptFQFN}")
@@ -43,13 +89,6 @@ function import(){
 
 					### LOOP C ##########################################################################################################
 					done < <(sed "${include_file}" -n -e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/p")
-					#source <(sed "${scriptFQFN}" -f <(cat << END-OF-SED
-					#	/^skip=/p
-					#	/^step=/p
-					#	/^prefix=/p
-					#	d
-#END-OF-SED
-					#))
 					#sed "${include_file}" 	
 					echo BUILDER :: ${include_file}
 				elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
