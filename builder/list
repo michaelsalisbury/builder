@@ -10,7 +10,6 @@ while read line; do
 		fi
 
 
-		echo $file
 	done < <(eval find "${line}" 2> /dev/null)  
 		
 
