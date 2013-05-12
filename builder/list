@@ -7,6 +7,7 @@ function main(){
 
 	import test.sh
 	typeset -f | sed '/^{/,/^}/d;s/[[:space:]].*//'
+	typeset -f | sed -n -e "s/^[[:space:]]*function[[:space:]]\([^()[:space:]]*\).*/\1/p";
 }
 function import(){
 	local scriptFQFN=$(readlink -nf "$1")
