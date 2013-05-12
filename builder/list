@@ -9,6 +9,7 @@ function import(){
 	local scriptFQFN=$(readlink -nf "$1")
 	local scriptPATH=$(dirname "${scriptFQFN}")
 	local include_line=""
+	local include_file=""
 	while read include_line; do
 		# escape all spaces in include line; this keeps include entries clean and free of quotes
 		include_line=${include_line// /\"\ \"}
@@ -18,18 +19,19 @@ function import(){
 		fi
 		#echo ${include_line}
 		#continue 
-
-		while read file; do
-			if [ -f "${file}" ]; then
-				if sed "${file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
-					echo BUILDER :: ${file}
-				elif sed "${file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
-					echo ___BASH :: ${file}
+		
+		while read include_file; do
+			if [ -f "${include_file}" ]; then
+				if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
+					
+					echo BUILDER :: ${include_file}
+				elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
+					echo ___BASH :: ${include_file}
 				else
-					echo ___FILE :: ${file}
+					echo ___FILE :: ${include_file}
 				fi
 			else
-				echo ___COLD :: ${file}
+				echo ___COLD :: ${include_file}
 			fi
 		# use the find command to expand the include line and list all the matching files
 		done < <(eval find "${include_line}" -type f -maxdepth 0 2> /dev/null)
