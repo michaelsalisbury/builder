@@ -155,16 +155,19 @@ function include(){
 
 		# Import functions from calling script
 		#. "$scriptFQFN"
+		# Import control variables skip, step & prefix
 		source <(sed "${scriptFQFN}" -f <(cat << END-OF-SED
 			/^skip=/p
 			/^step=/p
 			/^prefix=/p
-			/^function\s/,/^}/p
 			d
 END-OF-SED
 		))
+		# Import Global Variables
+		source <(sed "${scriptFQFN}" -e '/^function global_variables/,/^}/p;d')
 
 
+			/^function\s/,/^}/p
 
 		#  
 
