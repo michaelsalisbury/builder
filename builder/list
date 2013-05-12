@@ -21,10 +21,10 @@ function import(){
 
 		while read file; do
 			if [ -f "${file}" ]; then
-				if sed "${file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
-					echo ___BASH :: ${file}
-				elif sed "${file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
+				if sed "${file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
 					echo BUILDER :: ${file}
+				elif sed "${file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
+					echo ___BASH :: ${file}
 				else
 					echo ___FILE :: ${file}
 				fi
