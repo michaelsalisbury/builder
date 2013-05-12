@@ -3,40 +3,28 @@
 function main(){
 
 	import test.sh
-	import ../tmp/folder\ 2/one
-
-
 
 }
 function import(){
 	local scriptFQFN=$(readlink -nf "$1")
 	local scriptPATH=$(dirname "${scriptFQFN}")
 	
-
-
-
-
-
-
-while read line; do
-	line=${line// /\"\ \"}
-	while read file; do
-		if [ -f "${file}" ]; then
-			echo HOT :: ${file}
-			if sed "${file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
-				echo BASH :: ${file}
-			elif sed "${file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
-				echo BUILDER :: ${file}
+	while read line; do
+		line=${line// /\"\ \"}
+		while read file; do
+			if [ -f "${file}" ]; then
+				echo HOT :: ${file}
+				if sed "${file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
+					echo BASH :: ${file}
+				elif sed "${file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
+					echo BUILDER :: ${file}
+				else
+					echo FILE :: ${file}
+				fi
 			else
-				echo FILE :: ${file}
+				echo COLD :: ${file}
 			fi
-		else
-			echo COLD :: ${file}
-		fi
-	done < <(eval find "${line}" -type f -maxdepth 0 2> /dev/null)  
-		
-
-
-done < <(sed test.sh -e '/^function includes/,/^}/p;d' | sed '1d;$d')
+		done < <(eval find "${line}" -type f -maxdepth 0 2> /dev/null)  
+	done < <(sed "${scriptFQFN}" -e '/^function includes/,/^}/p;d' | sed '1d;$d')
 }
 main "$@"
