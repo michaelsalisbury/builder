@@ -10,7 +10,9 @@ function main(){
 }
 function import(){
 	local scriptFQFN=$(readlink -f "$1")
+	local scriptPATH=$(dirname "${scriptFQFN}")
 	echo $scriptFQFN
+	echo $scriptPATH
 	return 0
 	
 
