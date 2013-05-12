@@ -5,8 +5,8 @@ prefix="setup"
 
 function includes(){
 	functions*.sh
-	../functions/functions*.sh
 	../functions/functions.sh
+	../functions/functions*.sh
 	../tmp/folder*
 	../tmp/folder01/file03 03
 	../tmp/fo*er 2/one
