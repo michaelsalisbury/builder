@@ -11,9 +11,13 @@ function import(){
 	local include_line=""
 	while read include_line; do
 		# escape all spaces in include line; this keeps include entries clean and free of quotes
-		line=${include_line// /\"\ \"}
+		include_line=${include_line// /\"\ \"}
 		# if the include line does not start with a leading slash then it's relative to the location of the passed script file
-		if [ '${	
+		if [ "${include_line:0:1}" != "/" ]; then
+			echo -n
+		fi
+		echo ${include_line}
+		continue 
 
 		while read file; do
 			if [ -f "${file}" ]; then
