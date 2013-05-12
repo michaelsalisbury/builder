@@ -4,7 +4,7 @@ while read line; do
 	line=${line// /\"\ \"}
 	while read file; do
 		echo $file
-	done < <(eval ls -1 "${line}" 2> /dev/null)  
+	done < <(eval find "${line}" 2> /dev/null)  
 		
 
 
