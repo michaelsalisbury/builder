@@ -5,11 +5,13 @@ while read line; do
 	while read file; do
 		if [ -f "${file}" ]; then
 			echo HOT :: ${file}
-			if grep -q "^#!/bin/bash
-
-
-
-
+			if sed "${file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
+				echo BASH :: ${file}
+			elif sed "${file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
+				echo BUILDER :: ${file}
+			else
+				echo FILE :: ${file}
+			fi
 		else
 			echo COLD :: ${file}
 		fi
