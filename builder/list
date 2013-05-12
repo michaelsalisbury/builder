@@ -6,7 +6,7 @@ declare -A includes
 function main(){
 
 	import test.sh
-
+	env
 }
 function import(){
 	local scriptFQFN=$(readlink -nf "$1")
