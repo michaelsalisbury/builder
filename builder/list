@@ -13,6 +13,7 @@ function main(){
 function import(){
 	local scriptFQFN=$(readlink -nf "$1")
 	local scriptPATH=$(dirname "${scriptFQFN}")
+	# define loop variables as local
 	local include_line=""
 	local include_file=""
 	local function_name=""
@@ -41,8 +42,7 @@ function import(){
 
 
 					### LOOP C ##########################################################################################################
-					done < <(sed "${include_file}" 
-				
+					done < <(sed "${include_file}" -n -e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/p")
 					#source <(sed "${scriptFQFN}" -f <(cat << END-OF-SED
 					#	/^skip=/p
 					#	/^step=/p
