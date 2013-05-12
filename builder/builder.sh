@@ -389,8 +389,11 @@ function dump_functions(){ step=1
 			   done
 }
 
-function list_functions(){ sed "/^function $prefix/!d;s|.*\($prefix.*\)(.*|\1|" "$scriptFQFN"; }
-function list_functions(){ sed "/^function $prefix/!d;s|.*\($prefix.*\)(.*|\1|" "$scriptFQFN"; }
+#function list_functions(){ sed "/^function $prefix/!d;s|.*\($prefix.*\)(.*|\1|" "$scriptFQFN"; }
+function list_functions(){
+	sed "{scriptFQFN}"\
+		-e "/^function $prefix/!d;s|.*[[:space:]]\($prefix.*\)[[[:space:]](].*|\1|"
+}
 
 function disp_functions(){
 	disp_func_tabs="%-3s %-3s %-3s %-30s %-$(( `cols` - 43 ))s"
