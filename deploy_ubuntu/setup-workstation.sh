@@ -15,15 +15,7 @@ step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
 subScriptBase="/root/system-setup/`basename ${source}`"
-#source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/deploys/$scriptName
-
-
-aptopt="-y -q"
-autoLoginUser="localcosadmin"
-#autoLoginShell="ubuntu"
-#autoLoginShell="gnome-session-fallback"
-autoLoginShell="xfce4-session"
-
+source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/deploys/$scriptName
 function networkUpMsg(){ echo Network UP\!; } 
 
 ###########################################################################################
