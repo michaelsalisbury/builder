@@ -3,7 +3,11 @@ skip=( true true true false false true false )
 step=7
 prefix="setup"
 
-
+function global_variables(){
+	var_1=one
+	var_2=two
+	var_3=three
+}
 function setup_A_alpha(){
 	echo $FUNCNAME
 }
@@ -18,6 +22,9 @@ function setup_D_david(){
 }
 function setup_E(){
 	echo $FUNCNAME
+	echo var_1 :: $var_1
+	echo var_2 :: $var_2
+	echo var_3 :: $var_3
 }
 function setup_E_epsilon(){
 	echo $FUNCNAME
