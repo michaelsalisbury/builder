@@ -2,7 +2,7 @@
 
 while read line; do
 	#echo $line
-	line=${line// /" "}
+	line=${line// /\"\ \"}
 	
 	for each in $(echo "${line}"); do
 		echo $each
