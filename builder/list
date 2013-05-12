@@ -10,6 +10,7 @@ function main(){
 }
 function import(){
 	local scriptFQFN=$(readlink -f "$1")
+	echo $scriptFQFN
 	return 0
 	
 
