@@ -3,7 +3,7 @@
 while read line; do
 	#echo $line
 	#line=${line// /\"\ \"}
-	line=${line// /\"\ \"}
+	#line=${line// /\"\ \"}
 	while read file; do
 		echo $file
 	done < <(eval echo ${line})  
