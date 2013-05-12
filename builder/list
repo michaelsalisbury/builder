@@ -34,10 +34,10 @@ function import(){
 					includes[${include_file}]=true
 				fi
 				if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
-					while read function_name; do
-						echo $function_name
+					#while read function_name; do
+					#	echo $function_name
 
-					done
+					#done
 				
 					#source <(sed "${scriptFQFN}" -f <(cat << END-OF-SED
 					#	/^skip=/p
