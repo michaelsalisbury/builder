@@ -8,7 +8,7 @@ function main(){
 
 }
 function import(){
-	local scriptFQFN=$1
+	local scriptFQFN=$(readlink -f $1)
 	
 
 
