@@ -3,6 +3,10 @@ skip=( true true true false false true false )
 step=7
 prefix="setup"
 
+function includes(){
+	functions*.sh
+	../functions/functions*.sh
+}
 function global_variables(){
 	var_1=one
 	var_2=two
