@@ -3,10 +3,10 @@
 while read line; do
 	#echo $line
 	line=${line// /\"\ \"}
+	eval find "${line}"
 	#line=${line// /\\\ }
-	while read file; do
-		echo $file
-	done < <(eval find "${line}")
+	#while read file; do
+	#	echo $file
 	#done < <(eval ls -1 "${line}")  
 	#done < <(eval echo ${line})  
 		
