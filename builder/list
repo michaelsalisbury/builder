@@ -39,7 +39,6 @@ function include_file(){
 function include_functions(){
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
-	return 0
 
 	while read function_name; do
 			echo $function_name
@@ -51,6 +50,7 @@ function include_functions(){
 			-e "/^[[:space:]]*function[[:space:]]\+[^()[:space:]]\+[[:space:]]*()/!d"
 			-e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/p")
 
+	return 0
 
 
 }
