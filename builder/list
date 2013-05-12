@@ -1,7 +1,9 @@
 #!/bin/bash
 
 while read line; do
-	echo $line
+	for each in $(echo $line); do
+		echo $each
+	done
 
 
 done < <(sed test.sh -e '/^function includes/,/^}/p;d' | sed '1d;$d')
