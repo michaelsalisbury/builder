@@ -10,7 +10,7 @@ while read line; do
 		fi
 
 
-	done < <(eval find "${line}" -type f 2> /dev/null)  
+	done < <(eval find "${line}" -type f -maxdepth 1 2> /dev/null)  
 		
 
 
