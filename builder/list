@@ -25,17 +25,21 @@ function import(){
 		
 		while read include_file; do
 			if [ -f "${include_file}" ]; then
-				
-
+				if ${includes[${include_file}]:-false}; then
+					echo Include file \"${include_file}\" has already been processed. 1>&2
+					continue
+				else
+					includes[${include_file}]=true
+				fi
 				if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
-					source <(sed "${scriptFQFN}" -f <(cat << END-OF-SED
-						/^skip=/p
-						/^step=/p
-						/^prefix=/p
-						d
-END-OF-SED
-					))
-					sed "${include_file}" 	
+					#source <(sed "${scriptFQFN}" -f <(cat << END-OF-SED
+					#	/^skip=/p
+					#	/^step=/p
+					#	/^prefix=/p
+					#	d
+#END-OF-SED
+					#))
+					#sed "${include_file}" 	
 					echo BUILDER :: ${include_file}
 				elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
 					echo ___BASH :: ${include_file}
