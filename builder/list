@@ -3,6 +3,13 @@
 while read line; do
 	line=${line// /\"\ \"}
 	while read file; do
+		if [ -f "${file}" ]; then
+			echo HOT :: ${file} 
+		else
+			echo COLD :: ${file}
+		fi
+
+
 		echo $file
 	done < <(eval find "${line}" 2> /dev/null)  
 		
