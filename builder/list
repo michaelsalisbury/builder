@@ -3,7 +3,7 @@
 function main(){
 
 	import test.sh
-	import ../tmp/folder\ 2/one
+	import "../tmp/folder\ 2/one"
 
 
 
