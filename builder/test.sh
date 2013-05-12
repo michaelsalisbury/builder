@@ -10,6 +10,7 @@ function includes(){
 	../tmp/folder*/*
 	../tmp/folder01/file03 03
 	../tmp/fo*er 2/one
+	../tmp/fo*er 2/*
 }
 function global_variables(){
 	var_1=one
