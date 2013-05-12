@@ -1,11 +1,11 @@
 #!/bin/bash
 
 while read line; do
+	echo $list	
 	
-	
-	for each in $(echo "${line// /\' \'}"); do
-		echo $each
-	done
+	#for each in $(echo "${line// /\' \'}"); do
+	#	echo $each
+	#done
 
 
 done < <(sed test.sh -e '/^function includes/,/^}/p;d' | sed '1d;$d')
