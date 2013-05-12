@@ -49,8 +49,9 @@ function include_functions(){
 	done < <(sed "${include_file}"\
 			-e "/^[[:space:]]*function[[:space:]]\+[^()[:space:]]\+[[:space:]]*()/!d"\
 			-e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/"\
-			-e "/^includes$/d"
-)
+			-e "/^includes$/d"\
+			-e "/^global_variables$/d"
+		)
 
 	return 0
 
