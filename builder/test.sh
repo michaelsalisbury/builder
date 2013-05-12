@@ -11,6 +11,7 @@ function includes(){
 	../tmp/folder01/file03 03
 	../tmp/fo*er" "2/one
 	../tmp/fo*er\ 2/one
+	../tmp/fo*er 2/one
 }
 function global_variables(){
 	var_1=one
