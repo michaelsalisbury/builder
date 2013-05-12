@@ -21,18 +21,18 @@ function include_file(){
 		includes[${include_file}]=true
 	fi
 	if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
+		echo BUILDER :: ${include_file}
 		### LOOP C ### Parse functions to be sourced to ensure no duplicates
 		include_functions "${include_file}"
  
 
 
-		echo BUILDER :: ${include_file}
 	elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
-		#source "${include_file}"
 		echo ___BASH :: ${include_file}
-	else
 		#source "${include_file}"
+	else
 		echo ___FILE :: ${include_file}
+		#source "${include_file}"
 	fi
 
 }
