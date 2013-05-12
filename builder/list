@@ -3,12 +3,14 @@
 function main(){
 
 	import test.sh
+	import ../tmp/folder\ 2/one
 
 
 
 }
 function import(){
 	local scriptFQFN=$(readlink -f $1)
+	return 0
 	
 
 
