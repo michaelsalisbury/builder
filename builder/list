@@ -15,6 +15,8 @@ function import(){
 	local scriptPATH=$(dirname "${scriptFQFN}")
 	local include_line=""
 	local include_file=""
+	local function_name=""
+	### LOOP A ### parse the passed script file for a function called "includes"
 	while read include_line; do
 		# escape all spaces in include line; this keeps include entries clean and free of quotes
 		include_line=${include_line// /\"\ \"}
@@ -22,9 +24,7 @@ function import(){
 		if [ "${include_line:0:1}" != "/" ]; then
 			include_line=${scriptPATH}/${include_line}
 		fi
-		#echo ${include_line}
-		#continue 
-		
+		### LOOP B ### use the find command to expand the include line and list all the matching files
 		while read include_file; do
 			if [ -f "${include_file}" ]; then
 				if ${includes[${include_file}]:-false}; then
@@ -34,10 +34,13 @@ function import(){
 					includes[${include_file}]=true
 				fi
 				if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
-					#while read function_name; do
-					#	echo $function_name
+					### LOOP C ### Parse functions to be sourced to ensure no duplicates
+					while read function_name; do
+						echo $function_name
 
-					#done
+
+					### LOOP C ##########################################################################################################
+					done
 				
 					#source <(sed "${scriptFQFN}" -f <(cat << END-OF-SED
 					#	/^skip=/p
@@ -56,9 +59,9 @@ function import(){
 			else
 				echo ___COLD :: ${include_file}
 			fi
-		# use the find command to expand the include line and list all the matching files
+		### LOOP B ##########################################################################################################
 		done < <(eval find "${include_line}" -type f -maxdepth 0 2> /dev/null)
-	# parse the passed script file for a function called "includes"
+	### LOOP A ##########################################################################################################
 	done < <(sed "${scriptFQFN}" -e '/^function includes/,/^}/p;d' | sed '1d;$d')
 }
 main "$@"
