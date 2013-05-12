@@ -4,12 +4,15 @@ while read line; do
 	line=${line// /\"\ \"}
 	while read file; do
 		if [ -f "${file}" ]; then
-			echo HOT :: ${file} 
+			echo HOT :: ${file}
+			if grep -q "^#!/bin/bash
+
+
+
+
 		else
 			echo COLD :: ${file}
 		fi
-
-
 	done < <(eval find "${line}" -type f -maxdepth 0 2> /dev/null)  
 		
 
