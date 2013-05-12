@@ -5,10 +5,10 @@ declare -A includes
 
 function main(){
 
-	import test.sh
+	include_file test.sh
 	#typeset -f | sed -n -e "/^{/,/^}/!s/[[:space:]].*//p" -e "/import/d"
 	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" -e "/import/d"
-	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
+	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
 }
 function include_file(){
 	local include_file=$(readlink -nf "$1")
@@ -46,9 +46,9 @@ function include_functions(){
 
 
 	### LOOP A ##########################################################################################################
-	done < <(sed "${include_file}" -n -e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/p")
-
-	
+	done < <(sed "${include_file}"\
+			-e "/^[[:space:]]*function[[:space:]]\+[^()[:space:]]\+[[:space:]]*()/!d"
+			-e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/p")
 
 
 
