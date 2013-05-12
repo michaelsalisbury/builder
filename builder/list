@@ -6,7 +6,8 @@ while read line; do
 	#line=${line// /\\\ }
 	while read file; do
 		echo $file
-	done < <(eval ls -1 "${line}")  
+	done < <(eval find "${line}")
+	#done < <(eval ls -1 "${line}")  
 	#done < <(eval echo ${line})  
 		
 
