@@ -3,7 +3,7 @@
 while read line; do
 	
 	
-	for each in $(echo "${line// /\ }"); do
+	for each in $(echo "${line// /\\\ }"); do
 		echo $each
 	done
 
