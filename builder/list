@@ -4,12 +4,10 @@ while read line; do
 	#echo $line
 	#line=${line// /\"\ \"}
 	line=${line// /\"\ \"}
-	
-	#for each in $(echo "${line}"); do
-	#for each in $(eval echo "${line}"); do
-	for each in $(eval echo \""${line}"\"); do
-		echo $each
-	done
+	while read file; do
+		echo $file
+	done < <(eval echo ${line})  
+		
 
 
 done < <(sed test.sh -e '/^function includes/,/^}/p;d' | sed '1d;$d')
