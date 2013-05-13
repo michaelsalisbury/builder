@@ -28,7 +28,7 @@ function include_file(){
 	local include_path=$(dirname "${include_file}")
 
 	if ${includes[${include_file}]:-false}; then
-		echo Include file \"${include_file}\" has already been processed. 1>&2
+		echo Include file \"${include_file}\" has already been processed. | include_log
 		continue
 	else
 		includes[${include_file}]=true
@@ -68,9 +68,9 @@ function include_variables_bash(){
 	while read variable_name; do
 		variable_is_available=${!variable_name:+false}
 		if ${variable_is_available:-true}; then
-			echo variable_name :: $variable_name 1>&2
+			echo variable_name :: $variable_name | include_log
 		else
-			echo variable_name :: $variable_name ALREADY TAKEN 1>&2
+			echo variable_name :: $variable_name ALREADY TAKEN | include_log
 			source_variables=false
 		fi
 	done < <(sed "${include_file}"\
@@ -87,7 +87,7 @@ function include_variables_bash(){
 		source < <(include_function "${include_file}" global_variables | sed '1d;/$d')
 		IFS=${IFS_DEFAULT}
 	else
-		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. 1>&2
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | include_log
 		exit 1
 	fi
 }
@@ -101,9 +101,9 @@ function include_variables(){
 	while read variable_name; do
 		variable_is_available=${!variable_name:+false}
 		if ${variable_is_available:-true}; then
-			echo variable_name :: $variable_name 1>&2
+			echo variable_name :: $variable_name | include_log
 		else
-			echo variable_name :: $variable_name ALREADY TAKEN 1>&2
+			echo variable_name :: $variable_name ALREADY TAKEN | include_log
 			source_variables=false
 		fi
 	done < <(include_function "${include_file}" global_variables |\
@@ -120,7 +120,7 @@ function include_variables(){
 		source < <(include_function "${include_file}" global_variables | sed '1d;/$d')
 		IFS=${IFS_DEFAULT}
 	else
-		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. 1>&2
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | include_log
 		exit 1
 	fi
 }
@@ -138,9 +138,9 @@ function include_functions(){
 		# verify function name is unique 
 		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
 			if [ "${function_name}" == "main" ]; then
-				echo WARNING :: File \"${include_file}\" sourced function \"${function_name}\", but will be ignored. 1>&2
+				echo WARNING :: File \"${include_file}\" sourced function \"${function_name}\", but will be ignored. | include_log
 			else	
-				echo _ERROR_ :: File \"${include_file}\" needs to re-name function \"${function_name}\", ignoring. 1>&2
+				echo _ERROR_ :: File \"${include_file}\" needs to re-name function \"${function_name}\", ignoring. | include_log
 			fi
 			continue
 		fi
@@ -148,9 +148,9 @@ function include_functions(){
 		source <(include_function "${include_file}" ${function_name})
 		# verify function has been sourced
 		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
-			echo SUCCESS :: File \"${include_file}\" sourced function \"${function_name}\". 1>&2
+			echo SUCCESS :: File \"${include_file}\" sourced function \"${function_name}\". | include_log
 		else
-			echo _ERROR_ :: File \"${include_file}\" sourced function \"${function_name}\" but verification failed. 1>&2
+			echo _ERROR_ :: File \"${include_file}\" sourced function \"${function_name}\" but verification failed. | include_log
 		fi
 	### LOOP A ##########################################################################################################
 	done < <(sed "${include_file}"\
