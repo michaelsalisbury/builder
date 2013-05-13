@@ -58,9 +58,9 @@ function include_variables(){
 		    sed -e '1d;$d'\
 			-e 's/[[:space:]]*//'\
 			-e '/.*read.*</s/.*read.*[[:space:]]\+\([a-Z0-9_]\+\)[[:space:]]\+<.*/\1/p'\
+			-e '/^declare/s/.*[[:space:]]\+\([a-Z0-9_]\+\)\($\|=.*\)/\1/p'\
 			-e '/^IFS[a-Z0-9_]*=/d'\
 			-e '/[^[:space:]]\+=/s/=.*//p'\
-			-e '/^declare/s/.*[[:space:]]\+\([a-Z0-9_]\+\)\($\|=.*\)/\1/p'\
 			-e 'd')
 }
 
