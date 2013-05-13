@@ -119,6 +119,7 @@ function include_variables(){
 	# If all variables names were free from conflict then include all
 	if ${source_variables}; then
 		local IFS_DEFAULT=${IFS}
+		include_function "${include_file}" global_variables | include_log
 		source < <(include_function "${include_file}" global_variables | sed '1d;/$d')
 		IFS=${IFS_DEFAULT}
 	else
