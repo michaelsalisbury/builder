@@ -1,0 +1,178 @@
+#!/bin/bash
+
+declare -A includes
+declare scriptFQFN=$(readlink -nf "${BASH_SOURCE}")
+declare scriptName=$(basename "${scriptFQFN}")
+declare scriptPath=$(dirname  "${scriptFQFN}")
+declare scrLogFQFN="/var/log/builder_${scriptName}/${scriptName}"
+#rm -f     "${scrLogFQFN}-includes"
+mkdir -p  $(dirname "${scrLogFQFN}")
+touch     "${scrLogFQFN}-includes"
+chmod 777 "${scrLogFQFN}-includes"
+
+function list_main(){
+	include_file test.sh
+	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
+	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//"
+}
+function include_log(){
+	# test for args
+	(( ${#@} > 0 )) && echo "$@" >> "${scrLogFQFN}-includes"
+	# test for incomming pipe
+	#Use read -t 0 -N 0 to detect if data is available on stdin. 
+	#Use test -t 0 or tty to try to detect if a pipe is connected to stdin.
+	read -t 0 -N 0 && cat >> "${scrLogFQFN}-includes"
+}
+function include_file(){
+	local include_file=$(readlink -nf "$1")
+	local include_path=$(dirname "${include_file}")
+
+	if ${includes[${include_file}]:-false}; then
+		echo Include file \"${include_file}\" has already been processed. 1>&2
+		continue
+	else
+		includes[${include_file}]=true
+	fi
+	if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
+		echo BUILDER :: ${include_file}
+		# Parse functions to be sourced to ensure no duplicates
+		include_functions "${include_file}"
+
+		# Parse global variables
+		include_variables "${include_file}"	
+ 
+		# Parse includes
+		include_dependencies "${include_file}"
+
+	elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
+		echo ___BASH :: ${include_file}
+		# Parse functions to be sourced to ensure no duplicates
+		include_functions "${include_file}"
+
+		# Parse global variables
+		include_variables_bash "${include_file}"	
+		
+	else
+		echo ___FILE :: ${include_file}
+		source "${include_file}"
+	fi
+
+}
+function include_variables_bash(){
+	local include_file=$(readlink -nf "$1")
+	local include_path=$(dirname "${include_file}")
+	local variable_name=""
+	local variable_is_available=""
+	local source_variables=true
+	# Parse all variable to ensure they have not been used
+	while read variable_name; do
+		variable_is_available=${!variable_name:+false}
+		if ${variable_is_available:-true}; then
+			echo variable_name :: $variable_name 1>&2
+		else
+			echo variable_name :: $variable_name ALREADY TAKEN 1>&2
+			source_variables=false
+		fi
+	done < <(sed "${include_file}"\
+			-e '/[[:space:]]*function[[:space:]]\+/,/^}/d'
+			-e 's/[[:space:]]*//'\
+			-e '/.*read.*</s/.*read.*[[:space:]]\+\([a-Z0-9_]\+\)[[:space:]]\+<.*/\1/p'\
+			-e '/^declare/s/.*[[:space:]]\+\([a-Z0-9_]\+\)\($\|=.*\)/\1/p'\
+			-e '/^IFS[a-Z0-9_]*=/d'\
+			-e '/[^[:space:]]\+=/s/=.*//p'\
+			-e 'd')
+	# If all variables names were free from conflict then include all
+	if ${source_variables}; then
+		local IFS_DEFAULT=${IFS}
+		source < <(include_function "${include_file}" global_variables | sed '1d;/$d')
+		IFS=${IFS_DEFAULT}
+	else
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. 1>&2
+		exit 1
+	fi
+}
+function include_variables(){
+	local include_file=$(readlink -nf "$1")
+	local include_path=$(dirname "${include_file}")
+	local variable_name=""
+	local variable_is_available=""
+	local source_variables=true
+	# Parse all variable to ensure they have not been used
+	while read variable_name; do
+		variable_is_available=${!variable_name:+false}
+		if ${variable_is_available:-true}; then
+			echo variable_name :: $variable_name 1>&2
+		else
+			echo variable_name :: $variable_name ALREADY TAKEN 1>&2
+			source_variables=false
+		fi
+	done < <(include_function "${include_file}" global_variables |\
+		    sed -e '1d;$d'\
+			-e 's/[[:space:]]*//'\
+			-e '/.*read.*</s/.*read.*[[:space:]]\+\([a-Z0-9_]\+\)[[:space:]]\+<.*/\1/p'\
+			-e '/^declare/s/.*[[:space:]]\+\([a-Z0-9_]\+\)\($\|=.*\)/\1/p'\
+			-e '/^IFS[a-Z0-9_]*=/d'\
+			-e '/[^[:space:]]\+=/s/=.*//p'\
+			-e 'd')
+	# If all variables names were free from conflict then include all
+	if ${source_variables}; then
+		local IFS_DEFAULT=${IFS}
+		source < <(include_function "${include_file}" global_variables | sed '1d;/$d')
+		IFS=${IFS_DEFAULT}
+	else
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. 1>&2
+		exit 1
+	fi
+}
+function include_function(){
+	local include_file=$(readlink -nf "$1")
+	local function_name=$2
+	sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p"
+}
+function include_functions(){
+	local include_file=$(readlink -nf "$1")
+	local include_path=$(dirname "${include_file}")
+	local function_name=""
+
+	while read function_name; do
+		# verify function name is unique 
+		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
+			if [ "${function_name}" == "main" ]; then
+				echo WARNING :: File \"${include_file}\" sourced function \"${function_name}\", but will be ignored. 1>&2
+			else	
+				echo _ERROR_ :: File \"${include_file}\" needs to re-name function \"${function_name}\", ignoring. 1>&2
+			fi
+			continue
+		fi
+		# source function
+		source <(include_function "${include_file}" ${function_name})
+		# verify function has been sourced
+		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
+			echo SUCCESS :: File \"${include_file}\" sourced function \"${function_name}\". 1>&2
+		else
+			echo _ERROR_ :: File \"${include_file}\" sourced function \"${function_name}\" but verification failed. 1>&2
+		fi
+	### LOOP A ##########################################################################################################
+	done < <(sed "${include_file}"\
+			-e "/^[[:space:]]*function[[:space:]]\+[^()[:space:]]\+[[:space:]]*()/!d"\
+			-e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/"\
+			-e "/^includes$/d"\
+			-e "/^global_variables$/d"
+		)
+}
+function include_dependencies(){
+	local include_file=$(readlink -nf "$1")
+	local include_path=$(dirname "${include_file}")
+	local include_line=""
+	local include_target=""
+	### LOOP A ### parse the passed script file for a function called "includes"
+	while read include_line; do
+		### LOOP B ### use the find command to expand the include line and list all the matching files
+		while read include_target; do
+			include_file "${include_target}"
+		### LOOP B ##########################################################################################################
+		done < <(eval find "${include_line}" -type f -maxdepth 0 2> /dev/null)
+	### LOOP A ##########################################################################################################
+	done < <(include_function "${include_file}" includes | sed '1d;$d')
+}
+list_main "$@"
