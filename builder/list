@@ -13,7 +13,7 @@ chmod 777 "${scrLogFQFN}-includes"
 function list_main(){
 	include_file test.sh
 	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
-	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//"
+	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | include_log
 }
 function include_log(){
 	# test for args
