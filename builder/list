@@ -88,7 +88,8 @@ function include_variables_bash(){
 		IFS=${IFS_DEFAULT}
 	else
 		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat >> "${scrLogFQFN}-includes")
-		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | while read line; do echo "${line}" | include_log; done;)
+		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | while read line; do echo "${line}" | include_log; done;)
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | while read line; do echo "${line}" | include_log; done)
 		exit 1
 	fi
 }
