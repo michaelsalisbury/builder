@@ -13,7 +13,6 @@ function includes(){
 	../tmp/fo*er 2/*
 }
 function global_variables(){
-	IFS_TMP=${IFS}
 	var_1=one
 	var_2=two
 	var_3=three
