@@ -306,9 +306,9 @@ function include_functions(){
 		# verify function name is unique 
 		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
 			if [ "${function_name}" == "main" ]; then
-				echo WARNING :: File \"${include_file}\" sourced function \"${function_name}\", but will be ignored. | include_log
+				echo WARNING :: File [${include_file}] sourced function ${function_name}\(\), but will be ignored. | include_log
 			else	
-				echo _ERROR_ :: File \"${include_file}\" needs to re-name function \"${function_name}\", ignoring. | include_log
+				echo _ERROR_ :: File [${include_file}] needs to re-name function ${function_name}\(\), ignoring. | include_log
 			fi
 			continue
 		fi
