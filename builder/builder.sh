@@ -175,9 +175,11 @@ function include(){
 			for index in $(seq ${#skip[*]} `last_function`); do
 				skip[$index]=false
 			done
+			echo five
 			fixs		
 		fi
 
+		echo four
 		# Setup array to track sourced script
 		declare -A includes
 
