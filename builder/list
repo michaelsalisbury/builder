@@ -18,6 +18,7 @@ function list_main(){
 }
 function include_log(){
 	(( ${#@} > 0 )) && echo has args
+	[ -t 1 ] && echo has pipe
 	
 	return 0
 	echo "$@" >> "${scrLogFQFN}-includes"
