@@ -28,7 +28,7 @@ function include_file(){
 		include_variables "${include_file}"	
  
 		# Parse includes
-		#include_dependencies "${include_file}"
+		include_dependencies "${include_file}"
 
 
 	elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
@@ -161,13 +161,12 @@ function include_dependencies(){
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	local include_line=""
-	local include_file=""
+	local include_target=""
 	### LOOP A ### parse the passed script file for a function called "includes"
 	while read include_line; do
 		### LOOP B ### use the find command to expand the include line and list all the matching files
-		while read include_file; do
-
-
+		while read include_target; do
+			include_file "${include_target}"
 		### LOOP B ##########################################################################################################
 		done < <(eval find "${include_line}" -type f -maxdepth 0 2> /dev/null)
 	### LOOP A ##########################################################################################################
