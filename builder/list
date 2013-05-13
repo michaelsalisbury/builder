@@ -78,7 +78,7 @@ function include_functions(){
 			continue
 		fi
 		#sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p"
-		source <(include_function "${include_file}" ${function_name}
+		source <(include_function "${include_file}" ${function_name})
 		#source <(sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p")
 		# verify function has been sourced
 		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
