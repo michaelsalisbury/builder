@@ -123,9 +123,9 @@ function include_variables(){
 		source <(include_function "${include_file}" global_variables | sed '1d;$d')
 		IFS=${IFS_DEFAULT}
 	else
+		echo hello
 		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. |\
 			tee >(cat | include_log)
-		echo hello
 		exit 1
 	fi
 }
