@@ -206,9 +206,8 @@ function setup_Prep_Add_Repos(){
 	# Ammend apt proxy settings
 	local oracleProxy='Acquire::http::Proxy::download.oracle.com "DIRECT";'
 	sed "$(egrep -l -R '^Acquire::http::Proxy ' /etc/apt)"\
-		 "^Acquire::http::Proxy " /etc/apt
-		ee "/^Acquire::http::Proxy /a${oracleProxy}"
-	xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${oracleProxy}" @
+		-i.bk`date "+%s"`\
+		-e "/^Acquire::http::Proxy /a${oracleProxy}"
 
 	# Add Google Chrome Repo
 	echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > \
