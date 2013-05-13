@@ -47,12 +47,14 @@ function include_functions(){
 			echo ERROR :: Function \"${function_name}\" from file \"${include_file}\" needs to be re-named. 1>&2
 			continue
 		fi
-		sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p"
-		#source < <(sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p")
-		
-
-
-
+		#sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p"
+		source < <(sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p")
+		# verify function has been sourced
+		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
+			echo SUCCESS :: Function \"${function_name}\" from file \"${include_file}\" sourced. 1>&2
+		else
+			echo ERROR :: Function \"${function_name}\" from file \"${include_file}\" was sourced but not verified. 1>&2
+		fi
 	### LOOP A ##########################################################################################################
 	done < <(sed "${include_file}"\
 			-e "/^[[:space:]]*function[[:space:]]\+[^()[:space:]]\+[[:space:]]*()/!d"\
@@ -60,11 +62,6 @@ function include_functions(){
 			-e "/^includes$/d"\
 			-e "/^global_variables$/d"
 		)
-			#-e "/^[[:space:]]*function[[:space:]]\+[^()[:space:]]\+[[:space:]]*()/!d"\
-
-	return 0
-
-
 }
 function import(){
 	local scriptFQFN=$(readlink -nf "$1")
