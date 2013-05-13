@@ -87,8 +87,7 @@ function include_variables_bash(){
 		source <(include_function "${include_file}" global_variables | sed '1d;/$d')
 		IFS=${IFS_DEFAULT}
 	else
-		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(while read line; do echo "${line}" | include_log; done)
-		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee -a data | include_log
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(while read line; do include_log "${line}"; done)
 		exit 1
 	fi
 }
