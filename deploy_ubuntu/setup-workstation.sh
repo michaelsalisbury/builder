@@ -3,7 +3,7 @@ skip=( false false false false false false false false false false false false f
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
-source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/deploys/$scriptName
+#source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/deploys/$scriptName
 
 function includes(){
 	/etc/lsb-release
@@ -14,8 +14,6 @@ function includes(){
 # GLOBAL VARIABLES
 function global_variables(){ 
 	subScriptBase="/root/system-setup/`basename ${source}`"
-	source=http://10.173.119.78/scripts/system-setup/$scriptName
-	#source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/deploys/$scriptName
 	aptopt="-y -q"
 	autoLoginUser="localcosadmin"
 	#autoLoginShell="ubuntu"
