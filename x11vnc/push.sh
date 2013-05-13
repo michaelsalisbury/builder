@@ -1,4 +1,7 @@
 #!/bin/builder.sh
+skip=( false )
+step=1
+prefix="push"
 
 function includes(){
 	functions.*.sh
@@ -11,7 +14,7 @@ function global_variables(){
 }
 
 
-function main(){
+function push_main(){
 	cd "${scriptPath}"
 	# create tgz
 	tar -zcvf "${packagename}.tgz" *
