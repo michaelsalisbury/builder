@@ -120,6 +120,7 @@ function include_variables(){
 			-e '/^IFS[a-Z0-9_]*=/d'\
 			-e '/[^[:space:]]\+=/s/=.*//p'\
 			-e 'd')
+	echo GGGGGGGGGGGGGGGGGGGGGGGGreatttttttttttttttttttttttttttttttttt
 	# If all variables names were free from conflict then include all
 	if ${source_variables}; then
 		local IFS_DEFAULT=${IFS}
