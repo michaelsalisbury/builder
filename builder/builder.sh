@@ -553,7 +553,7 @@ function dump_functions(){ step=1
 }
 
 #function list_functions(){ sed "/^function $prefix/!d;s|.*\($prefix.*\)(.*|\1|" "$scriptFQFN"; }
-function list_functions(){ sed "{scriptFQFN}" -n -e "s/^[[:space:]]*function[[:space:]]\+\(${prefix}[^()[:space:]]\+\).*/\1/p"; }
+function list_functions(){ sed "${scriptFQFN}" -n -e "s/^[[:space:]]*function[[:space:]]\+\(${prefix}[^()[:space:]]\+\).*/\1/p"; }
 
 function disp_functions(){
 	disp_func_tabs="%-3s %-3s %-3s %-30s %-$(( `cols` - 43 ))s"
