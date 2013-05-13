@@ -249,7 +249,7 @@ function include_variables_bash(){
 	# If all variables names were free from conflict then include all
 	if ${source_variables}; then
 		local IFS_DEFAULT=${IFS}
-		source <(include_function "${include_file}" global_variables | sed '1d;/$d')
+		source <(include_function "${include_file}" global_variables | sed '1d;$d')
 		IFS=${IFS_DEFAULT}
 	else
 		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(while read line; do include_log "${line}"; done)
