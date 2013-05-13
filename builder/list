@@ -17,8 +17,8 @@ function list_main(){
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//"
 }
 function include_log(){
-	echo ${#@}
-	echo ${@[1]}
+	(( ${#@} > 0 )) && echo has args
+	
 	return 0
 	echo "$@" >> "${scrLogFQFN}-includes"
 }
