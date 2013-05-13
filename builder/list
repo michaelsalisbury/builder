@@ -18,7 +18,9 @@ function list_main(){
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//"
 }
 function include_log(){
+	echo test args
 	(( ${#@} > 0 )) && echo has args
+	echo test pipe
 	[ -t 1 ] && echo has pipe
 	
 	return 0
