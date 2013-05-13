@@ -23,6 +23,7 @@ function include_log(){
 	#Use test -t 0 or tty to try to detect if a pipe is connected to stdin.
 	if read -t 0 -N 0; then
 		test -t 0 && echo stdin
+		test -t 1 && echo stdin
 		test -t 2 && echo error
 		cat >> "${scrLogFQFN}-includes"
 	fi
