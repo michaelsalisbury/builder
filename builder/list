@@ -24,6 +24,11 @@ function include_log(){
 	if read -t 0 -N 0; then
 		cat >> "${scrLogFQFN}-includes"
 	fi
+
+	if read -t 0 -N 0; then
+		echo still open
+	fi
+
 }
 function include_file(){
 	local include_file=$(readlink -nf "$1")
