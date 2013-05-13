@@ -109,54 +109,6 @@ function include_functions(){
 			-e "/^global_variables$/d"
 		)
 }
-function import(){
-	local scriptFQFN=$(readlink -nf "$1")
-	local scriptPATH=$(dirname "${scriptFQFN}")
-	# define loop variables as local
-	local include_line=""
-	local include_file=""
-	local function_name=""
-	### LOOP A ### parse the passed script file for a function called "includes"
-	while read include_line; do
-		# escape all spaces in include line; this keeps include entries clean and free of quotes
-		include_line=${include_line// /\"\ \"}
-		# if the include line does not start with a leading slash then it's relative to the location of the passed script file
-		if [ "${include_line:0:1}" != "/" ]; then
-			include_line=${scriptPATH}/${include_line}
-		fi
-		### LOOP B ### use the find command to expand the include line and list all the matching files
-		while read include_file; do
-			if [ -f "${include_file}" ]; then
-				# verify that the file to be sourced has not already been processed
-				if ${includes[${include_file}]:-false}; then
-					echo Include file \"${include_file}\" has already been processed. 1>&2
-					continue
-				else
-					includes[${include_file}]=true
-				fi
-				if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
-					### LOOP C ### Parse functions to be sourced to ensure no duplicates
-					while read function_name; do
-						echo $function_name
-
-
-					### LOOP C ##########################################################################################################
-					done < <(sed "${include_file}" -n -e "s/^[[:space:]]*function[[:space:]]\+\([^()[:space:]]\+\).*/\1/p")
-					#sed "${include_file}" 	
-					echo BUILDER :: ${include_file}
-				elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
-					echo ___BASH :: ${include_file}
-				else
-					echo ___FILE :: ${include_file}
-				fi
-			else
-				echo ___COLD :: ${include_file}
-			fi
-		### LOOP B ##########################################################################################################
-		done < <(eval find "${include_line}" -type f -maxdepth 0 2> /dev/null)
-	### LOOP A ##########################################################################################################
-	done < <(sed "${scriptFQFN}" -e '/^function includes/,/^}/p;d' | sed '1d;$d')
-}
 function include_dependencies(){
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
