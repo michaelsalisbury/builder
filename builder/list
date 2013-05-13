@@ -2,9 +2,7 @@
 
 declare -A includes
 
-
 function list_main(){
-
 	include_file test.sh
 	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//"
@@ -30,15 +28,52 @@ function include_file(){
 		# Parse includes
 		include_dependencies "${include_file}"
 
-
 	elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
 		echo ___BASH :: ${include_file}
-		#source "${include_file}"
+		# Parse functions to be sourced to ensure no duplicates
+		include_functions "${include_file}"
+
+		# Parse global variables
+		include_variables_bash "${include_file}"	
+		
 	else
 		echo ___FILE :: ${include_file}
-		#source "${include_file}"
+		source "${include_file}"
 	fi
 
+}
+function include_variables_bash(){
+	local include_file=$(readlink -nf "$1")
+	local include_path=$(dirname "${include_file}")
+	local variable_name=""
+	local variable_is_available=""
+	local source_variables=true
+	# Parse all variable to ensure they have not been used
+	while read variable_name; do
+		variable_is_available=${!variable_name:+false}
+		if ${variable_is_available:-true}; then
+			echo variable_name :: $variable_name 1>&2
+		else
+			echo variable_name :: $variable_name ALREADY TAKEN 1>&2
+			source_variables=false
+		fi
+	done < <(sed "${include_file}"\
+			-e '/[[:space:]]*function[[:space:]]\+/,/^}/d'
+			-e 's/[[:space:]]*//'\
+			-e '/.*read.*</s/.*read.*[[:space:]]\+\([a-Z0-9_]\+\)[[:space:]]\+<.*/\1/p'\
+			-e '/^declare/s/.*[[:space:]]\+\([a-Z0-9_]\+\)\($\|=.*\)/\1/p'\
+			-e '/^IFS[a-Z0-9_]*=/d'\
+			-e '/[^[:space:]]\+=/s/=.*//p'\
+			-e 'd')
+	# If all variables names were free from conflict then include all
+	if ${source_variables}; then
+		local IFS_DEFAULT=${IFS}
+		source < <(include_function "${include_file}" global_variables | sed '1d;/$d')
+		IFS=${IFS_DEFAULT}
+	else
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. 1>&2
+		exit 1
+	fi
 }
 function include_variables(){
 	local include_file=$(readlink -nf "$1")
