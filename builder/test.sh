@@ -20,7 +20,7 @@ function global_variables(){
 		456\
 		789)
 
-	read 
+	IFS=$'\n' read -d $'' -a var_5 < /etc/passwd
 
 }
 function main(){
