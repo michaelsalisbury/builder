@@ -587,9 +587,9 @@ END-OF-DOMAIN-LIST
 }
 ###########################################################################################
 ###########################################################################################
-buildScriptFQFN="$(readlink -nf $BASH_SOURCE)"
-buildScriptName="$(basename $buildScriptFQFN)"
-buildScriptPath="$(dirname  $buildScriptFQFN)"
+buildScriptFQFN=$(readlink -nf "${BASH_SOURCE}")
+buildScriptName=$(basename "${buildScriptFQFN}")
+buildScriptPath=$(dirname  "${buildScriptFQFN}")
 buildScriptPipe="/tmp/$$${buildScriptName}_Pipe"
 mkfifo                 "${buildScriptPipe}"
 buildScriptSrc="http://10.173.119.78/scripts/system-setup/${buildScriptName}"
