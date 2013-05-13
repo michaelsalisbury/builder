@@ -11,7 +11,7 @@ touch     "${scrLogFQFN}-includes"
 chmod 777 "${scrLogFQFN}-includes"
 
 function list_main(){
-	include_function test.sh global_variables
+	include_function test.sh global_variables | sed '1d;$d'
 
 	return 0
 	include_file test.sh
