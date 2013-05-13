@@ -103,7 +103,7 @@ function setup_files(){
 
 function cat_preferences(){
 	cat << END-OF-PREFERENCES
-{
+\{
    "backup": {
       "_signature": "wrshpwGoyIry3vvW05eHh7Wylxonfm5gLuyfVLdT8RM=",
       "_version": 4,
@@ -543,7 +543,7 @@ function cat_preferences(){
       "startup_count": 1,
       "view_count": 1
    }
-}
+\}
 END-OF-PREFERENCES
 }
 
