@@ -10,16 +10,17 @@ function includes(){
 function global_variables(){
 	SSH_USERNAME=localcosadmin
 	SSH_PASSWORD='COSTech2010\!'
+	push_packagename=$(basename "${scriptPath}")
 }
 function push_main(){
 	desc main
 	cd "${scriptPath}"
 	# create tgz
-	tar -zcvf "${packagename}.tgz" *
+	tar -zcvf "${push_packagename}.tgz" *
 
 	# folder list to copy package to
 	while read path; do
-		[ -d "${path}" ] && cp "${packagename}.tgz" "${path}/."
+		[ -d "${path}" ] && cp "${push_packagename}.tgz" "${path}/."
 	done << PATH-LIST
 		/var/www/packages/Apps_Linux
 
