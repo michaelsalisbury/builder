@@ -12,7 +12,7 @@ function global_variables(){
 	SSH_PASSWORD='COSTech2010\!'
 	push_packagename=$(basename "${scriptPath}")
 }
-function push_host_list(){
+function host_list(){
 	cat << HOST-LIST
 		10.171.252.38	dr-richardson-ch0	vnmrs500	BTMZRW1.cos.ucf.edu
 		10.171.252.95	dr-richardson-ch1	mercury300	5T2TNC1.cos.ucf.edu
@@ -46,7 +46,7 @@ function push_test(){
 		SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/home/localcosadmin/.ssh/id_rsa"
 		SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/home/localcosadmin/.ssh/id_rsa.2945star"
 	
-	done < <(push_host_list)
+	done < <(host_list)
 }
 
 
