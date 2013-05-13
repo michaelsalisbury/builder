@@ -4,6 +4,15 @@ step=1
 prefix="setup"
 source=http://192.168.248.24/config/$scriptName
 
+#function includes(){
+#	functions.*.sh
+#	../functions/functions.*.sh
+#}
+
+# GLOBAL VARIABLES
+#function global_variables(){
+#	echo
+#}
 
 function setup_skel_Structure(){
 	desc Build skel directory structure
