@@ -7,13 +7,10 @@ function includes(){
 	functions.*.sh
 	../functions/functions.*.sh
 }
-
 function global_variables(){
 	SSH_USERNAME=localcosadmin
 	SSH_PASSWORD='COSTech2010\!'
 }
-
-
 function push_main(){
 	desc main
 	cd "${scriptPath}"
