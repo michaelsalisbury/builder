@@ -11,6 +11,9 @@ touch     "${scrLogFQFN}-includes"
 chmod 777 "${scrLogFQFN}-includes"
 
 function list_main(){
+	include_function test.sh global_variables
+
+	return 0
 	include_file test.sh
 	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | include_log
