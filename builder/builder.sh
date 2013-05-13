@@ -1,5 +1,5 @@
 #!/bin/bash
-function main(){
+function builder_main(){
 	garbage_collection
         switches "$@" && exit 1
 	while ! is_finished && ! is_rebooting; do
@@ -604,6 +604,6 @@ function garbage_collection(){ (
 ) & }
 ###########################################################################################
 ###########################################################################################
-main "$@"
+builder_main "$@"
 
 # nothing
