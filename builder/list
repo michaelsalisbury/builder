@@ -96,7 +96,7 @@ function include_variables_bash(){
 		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | while read line; do echo "${line}" | include_log; done;)
 		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | while read line; do echo "${line}" | include_log; done)
 		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(while read line; do echo "${line}" | include_log; done)
-		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | include_log)
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(include_log)
 		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | cat | include_log;)
 		exit 1
 	fi
