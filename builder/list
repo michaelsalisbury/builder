@@ -57,6 +57,7 @@ function include_variables(){
 		    sed -e '1d;$d'\
 			-e 's/[[:space:]]*//'\
 			-e '/[^[:space:]]\+=/s/=.*//p'\
+			-e '/IFS/d'
 			-e 'd')
 
 }
