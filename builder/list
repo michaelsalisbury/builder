@@ -48,7 +48,7 @@ function include_variables(){
 		echo variable_name :: $variable_name
 
 
-	done < <(include_function "${include_file}" global_variables | sed '1d;$d;s/[[:space:]]*//;s/=.*//')
+	done < <(include_function "${include_file}" global_variables | sed '1d;$d;s/[[:space:]]*//;s/=.*//!d')
 
 }
 
