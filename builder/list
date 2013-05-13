@@ -60,13 +60,11 @@ function include_variables(){
 			-e '/.*read.*</s/.*read.*[[:space:]]\+\([a-Z0-9_]\+\)[[:space:]]\+<.*/\1/p'\
 			-e '/IFS[a-Z0-9_]*=/d'\
 			-e '/[^[:space:]]\+=/s/=.*//p'\
+			-e 
+
+
+
 			-e 'd')
-	include_function "${include_file}" global_variables |\
-		    sed -e '1d;$d'\
-			-e 's/[[:space:]]*//'\
-			-e '/.*read.*</s/.*read.*[[:space:]]\+\([a-Z0-9_]\+\)[[:space:]]\+<.*/\1/p'\
-			-e 'd'
-#cat test.sh | sed -e '/.*read.*</s/.*read.*[[:space:]]\+\([a-Z0-9_]\+\)[[:space:]]\+<.*/\1/p' -e 'd'
 }
 
 
