@@ -6,6 +6,7 @@ declare scriptName=$(basename "${scriptFQFN}")
 declare scriptPath=$(dirname  "${scriptFQFN}")
 declare scrLogFQFN="/var/log/builder_${scriptName}/${scriptName}"
 rm -f     "${scrLogFQFN}-includes"
+mkdir -p  $(dirname "${scrLogFQFN}")
 touch     "${scrLogFQFN}-includes"
 chmod 777 "${scrLogFQFN}-includes"
 
@@ -19,35 +20,13 @@ function list_main(){
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//"
 }
 function include_log(){
-	echo test args
-	(( ${#@} > 0 )) && echo has args
-	echo test pipe
+	(( ${#@} > 0 )) && echo "$@" >> "${scrLogFQFN-includes}"
 	# test for incomming pipe
 	#Use read -t 0 -N 0 to detect if data is available on stdin. 
 	#Use test -t 0 or tty to try to detect if a pipe is connected to stdin.
 	if read -t 0 -N 0; then
-		cat
+		cat >> "${scrLogFQFN-includes}"
 	fi
-
-
-	return 0
-	local pipe_nibble=$(dd bs=1 count=1 2>/dev/null | od -t o1 -A n)
-	if [ -z "${pipe_nibble}" ]; then
-		echo nothing
-	else
-		#while read line; do
-		#	echo line
-		#done <({printf "\\${pipe_nibble# }"; cat; } | cat)
-		{
-			printf "\\${pipe_nibble# }"
-			cat
-		} | {
-			cat | while read line; do
-				echo $line
-			done
-		} 
-	fi
-
 
 
 	
