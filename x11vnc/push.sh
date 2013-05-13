@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false )
+skip=( false false )
 step=1
 prefix="push"
 
@@ -9,8 +9,8 @@ function includes(){
 }
 
 function global_variables(){
-	USERNAME=localcosadmin
-	PASSWORD='COSTech2010\!'
+	#USERNAME=localcosadmin
+	#PASSWORD='COSTech2010\!'
 }
 
 
