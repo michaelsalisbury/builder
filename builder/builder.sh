@@ -316,9 +316,9 @@ function include_functions(){
 		source <(include_function "${include_file}" ${function_name})
 		# verify function has been sourced
 		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
-			echo SUCCESS :: File \"${include_file}\" sourced function \"${function_name}\". | include_log
+			echo SUCCESS :: File [${include_file}] sourced function ${function_name}\(\). | include_log
 		else
-			echo _ERROR_ :: File \"${include_file}\" sourced function \"${function_name}\" but verification failed. | include_log
+			echo _ERROR_ :: File [${include_file}] sourced function ${function_name}\(\) but verification failed. | include_log
 		fi
 	### LOOP A ##########################################################################################################
 	done < <(sed "${include_file}"\
