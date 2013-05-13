@@ -153,24 +153,16 @@ function include(){
 		fi
 		scrLogFQFN="$scrLogPath/${scriptName%.*}"
 
-		# Import functions from calling script
+		# Include functions from calling script
 		#. "$scriptFQFN"
-		# Import control variables skip, step & prefix
-		source <(sed "${scriptFQFN}" -f <(cat << END-OF-SED
-			/^skip=/p
-			/^step=/p
-			/^prefix=/p
-			d
-END-OF-SED
-		))
-		# Import Global Variables
-		source <(sed "${scriptFQFN}" -e '/^function global_variables/,/^}/p;d')
-
-		# list includes
-
-		#			/^function\s/,/^}/p
-
-		#  
+		# Include control variables skip, step & prefix
+		source <(sed "${scriptFQFN}"\
+				-e '/^skip=/p'\
+				-e '/^step=/p'\
+				-e '/^prefix=/p'\
+				-e 'd')
+		# Include functions and global variables
+		include_file "${scriptFQFN}"
 
 
 		is_unset prefix	&& { prefix="setup"; sed -i "1aprefix=\"setup\""      "$scriptFQFN"; }
