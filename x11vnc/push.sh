@@ -9,8 +9,8 @@ function includes(){
 }
 
 function global_variables(){
-	USERNAME=localcosadmin
-	#PASSWORD='COSTech2010\!'
+	#USERNAME=localcosadmin
+	PASSWORD='COSTech2010\!'
 }
 
 
