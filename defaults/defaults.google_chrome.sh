@@ -550,7 +550,7 @@ END-OF-PREFERENCES
 
 function cat_local_state(){
 	cat << END-OF-LOCALSTATE
-{
+\{
    "browser": {
       "last_redirect_origin": ""
    },
@@ -611,6 +611,6 @@ function cat_local_state(){
    "was": {
       "restarted": false
    }
-}
+\}
 END-OF-LOCALSTATE
 }
