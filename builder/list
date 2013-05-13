@@ -124,7 +124,7 @@ function include_variables(){
 		IFS=${IFS_DEFAULT}
 	else
 		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. |\
-			tee >(cat | include_log) 1>&2
+			tee >(cat | include_log)
 		exit 1
 	fi
 }
