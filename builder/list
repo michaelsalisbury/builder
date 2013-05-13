@@ -99,6 +99,7 @@ function include_variables(){
 	local source_variables=true
 	# Verify that function global_variables exists
 	include_function "${include_file}" global_variables &> /dev/null || return 1
+	echo HELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLo | include_log
 	include_function "${include_file}" global_variables | include_log
 	# Parse all variable to ensure they have not been used
 	while read variable_name; do
