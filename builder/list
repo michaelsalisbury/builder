@@ -23,7 +23,7 @@ function include_log(){
 	(( ${#@} > 0 )) && echo has args
 	echo test pipe
 	# test for incomming pipe
-	local pipe_nibble=$(dd bs=1 count=1 2>/dev/null | od -t o1 -A n)
+	local pipe_nibble=$(dd bs=1 count=1 conv=noerror 2>/dev/null | od -t o1 -A n)
 	if [ -z "${pipe_nibble}" ]; then
 		echo nothing
 	else
