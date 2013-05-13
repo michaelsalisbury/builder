@@ -34,7 +34,7 @@ function include_file(){
 		includes[${include_file}]=true
 	fi
 	if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
-		echo BUILDER :: functions :: ${include_file}
+		echo BUILDER :: ${include_file}
 		# Parse functions to be sourced to ensure no duplicates
 		include_functions "${include_file}"
 		
