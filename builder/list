@@ -87,7 +87,7 @@ function include_variables_bash(){
 		source <(include_function "${include_file}" global_variables | sed '1d;/$d')
 		IFS=${IFS_DEFAULT}
 	else
-		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | include_log)
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat >> "${scrLogFQFN}-includes")
 		exit 1
 	fi
 }
