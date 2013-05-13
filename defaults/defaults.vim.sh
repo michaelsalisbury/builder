@@ -4,6 +4,16 @@ step=3
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
 
+#function includes(){
+#	functions.*.sh
+#	../functions/functions.*.sh
+#}
+
+# GLOBAL VARIABLES
+#function global_variables(){
+#	echo
+#}
+
 function setup_Create_Systemwide_Defaults(){
 	desc Write /etc/vim/vimrc.local
 	touch     /etc/skel/.viminfo
