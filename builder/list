@@ -21,9 +21,14 @@ function include_file(){
 	fi
 	if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
 		echo BUILDER :: ${include_file}
-		### LOOP C ### Parse functions to be sourced to ensure no duplicates
+		# Parse functions to be sourced to ensure no duplicates
 		include_functions "${include_file}"
+
+		# Parse global variables
+		include_variables "${include_file}"	
  
+		# Parse includes
+		include_dependencies "${include_file}"
 
 
 	elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
@@ -35,6 +40,22 @@ function include_file(){
 	fi
 
 }
+function include_variables(){
+	local include_file=$(readlink -nf "$1")
+	local include_path=$(dirname "${include_file}")
+	local variable_name=""
+	while read variable_name; do
+
+
+
+	done < <(sed "${include_file}"\
+			-e "/^[[:space:]]*function[[:space:]]\+global_variables[[:space:]]*()/,/^}/!d"\
+			-e
+
+}
+
+
+
 function include_functions(){
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
