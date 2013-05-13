@@ -15,6 +15,7 @@ function global_variables(){
 
 
 function push_main(){
+	desc main
 	cd "${scriptPath}"
 	# create tgz
 	tar -zcvf "${packagename}.tgz" *
@@ -27,6 +28,9 @@ function push_main(){
 
 PATH-LIST
 
+function push_test(){
+	desc \test
+
 	# host list to rsync updates to
 	while read IP HOST OTHER; do
 		echo -n $IP
@@ -35,13 +39,7 @@ PATH-LIST
 		SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD} "/home/localcosadmin/.ssh/id_rsa"
 		SSH_COPY_ID         ${USERNAME} ${IP} ${PASSWORD} "/home/localcosadmin/.ssh/id_rsa.2945star"
 	
-	done << HOST-LIST
-		10.171.252.38	dr-richardson-ch0	vnmrs500	BTMZRW1.cos.ucf.edu
-		10.171.252.95	dr-richardson-ch1	mercury300	5T2TNC1.cos.ucf.edu
-		10.173.152.119	dr-richardson-ps	avance400	BTN0SW1.cos.ucf.edu
-		10.173.156.190	dr-jameshopper-nmr	Agilent-NMR	2UA20814VX.cos.ucf.edu
-		10.173.152.117	dr-bochen-nmr		SSNMR
-HOST-LIST
+	done < <(push_host_list)
 }
 
 function push_host_list(){
