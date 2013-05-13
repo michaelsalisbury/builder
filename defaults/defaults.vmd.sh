@@ -4,7 +4,12 @@ step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
 
+#function includes(){
+#	functions.*.sh
+#	../functions/functions.*.sh
+#}
 
+# GLOBAL VARIABLES
 function global_variables(){
 	source_app=http://10.173.119.78/packages/Computation/vmd-1.9.1.bin.LINUXAMD64.opengl.tar.gz
 }
