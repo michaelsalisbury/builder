@@ -338,6 +338,10 @@ function include_dependencies(){
 	include_function "${include_file}" includes &> /dev/null || return 1
 	### LOOP A ### parse the passed script file for a function called "includes"
 	while read include_line; do
+		# escape all spaces in include line; this keeps include entries clean and free of quotes
+		include_line=${include_line// /\"\ \"}
+		# if the include line does not start with a leading slash then it's relative to the location of the passed script file
+		[ "${include_line:0:1}" != "/" ] && include_line=${include_path}/${include_line}
 		### LOOP B ### use the find command to expand the include line and list all the matching files
 		while read include_target; do
 			include_file "${include_target}"
