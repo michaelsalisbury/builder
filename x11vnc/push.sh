@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false )
+skip=( false false false false )
 step=1
 prefix="push"
 
@@ -27,7 +27,7 @@ function push_main(){
 		/var/www/packages/Apps_Linux
 
 PATH-LIST
-
+}
 function push_test(){
 	desc \test
 
