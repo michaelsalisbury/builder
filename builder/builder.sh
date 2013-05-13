@@ -153,6 +153,7 @@ function include(){
 		fi
 		scrLogFQFN="$scrLogPath/${scriptName%.*}"
 
+		echo one
 		# Include control variables skip, step & prefix
 		source <(sed "${scriptFQFN}"\
 				-e '/^skip=/p'\
@@ -178,6 +179,7 @@ function include(){
 		# Setup array to track sourced script
 		declare -A includes
 
+		echo two
 		# Include functions and global variables recursivelly
 		include_file "${scriptFQFN}"
 		return 0
