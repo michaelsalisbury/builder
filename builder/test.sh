@@ -17,6 +17,11 @@ function global_variables(){
 	var_2=two
 	var_3=three
 }
+function main(){
+	echo 1234
+
+
+}
 function setup_A_alpha(){
 	echo $FUNCNAME
 }
