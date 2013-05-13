@@ -734,7 +734,7 @@ default-lease-time 600;
 max-lease-time 7200;
 authoritative;
 log-facility local7;
-subnet ${network} netmask ${netmask} {
+subnet ${network} netmask ${netmask} \{
 	range ${rangSTART} ${rangSTOP};
 	option subnet-mask ${netmask};
 	option broadcast-address ${broadcast};
@@ -743,7 +743,7 @@ subnet ${network} netmask ${netmask} {
 	### PXE Server IP ###
 	next-server ${LAN_IP};
 	filename "pxelinux.0";
-}
+\}
 END-OF-DHCPDCONF
 
 	# Restart the NetworkManager
