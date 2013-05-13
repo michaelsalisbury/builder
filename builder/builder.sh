@@ -153,35 +153,41 @@ function include(){
 		fi
 		scrLogFQFN="$scrLogPath/${scriptName%.*}"
 
-		# Include functions from calling script
-		#. "$scriptFQFN"
 		# Include control variables skip, step & prefix
 		source <(sed "${scriptFQFN}"\
 				-e '/^skip=/p'\
 				-e '/^step=/p'\
 				-e '/^prefix=/p'\
 				-e 'd')
-		# Include functions and global variables
-		include_file "${scriptFQFN}"
 
-
+		# Verify control variables exist and fix script if nessisary
 		is_unset prefix	&& { prefix="setup"; sed -i "1aprefix=\"setup\""      "$scriptFQFN"; }
 		is_unset step	&& { step=1;         sed -i "1astep=1"                "$scriptFQFN"; }
 		is_unset skip	&& { skip=( 0 `seq $(last_function)` )
 				     skip=( ${skip[*]/*/false} )
 		                     sed -i "1askip=\( ${skip[*]} \)" "$scriptFQFN"; }
 		
+		# Fix skip array larger than the number of functions
 		if ! (( ${#skip[*]} > `last_function` )); then 
 			for index in $(seq ${#skip[*]} `last_function`); do
 				skip[$index]=false
 			done
 			fixs		
 		fi
+
+		# Setup array to track sourced script
+		declare -A includes
+
+		# Include functions and global variables recursivelly
+		include_file "${scriptFQFN}"
 		return 0
 	else
 		return 1
 	fi
 }
+
+
+
 ###########################################################################################
 ###########################################################################################
 function retr_version(){
@@ -429,7 +435,7 @@ function skip_function(){
 ###########################################################################################
 function is_rebooting(){ rl=(`who -r | awk '{print $2;}'`); [[ "$rl" == 1 ||" $rl" == 6 ]]; }
 function is_finished(){	(( $step > `last_function` )) && return 0 || return 1; }
-function is_unset(){ compgen -A variable | egrep ^$1$ > /dev/null && return 1 || return 0; }
+function is_unset(){ compgen -A variable | egrep -q ^$1$ && return 1 || return 0; }
 ###########################################################################################
 ###########################################################################################
 function skip(){ ${skip[0]} && { ${skip[$step]} && return 0 || return 1; } || return 1; }
