@@ -45,6 +45,7 @@ function include_variables(){
 	local include_path=$(dirname "${include_file}")
 	local variable_name=""
 	local variable_is_available=""
+	local source_variables=true
 	# Parse all variable to ensure they have not been used
 	while read variable_name; do
 		variable_is_available=${!variable_name:+false}
@@ -52,6 +53,7 @@ function include_variables(){
 			echo variable_name :: $variable_name 1>&2
 		else
 			echo variable_name :: $variable_name ALREADY TAKEN 1>&2
+			source_variables=false
 		fi
 	done < <(include_function "${include_file}" global_variables |\
 		    sed -e '1d;$d'\
@@ -61,16 +63,21 @@ function include_variables(){
 			-e '/^IFS[a-Z0-9_]*=/d'\
 			-e '/[^[:space:]]\+=/s/=.*//p'\
 			-e 'd')
+	# If all variables names were free from conflict then include all
+	if ${source_variables}; then
+		local IFS_DEFAULT=${IFS}
+		source < <(include_function "${include_file}" global_variables | sed '1d;/$d')
+		IFS=${IFS_DEFAULT}
+	else
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. 1>&2
+		exit 1
+	fi
 }
-
-
-
 function include_function(){
 	local include_file=$(readlink -nf "$1")
 	local function_name=$2
 	sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p"
 }
-
 function include_functions(){
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
@@ -149,5 +156,21 @@ function import(){
 		done < <(eval find "${include_line}" -type f -maxdepth 0 2> /dev/null)
 	### LOOP A ##########################################################################################################
 	done < <(sed "${scriptFQFN}" -e '/^function includes/,/^}/p;d' | sed '1d;$d')
+}
+function include_dependencies(){
+	local include_file=$(readlink -nf "$1")
+	local include_path=$(dirname "${include_file}")
+	local include_line=""
+	local include_file=""
+	### LOOP A ### parse the passed script file for a function called "includes"
+	while read include_line; do
+		### LOOP B ### use the find command to expand the include line and list all the matching files
+		while read include_file; do
+
+
+		### LOOP B ##########################################################################################################
+		done < <(eval find "${include_line}" -type f -maxdepth 0 2> /dev/null)
+	### LOOP A ##########################################################################################################
+	done < <(include_function "${include_file}" includes | sed '1d;$d')
 }
 list_main "$@"
