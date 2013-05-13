@@ -11,8 +11,8 @@ touch     "${scrLogFQFN}-includes"
 chmod 777 "${scrLogFQFN}-includes"
 
 function list_main(){
-	include_function test.sh global_variables | grep -q "" && echo good || echo bad
-	include_function ../functions/functions.sh global_variables | grep -q "" && echo good || echo bad
+	include_function test.sh global_variables && echo good || echo bad
+	include_function ../functions/functions.sh global_variables && echo good || echo bad
 
 	return 0
 	include_file test.sh
@@ -134,7 +134,7 @@ function include_variables(){
 function include_function(){
 	local include_file=$(readlink -nf "$1")
 	local function_name=$2
-	sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p"
+	sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p" | grep ""
 }
 function include_functions(){
 	local include_file=$(readlink -nf "$1")
