@@ -20,12 +20,12 @@ function list_main(){
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//"
 }
 function include_log(){
-	(( ${#@} > 0 )) && echo "$@" >> "${scrLogFQFN-includes}"
+	(( ${#@} > 0 )) && echo "$@" >> "${scrLogFQFN}-includes"
 	# test for incomming pipe
 	#Use read -t 0 -N 0 to detect if data is available on stdin. 
 	#Use test -t 0 or tty to try to detect if a pipe is connected to stdin.
 	if read -t 0 -N 0; then
-		cat >> "${scrLogFQFN-includes}"
+		cat >> "${scrLogFQFN}-includes"
 	fi
 
 
