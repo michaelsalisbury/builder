@@ -21,10 +21,7 @@ function include_log(){
 	# test for incomming pipe
 	#Use read -t 0 -N 0 to detect if data is available on stdin. 
 	#Use test -t 0 or tty to try to detect if a pipe is connected to stdin.
-	if read -t 0 -N 0; then
-		#cat >> "${scrLogFQFN}-includes"
-		while read line; do echo "${line}" >> "${scrLogFQFN}-includes"; done
-	fi
+	read -t 0 -N 0 && cat >> "${scrLogFQFN}-includes"
 }
 function include_file(){
 	local include_file=$(readlink -nf "$1")
@@ -94,7 +91,8 @@ function include_variables_bash(){
 		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | while read line; do echo "${line}" | include_log; done;)
 		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | while read line; do echo "${line}" | include_log; done)
 		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(while read line; do echo "${line}" | include_log; done)
-		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | include_log)
+		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | include_log)
+		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(IFS=$'\n'; while read pipe; do echo "${pipe}" | include_log; done)
 		#echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. | tee >(cat | cat | include_log;)
 		exit 1
 	fi
