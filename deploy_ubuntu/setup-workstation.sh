@@ -203,11 +203,13 @@ function setup_Prep_Add_Repos(){
 	echo "deb http://download.virtualbox.org/virtualbox/debian $DISTRIB_CODENAME contrib" > \
 	"/etc/apt/sources.list.d/oracle-virtualbox.list"
 	wget -q -O - http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc | apt-key add -
-	# Ammend apt proxy settings
-	local oracleProxy='Acquire::http::Proxy::download.oracle.com "DIRECT";'
-	sed "$(egrep -l -R '^Acquire::http::Proxy ' /etc/apt)"\
-		-i.bk`date "+%s"`\
-		-e "/^Acquire::http::Proxy /a${oracleProxy}"
+	# Amend apt proxy settings
+	local virtualboxProxy='Acquire::http::Proxy::virtualbox.org "DIRECT";'
+
+	sed "$(egrep -l -R '^Acquire::http::Proxy ' /etc/apt |\
+		grep -v '.[0-9]\+.bk')"\
+		-i.`date "+%s"`.bk\
+		-e "/^Acquire::http::Proxy /a${virtualboxProxy}"
 
 	# Add Google Chrome Repo
 	echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > \
