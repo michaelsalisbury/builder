@@ -44,12 +44,11 @@ function include_variables(){
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	local variable_name=""
-	#while read variable_name; do
-		
+	while read variable_name; do
+		echo variable_name :: $variable_name
 
 
-	#done < <
-	include_function "${include_file}" global_variables | sed '1d;$d;s/[[:space:]]*//;s/=.*//'
+	done < <(include_function "${include_file}" global_variables | sed '1d;$d;s/[[:space:]]*//;s/=.*//')
 
 }
 
