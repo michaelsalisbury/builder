@@ -34,13 +34,15 @@ function include_file(){
 		includes[${include_file}]=true
 	fi
 	if sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/builder"; then
-		echo BUILDER :: ${include_file}
+		echo BUILDER :: functions :: ${include_file}
 		# Parse functions to be sourced to ensure no duplicates
 		include_functions "${include_file}"
-
+		
+		echo BUILDER :: variables :: ${include_file}
 		# Parse global variables
 		include_variables "${include_file}"	
  
+		echo BUILDER :: includes :: ${include_file}
 		# Parse includes
 		include_dependencies "${include_file}"
 
