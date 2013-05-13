@@ -167,6 +167,8 @@ function include_dependencies(){
 	local include_path=$(dirname "${include_file}")
 	local include_line=""
 	local include_target=""
+	# Verify that function global_variables exists
+	include_function "${include_file}" includes &> /dev/null || return 1
 	### LOOP A ### parse the passed script file for a function called "includes"
 	while read include_line; do
 		### LOOP B ### use the find command to expand the include line and list all the matching files
