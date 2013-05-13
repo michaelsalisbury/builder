@@ -43,7 +43,11 @@ function include_functions(){
 	while read function_name; do
 		# verify function name is unique 
 		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
-			echo ERROR :: Function \"${function_name}\" from file \"${include_file}\" needs to be re-named. 1>&2
+			if [ "${function_name}" == "main" ]; then
+				echo WARNING :: File \"${include_file}\" sourced function \"${function_name}\", but will be ignored. 1>&2
+			else	
+				echo _ERROR_ :: File \"${include_file}\" needs to re-name function \"${function_name}\", ignoring. 1>&2
+			fi
 			continue
 		fi
 		#sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p"
