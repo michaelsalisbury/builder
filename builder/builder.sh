@@ -158,6 +158,7 @@ function include(){
 				-e '/^skip=/p'\
 				-e '/^step=/p'\
 				-e '/^prefix=/p'\
+				-e '/^source=/p'\
 				-e 'd')
 
 		# Verify control variables exist and fix script if nessisary
