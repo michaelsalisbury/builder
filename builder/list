@@ -24,9 +24,13 @@ function include_log(){
 	# test for incomming pipe
 	local pipe_nibble=$(dd bs=1 count=1 2>/dev/null | od -t o1 -A n)
 	if [ -n "${pipe_nibble}" ]; then
-		while read line; do
-			echo line
-		done <({printf "\\${pipe_nibble# }"; cat; } | cat)
+		#while read line; do
+		#	echo line
+		#done <({printf "\\${pipe_nibble# }"; cat; } | cat)
+		{
+			printf "\\${pipe_nibble# }"
+			cat
+		} | cat
 	fi
 
 
