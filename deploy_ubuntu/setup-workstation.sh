@@ -204,12 +204,8 @@ function setup_Prep_Add_Repos(){
 	"/etc/apt/sources.list.d/oracle-virtualbox.list"
 	wget -q -O - http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc | apt-key add -
 	# Amend apt proxy settings
-	local virtualboxProxy='Acquire::http::Proxy::virtualbox.org "DIRECT";'
-
-	sed "$(egrep -l -R '^Acquire::http::Proxy ' /etc/apt |\
-		grep -v '.[0-9]\+.bk')"\
-		-i.`date "+%s"`.bk\
-		-e "/^Acquire::http::Proxy /a${virtualboxProxy}"
+	apt_amend_proxy 'Acquire::http::Proxy::download.oracle.com "DIRECT";'
+	apt_amend_proxy 'Acquire::http::Proxy::virtualbox.org "DIRECT";'
 
 	# Add Google Chrome Repo
 	echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > \
@@ -952,9 +948,8 @@ function setup_adobe(){
         waitAptgetInstall
 	apt-get ${aptopt} autoremove	
 	# Modify of apt-cacher client setting required for Oracle Java Install
-	local oracleProxy='Acquire::http::Proxy::download.oracle.com "DIRECT";'
-	egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
-	xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${oracleProxy}" @
+	apt_amend_proxy 'Acquire::http::Proxy::download.oracle.com "DIRECT";'
+	apt_amend_proxy 'Acquire::http::Proxy::virtualbox.org "DIRECT";'
 	# Oracle Java Development Kit JDK X
         waitAptgetInstall
         apt-get ${aptopt} install oracle-java6-installer
