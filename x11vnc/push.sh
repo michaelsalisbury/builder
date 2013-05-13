@@ -14,11 +14,11 @@ function global_variables(){
 }
 function host_list(){
 	cat << HOST-LIST
-		10.171.252.38	dr-richardson-ch0	vnmrs500	BTMZRW1.cos.ucf.edu
+		#10.171.252.38	dr-richardson-ch0	vnmrs500	BTMZRW1.cos.ucf.edu
 		10.171.252.95	dr-richardson-ch1	mercury300	5T2TNC1.cos.ucf.edu
-		10.173.152.119	dr-richardson-ps	avance400	BTN0SW1.cos.ucf.edu
-		10.173.156.190	dr-jameshopper-nmr	Agilent-NMR	2UA20814VX.cos.ucf.edu
-		10.173.152.117	dr-bochen-nmr		SSNMR
+		#10.173.152.119	dr-richardson-ps	avance400	BTN0SW1.cos.ucf.edu
+		#10.173.156.190	dr-jameshopper-nmr	Agilent-NMR	2UA20814VX.cos.ucf.edu
+		#10.173.152.117	dr-bochen-nmr		SSNMR
 HOST-LIST
 }
 function push_main(){
@@ -47,7 +47,7 @@ function push_test(){
 		#SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/home/localcosadmin/.ssh/id_rsa"
 		#SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/home/localcosadmin/.ssh/id_rsa.2945star"
 	
-	done < <(host_list)
+	done < <(host_list | sed '/^[[:space:]]*#/d')
 }
 
 
