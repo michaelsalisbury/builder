@@ -1,4 +1,9 @@
 #!/bin/builder.sh
+skip=( false false false false false )
+step=1
+prefix="setup"
+source=http://192.168.248.24/config/$scriptName
+
 
 # IMPORTANT: Includes must be placed before global variables like "skip" & "step"
 #while read import; do
@@ -7,10 +12,6 @@
 #	 ls -1 "${scriptPath}"/../functions/functions.*.sh 2> /dev/null)
 
 # GLOBAL VARIABLES
-skip=( false false false false false )
-step=1
-prefix="setup"
-source=http://192.168.248.24/config/$scriptName
 
 function setup_skel_Structure(){
 	desc Build skel directory structure
