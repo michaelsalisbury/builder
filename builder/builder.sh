@@ -327,7 +327,8 @@ function log_clear(){ rm -rf "$scrLogPath"; mkdir -p "$scrLogPath"; }
 function log_to_stout(){ cat "`log_get_name $1`"; }
 function log_output(){ tee -a "$scrLogFQFN" | tee -a "`log_get_name $1`"; }
 function log_get_name(){ log_step="00$1"
-			 log_step="${log_step:$(( ${#log_step} - 3 ))}"
+			 #log_step="${log_step:$(( ${#log_step} - 3 ))}"
+			 log_step="${log_step: -3}"
 			 log_subFQFN="$scrLogFQFN-$log_step-`name_function $1`"
 			 echo "$log_subFQFN"; }
 ###########################################################################################
