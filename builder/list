@@ -2,8 +2,8 @@
 
 declare -A includes
 declare scriptFQFN=$(readlink -nf "${BASH_SOURCE}")
-declare scriptName=$(basename "${buildScriptFQFN}")
-declare scriptPath=$(dirname  "${buildScriptFQFN}")
+declare scriptName=$(basename "${scriptFQFN}")
+declare scriptPath=$(dirname  "${scriptFQFN}")
 declare scrLogFQFN="/var/log/builder_${scriptName}/${scriptName}"
 rm -f     "${scrLogFQFN}-includes"
 touch     "${scrLogFQFN}-includes"
