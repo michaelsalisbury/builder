@@ -49,8 +49,8 @@ function include_variables(){
 
 
 	#done < <
-	(sed "${include_file}"\
-			-e "/^[[:space:]]*function[[:space:]]\+global_variables[[:space:]]*()/,/^}/!d")
+	sed "${include_file}"\
+			-e "/^[[:space:]]*function[[:space:]]\+global_variables[[:space:]]*()/,/^}/!d"
 
 }
 
