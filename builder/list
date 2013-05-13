@@ -125,6 +125,7 @@ function include_variables(){
 	else
 		echo _ERROR_ :: Global variables from file \"${include_file}\" conflict. |\
 			tee >(cat | include_log)
+		echo hello
 		exit 1
 	fi
 }
