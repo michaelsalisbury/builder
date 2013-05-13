@@ -27,6 +27,9 @@ function global_variables(){
 	declare -a simpleArray=( )
 	declare -A assocArray=( )
 	declare -i integerVar=0
+
+	read var_6 < <(echo "hello")
+
 }
 function main(){
 	echo 1234
