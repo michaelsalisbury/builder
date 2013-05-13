@@ -1,12 +1,8 @@
 #!/bin/bash
-source=http://10.173.119.78/scripts/system-setup/$scriptName
-scriptName=$(basename  "$(readlink -f ${BASH_SOURCE})")
-scriptPath=$(dirname   "$(readlink -f ${BASH_SOURCE})")
-packagename=$(basename "${scriptPath}")
-LOG="~/.logs/${scriptName}"
-DOM='ucf.edu'
 
 function main(){
+	local LOG="~/.logs/${scriptName}"
+	local DOM='ucf.edu'
 
 	echo ${FUNCNAME}
 	return 0
