@@ -10,11 +10,15 @@ touch     "${scrLogFQFN}-includes"
 chmod 777 "${scrLogFQFN}-includes"
 
 function list_main(){
+	include_log 1 2 3
+	return 0
 	include_file test.sh
 	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//"
 }
 function include_log(){
+	echo ${#@}
+	return 0
 	echo "$@" >> "${scrLogFQFN}-includes"
 }
 function include_file(){
