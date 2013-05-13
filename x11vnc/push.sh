@@ -41,8 +41,8 @@ function push_test(){
 	# host list to rsync updates to
 	while read IP HOST OTHER; do
 		echo -n $IP
-		SSH_VERIFY_PASSWORD ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} && echo ::GOOD[$HOST]
-		
+		SSH_VERIFY_PASSWORD  ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} && echo ::GOOD[$HOST]
+		SSH_COPY_ID_VIA_SUDO "root" ${IP} ${SSH_PASSWORD} ${SSH_USERNAME} "/root/.ssh/id_rsa"
 		#SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/root/.ssh/id_rsa"
 		#SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/home/localcosadmin/.ssh/id_rsa"
 		#SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/home/localcosadmin/.ssh/id_rsa.2945star"
