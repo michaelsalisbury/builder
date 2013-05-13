@@ -118,7 +118,7 @@ function include_variables(){
 			-e '/[^[:space:]]\+=/s/=.*//p'\
 			-e 'd')
 	# If all variables names were free from conflict then include all
-		echo hello
+		echo hello | include_log
 	if ${source_variables}; then
 		local IFS_DEFAULT=${IFS}
 		source <(include_function "${include_file}" global_variables | sed '1d;$d')
