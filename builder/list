@@ -3,7 +3,7 @@
 declare -A includes
 
 
-function main(){
+function list_main(){
 
 	include_file test.sh
 	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
@@ -110,4 +110,4 @@ function import(){
 	### LOOP A ##########################################################################################################
 	done < <(sed "${scriptFQFN}" -e '/^function includes/,/^}/p;d' | sed '1d;$d')
 }
-main "$@"
+list_main "$@"
