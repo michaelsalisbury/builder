@@ -4,14 +4,15 @@ step=1
 prefix="setup"
 source=http://192.168.248.24/config/$scriptName
 
-
-# IMPORTANT: Includes must be placed before global variables like "skip" & "step"
-#while read import; do
-#	source <(sed '1,/^function/{/^function/p;d}' "${import}")
-#done < <(ls -1              "${scriptPath}"/functions.*.sh 2> /dev/null
-#	 ls -1 "${scriptPath}"/../functions/functions.*.sh 2> /dev/null)
+#function includes(){
+#	functions.*.sh
+#	../functions/functions.*.sh
+#}
 
 # GLOBAL VARIABLES
+#function global_variables(){
+#	echo
+#}
 
 function setup_skel_Structure(){
 	desc Build skel directory structure
