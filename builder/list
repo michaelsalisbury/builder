@@ -47,7 +47,6 @@ function include_variables(){
 	local variable_is_available=""
 	# Parse all variable to ensure they have not been used
 	while read variable_name; do
-		echo $variable_name
 		variable_is_available=${!variable_name:+false}
 		if ${variable_is_available:-true}; then
 			echo variable_name :: $variable_name 1>&2
