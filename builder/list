@@ -56,8 +56,8 @@ function include_variables(){
 	done < <(include_function "${include_file}" global_variables |\
 		    sed -e '1d;$d'\
 			-e 's/[[:space:]]*//'\
-			-e '/[^[:space:]]\+=/!d'\
-			-e 's/=.*//')
+			-e '/[^[:space:]]\+=/s/=.*//p'\
+			-e 'd')
 
 }
 
