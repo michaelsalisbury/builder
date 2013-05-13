@@ -44,7 +44,7 @@ PATH-LIST
 HOST-LIST
 }
 
-function host_list(){
+function push_host_list(){
 	cat << HOST-LIST
 		10.171.252.38	dr-richardson-ch0	vnmrs500	BTMZRW1.cos.ucf.edu
 		10.171.252.95	dr-richardson-ch1	mercury300	5T2TNC1.cos.ucf.edu
