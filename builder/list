@@ -38,11 +38,9 @@ function include_file(){
 		# Parse functions to be sourced to ensure no duplicates
 		include_functions "${include_file}"
 		
-		echo BUILDER :: variables :: ${include_file}
 		# Parse global variables
 		include_variables "${include_file}"	
  
-		echo BUILDER :: includes :: ${include_file}
 		# Parse includes
 		include_dependencies "${include_file}"
 
@@ -120,7 +118,6 @@ function include_variables(){
 			-e '/^IFS[a-Z0-9_]*=/d'\
 			-e '/[^[:space:]]\+=/s/=.*//p'\
 			-e 'd')
-	echo GGGGGGGGGGGGGGGGGGGGGGGGreatttttttttttttttttttttttttttttttttt
 	# If all variables names were free from conflict then include all
 	if ${source_variables}; then
 		local IFS_DEFAULT=${IFS}
