@@ -70,7 +70,7 @@ function include_variables_bash(){
 		if ${variable_is_available:-true}; then
 			echo variable_name :: $variable_name | include_log
 		else
-			echo variable_name :: $variable_name ALREADY TAKEN | include_log
+			echo variable_name :: $variable_name :: ALREADY TAKEN | include_log
 			source_variables=false
 		fi
 	done < <(sed "${include_file}"\
