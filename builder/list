@@ -21,8 +21,10 @@ function include_log(){
 	# test for incomming pipe
 	#Use read -t 0 -N 0 to detect if data is available on stdin. 
 	#Use test -t 0 or tty to try to detect if a pipe is connected to stdin.
-	read -t 0 -N 0 && cat >> "${scrLogFQFN}-includes"
-	read -t 1 -N 0
+	if read -t 0 -N 0; then
+		test
+		cat >> "${scrLogFQFN}-includes"
+	fi
 }
 function include_file(){
 	local include_file=$(readlink -nf "$1")
