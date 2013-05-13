@@ -19,6 +19,9 @@ function global_variables(){
 	var_4=$(echo 123\
 		456\
 		789)
+
+	read 
+
 }
 function main(){
 	echo 1234
