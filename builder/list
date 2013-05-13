@@ -21,7 +21,16 @@ function include_log(){
 	echo test args
 	(( ${#@} > 0 )) && echo has args
 	echo test pipe
-	[ -t 1 ] && echo has pipe
+	# test for incomming pipe
+	local pipe_nibble=$(dd bs=1 count=1 2>/dev/null | od -t o1 -A n)
+	if [ -n "${pipe_nibble}" ]; then
+		while read line; do
+			echo line
+		done <({printf "\\${pipe_nibble# }"; cat; } | cat)
+	fi
+
+
+
 	
 	return 0
 	echo "$@" >> "${scrLogFQFN}-includes"
