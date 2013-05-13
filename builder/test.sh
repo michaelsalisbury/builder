@@ -24,6 +24,9 @@ function global_variables(){
 	IFS=$'\n' read -d $'' -a var_5 < /etc/passwd
 	IFS=${IFS_TMP}
 
+	declare -a simpleArray=( )
+	declare -A assocArray=( )
+	declare -i integerVar=0
 }
 function main(){
 	echo 1234
