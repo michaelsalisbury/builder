@@ -7,6 +7,15 @@ source=http://10.173.119.78/scripts/system-setup/$scriptName
 ###########################################################################################
 #                                                             Repo Support
 ###########################################################################################
+function apt_amend_proxy(){
+	local proxyEntry="${1}"
+	local proxyConfig=$(egrep -l -R '^Acquire::http::Proxy ' /etc/apt |\
+				grep -v '.[0-9]\+.bk')
+	if ! grep -q "${proxyEntry}" "${proxyConfig}"; then
+		sed "${proxyConfig}" -i.`date "+%s"`.bk\
+		-e "/^Acquire::http::Proxy /a${proxyEntry}"
+	fi
+}
 function apt_search(){
 	local help=`cat << END-OF-HELP
 ---------------------------------------------------------------
