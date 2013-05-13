@@ -16,6 +16,9 @@ function global_variables(){
 	var_1=one
 	var_2=two
 	var_3=three
+	var_4=$(echo 123\
+		456\
+		789)
 }
 function main(){
 	echo 1234
