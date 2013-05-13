@@ -153,7 +153,6 @@ function include(){
 		fi
 		scrLogFQFN="$scrLogPath/${scriptName%.*}"
 
-		echo one
 		# Include control variables skip, step & prefix
 		source <(sed "${scriptFQFN}"\
 				-e '/^skip=/p'\
@@ -161,7 +160,6 @@ function include(){
 				-e '/^prefix=/p'\
 				-e 'd')
 
-		echo two
 		# Verify control variables exist and fix script if nessisary
 		is_unset prefix	&& { prefix="setup"; sed -i "1aprefix=\"setup\""      "$scriptFQFN"; }
 		is_unset step	&& { step=1;         sed -i "1astep=1"                "$scriptFQFN"; }
@@ -169,17 +167,14 @@ function include(){
 				     skip=( ${skip[*]/*/false} )
 		                     sed -i "1askip=\( ${skip[*]} \)" "$scriptFQFN"; }
 		
-		echo three
 		# Fix skip array larger than the number of functions
 		if ! (( ${#skip[*]} > `last_function` )); then 
 			for index in $(seq ${#skip[*]} `last_function`); do
 				skip[$index]=false
 			done
-			echo five
 			fixs		
 		fi
 
-		echo four
 		# Setup array to track sourced script
 		declare -A includes
 
