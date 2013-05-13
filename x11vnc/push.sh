@@ -1,11 +1,16 @@
-#!/bin/bash
+#!/bin/builder.sh
 
-scriptName=$(basename  "$(readlink -f ${BASH_SOURCE})")
-scriptPath=$(dirname   "$(readlink -f ${BASH_SOURCE})")
-packagename=$(basename "${scriptPath}")
+function includes(){
+	functions.*
 
-USERNAME=localcosadmin
-PASSWORD='COSTech2010\!'
+}
+
+function global_variables(){
+	USERNAME=localcosadmin
+	PASSWORD='COSTech2010\!'
+}
+
+
 
 while read import; do
 	echo $import
