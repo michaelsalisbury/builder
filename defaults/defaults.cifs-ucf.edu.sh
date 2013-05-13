@@ -10,13 +10,13 @@ function includes(){
 	../functions/functions.*.sh
 }
 function global_variables(){
-}
-
-read -d $'' g_domains << END-OF-DOMAINS
-	cos.ucf.edu
-	net.ucf.edu
-	mydomain.org
+	echo
+	read -d $'' g_domains << END-OF-DOMAINS
+		cos.ucf.edu
+		net.ucf.edu
+		mydomain.org
 END-OF-DOMAINS
+}
 
 function setup_skel_Structure(){
 	desc Build skel directory structure
