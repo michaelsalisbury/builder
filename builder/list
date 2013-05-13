@@ -49,8 +49,7 @@ function include_variables(){
 
 
 	#done < <
-	sed "${include_file}"\
-			-e "/^[[:space:]]*function[[:space:]]\+global_variables[[:space:]]*()/,/^}/!d"
+	include_function "${include_file}" global_variables | sed '1d;$d;s/[[:space:]]*//'
 
 }
 
@@ -77,9 +76,8 @@ function include_functions(){
 			fi
 			continue
 		fi
-		#sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p"
+		# source function
 		source <(include_function "${include_file}" ${function_name})
-		#source <(sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p")
 		# verify function has been sourced
 		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
 			echo SUCCESS :: File \"${include_file}\" sourced function \"${function_name}\". 1>&2
