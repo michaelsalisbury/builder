@@ -11,27 +11,17 @@ touch     "${scrLogFQFN}-includes"
 chmod 777 "${scrLogFQFN}-includes"
 
 function list_main(){
-	#include_log 1 2 3
-	echo tada | include_log
-	include_log wow
-	return 0
 	include_file test.sh
 	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//"
 }
 function include_log(){
+	# test for args
 	(( ${#@} > 0 )) && echo "$@" >> "${scrLogFQFN}-includes"
 	# test for incomming pipe
 	#Use read -t 0 -N 0 to detect if data is available on stdin. 
 	#Use test -t 0 or tty to try to detect if a pipe is connected to stdin.
-	if read -t 0 -N 0; then
-		cat >> "${scrLogFQFN}-includes"
-	fi
-
-
-	
-	return 0
-	echo "$@" >> "${scrLogFQFN}-includes"
+	read -t 0 -N 0 && cat >> "${scrLogFQFN}-includes"
 }
 function include_file(){
 	local include_file=$(readlink -nf "$1")
