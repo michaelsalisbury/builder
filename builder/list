@@ -11,10 +11,6 @@ touch     "${scrLogFQFN}-includes"
 chmod 777 "${scrLogFQFN}-includes"
 
 function list_main(){
-	include_function test.sh global_variables && echo good || echo bad
-	include_function ../functions/functions.sh global_variables && echo good || echo bad
-
-	return 0
 	include_file test.sh
 	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | include_log
@@ -102,8 +98,7 @@ function include_variables(){
 	local variable_is_available=""
 	local source_variables=true
 	# Verify that function global_variables exists
-	include_function "${include_file}" global_variables
-
+	include_function "${include_file}" global_variables &> /dev/null || return 1
 	# Parse all variable to ensure they have not been used
 	while read variable_name; do
 		variable_is_available=${!variable_name:+false}
