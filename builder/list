@@ -59,7 +59,6 @@ function include_variables(){
 			-e '/.*read.*</s/.*\([:a-Z0-9_]*\)[[:space:]]\+<.*/\1/p'\
 			-e '/^IFS=/d'\
 			-e '/[^[:space:]]\+=/s/=.*//p'\
-			-e '/IFS/d'\
 			-e 'd')
 
 }
