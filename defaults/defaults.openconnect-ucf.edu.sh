@@ -10,9 +10,9 @@ function includes(){
 }
 
 # GLOBAL VARIABLES
-function global_variables(){
-	echo
-}
+#function global_variables(){
+#	echo
+#}
 
 function setup_skel_Structure(){
 	desc Build skel directory structure
