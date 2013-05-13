@@ -39,9 +39,17 @@ function include_file(){
 function include_functions(){
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
+	local function_name=""
 
 	while read function_name; do
-			echo $function_name
+		# verify function name is unique 
+		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
+			echo ERROR :: Function \"${function_name}\" from file \"${include_file}\" needs to be re-named. 1>&2
+			continue
+		fi
+		sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p"
+		#source < <(sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p")
+		
 
 
 
@@ -52,6 +60,7 @@ function include_functions(){
 			-e "/^includes$/d"\
 			-e "/^global_variables$/d"
 		)
+			#-e "/^[[:space:]]*function[[:space:]]\+[^()[:space:]]\+[[:space:]]*()/!d"\
 
 	return 0
 
