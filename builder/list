@@ -51,7 +51,6 @@ function include_file(){
 
 		# Parse global variables
 		include_variables_bash "${include_file}"	
-		
 	else
 		echo ___FILE :: ${include_file}
 		source "${include_file}"
