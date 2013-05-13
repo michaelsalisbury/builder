@@ -1,21 +1,23 @@
 #!/bin/builder.sh
-
-# IMPORTANT: Includes must be placed before global variables like "skip" & "step"
-while read import; do
-        source <(sed '1,/^function/{/^function/p;d}' "${import}")
-done < <(
-	ls -1              "${scriptPath}"/functions*.sh 2> /dev/null
-	ls -1 "${scriptPath}"/../functions/functions*.sh 2> /dev/null
-)
-	source /etc/lsb-release
-
-# GLOBAL VARIABLES
 skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
-subScriptBase="/root/system-setup/`basename ${source}`"
 source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/deploys/$scriptName
+
+function includes(){
+	/etc/lsb-release
+	functions*.sh
+	../functions/functions*.sh
+}
+
+# GLOBAL VARIABLES
+function global_variables(){ 
+	subScriptBase="/root/system-setup/`basename ${source}`"
+	source=http://10.173.119.78/scripts/system-setup/$scriptName
+	#source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/deploys/$scriptName
+}
+
 function networkUpMsg(){ echo Network UP\!; } 
 
 ###########################################################################################
