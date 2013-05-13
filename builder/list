@@ -50,9 +50,9 @@ function include_functions(){
 		source <(sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p")
 		# verify function has been sourced
 		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
-			echo SUCCESS :: Function \"${function_name}\" from file \"${include_file}\" sourced. 1>&2
+			echo SUCCESS :: File \"${include_file}\" sourced function \"${function_name}\". 1>&2
 		else
-			echo ERROR :: Function \"${function_name}\" from file \"${include_file}\" was sourced but not verified. 1>&2
+			echo _ERROR_ :: File \"${include_file}\" sourced function \"${function_name}\" but verification failed. 1>&2
 		fi
 	### LOOP A ##########################################################################################################
 	done < <(sed "${include_file}"\
