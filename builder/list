@@ -1,12 +1,21 @@
 #!/bin/bash
 
 declare -A includes
-declare scrLogFQFN="/var/log/builder
+declare scriptFQFN=$(readlink -nf "${BASH_SOURCE}")
+declare scriptName=$(basename "${buildScriptFQFN}")
+declare scriptPath=$(dirname  "${buildScriptFQFN}")
+declare scrLogFQFN="/var/log/builder_${scriptName}/${scriptName}"
+rm -f     "${scrLogFQFN}-includes"
+touch     "${scrLogFQFN}-includes"
+chmod 777 "${scrLogFQFN}-includes"
 
 function list_main(){
 	include_file test.sh
 	#typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep "^import$"
 	typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//"
+}
+function include_log(){
+	echo "$@" >> "${scrLogFQFN}-includes"
 }
 function include_file(){
 	local include_file=$(readlink -nf "$1")
