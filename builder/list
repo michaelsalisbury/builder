@@ -74,7 +74,8 @@ function include_variables_bash(){
 			source_variables=false
 		fi
 	done < <(sed "${include_file}"\
-			-e '/[[:space:]]*function[[:space:]]\+/,/^}/d'
+			-e '/^#/d'\
+			-e '/[[:space:]]*function[[:space:]]\+/,/^}/d'\
 			-e 's/[[:space:]]*//'\
 			-e '/.*read.*</s/.*read.*[[:space:]]\+\([a-Z0-9_]\+\)[[:space:]]\+<.*/\1/p'\
 			-e '/^declare/s/.*[[:space:]]\+\([a-Z0-9_]\+\)\($\|=.*\)/\1/p'\
@@ -111,6 +112,7 @@ function include_variables(){
 	done < <(include_function "${include_file}" global_variables |\
 		    sed -e '1d;$d'\
 			-e 's/[[:space:]]*//'\
+			-e '/^#/d'\
 			-e '/.*read.*</s/.*read.*[[:space:]]\+\([a-Z0-9_]\+\)[[:space:]]\+<.*/\1/p'\
 			-e '/^declare/s/.*[[:space:]]\+\([a-Z0-9_]\+\)\($\|=.*\)/\1/p'\
 			-e '/^IFS[a-Z0-9_]*=/d'\
