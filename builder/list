@@ -26,10 +26,10 @@ function include_log(){
 function include_file(){
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
-
+	# Verify that include file has not already been processed
 	if ${includes[${include_file}]:-false}; then
 		echo Include file \"${include_file}\" has already been processed. | include_log
-		continue
+		return 0
 	else
 		includes[${include_file}]=true
 	fi
@@ -37,25 +37,20 @@ function include_file(){
 		echo INCLUDE_BLDR :: ${include_file}
 		# Parse functions to be sourced to ensure no duplicates
 		include_functions "${include_file}"
-		
 		# Parse global variables
 		include_variables "${include_file}"	
- 
 		# Parse includes
 		include_dependencies "${include_file}"
-
 	elif sed "${include_file}" -e '1p;d' | grep -q "^#!/bin/bash"; then
 		echo INCLUDE_BASH :: ${include_file}
 		# Parse functions to be sourced to ensure no duplicates
 		include_functions "${include_file}"
-
 		# Parse global variables
 		include_variables_bash "${include_file}"	
 	else
 		echo INCLUDE_FILE :: ${include_file}
 		source "${include_file}"
 	fi
-
 }
 function include_variables_bash(){
 	local include_file=$(readlink -nf "$1")
