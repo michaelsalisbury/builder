@@ -31,7 +31,9 @@ function include_log(){
 			printf "\\${pipe_nibble# }"
 			cat
 		} | {
-			cat
+			cat | while read line; do
+				echo $line
+			done
 		} 
 	fi
 
