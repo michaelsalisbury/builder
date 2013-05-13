@@ -49,7 +49,7 @@ function include_variables(){
 
 
 	#done < <
-	include_function "${include_file}" global_variables | sed '1d;$d;s/[[:space:]]*//'
+	include_function "${include_file}" global_variables | sed '1d;$d;s/[[:space:]]*//;s/=.*//'
 
 }
 
