@@ -168,6 +168,7 @@ function include(){
 				     skip=( ${skip[*]/*/false} )
 		                     sed -i "1askip=\( ${skip[*]} \)" "$scriptFQFN"; }
 		
+		echo two
 		# Fix skip array larger than the number of functions
 		if ! (( ${#skip[*]} > `last_function` )); then 
 			for index in $(seq ${#skip[*]} `last_function`); do
@@ -176,10 +177,10 @@ function include(){
 			fixs		
 		fi
 
+		echo three
 		# Setup array to track sourced script
 		declare -A includes
 
-		echo two
 		# Include functions and global variables recursivelly
 		include_file "${scriptFQFN}"
 		return 0
