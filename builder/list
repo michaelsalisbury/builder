@@ -1,6 +1,7 @@
 #!/bin/bash
 
 declare -A includes
+declare scrLogFQFN="/var/log/builder
 
 function list_main(){
 	include_file test.sh
