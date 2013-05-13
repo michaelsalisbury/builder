@@ -42,9 +42,10 @@ function push_test(){
 	while read IP HOST OTHER; do
 		echo -n $IP
 		SSH_VERIFY_PASSWORD ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} && echo ::GOOD[$HOST]
-		SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/root/.ssh/id_rsa"
-		SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/home/localcosadmin/.ssh/id_rsa"
-		SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/home/localcosadmin/.ssh/id_rsa.2945star"
+		
+		#SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/root/.ssh/id_rsa"
+		#SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/home/localcosadmin/.ssh/id_rsa"
+		#SSH_COPY_ID         ${SSH_USERNAME} ${IP} ${SSH_PASSWORD} "/home/localcosadmin/.ssh/id_rsa.2945star"
 	
 	done < <(host_list)
 }
