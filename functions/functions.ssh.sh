@@ -72,8 +72,8 @@ function SSH_COPY_ID_VIA_SUDO(){
 		cat << SSH-BASH-CMDS | ssh ${SUDOUSER}@${IP} "/bin/bash < <(cat)"
 			whoami
 			#sudo cat /root/.ssh/authorized_keys
-			USERHOME=\$(awk -F: '/^${USERNAME}:/{printf $6}' /etc/passwd)
-			
+			USERHOME=\$(awk -F: '/^${USERNAME}:/{printf \$6}' /etc/passwd)
+			echo \$USERHOME
 SSH-BASH-CMDS
 
 
