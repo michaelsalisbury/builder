@@ -71,12 +71,14 @@ function SSH_COPY_ID_VIA_SUDO(){
 	elif ! HOST_NEEDS_SSHKEY ${SUDOUSER} ${IP}; then
 		cat << SSH-BASH-CMDS | ssh ${SUDOUSER}@${IP} "/bin/bash < <(cat)"
 			whoami
-			sudo cat /root/.ssh/authorized_keys
+			#sudo cat /root/.ssh/authorized_keys
+			USERHOME=\$(awk -F: '/^${USERNAME}:/{printf $6}' /etc/passwd)
+			
 SSH-BASH-CMDS
 
 
- "${KEY}" | ssh ${SUDOUSER}@${IP}\
-		"cat | /usr/bin/sudo tee -a \$(awk -F: '/^${USERNAME}:/{print $6}' /etc/passwd)/.ssh/authorized_keys"
+		#"${KEY}" | ssh ${SUDOUSER}@${IP}\
+		#"cat | /usr/bin/sudo tee -a \$(awk -F: '/^${USERNAME}:/{print $6}' /etc/passwd)/.ssh/authorized_keys"
 		# verify access
 		HOST_NEEDS_SSHKEY ${USERNAME} ${IP} ${KEY:+"${KEY}"}\
 			&& echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
