@@ -74,8 +74,6 @@ function SSH_COPY_ID_VIA_SUDO(){
 			echo '$(cat "${KEY}")' | /usr/bin/sudo tee -a "\${USERHOME}/.ssh/authorized_keys"
 		SSH-BASH-CMDS
 
-
-
 		#"${KEY}" | ssh ${SUDOUSER}@${IP}\
 		#"cat | /usr/bin/sudo tee -a \$(awk -F: '/^${USERNAME}:/{print $6}' /etc/passwd)/.ssh/authorized_keys"
 		# verify access
