@@ -10,9 +10,9 @@ source=http://10.173.119.78/scripts/system-setup/$scriptName
 function apt_amend_proxy(){
 	local proxyEntry="${1}"
 	local proxyConfig=$(egrep -l -R '^Acquire::http::Proxy ' /etc/apt |\
-				grep -v '.[0-9]\+.bk')
+				grep -v '.[0-9]\+.save')
 	if ! grep -q "${proxyEntry}" "${proxyConfig}"; then
-		sed "${proxyConfig}" -i.`date "+%s"`.bk\
+		sed "${proxyConfig}" -i.`date "+%s"`.save\
 		-e "/^Acquire::http::Proxy /a${proxyEntry}"
 	fi
 }
