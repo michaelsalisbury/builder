@@ -69,7 +69,13 @@ function SSH_COPY_ID_VIA_SUDO(){
 		echo ${USERNAME}_HAS_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
 	# if the host grants access via the default key run ssh-copy-id without expect
 	elif ! HOST_NEEDS_SSHKEY ${SUDOUSER} ${IP}; then
-		cat "${KEY}" | ssh ${SUDOUSER}@${IP}\
+		cat << SSH-BASH-CMDS | ssh ${SUDOUSER}@${IP} "/bin/bash < <(cat)"
+			whoami
+			sudo cat /root/.ssh/authorized_keys
+SSH-BASH-CMDS
+
+
+ "${KEY}" | ssh ${SUDOUSER}@${IP}\
 		"cat | /usr/bin/sudo tee -a \$(awk -F: '/^${USERNAME}:/{print $6}' /etc/passwd)/.ssh/authorized_keys"
 		# verify access
 		HOST_NEEDS_SSHKEY ${USERNAME} ${IP} ${KEY:+"${KEY}"}\
