@@ -73,10 +73,6 @@ function SSH_COPY_ID_VIA_SUDO(){
 			USERHOME=\$(awk -F: '/^${USERNAME}:/{printf \$6}' /etc/passwd)
 			echo '$(cat "${KEY}")' | /usr/bin/sudo tee -a "\${USERHOME}/.ssh/authorized_keys"
 		SSH-BASH-CMDS
-
-		#"${KEY}" | ssh ${SUDOUSER}@${IP}\
-		#"cat | /usr/bin/sudo tee -a \$(awk -F: '/^${USERNAME}:/{print $6}' /etc/passwd)/.ssh/authorized_keys"
-		# verify access
 		HOST_NEEDS_SSHKEY ${USERNAME} ${IP} ${KEY:+"${KEY}"}\
 			&& echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
 			|| echo ${USERNAME}_GRANTED_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
@@ -186,7 +182,7 @@ function GET_EXPECT_SSH_VERIFY_PASSWORD(){
 	local USERNAME=$1
 	local IP=$2
 	local PASSWORD=$3
-	cat << END-OF-EXPECT
+	cat <<-END-OF-EXPECT
 #!/usr/bin/expect -f
 set timeout -1
 spawn ssh -o NumberOfPasswordPrompts=1\
@@ -200,7 +196,7 @@ send -- "${PASSWORD}\r"
 expect eof
 catch wait result
 exit [lindex \$result 3]
-END-OF-EXPECT
+	END-OF-EXPECT
 #expect *
 #send -- "exit\r"
 }
@@ -209,7 +205,7 @@ function GET_EXPECT_SSH_COPY_ID(){
 	local IP=$2
 	local PASSWORD=$3
 	local KEY=${4:+"${4%.pub}.pub"}
-	cat << END-OF-EXPECT
+	cat <<-END-OF-EXPECT
 #!/usr/bin/expect -f
 set timeout -1
 spawn ssh-copy-id ${KEY:+-i ${KEY}} ${USERNAME}@${IP}
@@ -220,7 +216,7 @@ send -- "${PASSWORD}\r"
 expect eof
 catch wait result
 exit [lindex \$result 3]
-END-OF-EXPECT
+	END-OF-EXPECT
 }
 
 #main "$@"
