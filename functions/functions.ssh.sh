@@ -101,7 +101,7 @@ function SSH_COPY_ID(){
 		return 1
 	# verify that host needs the ssh key in the first place
 	elif ! HOST_NEEDS_SSHKEY ${USERNAME} ${IP} ${KEY:+"${KEY}"}; then
-		echo ${USERNAME}_HAS_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+		echo user[${USERNAME}] has access @[${IP}]${KEY:+_VIA_KEY_${KEY}}
 	# if the host grants access via the default key run ssh-copy-id without expect
 	elif ! HOST_NEEDS_SSHKEY ${USERNAME} ${IP}; then
 		ssh-copy-id ${KEY:+-i ${KEY}} ${USERNAME}@${IP} &> /dev/null\
