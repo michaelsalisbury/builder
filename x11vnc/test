@@ -2,7 +2,8 @@
 
 
 
-	cat <<-TEST | sed 's/^[[:space:]]*//'
+	#cat <<-TEST | sed 's/^[[:space:]]*//'
+	cat <<-TEST
 		one
 		two
 		three
