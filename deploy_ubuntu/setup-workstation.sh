@@ -596,7 +596,7 @@ function setup_Configure_SSH(){
 	desc SSH: disable GSSAPIAuth, UseDNS, ecdsa keys
 	# Disable GSSAPIAuthentication
         sed /etc/ssh/sshd_config -i \
-		-e '\|^[^#]*GSSAPIAuthentication[[:space:]]\+|s|^|#|'
+		-e '\|^[^#]*GSSAPIAuthentication[[:space:]]\+|s|^|#|'\
 		-e '$a\GSSAPIAuthentication no'
 	# Disable DNS verification
         sed /etc/ssh/sshd_config -i \
