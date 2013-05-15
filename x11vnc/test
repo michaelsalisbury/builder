@@ -6,5 +6,5 @@
 	cat <<-TEST
 		one	four
 			   two
-		three
+ 		three
 	TEST
