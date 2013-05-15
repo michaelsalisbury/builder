@@ -183,19 +183,19 @@ function GET_EXPECT_SSH_VERIFY_PASSWORD(){
 	local IP=$2
 	local PASSWORD=$3
 	cat <<-END-OF-EXPECT
-#!/usr/bin/expect -f
-set timeout -1
-spawn ssh -o NumberOfPasswordPrompts=1\
-          -o PubkeyAuthentication=no\
-          -o StrictHostKeyChecking=no\
-          ${USERNAME}@${IP} exit
-match_max 100000
-expect *
-expect  -exact "password: "
-send -- "${PASSWORD}\r"
-expect eof
-catch wait result
-exit [lindex \$result 3]
+		#!/usr/bin/expect -f
+		set timeout -1
+		spawn ssh -o NumberOfPasswordPrompts=1	\
+		          -o PubkeyAuthentication=no	\
+		          -o StrictHostKeyChecking=no	\
+		          ${USERNAME}@${IP} exit
+		match_max 100000
+		expect *
+		expect  -exact "password: "
+		send -- "${PASSWORD}\r"
+		expect eof
+		catch wait result
+		exit [lindex \$result 3]
 	END-OF-EXPECT
 #expect *
 #send -- "exit\r"
@@ -206,16 +206,16 @@ function GET_EXPECT_SSH_COPY_ID(){
 	local PASSWORD=$3
 	local KEY=${4:+"${4%.pub}.pub"}
 	cat <<-END-OF-EXPECT
-#!/usr/bin/expect -f
-set timeout -1
-spawn ssh-copy-id ${KEY:+-i ${KEY}} ${USERNAME}@${IP}
-match_max 100000
-expect *
-expect  -exact "password: "
-send -- "${PASSWORD}\r"
-expect eof
-catch wait result
-exit [lindex \$result 3]
+		#!/usr/bin/expect -f
+		set timeout -1
+		spawn ssh-copy-id ${KEY:+-i ${KEY}} ${USERNAME}@${IP}
+		match_max 100000
+		expect *
+		expect  -exact "password: "
+		send -- "${PASSWORD}\r"
+		expect eof
+		catch wait result
+		exit [lindex \$result 3]
 	END-OF-EXPECT
 }
 
