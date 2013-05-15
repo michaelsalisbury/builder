@@ -4,7 +4,7 @@
 
 	#cat <<-TEST | sed 's/^[[:space:]]*//'
 	cat <<-TEST
-		one
+		one	four
 		two
 		three
 	TEST
