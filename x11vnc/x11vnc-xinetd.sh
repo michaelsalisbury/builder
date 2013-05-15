@@ -188,6 +188,7 @@ function ERROR_MSG(){
 		--title=\"Remote user attempting connection: ALLERT\"
 		--text=\"${dlgTEXT}\"
 	)
+	#su ${username} -s /bin/bash -c "DISPLAY=:0 zenity ${dlgOPTS[*]}"
 	cat <<-END-OF-SU | su -s /bin/bash ${username}
 			DISPLAY=:0 zenity ${dlgOPTS[*]}
 	END-OF-SU
