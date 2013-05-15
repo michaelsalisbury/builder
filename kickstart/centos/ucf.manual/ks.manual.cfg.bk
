@@ -1,0 +1,199 @@
+#platform=x86, AMD64, or Intel EM64T
+# System authorization information
+auth  --useshadow  --enablemd5 
+# System bootloader configuration
+#bootloader --location=mbr
+# Clear the Master Boot Record
+#zerombr
+# Partition clearing information
+#clearpart --all --initlabel
+
+ 
+# Use text mode install
+#text
+# Use automatics install no prompts
+interactive
+# Firewall configuration
+firewall --disabled
+# Run the Setup Agent on first boot
+#firstboot --disable
+# System keyboard
+keyboard us
+# System language
+lang en_US
+# Installation logging level
+logging --level=info
+# Use CDROM installation media
+#cdrom
+# Use NFS installation
+#nfs --server=192.168.0.1 --dir=/export/images/CentOS-6.0-x86_64-bin-DVD
+url --url=http://mirror.centos.org/centos/6.4/os/x86_64/
+
+# Network information
+network --bootproto=dhcp --device=eth0 --onboot=on --hostname=rename-me.cos.ucf.edu
+
+# Reboot after installation
+reboot
+#Root password
+rootpw --iscrypted $6$u9Ky7T5R$I/gY3f04Y.e1BTbUBEOdR6bm0Wd4Y9xiVAlmbnP3bKqEVmwSS4AVmpXIljixosmAIWZ/9KlKsnxVd4S7MPtAk0
+
+# SELinux configuration
+selinux --disabled
+# System timezone
+timezone America/New_York
+# Install OS instead of upgrade
+install
+# X Window System configuration information
+#xconfig  --defaultdesktop=GNOME --depth=24 --resolution=1024x768 --startxonboot
+xconfig  --defaultdesktop=GNOME --startxonboot
+#skipx
+
+%packages 
+#@ core
+@ Additional Development
+#@ Backup Client
+#@ Backup Server
+@ Base
+#@ base: dal.tx.us.glomirror.com.au
+@ CIFS file server
+@ Client management tools
+@ Compatibility libraries
+@ Console internet tools
+@ Debugging Tools
+@ Desktop
+#@ Desktop Debugging and Performance Tools
+@ Desktop Platform
+#@ Desktop Platform Development
+@ Development tools
+#@ Dial-up Networking Support
+#@ Directory Client
+#@ Directory Server
+@ Eclipse
+@ Educational Software
+#@ Electronic Lab
+@ Emacs
+@ E-mail server
+#@ epel: ftp.linux.ncsu.edu
+#@ extras: mirrors.seas.harvard.edu
+#@ FCoE Storage Client
+#@ Fedora Packager
+@ Fonts
+#@ FTP server
+@ General Purpose Desktop
+@ Graphical Administration Tools
+@ Graphics Creation Tools
+@ Hardware monitoring utilities
+#@ Haskell
+#@ High Availability
+#@ High Availability Management
+#@ Identity Management Server
+#@ Infiniband Support
+#@ Input Methods
+@ Internet Applications
+@ Internet Browser
+@ iSCSI Storage Client
+@ Java Platform
+#@ KDE Desktop
+#@ Large Systems Performance
+@ Legacy UNIX compatibility
+#@ Legacy X Window System compatibility
+#@ Load Balancer
+#@ Mainframe Access
+#@ Messaging Client Support
+#@ Milkymist
+#@ MySQL Database client
+#@ MySQL Database server
+@ Network file system client
+#@ Network Infrastructure Server
+@ Networking Tools
+@ Network Storage Server
+@ NFS file server
+@ Office Suite and Productivity
+@ Performance Tools
+@ Perl Support
+#@ PHP Support
+#@ PostgreSQL Database client
+#@ PostgreSQL Database server
+@ Printing client
+#@ Print Server
+@ Remote Desktop Clients
+#@ Resilient Storage
+#@ Ruby Support
+@ Scalable Filesystems
+@ Scientific support
+@ Security Tools
+@ Server Platform
+#@ Server Platform Development
+#@ Smart card support
+#@ SNMP Support
+@ Storage Availability Tools
+@ System administration tools
+@ System Management
+#@ Systems Management Messaging Server support
+@ Technical Writing
+@ TeX support
+#@ TurboGears application framework
+#@ updates: bay.uchicago.edu
+#@ Virtualization
+#@ Virtualization Client
+#@ Virtualization Platform
+#@ Virtualization Tools
+@ Web-Based Enterprise Management
+#@ Webmin: download.webmin.com
+#@ Web Server
+#@ Web Servlet Engine
+#@ Xfce
+@ X Window System
+
+kernel-devel
+vim
+rsync
+ntp
+pciutils
+#zlib
+#zlib-devel
+#sqlite-devel
+#java-1.6.0-openjdk
+#openssl
+#openssl-devel
+#glibc.i686
+wget
+acpid
+
+%post --interpreter=/bin/bash
+#########################################################################################################
+################################################################################# /root/.vimrc
+cat << EOF >> /root/.vimrc
+:set nowrap!
+:map <F2> :set nowrap! <CR>
+EOF
+
+#########################################################################################################
+################################################################################# /root/.vimrc
+cat << EOF >> /root/.vimrc
+:set nowrap!
+:map <F2> :set nowrap! <CR>
+EOF
+
+#########################################################################################################
+################################################################################# /root/.ssh
+mkdir         /root/.ssh
+chmod 755     /root/.ssh
+cat << EOF >> /root/.ssh/authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDy8m0fTN3inhUv41Cisv0d02eWDW35qlAn/V6Jy0rHpOCQORfIdlz2fDfv54ww1Mt+dTN8V5o8Ycr2aIIhBBlxofKh9yappXmNoJlIAIXOiEmKgFAQ6QUSQrAgecH1Mwgfp60IrYROYh7xMo+kV1Dp8vbMr5Bl+FJZ/x9AabBiYUifT4xGZ8y/p7DacHK+5nw1pThKNv/DM3/smfDYIk+IU0NYZYGfGOe7laFeHxa+7czKF5rxUrDjtkrrtj3EeJdyjolHAAYfR+HUE9tidX1UtgMTPk9fpm+bVnAVCqNEozfX4L6yCJpi+8rPVhh6K2bQCDdPTFBfenBvjsES1Oan localcosadmin@cf-147728
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDoXyP/pe7u2SZ7gp+CeJb7Jv8ctj3IbaiuhywEtL2C96AesosYJDdnuQ9fFHyDR7vNQ6Sl8LMyDNeahiHG91HZgeoTaPUaye5XGY2sZIj4dIB+ubDa0GSyTFdWvCK6U2f/jxKiON9hqC9cgV3YDOjc/fn5Gqpgb6mkTOT7oRrGhHUcxPrEfG0tUWNFl678GEjRwulO6L9MnZQKZfBZ4pZhdmKbloDdmiznvU6NjGjSGr6oAp7lHg12orfM7soqCJyYaj+vbrsNnDjIwJis6h6KWgbrD9z90b1WZkpnJ6L+/T9xFBELZNvQDoYblf6oaaJPrJjYngPGDaNwAjOaHFgR root@cf-147728
+EOF
+chmod 600     /root/.ssh/authorized_keys
+
+#########################################################################################################
+################################################################################# /var/spool/cron/root
+cat << EOF >> /var/spool/cron/root
+00 05 * * 0 yum -y -v update > /var/log/yum.sunday
+00 05 * * 1 yum -y -v update > /var/log/yum.monday
+00 05 * * 2 yum -y -v update > /var/log/yum.tuesday
+00 05 * * 3 yum -y -v update > /var/log/yum.wednesday
+00 05 * * 4 yum -y -v update > /var/log/yum.thursday
+00 05 * * 5 yum -y -v update > /var/log/yum.friday
+00 05 * * 6 yum -y -v update > /var/log/yum.saturday
+EOF
+
