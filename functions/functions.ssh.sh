@@ -148,10 +148,10 @@ function GET_HOST_ENTRY(){
 		echo -n ""
 	fi
 }
-function IP_IS_UP(){
-	ping -W 2 -c 1 $1 &> /dev/null	\
-		&& return 0		\
-		|| return 1
+function IP_IS_UP(){ ping -A -w 3 -c 20 $1 &> /dev/null
+	#ping -W 2 -c 1 $1 &> /dev/null	\
+	#	&& return 0		\
+	#	|| return 1
 }
 function GET_HOSTNAME_SIMPLE(){
 	local IP=$1
