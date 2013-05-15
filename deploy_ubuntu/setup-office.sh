@@ -18,7 +18,7 @@ function main(){
 			list_users
 			echo -----------------------------------------------------
 			echo 10 seconds to cancel\; press ctrl-c
-			for i in {10..1}; do echo -n $i..; sleep 1; done	
+			#for i in {10..1}; do echo -n $i..; sleep 1; done	
 			echo -----------------------------------------------------
 			echo
 			for user in `list_users`; do
