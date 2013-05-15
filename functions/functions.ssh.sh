@@ -100,21 +100,21 @@ function SSH_COPY_ID(){
 		return 1
 	# verify that host needs the ssh key in the first place
 	elif ! HOST_NEEDS_SSHKEY ${USERNAME} ${IP} ${KEY:+"${KEY}"}; then
-		echo user[${USERNAME}] has access @[${IP}]${KEY:+_VIA_KEY_${KEY}}
+		echo SUCCESS :: user[${USERNAME}] has access @[${IP}] ${KEY:+ w-key[${KEY}]}
 	# if the host grants access via the default key run ssh-copy-id without expect
 	elif ! HOST_NEEDS_SSHKEY ${USERNAME} ${IP}; then
 		ssh-copy-id ${KEY:+-i ${KEY}} ${USERNAME}@${IP} &> /dev/null\
-			&& echo ${USERNAME}_GRANTED_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
-			|| echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+                        && echo _ERROR_ :: ${FUNCNAME} :: failed adding key${KEY:+w-key[${KEY}]} for user[${USERNAME}]@[${IP}]\
+                        || echo SUCCESS :: user[${USERNAME}] granted access @[${IP}] ${KEY:+ w-key[${KEY}]}
 	# verify ssh username and password before running expect script
 	elif ! SSH_VERIFY_PASSWORD ${USERNAME} ${IP} ${PASSWORD}; then
-		echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+		echo _ERROR_ :: ${FUNCNAME} :: user[${USERNAME}] failed password access @[${IP}]
 		return 1
 	# copy ssh key via expect script
 	else
 		expect <(GET_EXPECT_SSH_COPY_ID ${USERNAME} ${IP} ${PASSWORD} ${KEY}) &> /dev/null\
-			&& echo ${USERNAME}_GRANTED_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
-			|| echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+                        && echo SUCCESS :: user[${USERNAME}] granted access @[${IP}] ${KEY:+ w-key[${KEY}]}\
+                        || echo _ERROR_ :: ${FUNCNAME} :: failed adding key${KEY:+w-key[${KEY}]} for user[${USERNAME}]@[${IP}]
 	fi
 } 
 function SSH_VERIFY_PASSWORD(){
