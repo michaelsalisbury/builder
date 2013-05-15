@@ -3,8 +3,8 @@
 
 
 	#cat <<-TEST | sed 's/^[[:space:]]*//'
-	cat << TEST
+	cat <<-TEST
 		one	four
 			   two
  		three
-TEST
+	TEST
