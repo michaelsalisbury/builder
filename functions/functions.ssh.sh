@@ -58,15 +58,15 @@ function SSH_COPY_ID_VIA_SUDO(){
 	# verify that KEY file exists
 	if [ ! -f "${KEY}" ]; then
 		echo key \"${KEY}\" missing\!\! 1>&2
-		echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+		echo _ERROR_ :: ${FUNCNAME} :: missing key${KEY:+[${KEY}]} for user[${USERNAME}] to [${IP}]
 		return 1
 	# verify that host is up via echo responce
 	elif ! IP_IS_UP ${IP}; then
-		echo "${IP}_DOWN"
+		echo _ERROR_ :: [${IP}] DOWN
 		return 1
 	# verify that host needs the ssh key in the first place
 	elif ! HOST_NEEDS_SSHKEY ${USERNAME} ${IP} ${KEY:+"${KEY}"}; then
-		echo SUCCESS::user[${USERNAME}] has access @[${IP}] ${KEY:+ w-key[${KEY}]}
+		echo SUCCESS :: user[${USERNAME}] has access @[${IP}] ${KEY:+ w-key[${KEY}]}
 	# if the host grants access via the default key run ssh-copy-id without expect
 	elif ! HOST_NEEDS_SSHKEY ${SUDOUSER} ${IP}; then
 		cat <<-SSH-BASH-CMDS | ssh ${SUDOUSER}@${IP} "/bin/bash < <(cat)"
@@ -74,12 +74,11 @@ function SSH_COPY_ID_VIA_SUDO(){
 			echo '$(cat "${KEY}")' | /usr/bin/sudo tee -a "\${USERHOME}/.ssh/authorized_keys"
 		SSH-BASH-CMDS
 		HOST_NEEDS_SSHKEY ${USERNAME} ${IP} ${KEY:+"${KEY}"}\
-			&& echo _ERROR_::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}\
-			|| echo ${USERNAME}_GRANTED_ACCESS_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+			&& echo _ERROR_ :: ${FUNCNAME} :: failed adding key${KEY:+w-key[${KEY}]} for user[${USERNAME}]@[${IP}]\
+			|| echo SUCCESS :: user[${USERNAME}] granted access @[${IP}] ${KEY:+ w-key[${KEY}]}
 	# if the host requires a password for access via the SUDOUSER then verify password
 	elif ! SSH_VERIFY_PASSWORD ${SUDOUSER} ${IP} ${PASSWORD}; then
-		echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}_VIA_PASSWORD
-	# if host sudo user :
+		echo _ERROR_ :: ${FUNCNAME} :: user[${USERNAME}] failed password access @[${IP}]
 	else
 		echo
 	fi
@@ -93,7 +92,7 @@ function SSH_COPY_ID(){
 	# verify that KEY file exists
 	if [ ! -f "${KEY}" ]; then
 		echo key \"${KEY}\" missing\!\! 1>&2
-		echo ERROR::${FUNCNAME}::FOR_${USERNAME}_TO_${IP}${KEY:+_VIA_KEY_${KEY}}
+		echo _ERROR_ :: ${FUNCNAME} :: missing key${KEY:+[${KEY}]} for user[${USERNAME}] to [${IP}]
 		return 1
 	# verify that host is up via echo responce
 	elif ! IP_IS_UP ${IP}; then
