@@ -2,9 +2,6 @@
 #https://wiki.archlinux.org/index.php/X11vnc
 DISPLAY_FILE=".vnc/displays"
 DESKTOPS='gnome twm ice fluxbox xfce4'
-CONFIG_FOLDER=$(readlink -nf "${BASH_SOURCE}")
-CONFIG_FOLDER=$(dirname "${CONFIG_FOLDER}")
-source "${CONFIG_FOLDER}/Xcommon-functions.sh"
 LOG=/var/log/Xvnc-dynamic
 touch     "${LOG}"
 chmod 777 "${LOG}"
@@ -24,8 +21,13 @@ function main(){
 	local usrHOME=`GET_USER_HOMEDIR ${srcUSER}`
 
 	# test if connecting user was not on the allowed_users array list
-	IS_USER_ALLOWED ${srcUSER} ${vncPORT} "$@" || exit 1
-	IS_USER_ADMIN   ${srcUSER} && echo ACCESS :: User is Admin
+	if ! GET_ALLOWED_USERS "$@" | grep -q "^${srcUSER}$"; then
+		echo EXITING\!\!\! User \"${srcUSER}\" tried to\
+			VNC via $'('127.0.0.1:${vncPORT}$')'.
+	else
+		echo "$@"              | xargs echo OPTARG :: 
+		GET_ALLOWED_USERS "$@" | xargs echo ACCESS ::
+	fi
 
 	# load last known display port details (bewaire; these will be global)
 	DISPLAY_READ_KEYS ${srcUSER} ${vncPORT}
@@ -86,6 +88,49 @@ function NETCAT(){
 	cat | /usr/bin/nc 127.0.0.1 ${rfbport} &
 	echo NETCAT :: sshTunnel PID :: $! >> "${LOG}"
 }
+function GET_ALLOWED_USERS(){
+	local entry=""
+	local usernames=""
+	local config_folder=$(readlink -nf "${BASH_SOURCE}")
+	local config_folder=$(dirname "${config_folder}")
+	#echo _TEST_ :: ${config_folder} >> "${LOG}"
+	for entry in "$@"; do
+		if [ -f "${entry}" ]; then
+			#echo _TEST_ :: is file >> "${LOG}"
+			while read -a usernames; do
+				PARSE_USERNAME "${usernames[*]}"
+			done < <(cat "${entry}")
+		elif [ -f "${config_folder}/${entry}" ]; then
+			#echo _TEST_ :: is relative >> "${LOG}"
+			while read -a usernames; do
+				PARSE_USERNAME "${usernames[*]}"
+			done < <(cat "${config_folder}/${entry}")
+		else
+			#echo _TEST_ :: is name >> "${LOG}"
+			PARSE_USERNAME ${entry}
+		fi
+	done
+}
+function PARSE_USERNAME(){
+	local username=""
+	#echo _TEST_ :: PARSE - "$@" >> "${LOG}"
+	for username in "$@"; do
+		# if name is a username then add to list
+		grep -q "^${username}:" /etc/passwd &> /dev/null && echo ${username}
+		# parse groups for match and list users	
+		cat <<-AWK | awk -F: -f <(cat) /etc/group
+			\$1=="${username}" {
+				gsub(" ","",\$4)	# remove all whitespace
+				sub(/^,*/,"",\$4)	# remove leading commas
+				sub(/,*\$/,"",\$4)	# remove trailing commas
+				gsub(",","\n",\$4)	# sub commas for newlines
+				if(\$4=="")exit		# exit if no users in group
+				print \$4
+				exit
+			}
+		AWK
+	done
+}
 function DISPLAY_NEW(){
 	local username="$1"
 	local homedir=$(GET_USER_HOMEDIR "${username}")
@@ -94,6 +139,10 @@ function DISPLAY_NEW(){
 		touch     "${displays}"
 		chmod 600 "${displays}"
 	SU
+}
+function GET_USER_HOMEDIR(){
+	local username="$1"
+	awk -F: -v USER=${username} '$1==USER{printf $6}' /etc/passwd
 }
 function DISPLAY_NEW_PORT(){
 	local username="$1"
@@ -197,6 +246,64 @@ function DISPLAY_WRITE_KEY(){
 			}
 		SED
 	fi
+}
+
+
+function GET_PROC_SOCKETS(){
+	local process=$1
+	local ocket='\([0-9\.\*]\+:[0-9\*]\+\)'	# sed socket filter
+	local p='[[:space:]]\+'			# sed white space key
+	cat <<-SED | sed -n -f <(cat) <(ss -np)
+		/,${process},/{
+			s/.*$p$ocket$p$ocket$p.*/\1 \2/
+			p
+		}
+	SED
+	#ss -np | sed -n "/,${process},/s/.*$p$ocket$p$ocket$p.*/\1 \2/p"
+}
+function GET_PROC_DST_IP(){
+	local process=$1
+	local -a sockets=( `GET_PROC_SOCKETS ${process}` )
+	echo ${sockets[0]%:*}
+}
+function GET_PROC_SRC_IP(){
+	local process=$1
+	local -a sockets=( `GET_PROC_SOCKETS ${process}` )
+	echo ${sockets[1]%:*}
+}
+function GET_PROC_DST_PORT(){
+	local process=$1
+	local -a sockets=( `GET_PROC_SOCKETS ${process}` )
+	echo ${sockets[0]#*:}
+}
+function GET_PROC_SRC_PORT(){
+	local process=$1
+	local -a sockets=( `GET_PROC_SOCKETS ${process}` )
+	echo ${sockets[1]#*:}
+}
+function GET_PROC_SRC_PID(){
+	local process=$1
+	local g='[[:graph:]]'			# sed graph key
+	local p='[[:space:]]'			# sed white space key
+	local -a sockets=( `GET_PROC_SOCKETS ${process}` )
+	cat <<-SED | sed -n -f <(cat) <(ss -n -p src ${sockets[1]})
+		s/.*${p}\+users:(("${g}\+",\([0-9]*\),.*/\1/p
+	SED
+}
+function GET_PROC_SRC_UID(){
+	local process=$1
+	local srcPID=$(GET_PROC_SRC_PID ${process})
+	ps --no-heading -o uid -p ${srcPID}
+}
+function GET_PROC_SRC_USER(){
+	local process=$1
+	local srcPID=$(GET_PROC_SRC_PID ${process})
+	ps --no-heading -o user -p ${srcPID}
+}
+function GET_PROC_SRC_PPID(){
+	local process=$1
+	local srcPID=$(GET_PROC_SRC_PID ${process})
+	ps --no-heading -o ppid -p ${srcPID}
 }
 function IS_DISPLAY_OPEN(){
 	local username=$1

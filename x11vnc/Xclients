@@ -1,0 +1,81 @@
+#!/bin/bash
+LOG=/var/log/Xvnc-dynamic
+
+function main(){
+	local BASH_SOURCE=$(readlink -nf "${BASH_SOURCE}")
+
+	# restore user .Xclients file backups up as .Xclients.user
+	if [ !   -f "${BASH_SOURCE}.user" ]; then
+	      rm -f "${BASH_SOURCE}"
+	elif ! diff "${BASH_SOURCE}.user" "${BASH_SOURCE}" &> /dev/null; then
+	      cp -f "${BASH_SOURCE}.user" "${BASH_SOURCE}"	
+	fi
+
+	# get desktop session paths
+	local GSESSION="$(which gnome-session 2>/dev/null)"
+	local STARTKDE="$(which startkde      2>/dev/null)"
+	local      TWM="$(which twm           2>/dev/null)"
+	local    ICEWM="$(which icewm-session 2>/dev/null)"
+	local  FLUXBOX="$(which fluxbox       2>/dev/null)"
+	local    XFCE4="$(which xfce4-session 2>/dev/null)"
+
+	# launch a standard desktop if this .Xclients file is accidentally in place
+	# and a non VNC session is started
+	if [ -z "${VNCDESKTOP}" ]; then
+		# launch default desktop
+		exec "${GSESSION}"
+		return 0
+	fi
+
+	# simply send some data to the LOG 
+	local vncPID=`gvncPID`
+	local sockets=(`gSockets`)
+	local rfbport=${sockets[0]#*:}
+	local desktop=$(gxstartup)
+
+	echo XCLIENTS :: Starting Desktop                  >> "${LOG}"
+	echo XCLIENTS :: \ vncPID :: ${vncPID}             >> "${LOG}"
+	echo XCLIENTS ::  rfbport :: ${rfbport}            >> "${LOG}"
+	echo XCLIENTS ::  desktop :: ${desktop}            >> "${LOG}"
+	echo --------------------------------------------- >> "${LOG}"
+	#env                                                >> "${LOG}"
+	#echo --------------------------------------------- >> "${LOG}"
+	echo                                               >> "${LOG}"
+	#desktop=twm
+	case ${desktop} in
+		gnome)		exec "${GSESSION}";;
+
+		xfce4)		exec "${XFCE4}";;
+
+		ice)		[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+				xsetroot -solid grey
+				exec "${ICEWM}";;
+
+		fluxbox)	[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+				xsetroot -solid grey
+				exec "${FLUXBOX}";;
+
+		twm)		[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+				xsetroot -solid grey
+				xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
+				exec "${TWM}";;
+	esac
+}
+function gvncPID(){
+	cat "${HOME}/.vnc/"*"${DISPLAY}.pid"
+}
+function gSockets(){
+	local ocket='\([0-9\.\*]\+:[0-9\*]\+\)'	# sed socket filter
+	local p='[[:space:]]\+'			# sed white space key
+	local vncPID=`gvncPID`
+	ss -atlnp |\
+	sed -n "/,${vncPID},/s/.*$p$ocket$p$ocket$p.*/\1 \2/p"
+}
+function gxstartup(){
+	local sockets=(`gSockets`)
+	local rfbport=${sockets[0]#*:}
+	cat   "${HOME}/.vnc/xstartup.${rfbport}"
+	rm -f "${HOME}/.vnc/xstartup.${rfbport}"
+}
+main "$@"
+

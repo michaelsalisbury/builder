@@ -24,8 +24,13 @@ function main(){
 	local usrHOME=`GET_USER_HOMEDIR ${srcUSER}`
 
 	# test if connecting user was not on the allowed_users array list
-	IS_USER_ALLOWED ${srcUSER} ${vncPORT} "$@" || exit 1
-	IS_USER_ADMIN   ${srcUSER} && echo ACCESS :: User is Admin
+	if ! GET_ALLOWED_USERS "$@" | grep -q "^${srcUSER}$"; then
+		echo EXITING\!\!\! User \"${srcUSER}\" tried to\
+			VNC via $'('127.0.0.1:${vncPORT}$')'.
+	else
+		echo "$@"              | xargs echo OPTARG :: 
+		GET_ALLOWED_USERS "$@" | xargs echo ACCESS ::
+	fi
 
 	# load last known display port details (bewaire; these will be global)
 	DISPLAY_READ_KEYS ${srcUSER} ${vncPORT}

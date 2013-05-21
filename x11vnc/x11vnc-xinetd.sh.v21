@@ -142,13 +142,10 @@ function ERROR_MSG(){
 		--title=\"Remote user attempting connection: ALLERT\"
 		--text=\"${dlgTEXT}\"
 	)
-	#cat <<-END-OF-SU | su ${username} -s /bin/bash -l
-	#	cat <<-END-OF-BASH | bash
-	#		DISPLAY=:0 zenity ${dlgOPTS[*]}
-	#	END-OF-BASH
-	#END-OF-SU
-	cat <<-END-OF-SU | su ${username} -s /bin/bash -l
-		DISPLAY=:0 zenity ${dlgOPTS[*]}
+	cat <<-END-OF-SU | su ${username} 
+		cat <<-END-OF-BASH | bash
+			DISPLAY=:0 zenity ${dlgOPTS[*]}
+		END-OF-BASH
 	END-OF-SU
 	echo ERROR_MSG :: returned $? :: ${dlgTEXT}
 }

@@ -1,6 +1,6 @@
-service x11vnc-5899
+service x11vnc
 {
-        disable = no
+	disable = no
 	type			= UNLISTED
         port                    = 5899
 	bind			= 127.0.0.1
@@ -10,5 +10,5 @@ service x11vnc-5899
         user                    = root
         passenv                 = PATH
         server			= /etc/x11vnc/x11vnc-xinetd.sh
-	server_args		= root localcosadmin nmr
+	server_args		= nmr localcosadmin
 }

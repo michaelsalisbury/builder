@@ -1,0 +1,61 @@
+function SET_FREE_LISTENING_PORT(){
+	local username=$1
+	local vncPORT=$2
+	rfbport=$(
+		cat <<-PYTHON | python <(cat)
+			import socket
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.bind(("127.0.0.1", 0))
+			s.listen(1)
+			ipaddr, port = s.getsockname()
+			print port
+		PYTHON
+	)
+	echo CONFIG :: set free rfbport ${rfbport}
+	# write new port number to displays file   
+	DISPLAY_WRITE_KEY ${username} ${vncPORT} rfbport
+}
+function VERIFY_GLOBAL_DESKTOP(){
+	local username=$1
+	local vncPORT=$2
+	case "${desktop}" in
+		gnome)	;;
+		twm)	;;
+		ice)	;;
+		*)	echo FIXING :: desktop selection from ${desktop:-MISSING}
+			desktop='gnome'
+			DISPLAY_WRITE_KEY ${username} ${vncPORT} desktop;;
+	esac
+}
+function VERIFY_GLOBEL_RESOLUTION(){
+	local username=$1
+	local vncPORT=$2
+	if ! [[ "${resolution}" =~ ^[0-9]+x[0-9]+$ ]]; then
+		echo FIXING :: resolution format from ${resolution:-MISSING}
+		resolution='1024x768'
+		DISPLAY_WRITE_KEY ${username} ${vncPORT} resolution
+	else
+		local horz=${resolution%x*}
+		local vert=${resolution#*x}
+		local write_key=false
+		(( horz < 640 ))  && horz=640  && write_key=true
+		(( horz > 2048 )) && horz=2048 && write_key=true
+		(( vert < 480 ))  && vert=480  && write_key=true
+		(( vert > 2048 )) && vert=2048 && write_key=true
+		if ${write_key}; then
+			echo FIXING :: resolution range from ${resolution:-MISSING}
+			resolution="${horz}x${vert}"
+			DISPLAY_WRITE_KEY ${username} ${vncPORT} resolution
+		fi
+	fi
+}
+function VERIFY_GLOBAL_DEPTH(){
+	local username=$1
+	local vncPORT=$2
+	if [[ "${depth}" =~ ^[0-9]*$ ]] &&\
+	   (( depth != 8 && depth != 16 && depth != 24 )); then
+		echo FIXING :: depth from ${depth:-MISSING}
+		depth=16
+		DISPLAY_WRITE_KEY ${username} ${vncPORT} depth
+	fi
+}
