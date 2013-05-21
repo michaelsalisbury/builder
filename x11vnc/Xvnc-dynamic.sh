@@ -1,7 +1,7 @@
 #!/bin/bash
 #https://wiki.archlinux.org/index.php/X11vnc
 DISPLAY_FILE=".vnc/displays"
-DESKTOPS='gnome twm ice fluxbox xfce4'
+DESKTOPS='gnome twm ice fluxbox xfce4 kde'
 CONFIG_FOLDER=$(readlink -nf "${BASH_SOURCE}")
 CONFIG_FOLDER=$(dirname "${CONFIG_FOLDER}")
 source "${CONFIG_FOLDER}/Xcommon-functions.sh"
