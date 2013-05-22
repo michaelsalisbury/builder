@@ -25,6 +25,7 @@ function push_main(){
 	desc main
 	cd "${scriptPath}"
 	# create tgz
+	rm     -f "${push_packagename}.tgz" 
 	tar -zcvf "${push_packagename}.tgz" *
 
 	# folder list to copy package to
