@@ -28,11 +28,14 @@ function push_main(){
 	rm     -f "${push_packagename}.tgz" 
 	tar -zcvf "${push_packagename}.tgz"	\
 		tigervnc*			\
-		xstartup			\
-		Xvnc-dynamic.sh			\
-		Xcommon-functions.sh		\
+		install.*			\
+		allowed.*			\
 		vncserver			\
 		x11vnc				\
+		Xcommon-functions.sh		\
+		x11vnc.sh			\
+		Xvnc-dynamic.sh			\
+		xstartup
 		
 
 	# folder list to copy package to
