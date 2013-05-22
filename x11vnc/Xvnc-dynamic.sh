@@ -55,15 +55,11 @@ function main(){
 		SET_xstartup ${srcUSER}
 		# Setup VNCDESKTOP environmental variable
 		SET_VNCDESKTOP ${srcUSER} ${vncPORT} ${rfbport} ${desktop}
-		# remove autokill option for Red Hat machines
-		grep -q "Red Hat" /etc/redhat-release \
-			&& local autokill=""\
-			|| local autokill='-autokill'
 		# setup vncserver display port
 		cat <<-END-OF-VNCSERVER-SETUP | su ${srcUSER} -s /bin/bash
 			cd "${usrHOME}"
 			/usr/bin/vncserver		\
-				${autokill}		\
+				-autokill		\
 				-SecurityTypes None	\
 				-localhost		\
 				-httpPort 0		\
