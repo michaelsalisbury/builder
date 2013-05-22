@@ -116,9 +116,11 @@ function DISPLAY_READ_KEYS(){
 	local vncPORT="$2"
 	local homedir=$(GET_USER_HOMEDIR "${username}")
 	local displays="${homedir}/${DISPLAY_FILE}"
+	local vncfolder=$(dirname "${displays}")
 	# setup missing ~/.vnc folder
-	[ -d 
-
+	[ -d "${vncfolder}" ] || cat <<-SU | su ${username} -l -s /bin/bash\
+						mkdir -p "${vncfolder}"
+					SU
 	# setup file if missing
 	[ -f "${displays}" ] || DISPLAY_SETUP_DEFAULTS ${username} ${vncPORT}
 	# if port entry is missing 
