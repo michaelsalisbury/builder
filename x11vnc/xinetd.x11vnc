@@ -10,5 +10,5 @@ service x11vnc
         user                    = root
         passenv                 = PATH
         server			= /etc/x11vnc/x11vnc.sh
-	server_args		= nmr localcosadmin
+	server_args		= allowed.x11vnc
 }
