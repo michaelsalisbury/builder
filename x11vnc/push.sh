@@ -26,7 +26,8 @@ function push_main(){
 	cd "${scriptPath}"
 	# create tgz
 	rm     -f "${push_packagename}.tgz" 
-	tar -zcvf "${push_packagename}.tgz" *
+	tar -zcvf "${push_packagename}.tgz" \
+		
 
 	# folder list to copy package to
 	while read path; do
