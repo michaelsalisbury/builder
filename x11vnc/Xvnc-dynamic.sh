@@ -40,6 +40,7 @@ function main(){
 	# verify that depth is only values of 8, 16 & 24 (15 has font problems)
 	VERIFY_GLOBAL_DEPTH ${srcUSER} ${vncPORT}
 
+
 	# echo vncserver setup details
 	echo GLOBAL :: ________________________
         echo GLOBAL :: resolution :: ${resolution}
@@ -48,10 +49,12 @@ function main(){
 
 	# test to see if display is still open 
 	if ! IS_DISPLAY_OPEN ${srcUSER} ${vncPID} ${vncDisplay}; then
-		# generate randome port number to create vncserver display
+		# generate randome port number to create vncserver display: rfbport
 		SET_FREE_LISTENING_PORT ${srcUSER} ${vncPORT}
 		# write xstartup file
 		SET_xstartup ${srcUSER}
+		# Setup VNCDESKTOP environmental variable
+		SET_VNCDESKTOP ${srcUSER} ${vncPORT} ${rfbport} ${desktop}
 		# setup vncserver display port
 		cat <<-END-OF-VNCSERVER-SETUP | su ${srcUSER} -s /bin/bash
 			cd "${usrHOME}"
@@ -63,7 +66,8 @@ function main(){
 				-nolisten tcp		\
 				-geometry ${resolution}	\
 				-depth ${depth}		\
-				-rfbport ${rfbport} 2>&1
+				-rfbport ${rfbport}	\
+				-name "${VNCDESKTOP}" 2>&1
 		END-OF-VNCSERVER-SETUP
 				#-NeverShared		\
 
@@ -112,6 +116,9 @@ function DISPLAY_READ_KEYS(){
 	local vncPORT="$2"
 	local homedir=$(GET_USER_HOMEDIR "${username}")
 	local displays="${homedir}/${DISPLAY_FILE}"
+	# setup missing ~/.vnc folder
+	[ -d 
+
 	# setup file if missing
 	[ -f "${displays}" ] || DISPLAY_SETUP_DEFAULTS ${username} ${vncPORT}
 	# if port entry is missing 
@@ -306,6 +313,18 @@ function SET_FREE_LISTENING_PORT(){
 	echo CONFIG :: set free rfbport ${rfbport}
 	# write new port number to displays file   
 	DISPLAY_WRITE_KEY ${username} ${vncPORT} rfbport
+}
+function SET_VNCDESKTOP(){
+	local username=$1
+	local vncPORT=$2
+	local rfbport=$3
+	local desktop=$4
+	read -d $'' VNCDESKTOP <<-EOE
+		[vncUSER]=${username}
+		[vncPORT]=${vncPORT}
+		[rfbport]=${rfbport}
+		[desktop]=${desktop}
+	EOE
 }
 function VERIFY_GLOBAL_DESKTOP(){
 	local username=$1
