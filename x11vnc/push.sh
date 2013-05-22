@@ -26,8 +26,10 @@ function push_main(){
 	cd "${scriptPath}"
 	# create tgz
 	rm     -f "${push_packagename}.tgz" 
-	tar -zcvf "${push_packagename}.tgz" \
-		tigervnc*
+	tar -zcvf "${push_packagename}.tgz"	\
+		tigervnc*			\
+		xstartup			\
+		Xvnc-dynamic.sh			\
 		
 
 	# folder list to copy package to
