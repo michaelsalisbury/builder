@@ -27,7 +27,7 @@ function GET_ALLOWED_USERS(){
 	# Append root to list of allowed users
 	echo root
 	# Append all users in the wheel group to allowed users
-	PARSE_USERNAME wheel
+	PARSE_USERNAME wheel adm
 	#echo _TEST_ :: ${config_folder} >> "${LOG}"
 	for entry in "$@"; do
 		if [ -f "${entry}" ]; then
