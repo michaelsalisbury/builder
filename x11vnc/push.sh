@@ -27,6 +27,7 @@ function push_main(){
 	# create tgz
 	rm     -f "${push_packagename}.tgz" 
 	tar -zcvf "${push_packagename}.tgz"	\
+		aliases				\
 		tigervnc*			\
 		install.*			\
 		allowed.*			\
