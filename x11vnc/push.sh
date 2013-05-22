@@ -31,7 +31,9 @@ function push_main(){
 		xstartup			\
 		Xvnc-dynamic.sh			\
 		Xcommon-functions.sh		\
-			
+		vncserver			\
+		x11vnc				\
+		
 
 	# folder list to copy package to
 	while read path; do
