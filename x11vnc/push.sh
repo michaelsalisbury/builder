@@ -30,7 +30,8 @@ function push_main(){
 		tigervnc*			\
 		xstartup			\
 		Xvnc-dynamic.sh			\
-		
+		Xcommon-functions.sh		\
+			
 
 	# folder list to copy package to
 	while read path; do
