@@ -83,7 +83,9 @@ function main(){
 	echo
 }
 function NETCAT(){
-	cat | /usr/bin/nc 127.0.0.1 ${rfbport} &
+	local nc=$(which nc 2>/dev/null)
+	[ -x "${nc}" ] || { echo BROKEN ?? The program \"nc\" could not be found\!; return 1; }
+	cat | ${nc} 127.0.0.1 ${rfbport} &
 	echo NETCAT :: sshTunnel PID :: $! >> "${LOG}"
 }
 function DISPLAY_NEW(){
@@ -209,12 +211,14 @@ function IS_DISPLAY_OPEN(){
 function SET_vncPID(){
 	local username=$1
 	local vncPORT=$2
+	local ss=$(which ss 2>/dev/null)
+	[ -x "${ss}" ] || { echo BROKEN ?? The program \"ss\" could not be found\!; return 1; }
 	# if no listening port with process command Xvnc then fail
-	grep -q "127.0.0.1:${rfbport}.*Xvnc" <(ss -atnp) || \
+	grep -q "127.0.0.1:${rfbport}.*Xvnc" <(${ss} -atnp) || \
 	{ echo ERROR :: SET_vncPID failed.; return 1; }
 	# get vncPID 
 	vncPID=$(	
-		cat <<-SED | sed -n -f <(cat) <(ss -atnp)
+		cat <<-SED | sed -n -f <(cat) <(${ss} -atnp)
 			/127.0.0.1:${rfbport}/{
 				s/[()\"[:space:]]\+//g
 				s/.*Xvnc,\([0-9]*\),.*/\1/p
@@ -239,6 +243,32 @@ function SET_vncDisplay(){
 	DISPLAY_WRITE_KEY ${username} ${vncPORT} vncDisplay
 }
 function SET_xstartup(){
+	local username=$1
+	local homedir=$(GET_USER_HOMEDIR "${username}")
+	local XsCustom="${CONFIG_FOLDER}/xstartup"
+	local xstartup="${homedir}/.vnc/xstartup"
+	local xdesktop="${homedir}/.vnc/xstartup.${rfbport}"
+	# setup the prefered desktop
+	cat <<-xstartup > "${xdesktop}"
+		${desktop}
+	xstartup
+	# if .Xclients exists and is diff then 
+	if [ -f "${xstartup}" ] && ! \
+	   diff "${xstartup}" "${XsCustom}" &> /dev/null; then
+		# if xstartup has already been backed-up then date stamp
+		if find "${xstartup}".user* &> /dev/null; then
+			mv -f "${xstartup}" "${xstartup}".user_$(date "+%s")
+		else
+			mv -f "${xstartup}" "${xstartup}".user
+		fi
+	fi
+	# setup the custom xstartup file
+	cat <<-SU | su ${username} -s /bin/bash
+		cp -f "${XsCustom}" "${xstartup}"
+		chmod +x            "${xstartup}"
+	SU
+}
+function SET_xstartup_old(){
 	local username=$1
 	local homedir=$(GET_USER_HOMEDIR "${username}")
 	local config_folder=$(readlink -nf "${BASH_SOURCE}")

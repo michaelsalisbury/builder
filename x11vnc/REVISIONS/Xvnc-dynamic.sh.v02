@@ -1,0 +1,262 @@
+#!/bin/bash
+#https://wiki.archlinux.org/index.php/X11vnc
+LOG=/var/log/x11vnc.dynamic
+DISPLAY_FILE=".vnc/displays"
+touch "${LOG}"
+
+function GET_ALLOWED_USERS(){
+	local name=""
+	for name in "$@"; do
+		# if name is a username then add to list
+		grep -q "^${name}:" /etc/passwd &> /dev/null && echo ${name}
+		# parse groups for match and list users	
+		cat <<-AWK | awk -F: -f <(cat) /etc/group
+			\$1=="${name}" {
+				gsub(" ","",\$4)	# remove all whitespace
+				sub(/^,*/,"",\$4)	# remove leading commas
+				sub(/,*\$/,"",\$4)	# remove trailing commas
+				gsub(",","\n",\$4)	# sub commas for newlines
+				if(\$4=="")exit		# exit if no users in group
+				print \$4
+				exit
+			}
+		AWK
+	done
+}
+function DISPLAYS_NEW(){
+	local username="$1"
+	local homedir=$(GET_USER_HOMEDIR "${username}")
+	local displays="${homedir}/${DISPLAY_FILE}"
+	cat <<-SU | su ${username} -s /bin/bash
+		touch     "${displays}"
+		chmod 600 "${displays}"
+	SU
+}
+function GET_USER_HOMEDIR(){
+	local username="$1"
+	awk -F: -v USER=${username} '$1==USER{printf $6}' /etc/passwd
+}
+function DISPLAYS_NEW_PORT(){
+	local username="$1"
+	local port="$2"
+	local homedir=$(GET_USER_HOMEDIR "${username}")
+	local displays="${homedir}/${DISPLAY_FILE}"
+	# setup file if missing
+	[ ! -f "${displays}" ] && DISPLAYS_NEW "${username}"
+	# append new port entry to the end of file
+	! grep -q "^\[${port}]" "${displays}" && echo "[${port}]" >> "${displays}"
+}
+function DISPLAYS_READ_KEYS(){
+	local username="$1"
+	local port="$2"
+	local homedir=$(GET_USER_HOMEDIR "${username}")
+	local displays="${homedir}/${DISPLAY_FILE}"
+	# setup file if missing
+	[ ! -f "${displays}" ] && DISPLAYS_SETUP_DEFAULTS ${username} ${port}
+	# if port entry is missing 
+	! grep -q "^\[${port}]" "${displays}" && DISPLAYS_SETUP_DEFAULTS ${username} ${port}
+	echo
+
+
+}
+function DISPLAYS_SETUP_DEFAULTS(){
+	local username="$1"
+	local port="$2"
+	local homedir=$(GET_USER_HOMEDIR "${username}")
+	local displays="${homedir}/${DISPLAY_FILE}"
+	# setup file if missing
+	[ ! -f "${displays}" ] && DISPLAYS_NEW "${username}"
+	# if port entry is missing
+	! grep -q "^\[${port}]" "${displays}" && DISPLAYS_NEW_PORT ${username} ${port}
+	# setup default key value pairs
+	local display=""
+	local rfbport=""
+	local resolution='1024x768'
+	local depth='16'
+	local desktop='gnome'
+	local name=""
+	local key=""
+	# write key value pairs
+	for key in display rfbport resolution depth desktop name; do
+		DISPLAYS_WRITE_KEY ${username} ${port} ${key}
+	done
+	# remove any blank lines
+	cat <<-SED | sed -i -f <(cat) "${displays}"
+		/^\[${port}]/,/^\[/{
+			 /^$/d
+		}
+	SED
+}
+function DISPLAYS_WRITE_KEY(){
+	local username="$1"
+	local port="$2"
+	local key="$3"
+	local value=${!key}
+	local homedir=$(GET_USER_HOMEDIR "${username}")
+	local displays="${homedir}/${DISPLAY_FILE}"
+	# setup file if missing
+	[ ! -f "${displays}" ] && DISPLAYS_NEW "${username}"
+	# if port entry is missing
+	! grep -q "^\[${port}]" "${displays}" && DISPLAYS_NEW_PORT ${username} ${port}
+	# test if key value pair exists then edit
+	if cat <<-SED | sed -f <(cat) "${displays}" | grep -q ""; then
+			/^\[${port}]/,/^\[/{
+				/^[[:space:]]*${key}=/p
+			}
+			d
+		SED
+		cat <<-SED | sed -i -f <(cat) "${displays}"
+			/^\[${port}]/,/^\[/{
+				/^[[:space:]]*${key}=/{
+					s/=.*/=${value}/
+				}
+			}
+		SED
+	# if the keyvalue pair does not exist then append to the end of the entries
+	elif cat <<-SED | sed -f <(cat) "${displays}" | grep -q ""; then
+			/^\[${port}]/,/^\[/{
+				/^\[${port}]/d
+				/^\[/p
+			}
+			d
+		SED
+		cat <<-SED | sed -i -f <(cat) "${displays}"
+			/^\[${port}]/,/^\[/{
+				/^\[${port}]/b
+				/^\[/i\\\t${key}=${value}
+			}
+		SED
+	else
+		cat <<-SED | sed -i -f <(cat) "${displays}"
+			/^\[${port}]/,/^\[/{
+				\$a\\\t${key}=${value}
+			}
+		SED
+	fi
+}
+DISPLAYS_SETUP_DEFAULTS localcosadmin 5901
+DISPLAYS_SETUP_DEFAULTS localcosadmin 5909
+
+exit 0
+
+GET_ALLOWED_USERS "$@"
+function testPIPE(){
+	local PORT=$1
+	cat | /usr/bin/nc 127.0.0.1 ${PORT} &
+	local ncPID=$!
+	(	echo netcatPID :: ${ncPID}
+		echo Xvnc PORT :: ${PORT}
+	) >> "${LOG}"
+}
+
+
+function main(){
+	echo -------------------------------------------------------- `date "+%Y.%m.%d-%T"`
+	
+	echo srvARGS : "$@"
+	echo x11PID :: $$
+	echo x11PPID : $PPID
+	echo x11prog : $(basename "${BASH_SOURCE}")
+
+	# get sockets
+	local ock='\([0-9\.]\+:[0-9]\+\)'	# sed socket filter
+	local p='[[:space:]]'			# sed white space key
+	# "/,$$,/s/.*[[:s:]]\([0-9\.]\+:[0-9]\+\)[[:s:]]*\([0-9\.]\+:[0-9]\+\)[[:s:]].*/p;d"
+	local -a sockets=($(ss -np | sed "/,$$,/s/.*$p$ock$p*$ock$p.*/\1 \2/p;d"))
+	local dstIP=${sockets[0]%:*}
+	local dstPORT=${sockets[0]#*:}
+	local srcIP=${sockets[1]%:*}
+	local srcPORT=${sockets[1]#*:}
+	
+	# get connecting pid
+	local srcPID=$(\
+		ss -n -p src ${sockets[1]} |\
+		sed 's/.*[[:space:]]\+users:(("[[:graph:]]\+",\([0-9]*\),.*/\1/p;d')
+
+	# get connecting ppid
+	local srcPPID=$(ps --no-heading -o ppid -p ${srcPID})
+
+	# get connecting userID
+	local srcUID=$(ps --no-heading -o uid -p ${srcPID})
+	
+	# get connecting username
+	local srcUSER=$(ps --no-heading -o user -p ${srcPID})
+
+	# setup desktop name for re-connecting
+	local desktop=${srcUSER}_${dstPORT}
+
+	# get display number
+	local dispNUM=$(( dstPORT - 6049 ))
+
+	# get display details
+	local dispOPT=($(/bin/su -l ${srcUSER} -c "/bin/sed '/^${dispNUM}[[:space:]]/p;d' ~/.vnc/map"))
+
+	echo dispNUM : ${dispNUM}
+	echo d sock :: ${sockets[0]}
+	echo d IPAD :: ${dstIP}
+	echo d PORT :: ${dstPORT}
+	echo s sock :: ${sockets[1]}
+	echo s IPAD :: ${srcIP}
+	echo s PORT :: ${srcPORT}
+	
+	echo x11PID :: $$
+	echo x11PPID : $PPID
+	echo srcPID :: ${srcPID}
+	echo srcPPID : ${srcPPID}
+	echo srcUID :: ${srcUID}
+	echo srcUSER : ${srcUSER}
+
+	# test if connecting user was not on the allowed_users array list
+	if ! GET_ALLOWED_USERS "$@" | grep -q "^${srcUSER}$"; then
+		ERROR_MSG User [${srcUSER}] tried to VNC via $'\('${sockets[0]}$')'. &
+		echo EXITING\!\!\! User \"${srcUSER}\" tried to\
+			VNC via $'('${sockets[0]}$')'.
+	fi
+
+	# test if .vnc/displays
+
+
+
+
+	
+
+
+
+	return 0
+
+	cat <<-END-OF-VNCSERVER-SETUP | su ${srcUSER}
+		/usr/bin/vncserver		\
+			-autokill		\
+			-SecurityTypes None	\
+			-localhost		\
+			-httpPort 0		\
+			-nolisten tcp		\
+			-rfbport ${dstPORT}
+	END-OF-VNCSERVER-SETUP
+
+			#-name ${desktop}	\
+			#-geometry 1024x768	\
+			#-depth 16		\
+
+	
+
+}
+function ERROR_MSG(){
+	local dlgTEXT="$@"
+	local user_logged_into_DISPLAY0=$(who -u | awk '/tty7.*\(:0/{print $1}')
+	local dlgOPTS=(
+		--error
+		--timeout=15
+		--title=\"Remote user attempting connection: ALLERT\"
+		--text=\"${dlgTEXT}\"
+	)
+	/bin/su ${user_logged_into_DISPLAY0} -c "DISPLAY=:0 zenity ${dlgOPTS[*]}"
+	echo ERROR_MSG :: returned $? :: ${dlgTEXT}
+}
+
+#main "$@" 2>&1 >> "${LOG}"
+main "$@" >> "${LOG}"
+
+cat | testPIPE ${XvncPORT}
+exit 0
+

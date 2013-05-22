@@ -72,15 +72,16 @@ function GET_USER_HOMEDIR(){
 }
 function GET_PROC_SOCKETS(){
 	local process=$1
+	local ss=$(which ss 2>/dev/null)
+	[ -x "${ss}" ] || { echo BROKEN ?? The program \"ss\" could not be found\!; return 1; }
 	local ocket='\([0-9\.\*]\+:[0-9\*]\+\)'	# sed socket filter
 	local p='[[:space:]]\+'			# sed white space key
-	cat <<-SED | sed -n -f <(cat) <(ss -np)
+	cat <<-SED | sed -n -f <(cat) <(${ss} -np)
 		/,${process},/{
 			s/.*$p$ocket$p$ocket$p.*/\1 \2/
 			p
 		}
 	SED
-	#ss -np | sed -n "/,${process},/s/.*$p$ocket$p$ocket$p.*/\1 \2/p"
 }
 function GET_PROC_DST_IP(){
 	local process=$1
@@ -104,10 +105,12 @@ function GET_PROC_SRC_PORT(){
 }
 function GET_PROC_SRC_PID(){
 	local process=$1
+	local ss=$(which ss 2>/dev/null)
+	[ -x "${ss}" ] || { echo BROKEN ?? The program \"ss\" could not be found\!; return 1; }
 	local g='[[:graph:]]'			# sed graph key
 	local p='[[:space:]]'			# sed white space key
 	local -a sockets=( `GET_PROC_SOCKETS ${process}` )
-	cat <<-SED | sed -n -f <(cat) <(ss -n -p src ${sockets[1]})
+	cat <<-SED | sed -n -f <(cat) <(${ss} -n -p src ${sockets[1]})
 		s/.*${p}\+users:(("${g}\+",\([0-9]*\),.*/\1/p
 	SED
 }
