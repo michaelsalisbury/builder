@@ -30,8 +30,8 @@ function push_main(){
 		tigervnc*			\
 		install.*			\
 		allowed.*			\
-		vncserver			\
-		x11vnc				\
+		xinetd.vncserver		\
+		xinetd.x11vnc			\
 		Xcommon-functions.sh		\
 		x11vnc.sh			\
 		Xvnc-dynamic.sh			\
