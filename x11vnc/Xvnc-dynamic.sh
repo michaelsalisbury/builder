@@ -118,7 +118,7 @@ function DISPLAY_READ_KEYS(){
 	local displays="${homedir}/${DISPLAY_FILE}"
 	local vncfolder=$(dirname "${displays}")
 	# setup missing ~/.vnc folder
-	[ -d "${vncfolder}" ] || cat <<-SU | su ${username} -l -s /bin/bash\
+	[ -d "${vncfolder}" ] || cat <<-SU | su ${username} -l -s /bin/bash
 						mkdir -p "${vncfolder}"
 					SU
 	# setup file if missing
