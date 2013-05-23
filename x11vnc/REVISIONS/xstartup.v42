@@ -1,0 +1,85 @@
+#!/bin/bash
+LOG=/var/log/Xvnc-dynamic
+
+function main(){
+	local BASH_SRCFQFN=$(readlink -nf "${BASH_SOURCE}")
+
+	# restore user xstartup
+	# loop through backups restoring the first diff
+	# remove any matching files as accidents
+	if find "${BASH_SRCFQFN}".user* &> /dev/null; then
+		local xstartup=""
+		while read xstartup; do
+			if diff "${xstartup}" "${BASH_SRCFQFN}"; then
+				rm -f "${xstartup}"
+			else
+				mv -f "${xstartup}" "${BASH_SRCFQFN}"
+				break
+			fi
+		done < <(ls -1t "${BASH_SRCFQFN}".user*)
+	else
+	      rm -f "${BASH_SRCFQFN}"
+	fi
+
+	# get desktop session paths
+	local GSESSION="$(which gnome-session		2>/dev/null)"
+	local STARTKDE="$(which startkde		2>/dev/null)"
+	local      TWM="$(which twm			2>/dev/null)"
+	local    ICEWM="$(which icewm-session		2>/dev/null)"
+	local  FLUXBOX="$(which fluxbox			2>/dev/null)"
+	local    XFCE4="$(which xfce4-session		2>/dev/null)"
+	local      KDE="$(which startkde		2>/dev/null)"
+
+	# system specifics
+	local SSHAGENT="$(which ssh-agent		2>/dev/null)"
+	local CKLAUNCH="$(which ck-launch-session	2>/dev/null)"
+
+	# is Ubuntu
+	if cat /etc/lsb-release | grep -q -i ubuntu; then
+		local GSESSION="$(which gnome-session 		2>/dev/null)"
+		local GSESSION+=" --session=gnome-classic"
+		#local GSESSION+=" --session=gnome-fallback"
+		#local GSESSION=" $(which gnome-session-fallback	2>/dev/null)"
+
+	# is Red Hat | CentOS
+	elif [ -f /etc/redhat-release ]; then
+		local CKLAUNCH="$(which ck-xinit-session	2>/dev/null)"
+
+	fi
+
+	# extract connection details from VNCDESKTOP variable
+	eval local -A VNC=( ${VNCDESKTOP} )
+	export VNCDESKTOP="${VNC[vncUSER]}:${VNC[vncPORT]}:${VNC[desktop]}"
+
+	echo --------------------------------------------- >> "${LOG}"
+	echo XCLIENTS :: Starting Desktop                  >> "${LOG}"
+	echo XCLIENTS :: VNC[vncUSER] :: ${VNC[vncUSER]}   >> "${LOG}"
+	echo XCLIENTS :: VNC[vncPORT] :: ${VNC[vncPORT]}   >> "${LOG}"
+	echo XCLIENTS :: VNC[rfbport] :: ${VNC[rfbport]}   >> "${LOG}"
+	echo XCLIENTS :: VNC[desktop] :: ${VNC[desktop]}   >> "${LOG}"
+	echo XCLIENTS :: [VNCDESKTOP] :: ${VNCDESKTOP}     >> "${LOG}"
+	echo --------------------------------------------- >> "${LOG}"
+	echo                                               >> "${LOG}"
+
+	case ${VNC[desktop]} in
+		gnome)		exec ${CKLAUNCH} ${SSHAGENT} ${GSESSION};;
+
+		xfce4)		exec ${CKLAUNCH} ${SSHAGENT} ${XFCE4};;
+
+		kde)		exec ${CKLAUNCH} ${SSHAGENT} ${KDE};;
+
+		ice)		[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+				xsetroot -solid grey
+				exec ${CKLAUNCH} ${SSHAGENT} ${ICEWM};;
+
+		fluxbox)	[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+				xsetroot -solid grey
+				exec ${CKLAUNCH} ${SSHAGENT} ${FLUXBOX};;
+
+		twm)		[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+				xsetroot -solid grey
+				xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP" &
+				exec ${CKLAUNCH} ${SSHAGENT} ${TWM};;
+	esac
+}
+main "$@"
