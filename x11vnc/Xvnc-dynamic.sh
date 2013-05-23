@@ -277,28 +277,6 @@ function SET_xstartup(){
 		chmod +x            "${xstartup}"
 	SU
 }
-function SET_xstartup_old(){
-	local username=$1
-	local homedir=$(GET_USER_HOMEDIR "${username}")
-	local config_folder=$(readlink -nf "${BASH_SOURCE}")
-	local config_folder=$(dirname "${config_folder}")
-	local Xclients="${config_folder}/Xclients"
-	local xstartup="${homedir}/.vnc/xstartup.${rfbport}"
-	# setup the prefered desktop
-	cat <<-xstartup > "${xstartup}"
-		${desktop}
-	xstartup
-	# if .Xclients exists and is diff then 
-	if [ -f "${homedir}/.Xclients" ] && ! \
-	   diff "${homedir}/.Xclients" "${Xclients}" &> /dev/null; then
-		mv -f "${homedir}/.Xclients" "${homedir}/.Xclients.user"
-	fi
-	# setup the custom .Xclients file
-	cat <<-SU | su ${username} -s /bin/bash
-		cp -f "${Xclients}" "${homedir}/.Xclients"
-		chmod +x            "${homedir}/.Xclients"
-	SU
-}
 function SET_FREE_LISTENING_PORT(){
 	local username=$1
 	local vncPORT=$2
