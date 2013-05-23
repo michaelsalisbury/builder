@@ -2,23 +2,23 @@
 LOG=/var/log/Xvnc-dynamic
 
 function main(){
-	local BASH_SOURCE=$(readlink -nf "${BASH_SOURCE}")
+	local BASH_SRCFQFN=$(readlink -nf "${BASH_SOURCE}")
 
 	# restore user xstartup
 	# loop through backups restoring the first diff
 	# remove any matching files as accidents
-	if find "${BASH_SOURCE}".user* &> /dev/null; then
+	if find "${BASH_SRCFQFN}".user* &> /dev/null; then
 		local xstartup=""
 		while read xstartup; do
-			if diff "${xstartup}" "${BASH_SOURCE}"; then
+			if diff "${xstartup}" "${BASH_SRCFQFN}"; then
 				rm -f "${xstartup}"
 			else
-				mv -f "${xstartup}" "${BASH_SOURCE}"
+				mv -f "${xstartup}" "${BASH_SRCFQFN}"
 				break
 			fi
-		done < <(ls -1t "${BASH_SOURCE}".user*)
+		done < <(ls -1t "${BASH_SRCFQFN}".user*)
 	else
-	      rm -f "${BASH_SOURCE}"
+	      rm -f "${BASH_SRCFQFN}"
 	fi
 
 	# get desktop session paths
