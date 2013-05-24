@@ -40,8 +40,8 @@ function main(){
 	# verify that depth is only values of 8, 16 & 24 (15 has font problems)
 	VERIFY_GLOBAL_DEPTH ${srcUSER} ${vncPORT}
 
-        # verify that Ubuntu gnome desktop has logout icon
-        VERIFY_UBUNTU_GNOME_LOGOUT ${srcUSER} ${desktop}
+	# verify that Ubuntu gnome desktop has logout icon
+	VERIFY_UBUNTU_GNOME_LOGOUT ${srcUSER} ${desktop}
 
 	# echo vncserver setup details
 	echo GLOBAL :: ________________________
@@ -354,25 +354,25 @@ function VERIFY_GLOBAL_DEPTH(){
 	fi
 }
 function VERIFY_UBUNTU_GNOME_LOGOUT(){
-        local username=$1
-        local desktop=$2
-        local homedir=$(GET_USER_HOMEDIR "${username}")
-        local logout_desktop="${homedir}/Desktop/logout.desktop"
-        # verify Ubuntu and gnome
-        cat /etc/lsb-release | grep -q -i ubuntu        &&\
-        [ "${desktop}" == "gnome" ]                     &&\
-        cat <<-DESKTOP | su ${username} -c "tee \"${logout_desktop}\"" &>/dev/null
-                #!/usr/bin/env xdg-open
-                [Desktop Entry]
-                Name=Gnome Session Logout
-                GenericName=Logout
-                Exec=/usr/bin/gnome-session-quit
-                Icon=/usr/share/icons/Humanity/apps/48/gnome-session-logout.svg
-                StartupNotify=true
-                Terminal=false
-                Type=Application
-        DESKTOP
-        chmod +x "${logout_desktop}"
+	local username=$1
+	local desktop=$2
+	local homedir=$(GET_USER_HOMEDIR "${username}")
+	local logout_desktop="${homedir}/Desktop/logout.desktop"
+	# verify Ubuntu and gnome
+	cat /etc/lsb-release | grep -q -i ubuntu	&&\
+	[ "${desktop}" == "gnome" ]			&&\
+	cat <<-DESKTOP | su ${username} -c "tee \"${logout_desktop}\"" &>/dev/null
+		#!/usr/bin/env xdg-open
+		[Desktop Entry]
+		Name=Gnome Session Logout
+		GenericName=Logout
+		Exec=/usr/bin/gnome-session-quit
+		Icon=/usr/share/icons/Humanity/apps/48/gnome-session-logout.svg
+		StartupNotify=true
+		Terminal=false
+		Type=Application
+	DESKTOP
+	chmod +x "${logout_desktop}"
 }
 main "$@" >> "${LOG}"
 cat | NETCAT
