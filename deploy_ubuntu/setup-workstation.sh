@@ -300,14 +300,18 @@ function setup_Package_Holds(){
 	dpkg --get-selections | grep -v install
 }
 function setup_Package_Gnome_Defaults(){
-	desc Terminal\; Run Command as Login Shell
+	desc gconf\; /etc/gconf/...
 	# gconftool-2
 
 	# Set the Gnome Terminal to "Run Command as Login Shell"
+	local opt='--direct --config-source xml:readwrite:/etc/gconf/gconf.xml.defaults'
+	gconftool-2 $opt -t bool -s /apps/gnome-terminal/profiles/Default/login_shell true
 	local opt='--direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory'
 	gconftool-2 $opt -t bool -s /apps/gnome-terminal/profiles/Default/login_shell true
 
 	# Change default terminal from Gnome Terminal to Terminator
+	local opt='--direct --config-source xml:readwrite:/etc/gconf/gconf.xml.defaults'
+	gconftool-2 $opt -t string -s /desktop/gnome/applications/terminal/exec terminator
 	local opt='--direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory'
 	gconftool-2 $opt -t string -s /desktop/gnome/applications/terminal/exec terminator
 
