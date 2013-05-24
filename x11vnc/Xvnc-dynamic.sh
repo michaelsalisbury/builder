@@ -351,6 +351,27 @@ function VERIFY_GLOBAL_DEPTH(){
 		DISPLAY_WRITE_KEY ${username} ${vncPORT} depth
 	fi
 }
+function VERIFY_UBUNTU_GNOME_LOGOUT(){
+        local username=$1
+        local desktop=$2
+        local homedir=$(GET_USER_HOMEDIR "${username}")
+        local logout_desktop="${homedir}/Desktop/logout.desktop"
+        # verify Ubuntu and gnome
+        cat /etc/lsb-release | grep -q -i ubuntu        &&\
+        [ "${desktop}" == "gnome" ]                     &&\
+        cat <<-DESKTOP | su ${username} -c "tee \"${logout_desktop}\"" &>/dev/null
+                #!/usr/bin/env xdg-open
+                [Desktop Entry]
+                Name=Gnome Session Logout
+                GenericName=Logout
+                Exec=/usr/bin/gnome-session-quit
+                Icon=/usr/share/icons/Humanity/apps/48/gnome-session-logout.svg
+                StartupNotify=true
+                Terminal=false
+                Type=Application
+        DESKTOP
+        chmod +x "${logout_desktop}"
+}
 main "$@" >> "${LOG}"
 cat | NETCAT
 exit 0
