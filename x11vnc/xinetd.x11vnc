@@ -11,7 +11,7 @@ service x11vnc
         passenv                 = PATH
         server			= /etc/x11vnc/x11vnc.sh
 	server_args		= allowed.x11vnc
-        log_type                = FILE /var/log/x11vnc-xinetd
+        log_type                = FILE /var/log/x11vnc.logons
         log_on_success          = PID HOST EXIT
         log_on_failure          = HOST USERID ATTEMPT
 }
