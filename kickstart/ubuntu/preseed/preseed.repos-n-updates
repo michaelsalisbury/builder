@@ -6,6 +6,7 @@ d-i apt-setup/universe   boolean true
 d-i apt-setup/multiverse boolean true
 d-i apt-setup/non-free   boolean true
 d-i apt-setup/contrib    boolean true
+d-i apt-setup/extras     boolean true
 
 # Auto Responces
 acroread-common acroread-common/default-viewer                    select true
