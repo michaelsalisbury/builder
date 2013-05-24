@@ -816,6 +816,11 @@ function setup_Multimedia(){
         /usr/share/doc/libdvdread4/install-css.sh
         waitAptgetInstall
         apt-get ${aptopt} install ubuntu-restricted-extras
+        waitAptgetInstall
+	apt-get ${aptopt} install libxine1-ffmpeg gxine mencoder \
+				  totem-mozilla icedax tagtool easytag\
+				  id3tool lame nautilus-script-audio-convert
+				  libmad0 mpg321
 }
 function setup_grub_customizer(){
         desc Command line app \# \> grub-customizer
