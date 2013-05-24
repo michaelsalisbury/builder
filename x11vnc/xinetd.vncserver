@@ -12,6 +12,9 @@ service vncserver
         passenv                 = PATH
         server			= /etc/x11vnc/Xvnc-dynamic.sh
 	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
 }
 service vncserver
 {
@@ -27,6 +30,9 @@ service vncserver
         passenv                 = PATH
         server			= /etc/x11vnc/Xvnc-dynamic.sh
 	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
 }
 service vncserver
 {
@@ -42,6 +48,9 @@ service vncserver
         passenv                 = PATH
         server			= /etc/x11vnc/Xvnc-dynamic.sh
 	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
 }
 service vncserver
 {
@@ -57,6 +66,9 @@ service vncserver
         passenv                 = PATH
         server			= /etc/x11vnc/Xvnc-dynamic.sh
 	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
 }
 service vncserver
 {
@@ -72,6 +84,9 @@ service vncserver
         passenv                 = PATH
         server			= /etc/x11vnc/Xvnc-dynamic.sh
 	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
 }
 service vncserver
 {
@@ -87,6 +102,9 @@ service vncserver
         passenv                 = PATH
         server			= /etc/x11vnc/Xvnc-dynamic.sh
 	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
 }
 service vncserver
 {
@@ -102,6 +120,9 @@ service vncserver
         passenv                 = PATH
         server			= /etc/x11vnc/Xvnc-dynamic.sh
 	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
 }
 service vncserver
 {
@@ -117,6 +138,9 @@ service vncserver
         passenv                 = PATH
         server			= /etc/x11vnc/Xvnc-dynamic.sh
 	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
 }
 service vncserver
 {
@@ -132,6 +156,9 @@ service vncserver
         passenv                 = PATH
         server			= /etc/x11vnc/Xvnc-dynamic.sh
 	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
 }
 
 
