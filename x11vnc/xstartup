@@ -49,7 +49,6 @@ function main(){
 	local CKLAUNCH=$(which ck-launch-session	2>/dev/null)
 
 	# xstartup
-	vncconfig -iconic &
 	unset SESSION_MANAGER
 	unset DBUS_SESSION_BUS_ADDRESS
 
