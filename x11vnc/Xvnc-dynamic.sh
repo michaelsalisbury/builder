@@ -40,6 +40,8 @@ function main(){
 	# verify that depth is only values of 8, 16 & 24 (15 has font problems)
 	VERIFY_GLOBAL_DEPTH ${srcUSER} ${vncPORT}
 
+        # verify that Ubuntu gnome desktop has logout icon
+        VERIFY_UBUNTU_GNOME_LOGOUT ${srcUSER} ${desktop}
 
 	# echo vncserver setup details
 	echo GLOBAL :: ________________________
