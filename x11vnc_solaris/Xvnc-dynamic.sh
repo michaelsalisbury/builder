@@ -238,7 +238,8 @@ function VERIFY_GLOBAL_DESKTOP(){
 	 desktop=`echo ${desktop}  | tr A-Z a-z`
 	DESKTOPS=`echo ${DESKTOPS} | tr A-Z a-z`
 	# Match approved desktop type to GLOBAL variable desktops
-	[[ "${DESKTOPS}" =~ (^|[[:space:]])"${desktop}"([[:space:]]|$) ]] && return 0
+	echo ' '${DESKTOPS}' ' | grep " ${desktop} " &>/dev/null && return 0
+	#[[ "${DESKTOPS}" =~ (^|[[:space:]])"${desktop}"([[:space:]]|$) ]] && return 0
 	# If no approved desktop is selected fix to default
 	echo FIXING :: desktop selection from ${desktop:-MISSING}
 	desktop='gnome'
