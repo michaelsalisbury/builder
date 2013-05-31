@@ -11,6 +11,10 @@
 ###pkgutil -i netcat
 ###pkgutil -i ncurses
 
+# verify that sshd_config allows for TCP and gateway forwarding
+# allowTcpForwarding yes
+# GatewayPorts yes
+
 # Setup SMF Services
 
 #1) Add service entries to /etc/services
