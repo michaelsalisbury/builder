@@ -1,0 +1,17 @@
+service x11vnc
+{
+	disable = no
+	type			= UNLISTED
+        port                    = 5899
+	bind			= 127.0.0.1
+        socket_type             = stream
+        protocol                = tcp
+        wait                    = no
+        user                    = root
+        passenv                 = PATH
+        server			= /etc/x11vnc/x11vnc.sh
+	server_args		= allowed.x11vnc
+        log_type                = FILE /var/log/x11vnc.logons
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
+}
