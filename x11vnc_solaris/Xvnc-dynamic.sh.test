@@ -1,0 +1,34 @@
+#!/bin/bash
+
+function main(){
+	echo BASH_SOURCE :: $BASH_SOURCE
+	echo canonicalpath :: $(canonicalpath "${BASH_SOURCE}")
+	echo ------------------------------------------------$(date)
+	echo PID :: $$
+	echo -------------------------------------------------
+	env
+
+
+
+
+
+}
+function canonicalpath(){
+	if [ -d $1 ]; then
+		pushd $1 > /dev/null 2>&1
+		echo $PWD
+	elif [ -f $1 ]; then
+		pushd $(dirname $1) > /dev/null 2>&1
+		echo $PWD/$(basename $1)
+	else
+		echo "Invalid path $1"
+	fi
+	popd > /dev/null 2>&1
+}
+BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
+BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
+BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
+LOG=/var/log/${BASH_SRCNAME//.sh/.log}
+touch     ${LOG}
+chmod 777 ${LOG}
+main "$@" >> ${LOG}

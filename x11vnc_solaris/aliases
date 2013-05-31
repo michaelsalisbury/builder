@@ -1,0 +1,2 @@
+alias unlock="su \$(who -u | awk '/tty.*\(:0/{print \$1}') -s /bin/bash -c 'DISPLAY=:0 gnome-screensaver-command -d'"
+alias   kick="su \$(who -u | awk '/tty.*\(:0/{print \$1}') -s /bin/bash -c 'DISPLAY=:0 gnome-session-save --kill'"
