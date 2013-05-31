@@ -84,7 +84,8 @@ function main(){
 				-geometry ${resolution}	\
 				-depth ${depth}		\
 				-rfbport ${rfbport}	\
-				-name "${VNCDESKTOP}" 2>&1
+				-name "${VNCDESKTOP}"	\
+				$(IS_OS_SOLARIS || echo -autokill) 2>&1
 		END-OF-VNCSERVER-SETUP
 	fi
 	echo --DONE----------------------------------- `date "+%Y.%m.%d-%T"`
@@ -131,9 +132,11 @@ function SET_vncPID(){
 					break;;
 			esac
 		done < <(
-			${lsof} -a -n -P			\
+			${lsof} -n -P				\
 				-p ^${process}			\
+				-a				\
 				-c Xvnc				\
+				-a				\
 				-i TCP@127.0.0.1:${rfbport}	\
 				-F p
 			)
@@ -333,7 +336,7 @@ chmod 777 ${LOG}
 
 
 # GLOBAL vars; import PATH config on Solaris machine
-if uname | grep -i '^sunos$' &>/dev/null; then
+if IS_OS_SOLARIS; then
 	export `grep ^PATH /etc/default/login`
 fi
 
