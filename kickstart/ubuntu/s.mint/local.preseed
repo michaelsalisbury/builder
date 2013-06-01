@@ -5,6 +5,10 @@
 #d-i mirror/http/proxy string http://10.173.119.72:3142/
 #d-i mirror/http/proxy string http://192.168.253.3:3142/
 
+# Choices: Dialog, Readline, Gnome, Kde, Editor, Noninteractive
+# debconf debconf/frontend select Dialog
+debconf debconf/frontend select Noninteractive
+
 # Primary instalation task
 #tasksel tasksel/first multiselect Basic Ubuntu Server
 #tasksel tasksel/first multiselect Xubuntu desktop
@@ -19,7 +23,7 @@
 
 # Whether to upgrade packages after debootstrap.
 # Allowed values: none, safe-upgrade, full-upgrade
-#d-i pkgsel/upgrade select none
+d-i pkgsel/upgrade select none
 
 # Network name preseed config
 d-i netcfg/get_hostname string DLPBMM1-mint-test-deploy
@@ -38,23 +42,19 @@ d-i console-setup/layoutcode string us
 d-i console-setup/ask_detect boolean false
 d-i netcfg/choose_interface select auto
 
-d-i mirror/country string US
-d-i mirror/http/proxy string
+#d-i mirror/country string US
 
-d-i passwd/user-fullname		string		localcosadmin
-d-i passwd/username			string		localcosadmin
-d-i passwd/auto-login			boolean		true
-d-i passwd/user-password		password	orlando1
-d-i passwd/user-password-again		password	orlando1
-d-i user-setup/allow-password-weak	boolean		true
+d-i passwd/user-fullname string localcosadmin
+d-i passwd/username string localcosadmin
+d-i passwd/auto-login boolean true
+d-i passwd/user-password password orlando1
+d-i passwd/user-password-again password	orlando1
+d-i user-setup/allow-password-weak boolean true
 
 #d-i grub-installer/only_debian		boolean		true
 #d-i grub-installer/with_other_os	boolean		true
 #d-i finish-install/reboot_in_progress	note
 
 #ubiquity ubiquity/success_command	string		yourcommands
-ubiquity ubiquity/summary		note
-ubiquity ubiquity/reboot		boolean		true
-
-
-
+ubiquity ubiquity/summary note
+ubiquity ubiquity/reboot boolean true
