@@ -1047,7 +1047,8 @@ function setup_tigervnc(){
         waitAptgetInstall
 	apt-get ${aptopt} install tigervnc-standalone-server	\
 				  tigervnc-xorg-extension	\
-				  xfonts-100dpi xfonts-75dpi
+				  xfonts-100dpi xfonts-75dpi	\
+				  x11vnc
 
 
 
