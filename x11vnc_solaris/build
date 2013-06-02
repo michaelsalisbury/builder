@@ -48,6 +48,7 @@ read -d $'' includes <<-EOE
 	allowed.*
 	tigervnc-*
 	x11vnc-*
+	LATEST.TXT
 
 
 
