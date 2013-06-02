@@ -203,21 +203,23 @@ function setup_Prep_Add_Repos(){
 	# Disable upgrades
 	sed -i '/^Prompt=/c\never' /etc/update-manager/release-upgrades
 
-	# Add Neuro Debian Repo
-	local list='/etc/apt/sources.list.d/neurodebian.sources.list'
-	local do_release=`lsb_release -sc`
-	rm -f "${list}"
-	for http in	"http://neuro.debian.net/debian" \
-			"http://neurodeb.pirsquared.org" \
-			"http://masi.vuse.vanderbilt.edu/neurodebian"; do
-		for deb in deb \#deb-src; do
-			for repo in data ${do_release}; do
-				echo ${deb} ${http} ${repo} main contrib non-free >> "${list}"
+	# Add Neuro Debian Repo; was to pulldown tigervnc-server
+	if false; then
+		local list='/etc/apt/sources.list.d/neurodebian.sources.list'
+		local do_release=`lsb_release -sc`
+		rm -f "${list}"
+		for http in	"http://neuro.debian.net/debian" \
+				"http://neurodeb.pirsquared.org" \
+				"http://masi.vuse.vanderbilt.edu/neurodebian"; do
+			for deb in deb \#deb-src; do
+				for repo in data ${do_release}; do
+					echo ${deb} ${http} ${repo} main contrib non-free >> "${list}"
+				done
 			done
 		done
-	done
-	#apt-key adv --recv-keys --keyserver keyserver.ubuntu.com A5D32F012649A5A9
-	apt-key adv --recv-keys --keyserver pgp.mit.edu 2649A5A9
+		#apt-key adv --recv-keys --keyserver keyserver.ubuntu.com A5D32F012649A5A9
+		apt-key adv --recv-keys --keyserver pgp.mit.edu 2649A5A9
+	fi
 
 	# Add Oracle VirtualBox Repo
 	echo "deb http://download.virtualbox.org/virtualbox/debian $DISTRIB_CODENAME contrib" > \
@@ -1045,15 +1047,18 @@ function setup_tigervnc(){
 	desc Tiger VNC server from Neuro Debian Repo, dynamix xinetd
         ###################################################################################
 	# dynamic script supports desktops gnome(classic) xfce kde ice lwm fluxbox
+
+	# neuro's tiger vncversion has been heavily modified from redhat's version; needs much exploration
         #waitAptgetInstall
 	#apt-get ${aptopt} install tigervnc-standalone-server	\
 	#			  tigervnc-xorg-extension	\
 	#			  xfonts-100dpi xfonts-75dpi	\
 	#			  x11vnc xinetd
 	local http='https://github.com/michaelsalisbury/builder/blob/master/x11vnc_solaris'
+	local latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
 	mkdir /etc/x11vnc
 	cd    /etc/x11vnc
-	wget "${http}/LATEST.TXT"
+	wget "${http}/${latest}"
 
 	mkdir /opt/tigervnc
 	https://github.com/michaelsalisbury/builder/blob/master/x11vnc_solaris/x11vnc.v73.tgz
