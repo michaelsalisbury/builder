@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -198,6 +198,15 @@ function setup_Prep_Add_Repos(){
 
 	# Disable upgrades
 	sed -i '/^Prompt=/c\never' /etc/update-manager/release-upgrades
+
+	# Sdd Nero Debian Repo
+
+	deb http://masi.vuse.vanderbilt.edu/neurodebian data main contrib non-free
+	#deb-src http://masi.vuse.vanderbilt.edu/neurodebian data main contrib non-free
+	deb http://masi.vuse.vanderbilt.edu/neurodebian raring main contrib non-free
+	#deb-src http://masi.vuse.vanderbilt.edu/neurodebian raring main contrib non-free
+
+	return
 
 	# Add Oracle VirtualBox Repo
 	echo "deb http://download.virtualbox.org/virtualbox/debian $DISTRIB_CODENAME contrib" > \
