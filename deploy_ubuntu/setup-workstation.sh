@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
@@ -1045,12 +1045,15 @@ function setup_tigervnc(){
 	desc Tiger VNC server from Neuro Debian Repo, dynamix xinetd
         ###################################################################################
 	# dynamic script supports desktops gnome(classic) xfce kde ice lwm fluxbox
-        waitAptgetInstall
-	apt-get ${aptopt} install tigervnc-standalone-server	\
-				  tigervnc-xorg-extension	\
-				  xfonts-100dpi xfonts-75dpi	\
-				  x11vnc xinetd
+        #waitAptgetInstall
+	#apt-get ${aptopt} install tigervnc-standalone-server	\
+	#			  tigervnc-xorg-extension	\
+	#			  xfonts-100dpi xfonts-75dpi	\
+	#			  x11vnc xinetd
 	mkdir /etc/x11vnc
+	mkdir /opt/tigervnc
+		http://downloads.sourceforge.net/project/tigervnc/tigervnc/1.2.0/tigervnc-Linux-x86_64-1.2.0.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Ftigervnc%2Ffiles%2Ftigervnc%2F1.2.0%2F&ts=1370196375&use_mirror=superb-dca2
+
 
 	
 
