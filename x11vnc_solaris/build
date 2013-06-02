@@ -3,6 +3,7 @@ shopt -s extglob
 
 function main(){
 	local version=`GET_VERSION`
+	mkdir 
 	GET_FILES	
 
 
@@ -44,6 +45,9 @@ function canonicalpath(){
 BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
 BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
 BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
+
+# MAX split file size
+MAX_SPLIT='10M'
 
 # Project NAME
 NAME='x11vnc'
