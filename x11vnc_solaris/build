@@ -3,7 +3,6 @@
 function main(){
 
 	#echo "${majors}"
-		ls -1 "${BASH_SRCDIR}/Xvnc-dynamic.sh".v+([0-9])
 	#GET_VERSION
 	
 
@@ -49,5 +48,5 @@ read -d $'' majors <<-EOE
 	xstartup
 EOE
 
-shopt -s extglob
+ls -1 "${BASH_SRCDIR}/Xvnc-dynamic.sh".v+([0-9])
 main "$@"
