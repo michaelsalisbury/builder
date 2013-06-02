@@ -4,7 +4,7 @@ function main(){
 
 	#echo "${majors}"
 	shopt -q extglob && local EXTGLOB=true || shopt -s extglob
-		ls -1 "${BASH_SRCDIR}/Xvnc-dynamic.sh".v\\\+([0-9])
+		ls -1 "${BASH_SRCDIR}/Xvnc-dynamic.sh".v\\\+\([0-9]\)
 	${EXTGLOB:-false} || shopt -u extglob
 	#GET_VERSION
 	
