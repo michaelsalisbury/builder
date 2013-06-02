@@ -3,7 +3,7 @@ shopt -s extglob
 
 function main(){
 	local version=`GET_VERSION`
-		
+	GET_FILES	
 
 
 
@@ -18,6 +18,22 @@ function GET_VERSION(){
 	sed 's/.*\.v//'	|\
 	sort -n -u	|\
 	tail -1
+}
+function GET_FILES(){
+	local major=""
+	for major in ${majors}; do
+		ls -1 "${BASH_SRCDIR}"/${major}
+	done
+	local include=""
+	for include in ${includes}; do
+		echo $include
+	done
+
+
+
+
+
+
 }
 function canonicalpath(){
 	if [ -d $1 ]; then
@@ -49,10 +65,7 @@ read -d $'' includes <<-EOE
 	tigervnc-*
 	x11vnc-*
 	LATEST.TXT
-
-
-
-
+	aliases
 EOE
 
 main "$@"
