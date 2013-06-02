@@ -199,7 +199,7 @@ function setup_Prep_Add_Repos(){
 	# Disable upgrades
 	sed -i '/^Prompt=/c\never' /etc/update-manager/release-upgrades
 
-	# Sdd Nero Debian Repo
+	# Add Neuro Debian Repo
 
 	deb http://masi.vuse.vanderbilt.edu/neurodebian	data   main contrib non-free
 	deb http://masi.vuse.vanderbilt.edu/neurodebian	raring main contrib non-free
