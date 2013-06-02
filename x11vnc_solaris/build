@@ -2,10 +2,8 @@
 shopt -s extglob
 
 function main(){
-
-	#echo "${majors}"
-	GET_VERSION
-
+	local version=`GET_VERSION`
+		
 
 
 
@@ -21,8 +19,6 @@ function GET_VERSION(){
 	sort -n -u	|\
 	tail -1
 }
-
-
 function canonicalpath(){
 	if [ -d $1 ]; then
 		pushd $1 > /dev/null 2>&1
@@ -45,6 +41,12 @@ read -d $'' majors <<-EOE
 	Xvnc-dynamic.sh
 	x11vnc.sh
 	xstartup
+EOE
+read -d $'' includes <<-EOE
+	
+
+
+
 EOE
 
 main "$@"
