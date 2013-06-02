@@ -1058,7 +1058,7 @@ function setup_tigervnc(){
 	#			  tigervnc-xorg-extension	\
 	#			  xfonts-100dpi xfonts-75dpi	\
 	#			  x11vnc xinetd
-	local http='https://github.com/michaelsalisbury/builder/blob/master/x11vnc_solaris'
+	local http='https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris'
 	local latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
 	mkdir /etc/x11vnc
 	cd    /etc/x11vnc
