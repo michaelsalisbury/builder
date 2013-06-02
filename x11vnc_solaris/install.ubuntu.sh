@@ -33,6 +33,7 @@ latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
 
 # Verify that currect version is latest
 diff <(echo "${latest}") "${BASH_SRCDIR}/LATEST.TXT"
+echo version is latest :: $?
 
 
 
