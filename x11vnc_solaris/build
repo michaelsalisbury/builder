@@ -26,7 +26,7 @@ function GET_FILES(){
 	done
 	local include=""
 	for include in ${includes}; do
-		echo $include
+		ls -1 "${BASH_SRCDIR}"/$include
 	done
 
 
