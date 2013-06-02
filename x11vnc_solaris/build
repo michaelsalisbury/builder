@@ -43,6 +43,8 @@ read -d $'' majors <<-EOE
 	xstartup
 EOE
 read -d $'' includes <<-EOE
+	xinetd.*
+	allowed.*
 	
 
 
