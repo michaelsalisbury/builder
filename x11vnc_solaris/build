@@ -43,10 +43,11 @@ read -d $'' majors <<-EOE
 	xstartup
 EOE
 read -d $'' includes <<-EOE
+	install.*
 	xinetd.*
 	allowed.*
-	tigervnc*
-
+	tigervnc-*
+	x11vnc-*
 
 
 
