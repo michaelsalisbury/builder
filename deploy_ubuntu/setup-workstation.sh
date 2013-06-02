@@ -1063,7 +1063,7 @@ function setup_tigervnc(){
 	mkdir /etc/x11vnc
 	cd    /etc/x11vnc
 
-	echo ${LATEST}
+	echo ${latest}
 	return 
 	wget "${http}/${latest}"
 	tar -zxvf    "${latest}"
