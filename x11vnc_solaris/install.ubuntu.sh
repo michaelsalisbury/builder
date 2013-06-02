@@ -8,6 +8,18 @@ function main(){
 
 
 }
+function canonicalpath(){
+	if [ -d $1 ]; then
+		pushd $1 > /dev/null 2>&1
+		echo $PWD
+	elif [ -f $1 ]; then
+		pushd $(dirname $1) > /dev/null 2>&1
+		echo $PWD/$(basename $1)
+	else
+		echo "Invalid path $1"
+	fi
+	popd > /dev/null 2>&1
+}
 # GLOBAL vars; fully qualified script paths and names
 BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
 BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
