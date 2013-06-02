@@ -45,7 +45,8 @@ EOE
 read -d $'' includes <<-EOE
 	xinetd.*
 	allowed.*
-	
+	tigervnc*
+
 
 
 
