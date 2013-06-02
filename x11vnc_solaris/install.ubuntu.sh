@@ -19,8 +19,11 @@ function main(){
 		return
 	fi
 
-	# 
-
+	# Update major scrips
+	local major=""
+	for major in ${majors}; do
+		cp -f "${major}" /etc/x11vnc/.
+	done
 
 
 }
@@ -47,8 +50,11 @@ http='https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris'
 # Get latest version details
 latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
 
-
-
-
+# Projects major scripts
+read -d $'' majors <<-EOE
+	Xvnc-dynamic.sh
+	x11vnc.sh
+	xstartup
+EOE
 
 main "$@"
