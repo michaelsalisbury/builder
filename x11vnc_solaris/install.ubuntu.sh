@@ -7,10 +7,14 @@ function main(){
 	# If an update is need then re-download and re-run install
 	if (( $? 1= 0 )); then
 		local version=`echo "${latest}" | xargs dirname | sort -u`
-
-
-		
-		echo version is latest :: $?
+		local part=""
+		rm -rf    /etc/x11vnc/${version}
+		mkdir  -p /etc/x11vnc/${version}
+		cd        /etc/x11vnc/${version}
+		for part in ${latest}; do
+			wget "${http}/${part}"
+		done
+		cat * | tar -zxvf -
 		return
 	fi
 
