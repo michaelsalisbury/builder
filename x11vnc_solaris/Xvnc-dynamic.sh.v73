@@ -344,8 +344,8 @@ fi
 DISPLAY_FILE=".vnc/displays"
 
 # set DEBUG to true for excessive function logging
-DEBUG=false
 DEBUG=true
+DEBUG=false
 
 # MAIN; setup or jump into vncserver session
 main "$@" >> "${LOG}" 2>/dev/null
