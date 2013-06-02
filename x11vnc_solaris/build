@@ -9,8 +9,7 @@ function main(){
 	cd "${BASH_SRCDIR}"
 	tar -cz `GET_FILES` | split -b ${MAX_SPLIT} - "${version_dir}/${NAME}.v${version_num}.tgz"_
 	# write LATEST.TXT
-	cd "${version_dir}"
-	ls | xargs echo $(dirname "${version_dir}")/
+	ls $(basename "${version_dir}")/*
 
 
 
