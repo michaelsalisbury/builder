@@ -216,16 +216,8 @@ function setup_Prep_Add_Repos(){
 			done
 		done
 	done
-			
-	#deb http://neuro.debian.net/debian		data   main contrib non-free
-	#deb http://neuro.debian.net/debian		raring main contrib non-free
-	#deb http://neurodeb.pirsquared.org		data   main contrib non-free
-	#deb http://neurodeb.pirsquared.org		raring main contrib non-free
-	#deb http://masi.vuse.vanderbilt.edu/neurodebian	data   main contrib non-free
-	#deb http://masi.vuse.vanderbilt.edu/neurodebian	raring main contrib non-free
-
-
-	return
+	#apt-key adv --recv-keys --keyserver keyserver.ubuntu.com A5D32F012649A5A9
+	apt-key adv --recv-keys --keyserver pgp.mit.edu 2649A5A9
 
 	# Add Oracle VirtualBox Repo
 	echo "deb http://download.virtualbox.org/virtualbox/debian $DISTRIB_CODENAME contrib" > \
@@ -322,7 +314,7 @@ function setup_Prep_Add_Repos(){
 	add-apt-repository -y ppa:nvbn-rm/ppa
 
 	# Add Tweak & MyUnity Repos
-	add-apt-repository -y ppa:tualatrix/ppa
+	add-apt-repository -y ppa:tualatrix/ppaapt-key adv --recv-keys --keyserver keyserver.ubuntu.com 2EBC26B60C5A2783
 
 	# Update
 	apt-get ${aptopt} update
