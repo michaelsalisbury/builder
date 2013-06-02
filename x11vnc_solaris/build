@@ -16,14 +16,10 @@ function GET_VERSION(){
 	for major in ${majors}; do
 		ls -1 "${BASH_SRCDIR}/${major}".v+([0-9])           2>/dev/null
 		ls -1 "${BASH_SRCDIR}/REVISIONS/${major}".v+([0-9]) 2>/dev/null
-	done |\
-	sed 's/.*\.v//' |\
-	sort -n -u |\
+	done		|\
+	sed 's/.*\.v//'	|\
+	sort -n -u	|\
 	tail -1
-
-
-
-
 }
 
 
