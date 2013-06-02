@@ -195,12 +195,29 @@ EOF
 function setup_Prep_Add_Repos(){
         desc Prep: Add repos
         waitForNetwork || return 1
+	local http=""
+	local list=""
+	local repo=""
+	local deb=""
 
 	# Disable upgrades
 	sed -i '/^Prompt=/c\never' /etc/update-manager/release-upgrades
 
 	# Add Neuro Debian Repo
-	deb http://neuro.debian.net/debian		data   main contrib non-free
+	local list='/etc/apt/sources.list.d/neurodebian.sources.list'
+	local do_release=`lsb_release -sc`
+	rm -f "${list}"
+	for http in	"http://neuro.debian.net/debian" \
+			"http://neurodeb.pirsquared.org" \
+			"http://masi.vuse.vanderbilt.edu/neurodebian"; do
+		for repo in data ${do_release}; do
+			for deb in deb \#deb-src; do
+				echo ${deb} ${http} ${repo} main contrib non-free >> "${list}"
+			done
+		done
+	done
+			
+	#deb http://neuro.debian.net/debian		data   main contrib non-free
 	deb http://neuro.debian.net/debian		raring main contrib non-free
 	deb http://neurodeb.pirsquared.org		data   main contrib non-free
 	deb http://neurodeb.pirsquared.org		raring main contrib non-free
@@ -224,15 +241,15 @@ function setup_Prep_Add_Repos(){
 	wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 
 	# Add UCK Repos
-	local uck_list='/etc/apt/sources.list.d/uck-team'
+	local list='/etc/apt/sources.list.d/uck-team'
 	local do_release=`lsb_release -sc`
-	rm -f "${uck_list}"*
+	rm -f "${list}"*
 	add-apt-repository -y ppa:uck-team/uck-stable
 	add-apt-repository -y ppa:uck-team/uck-unstable
 	# current stable build of uck is quantal
 	case ${do_release} in
 		saucy|raring)
-			cat <<-SED | sed -i -f <(cat) "${uck_list}-stable-${do_release}.list"
+			cat <<-SED | sed -i -f <(cat) "${list}-stable-${do_release}.list"
 				/^deb/{
 					h
 					s/^/#/
@@ -246,7 +263,7 @@ function setup_Prep_Add_Repos(){
 	# last build of unionfs-fuse is oneiric
 	case ${do_release} in
 		saucy|raring|quantal)
-			cat <<-SED | sed -i -f <(cat) "${uck_list}-unstable-${do_release}.list"
+			cat <<-SED | sed -i -f <(cat) "${list}-unstable-${do_release}.list"
 				/^deb/{
 					h
 					x
@@ -258,22 +275,20 @@ function setup_Prep_Add_Repos(){
 	esac
 
 	# Add Adobe Repo
-	local adobe_list='/etc/apt/sources.list.d/canonical_Adobe.list'
-	local canonical='http://archive.canonical.com/ubuntu'
+	local list='/etc/apt/sources.list.d/canonical_Adobe.list'
+	local http='http://archive.canonical.com/ubuntu'
 	local do_release=`lsb_release -sc`
-	local repo=""
-	local deb=""
-	rm -f "${adobe_list}"
+	rm -f "${list}"
 	case ${do_release} in
 		saucy)	do_release=quantal;;
 		raring)	for deb in deb deb-src; do
-				echo ${deb} ${canonical} ${do_release} partner >> "${adobe_list}"
-		done
-		do_release=quantal;;
+				echo ${deb} ${http} ${do_release} partner >> "${list}"
+			done
+			do_release=quantal;;
 	esac
 	for repo in "" -updates -security -backports; do
 		for deb in deb deb-src; do
-			echo ${deb} ${canonical} ${do_release}${repo} partner >> "${adobe_list}"
+			echo ${deb} ${http} ${do_release}${repo} partner >> "${list}"
 		done
 	done
 
