@@ -1050,8 +1050,13 @@ function setup_tigervnc(){
 	#			  tigervnc-xorg-extension	\
 	#			  xfonts-100dpi xfonts-75dpi	\
 	#			  x11vnc xinetd
+	local http='https://github.com/michaelsalisbury/builder/blob/master/x11vnc_solaris'
 	mkdir /etc/x11vnc
+	cd    /etc/x11vnc
+	wget "${http}/LATEST.TXT"
+
 	mkdir /opt/tigervnc
+	https://github.com/michaelsalisbury/builder/blob/master/x11vnc_solaris/x11vnc.v73.tgz
 		http://downloads.sourceforge.net/project/tigervnc/tigervnc/1.2.0/tigervnc-Linux-x86_64-1.2.0.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Ftigervnc%2Ffiles%2Ftigervnc%2F1.2.0%2F&ts=1370196375&use_mirror=superb-dca2
 
 
