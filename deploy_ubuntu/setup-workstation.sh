@@ -206,6 +206,11 @@ function setup_Prep_Add_Repos(){
 	deb http://masi.vuse.vanderbilt.edu/neurodebian raring main contrib non-free
 	#deb-src http://masi.vuse.vanderbilt.edu/neurodebian raring main contrib non-free
 
+deb http://neuro.debian.net/debian data main contrib non-free
+#deb-src http://neuro.debian.net/debian data main contrib non-free
+deb http://neuro.debian.net/debian raring main contrib non-free
+
+
 	return
 
 	# Add Oracle VirtualBox Repo
