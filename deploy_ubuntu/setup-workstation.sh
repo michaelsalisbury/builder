@@ -504,19 +504,18 @@ function setup_Add_Desktop_gnome_shells(){
 			gnome-shell-extensions
 			gnome-session-fallback
 			gnome-tweak-tool)
-	/usr/bin/expect -f <(cat << END-OF-EXPECT
-set timeout -1
-spawn apt-get -y -q install ${packages[@]}
-#spawn apt-get -y -q install ${package}
-match_max 100000
-expect -exact "Preconfiguring packages ...\r"
-set timeout 3
-expect "$"
-send -- "\r"
-set timeout -1
-expect eof
-END-OF-EXPECT
-)
+	cat <<-END-OF-EXPECT | /usr/bin/expect -f <(cat)
+		set timeout -1
+		spawn apt-get -y -q install ${packages[@]}
+		#spawn apt-get -y -q install ${package}
+		match_max 100000
+		expect -exact "Preconfiguring packages ...\r"
+		set timeout 3
+		expect "$"
+		send -- "\r"
+		set timeout -1
+		expect eof
+	END-OF-EXPECT
 }
 function setup_Unity_Classic_Menu(){
         desc "Setup classicmenu-indicator_0.07_all.deb"
@@ -530,16 +529,16 @@ function setup_Unity_Classic_Menu(){
         waitAptgetInstall
         dpkg -i classicmenu-indicator_0.07_all.deb
         waitAptgetInstall
-        cat << EOF > /etc/xdg/autostart/classicmenu-indicator.desktop
-[Desktop Entry]
-Name=ClassicMenu Indicator
-Comment=Indicator applet to show the Gnome Classic main menu
-GenericName=ClassicMenu Indicator
-Categories=GNOME;Utility;
-Exec=classicmenu-indicator
-Icon=gnome-main-menu
-Type=Application
-EOF
+        cat <<-EOF > /etc/xdg/autostart/classicmenu-indicator.desktop
+		[Desktop Entry]
+		Name=ClassicMenu Indicator
+		Comment=Indicator applet to show the Gnome Classic main menu
+		GenericName=ClassicMenu Indicator
+		Categories=GNOME;Utility;
+		Exec=classicmenu-indicator
+		Icon=gnome-main-menu
+		Type=Application
+	EOF
 }
 function setup_Synergy(){
 	desc Synergy Keybard and Mouse share
