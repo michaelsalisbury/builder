@@ -5,14 +5,14 @@ function main(){
 	local version_num=`GET_VERSION`
 	local version_dir="${BASH_SRCDIR}/${NAME}.v${version_num}"
 	mkdir -p "${version_dir}"
+
 	# compress and split
 	cd "${BASH_SRCDIR}"
 	tar -cz `GET_FILES` | split -b ${MAX_SPLIT} - "${version_dir}/${NAME}.v${version_num}.tgz"_
+
 	# write LATEST.TXT
-	ls $(basename "${version_dir}")/* > LATEST.TXT2
-
-
-
+	cd "${BASH_SRCDIR}"
+	ls $(basename "${version_dir}")/* | tee LATEST.TXT
 }
 function GET_VERSION(){
 	# requires; shopt -s extglob
