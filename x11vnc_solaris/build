@@ -5,7 +5,6 @@ function main(){
 	local version=`GET_VERSION`
 	GET_FILES	
 
-	echo ${includes[2]}
 
 }
 function GET_VERSION(){
@@ -26,14 +25,8 @@ function GET_FILES(){
 	done
 	local include=""
 	for include in ${includes}; do
-		ls -1 "${BASH_SRCDIR}"/$include
+		ls -1 "${BASH_SRCDIR}"/${include}
 	done
-
-
-
-
-
-
 }
 function canonicalpath(){
 	if [ -d $1 ]; then
@@ -52,12 +45,16 @@ BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
 BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
 BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 
+# Project NAME
+NAME='x11vnc'
+
 # Projects major scripts
 read -d $'' majors <<-EOE
 	Xvnc-dynamic.sh
 	x11vnc.sh
 	xstartup
 EOE
+# Projects support files
 read -d $'' includes <<-EOE
 	install.*
 	xinetd.*
