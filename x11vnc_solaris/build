@@ -4,7 +4,7 @@ shopt -s extglob
 function main(){
 	local version_num=`GET_VERSION`
 	local version_dir="${BASH_SRCDIR}/${NAME}.v${version_num}"
-	mkdir "${version_dir}"
+	mkdir -p "${version_dir}"
 	# compress and split
 	cd "${BASH_SRCDIR}"
 	tar -cz `GET_FILES` | split -b ${MAX_SPLIT} - "${version_dir}/${NAME}.v${version_num}.tgz"_
