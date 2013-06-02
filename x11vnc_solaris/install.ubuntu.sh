@@ -3,11 +3,15 @@
 
 function main(){
 	# Verify that currect version is latest
-	diff <(echo "${latest}") "${BASH_SRCDIR}/LATEST.TXT"
-	if (( $? == 0 )); then
+	diff <(echo "${latest}") "${BASH_SRCDIR}/LATEST.TXT" &>/dev/null
+	# If an update is need then re-download and re-run install
+	if (( $? 1= 0 )); then
+		mkdir 
+
+
+		
 		echo version is latest :: $?
-	else
-	
+		return
 	fi
 
 
