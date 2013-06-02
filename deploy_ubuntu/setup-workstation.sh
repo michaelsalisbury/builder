@@ -210,8 +210,8 @@ function setup_Prep_Add_Repos(){
 	for http in	"http://neuro.debian.net/debian" \
 			"http://neurodeb.pirsquared.org" \
 			"http://masi.vuse.vanderbilt.edu/neurodebian"; do
-		for repo in data ${do_release}; do
-			for deb in deb \#deb-src; do
+		for deb in deb \#deb-src; do
+			for repo in data ${do_release}; do
 				echo ${deb} ${http} ${repo} main contrib non-free >> "${list}"
 			done
 		done
