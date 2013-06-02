@@ -59,11 +59,11 @@ read -d $'' majors <<-EOE
 	xstartup
 EOE
 read -d $'' includes <<-EOE
-	install.\*
-	xinetd.\*
-	allowed.\*
-	tigervnc-\*
-	x11vnc-\*
+	install.\\*
+	xinetd.\\*
+	allowed.\\*
+	tigervnc-\\*
+	x11vnc-\\*
 	LATEST.TXT
 	aliases
 EOE
