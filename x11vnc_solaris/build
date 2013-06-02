@@ -63,7 +63,7 @@ read -d $'' includes <<-EOE
 	xinetd.*
 	allowed.*
 	tigervnc-*
-	x11vnc-\\\*
+	x11vnc-*
 	LATEST.TXT
 	aliases
 EOE
