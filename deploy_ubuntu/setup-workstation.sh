@@ -318,6 +318,7 @@ function setup_Prep_Add_Repos(){
 
 	# Update
 	apt-get ${aptopt} update
+	apt-file update
 }
 function setup_Package_Autoresponces(){
         desc Prep \for EULA and other apt-get prompts
