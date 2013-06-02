@@ -19,11 +19,18 @@ function main(){
 		return
 	fi
 
-	# Update major scrips
+	# Install dependencies
+
+
+	# Update major scripts
 	local major=""
 	for major in ${majors}; do
 		cp -f "${major}" /etc/x11vnc/.
 	done
+
+	# Update xinetd configs and re-start xinetd
+
+	# copy config files but don't overwrite  
 
 
 }
