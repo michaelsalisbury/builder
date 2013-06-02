@@ -1048,7 +1048,9 @@ function setup_tigervnc(){
         ###################################################################################
 	# dynamic script supports desktops gnome(classic) xfce kde ice lwm fluxbox
         waitAptgetInstall
-	apt-get ${aptopt} install x11vnc xinetd xfonts-100dpi xfonts-75dpi
+	apt-get ${aptopt} install x11vnc xinetd \
+				  xfonts-base xfonts-100dpi xfonts-75dpi \
+				  xfonts-biznet-base xfonts-biznet-100dpi xfonts-biznet-75dpi
 
 	# neuro's tiger vncversion has been heavily modified from redhat's version; needs much exploration
         #waitAptgetInstall
@@ -1065,13 +1067,7 @@ function setup_tigervnc(){
 
 	mkdir /opt/tigervnc
 	cd    /opt/tigervnc
-	cp    /etc/x11vnc
-	https://github.com/michaelsalisbury/builder/blob/master/x11vnc_solaris/x11vnc.v73.tgz
-		http://downloads.sourceforge.net/project/tigervnc/tigervnc/1.2.0/tigervnc-Linux-x86_64-1.2.0.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Ftigervnc%2Ffiles%2Ftigervnc%2F1.2.0%2F&ts=1370196375&use_mirror=superb-dca2
-
-
-	
-
+	tar -zxvf /etc/x11vnc/tigervnc-Linux-`uname -m`-*.tar.gz
 
 
 
