@@ -6,7 +6,7 @@ function main(){
 	diff <(echo "${latest}") "${BASH_SRCDIR}/LATEST.TXT" &>/dev/null
 	# If an update is need then re-download and re-run install
 	if (( $? == 0 )); then
-		local version=`echo "${latest}" | head -a | xargs dirname`
+		local version=`echo "${latest}" | head -1 | xargs dirname`
 		echo $version
 		return
 		local part=""
