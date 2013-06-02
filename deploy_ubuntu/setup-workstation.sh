@@ -1060,7 +1060,7 @@ function setup_tigervnc(){
 	#			  x11vnc xinetd
 	local http='https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris'
 	local latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
-	local version=`echo "${latest}" | xargs dirname | sort -u`
+	local version=`echo "${latest}" | head -1 | xargs dirname`
 	local part=""
 	rm -rf    /etc/x11vnc/${version}
 	mkdir  -p /etc/x11vnc/${version}
