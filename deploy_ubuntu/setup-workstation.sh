@@ -1044,11 +1044,14 @@ function setup_adobe(){
 function setup_tigervnc(){
 	desc Tiger VNC server from Neuro Debian Repo, dynamix xinetd
         ###################################################################################
+	# dynamic script supports desktops gnome(classic) xfce kde ice lwm fluxbox
         waitAptgetInstall
 	apt-get ${aptopt} install tigervnc-standalone-server	\
 				  tigervnc-xorg-extension	\
 				  xfonts-100dpi xfonts-75dpi	\
 				  x11vnc xinetd
+	mkdir /etc/x11vnc
+
 	
 
 
