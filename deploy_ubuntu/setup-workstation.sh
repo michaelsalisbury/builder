@@ -1062,6 +1062,9 @@ function setup_tigervnc(){
 	local latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
 	mkdir /etc/x11vnc
 	cd    /etc/x11vnc
+
+	echo ${LATEST}
+	return 
 	wget "${http}/${latest}"
 	tar -zxvf    "${latest}"
 
