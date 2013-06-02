@@ -12,6 +12,7 @@ function main(){
 }
 function GET_VERSION(){
 	local major=""
+	shopt -q extglob || local EXTGLOB=false
 	shopt -s extglob
 	for major in ${majors}; do
 		ls -1 "${BASH_SRCDIR}/${major}".v*           2>/dev/null
