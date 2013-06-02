@@ -2,8 +2,8 @@
 
 function main(){
 
-	echo "${majors}"
-	
+	#echo "${majors}"
+	GET_VERSION
 	
 
 
@@ -13,8 +13,9 @@ function main(){
 function GET_VERSION(){
 	local major=""
 	for major in ${majors}; do
-		ls -1 "${BASH_SRCDIR}/${major}"
-		ls -1 "${BASH_SRCDIR}/REVISIONS
+		ls -1 "${BASH_SRCDIR}/${major}"           2>/dev/null
+		ls -1 "${BASH_SRCDIR}/REVISIONS/${major}" 2>/dev/null
+	done
 
 
 
