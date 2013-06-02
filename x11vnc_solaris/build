@@ -4,14 +4,14 @@ shopt -s extglob
 function main(){
 
 	#echo "${majors}"
-	#GET_VERSION
-	echo	
+	GET_VERSION
 
 
 
 
 }
 function GET_VERSION(){
+	# requires; shopt -s extglob
 	local major=""
 	for major in ${majors}; do
 		ls -1 "${BASH_SRCDIR}/${major}".v\+\([0-9]\)           2>/dev/null
@@ -49,5 +49,4 @@ read -d $'' majors <<-EOE
 	xstartup
 EOE
 
-ls -1 "${BASH_SRCDIR}/Xvnc-dynamic.sh".v+([0-9])
 main "$@"
