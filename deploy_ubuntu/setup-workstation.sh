@@ -218,11 +218,11 @@ function setup_Prep_Add_Repos(){
 	done
 			
 	#deb http://neuro.debian.net/debian		data   main contrib non-free
-	deb http://neuro.debian.net/debian		raring main contrib non-free
-	deb http://neurodeb.pirsquared.org		data   main contrib non-free
-	deb http://neurodeb.pirsquared.org		raring main contrib non-free
-	deb http://masi.vuse.vanderbilt.edu/neurodebian	data   main contrib non-free
-	deb http://masi.vuse.vanderbilt.edu/neurodebian	raring main contrib non-free
+	#deb http://neuro.debian.net/debian		raring main contrib non-free
+	#deb http://neurodeb.pirsquared.org		data   main contrib non-free
+	#deb http://neurodeb.pirsquared.org		raring main contrib non-free
+	#deb http://masi.vuse.vanderbilt.edu/neurodebian	data   main contrib non-free
+	#deb http://masi.vuse.vanderbilt.edu/neurodebian	raring main contrib non-free
 
 
 	return
