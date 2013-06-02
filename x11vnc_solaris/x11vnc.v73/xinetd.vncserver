@@ -1,0 +1,168 @@
+service vncserver
+{
+	disable			= no
+	type			= UNLISTED
+	id			= vncserver-dynamic-5901
+	port			= 5901
+	bind			= 127.0.0.1
+        socket_type             = stream
+        protocol                = tcp
+        wait                    = no
+        user                    = root
+        passenv                 = PATH
+        server			= /etc/x11vnc/Xvnc-dynamic.sh
+	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
+}
+service vncserver
+{
+	disable			= no
+	type			= UNLISTED
+	id			= vncserver-dynamic-5902
+	port			= 5902
+	bind			= 127.0.0.1
+        socket_type             = stream
+        protocol                = tcp
+        wait                    = no
+        user                    = root
+        passenv                 = PATH
+        server			= /etc/x11vnc/Xvnc-dynamic.sh
+	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
+}
+service vncserver
+{
+	disable			= no
+	type			= UNLISTED
+	id			= vncserver-dynamic-5903
+	port			= 5903
+	bind			= 127.0.0.1
+        socket_type             = stream
+        protocol                = tcp
+        wait                    = no
+        user                    = root
+        passenv                 = PATH
+        server			= /etc/x11vnc/Xvnc-dynamic.sh
+	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
+}
+service vncserver
+{
+	disable			= no
+	type			= UNLISTED
+	id			= vncserver-dynamic-5904
+	port			= 5904
+	bind			= 127.0.0.1
+        socket_type             = stream
+        protocol                = tcp
+        wait                    = no
+        user                    = root
+        passenv                 = PATH
+        server			= /etc/x11vnc/Xvnc-dynamic.sh
+	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
+}
+service vncserver
+{
+	disable			= no
+	type			= UNLISTED
+	id			= vncserver-dynamic-5905
+	port			= 5905
+	bind			= 127.0.0.1
+        socket_type             = stream
+        protocol                = tcp
+        wait                    = no
+        user                    = root
+        passenv                 = PATH
+        server			= /etc/x11vnc/Xvnc-dynamic.sh
+	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
+}
+service vncserver
+{
+	disable			= no
+	type			= UNLISTED
+	id			= vncserver-dynamic-5906
+	port			= 5906
+	bind			= 127.0.0.1
+        socket_type             = stream
+        protocol                = tcp
+        wait                    = no
+        user                    = root
+        passenv                 = PATH
+        server			= /etc/x11vnc/Xvnc-dynamic.sh
+	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
+}
+service vncserver
+{
+	disable			= no
+	type			= UNLISTED
+	id			= vncserver-dynamic-5907
+	port			= 5907
+	bind			= 127.0.0.1
+        socket_type             = stream
+        protocol                = tcp
+        wait                    = no
+        user                    = root
+        passenv                 = PATH
+        server			= /etc/x11vnc/Xvnc-dynamic.sh
+	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
+}
+service vncserver
+{
+	disable			= no
+	type			= UNLISTED
+	id			= vncserver-dynamic-5908
+	port			= 5908
+	bind			= 127.0.0.1
+        socket_type             = stream
+        protocol                = tcp
+        wait                    = no
+        user                    = root
+        passenv                 = PATH
+        server			= /etc/x11vnc/Xvnc-dynamic.sh
+	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
+}
+service vncserver
+{
+	disable			= no
+	type			= UNLISTED
+	id			= vncserver-dynamic-5909
+	port			= 5909
+	bind			= 127.0.0.1
+        socket_type             = stream
+        protocol                = tcp
+        wait                    = no
+        user                    = root
+        passenv                 = PATH
+        server			= /etc/x11vnc/Xvnc-dynamic.sh
+	server_args		= allowed.vncserver
+        log_type                = FILE /var/log/Xvnc-xinetd
+        log_on_success          = PID HOST EXIT
+        log_on_failure          = HOST USERID ATTEMPT
+}
+
+
+
+
+
+
