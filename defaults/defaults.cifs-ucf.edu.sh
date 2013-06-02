@@ -11,11 +11,11 @@ function includes(){
 }
 function global_variables(){
 	echo
-	read -d $'' g_domains << END-OF-DOMAINS
+	read -d $'' g_domains <<-END-OF-DOMAINS
 		cos.ucf.edu
 		net.ucf.edu
 		mydomain.org
-END-OF-DOMAINS
+	END-OF-DOMAINS
 }
 
 function setup_skel_Structure(){
@@ -46,57 +46,58 @@ function setup_skel_Structure(){
 }
 function setup_make_Config(){
 	desc Setting up default config
-	cat << END-OF-ALIASES > /etc/profile.d/cifs.sh
-alias    mount.d='\${HOME}/.scripts/mount.domain_cifs.sh'
-alias  mount.dom='\${HOME}/.scripts/mount.domain_cifs.sh'
-alias domain.mnt='\${HOME}/.scripts/mount.domain_cifs.sh'
-END-OF-ALIASES
+	cat <<-END-OF-ALIASES > /etc/profile.d/cifs.sh
+		alias    mount.d='\${HOME}/.scripts/mount.domain_cifs.sh'
+		alias  mount.dom='\${HOME}/.scripts/mount.domain_cifs.sh'
+		alias domain.mnt='\${HOME}/.scripts/mount.domain_cifs.sh'
+	END-OF-ALIASES
 	for domain in $g_domains; do
-		cat << END-OF-CONF > /etc/skel/.cifs-${domain}-cred
-username=[NID]
-password=[***]
-domain=${domain}
-END-OF-CONF
+		cat <<-END-OF-CONF > /etc/skel/.cifs-${domain}-cred
+			username=[NID]
+			password=[***]
+			domain=${domain}
+		END-OF-CONF
 	done
-	cat << END-OF-SUDOERS > /etc/sudoers.d/cifs
-# cifs
-%cifs ALL=(root) NOPASSWD:/sbin/mount.cifs
-%cifs ALL=(root) NOPASSWD:/bin/umount -t cifs -v /home/*
-END-OF-SUDOERS
-	cat << END-OF-DESKTOP > /etc/xdg/autostart/mount.domain_cifs.desktop
-[Desktop Entry]
-Type=Application
-Exec=/bin/bash -c \\\${HOME}/.scripts/mount.domain_cifs.sh
-Hidden=false
-NoDisplay=true
-Terminal=true
-X-GNOME-Autostart-enabled=true
-Name[en_US]=CIFS Automount
-Name=CIFS Automount
-Comment[en_US]=
-Comment=
-END-OF-DESKTOP
+	cat <<-END-OF-SUDOERS > /etc/sudoers.d/cifs
+		# cifs
+		%cifs ALL=(root) NOPASSWD:/sbin/mount.cifs
+		%cifs ALL=(root) NOPASSWD:/bin/umount -t cifs -v /home/*
+	END-OF-SUDOERS
+	cat <<-END-OF-DESKTOP > /etc/xdg/autostart/mount.domain_cifs.desktop
+		[Desktop Entry]
+		Type=Application
+		Exec=/bin/bash -c \\\${HOME}/.scripts/mount.domain_cifs.sh
+		Hidden=false
+		NoDisplay=true
+		Terminal=true
+		X-GNOME-Autostart-enabled=true
+		Name[en_US]=CIFS Automount
+		Name=CIFS Automount
+		Comment[en_US]=
+		Comment=
+	END-OF-DESKTOP
 	# Modify /etc/adduser.conf to include new group openconnect
 	add_default_group cifs
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
+	chmod +r /etc/skel/.scripts
 	chmod +r /etc/skel/.cifs-*
-	local scriptBase=$(basename "${scriptName}" .sh)
+	#local scriptBase=$(basename "${scriptName}" .sh)
 	get_user_details all | while read user uid gid home; do
 		usermod -a -G cifs ${user}
-		su -m -s /bin/bash ${user} < <(cat << END-OF-CMDS
-			mkdir -p  "${home}/.scripts"
-			chmod 750 "${home}/.scripts"
-			mkdir -p  "${home}/.logs"
-			chmod 750 "${home}/.logs"
-			cp "/etc/skel/.scripts/mount.domain_cifs.sh" "${home}/.scripts/".
-			chmod 750                                    "${home}/.scripts/mount.domain_cifs.sh"
-			cp "/etc/skel/.cifs-"*                       "${home}/".
-			chmod 600                                    "${home}/.cifs-"*
-END-OF-CMDS
-)
+		cat <<-END-OF-CMDS | su - ${user} -s /bin/bash
+			mkdir -p  "\${HOME}/.scripts"
+			chmod 750 "\${HOME}/.scripts"
+			mkdir -p  "\${HOME}/.logs"
+			chmod 750 "\${HOME}/.logs"
+			cp "/etc/skel/.scripts/mount.domain_cifs.sh" "\${HOME}/.scripts/".
+			chmod 750                                    "\${HOME}/.scripts/mount.domain_cifs.sh"
+			cp "/etc/skel/.cifs-"*                       "\${HOME}/".
+			chmod 600                                    "\${HOME}/.cifs-"*
+		END-OF-CMDS
 	done
+	chmod 700 /etc/skel/.scripts
 	chmod 600 /etc/skel/.cifs-*
 }
 

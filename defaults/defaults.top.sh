@@ -40,11 +40,12 @@ END-OF-CONFIG
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
+	chmod +r /etc/skel/.toprc
 	get_user_details all | while read user uid gid home; do
-		su -m ${user} < <(cat << END-OF-CMDS
-			cp "/etc/skel/.toprc" "${home}/."
-			chmod 700 "${home}/.toprc"
-END-OF-CMDS
-)
+		cat <<-END-OF-CMDS | su - ${user} -s /bin/bash
+			cp "/etc/skel/.toprc" "\${HOME}/."
+			chmod 700 "\${HOME}/.toprc"
+		END-OF-CMDS
+	chmod 700 /etc/skel/.toprc
 	done
 }

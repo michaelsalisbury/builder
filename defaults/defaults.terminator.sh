@@ -1,6 +1,6 @@
 #!/bin/builder.sh
 skip=( false false false false )
-step=1
+step=3
 prefix="setup"
 source=http://10.173.119.78/scripts/system-setup/$scriptName
 
@@ -104,14 +104,19 @@ END-OF-CONFIG
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
+	chmod +r /etc/skel/.config
+	chmod +r /etc/skel/.config/terminator
+	chmod +r /etc/skel/.config/terminator/config
 	get_user_details all | while read user uid gid home; do
-		su -m ${user} < <(cat << END-OF-CMDS
+		cat <<-END-OF-CMDS | su - ${user} -s /bin/bash
 			mkdir -p  "${home}/.config/terminator"
 			chmod 700 "${home}/.config/"
 			chmod 700 "${home}/.config/terminator"
 			cp "/etc/skel/.config/terminator/config" "${home}/.config/terminator/."
-END-OF-CMDS
-)
+		END-OF-CMDS
 	done
+	chmod 700 /etc/skel/.config
+	chmod 700 /etc/skel/.config/terminator
+	chmod 600 /etc/skel/.config/terminator/config
 }
 

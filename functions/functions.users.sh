@@ -32,20 +32,19 @@ function get_user_details(){
 	local ID=$1
 	shopt -s nocasematch
 	if [ "$ID" == "all" ]; then
-		read -d $'' awk << END-OF-AWK
-		{if (((\$3 >= 1000)||(\$1 == "root"))&&(\$1 != "nobody"))
-			{print \$1" "\$3" "\$4" "\$6;}
-		}
-END-OF-AWK
+		cat <<-AWK | awk -F: -f <(cat) /etc/passwd
+			{if (((\$3 >= 1000)||(\$1 == "root"))&&(\$1 != "nobody"))
+				{print \$1" "\$3" "\$4" "\$6;}
+			}
+		AWK
 	else
-		read -d $'' awk << END-OF-AWK
-		{if ((\$1 == "$ID")||(\$3 == "$ID"))
-			{print \$1" "\$3" "\$4" "\$6;}
-		}
-END-OF-AWK
+		cat <<-AWK | awk -F: -f <(cat) /etc/passwd
+			{if ((\$1 == "$ID")||(\$3 == "$ID"))
+				{print \$1" "\$3" "\$4" "\$6;}
+			}
+		AWK
 	fi
 	shopt -u nocasematch
-	awk -F: "${awk}" /etc/passwd
 }
 function add_default_group(){
 	local group=$1
@@ -64,38 +63,43 @@ function del_default_group(){
 	fi
 	return 1
 }
-function free_ID_pair(){
-	local ID=${1:-\1}
-
-	if ! awk -F: '{print $3}' /etc/passwd | egrep -q ^${ID}$ \
-	&& ! awk -F: '{print $3}' /etc/group  | egrep -q ^${ID}$ ; then
-		echo $ID
-		return 0
-	else
-		let ID++
-		free_ID_pair $ID $MAX
-	fi
-}
 function free_group_ID(){
-	local ID=${1:-\1}
-
-	if ! awk -F: '{print $3}' /etc/group  | egrep -q ^${ID}$ ; then
-		echo $ID
-		return 0
-	else
-		let ID++
-		free_group_ID $ID $MAX
-	fi
+	free_ID UID ${1}
 }
 function free_user_ID(){
-	local ID=${1:-\1}
+	free_ID GID ${1}
+}
+function free_UID(){	
+	free_ID UID $1
+}
+function free_GID(){
+	free_ID GID $1
+}
+function free_ID_pair(){
+	local uid=$(free_UID $1)
+	local gid=$(free_GID ${uid})
+	if (( uid == gid )); then
+		echo ${uid}
+	else
+		free_ID_pair ${gid}
+	fi
+} 
+function free_ID(){
+	local file=${1//[^a-Z]/}
+	case ${file} in
+		group|passwd)	local ID=${2:-\1};;
+		g*|G*)		free_ID group ${2//[^0-9]/}
+				return 0;;
+		p*|P*|u*|U*)	free_ID passwd ${2//[^0-9]/}
+				return 0;;
+		*)		free_ID ${file:-passwd} ${1//[^0-9]/}
+				return 0;;
+	esac
 
-	if ! awk -F: '{print $3}' /etc/passwd | egrep -q ^${ID}$ ; then
+	if ! grep -q ^${ID}$ <(cut -d: -f3 /etc/${file}); then
 		echo $ID
-		return 0
 	else
 		let ID++
-		free_user_ID $ID $MAX
+		free_ID ${file} ${ID}
 	fi
 }
-

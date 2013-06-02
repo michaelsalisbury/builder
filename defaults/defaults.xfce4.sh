@@ -24,51 +24,51 @@ function setup_Panel_Icons(){
 	desc Add Panel icons
 	mkdir -p                            /etc/skel/.config/xfce4/panel/launcher-13
 	mkdir -p                            /etc/skel/.config/xfce4/panel/launcher-13
-	cat << END-OF-13520553166.desktop > /etc/skel/.config/xfce4/panel/launcher-13/13520553166.desktop
-[Desktop Entry]
-Name=Terminator
-Comment=Multiple terminals in one window
-TryExec=terminator
-Exec=terminator
-Icon=terminator
-Type=Application
-Categories=GNOME;GTK;Utility;TerminalEmulator;System;
-StartupNotify=true
-X-Ubuntu-Gettext-Domain=terminator
-X-Ayatana-Desktop-Shortcuts=NewWindow;
-X-XFCE-Source=file:///usr/share/applications/terminator.desktop
+	cat <<-END-OF-13520553166.desktop > /etc/skel/.config/xfce4/panel/launcher-13/13520553166.desktop
+		[Desktop Entry]
+		Name=Terminator
+		Comment=Multiple terminals in one window
+		TryExec=terminator
+		Exec=terminator
+		Icon=terminator
+		Type=Application
+		Categories=GNOME;GTK;Utility;TerminalEmulator;System;
+		StartupNotify=true
+		X-Ubuntu-Gettext-Domain=terminator
+		X-Ayatana-Desktop-Shortcuts=NewWindow;
+		X-XFCE-Source=file:///usr/share/applications/terminator.desktop
 
-[NewWindow Shortcut Group]
-Name=Open a New Window
-Exec=terminator
-TargetEnvironment=Unity
-END-OF-13520553166.desktop
+		[NewWindow Shortcut Group]
+		Name=Open a New Window
+		Exec=terminator
+		TargetEnvironment=Unity
+	END-OF-13520553166.desktop
 	mkdir -p                            /etc/skel/.config/xfce4/panel/launcher-14
-	cat << END-OF-13520553487.desktop > /etc/skel/.config/xfce4/panel/launcher-14/13520553487.desktop
-[Desktop Entry]
-Version=1.0
-Name=Google Chrome
-GenericName=Web Browser
-Comment=Access the Internet
-Exec=/opt/google/chrome/google-chrome %U
-Terminal=false
-Icon=google-chrome
-Type=Application
-Categories=Network;WebBrowser;
-MimeType=text/html;text/xml;application/xhtml_xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;
-X-Ayatana-Desktop-Shortcuts=NewWindow;NewIncognito
-X-XFCE-Source=file:///usr/share/applications/google-chrome.desktop
+	cat <<-END-OF-13520553487.desktop > /etc/skel/.config/xfce4/panel/launcher-14/13520553487.desktop
+		[Desktop Entry]
+		Version=1.0
+		Name=Google Chrome
+		GenericName=Web Browser
+		Comment=Access the Internet
+		Exec=/opt/google/chrome/google-chrome %U
+		Terminal=false
+		Icon=google-chrome
+		Type=Application
+		Categories=Network;WebBrowser;
+		MimeType=text/html;text/xml;application/xhtml_xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;
+		X-Ayatana-Desktop-Shortcuts=NewWindow;NewIncognito
+		X-XFCE-Source=file:///usr/share/applications/google-chrome.desktop
 
-[NewWindow Shortcut Group]
-Name=New Window
-Exec=/opt/google/chrome/google-chrome
-TargetEnvironment=Unity
+		[NewWindow Shortcut Group]
+		Name=New Window
+		Exec=/opt/google/chrome/google-chrome
+		TargetEnvironment=Unity
 
-[NewIncognito Shortcut Group]
-Name=New Incognito Window
-Exec=/opt/google/chrome/google-chrome --incognito
-TargetEnvironment=Unity
-END-OF-13520553487.desktop
+		[NewIncognito Shortcut Group]
+		Name=New Incognito Window
+		Exec=/opt/google/chrome/google-chrome --incognito
+		TargetEnvironment=Unity
+	END-OF-13520553487.desktop
 }
 function setup_Panel_xml(){
 	desc Establish Default Panel XML

@@ -36,29 +36,28 @@ function setup_xfce_defaults(){
 	touch                    "${helpers}"
 	chmod 600                "${helpers}"
 	sed -i '/^WebBrowser=/d' "${helpers}"
-	cat << END-OF-APPEND >>  "${helpers}"
-WebBrowser=google-chrome
-END-OF-APPEND
+	cat <<-END-OF-APPEND >>  "${helpers}"
+		WebBrowser=google-chrome
+	END-OF-APPEND
 	###############################################################################
 	local mimeapps='/etc/skel/.local/share/applications/mimeapps.list'
 	touch  "${mimeapps}"
 	if `egrep "^\[Default Applications\]$" "${mimeapps}" &> /dev/null`; then
-		sed -i "${mimeapps}" -f <(cat << END-OF-SED
-		/^\[Default Applications\]$/,/^\[.*\]$/ {
-			/^text\/html=/d
-			/^x-scheme-handler\/http=/d
-			/^x-scheme-handler\/https=/d
-			/^x-scheme-handler\/about=/d
-			/^x-scheme-handler\/unknown=/d
-		}
-END-OF-SED
-)
+		cat <<-SED | sed -i -f <(cat) "${mimeapps}"
+			/^\[Default Applications\]$/,/^\[.*\]$/ {
+				/^text\/html=/d
+				/^x-scheme-handler\/http=/d
+				/^x-scheme-handler\/https=/d
+				/^x-scheme-handler\/about=/d
+				/^x-scheme-handler\/unknown=/d
+			}
+		SED
 	else
-		cat << END-OF-APPEND >> "${mimeapps}"
-[Default Applications]
-END-OF-APPEND
+		cat <<-END-OF-APPEND >> "${mimeapps}"
+			[Default Applications]
+		END-OF-APPEND
 	fi
-	sed -i "${mimeapps}" -f <(cat << END-OF-SED
+	cat <<-SED | sed -i -f <(cat) "${mimeapps}"
 		/^\[Default Applications\]$/ {
 			atext\/html=google-chrome.desktop
 			ax-scheme-handler\/http=google-chrome.desktop
@@ -66,8 +65,7 @@ END-OF-APPEND
 			ax-scheme-handler\/about=google-chrome.desktop
 			ax-scheme-handler\/unknown=google-chrome.desktop
 		}
-END-OF-SED
-)
+	SED
 }
 function setup_gnome_defaults(){
 	desc Set Gnome Defaults via gcontool\-2
