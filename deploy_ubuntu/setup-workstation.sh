@@ -1041,6 +1041,19 @@ function setup_adobe(){
         #waitAptgetInstall
         #apt-get ${aptopt} install oracle-java8-installer
 }
+function setup_tigervnc(){
+	desc Tiger VNC server from Neuro Debian Repo, dynamix xinetd
+        ###################################################################################
+        waitAptgetInstall
+	apt-get ${aptopt} install tigervnc-standalone-server	\
+				  tigervnc-xorg-extension	\
+				  xfonts-100dpi xfonts-75dpi
+
+
+
+
+
+}
 function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
         ###################################################################################
