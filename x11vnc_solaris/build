@@ -5,7 +5,7 @@ function main(){
 	local version=`GET_VERSION`
 	GET_FILES	
 
-
+	echo ${includes[2]}
 
 }
 function GET_VERSION(){
