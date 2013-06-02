@@ -1,11 +1,6 @@
 #!/bin/bash
 
-# GLOBAL vars; fully qualified script paths and names
-BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
-BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
-BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
-
-
+function main(){
 read -d $'' majors <<-EOE
 	Xvnc-dynamic.sh
 	x11vnc.sh
@@ -14,4 +9,9 @@ EOE
 
 echo "${majors}"
 
+}
+# GLOBAL vars; fully qualified script paths and names
+BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
+BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
+BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 
