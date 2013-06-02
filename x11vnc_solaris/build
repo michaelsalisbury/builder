@@ -5,8 +5,8 @@ function main(){
 	local version_num=`GET_VERSION`
 	local WORKDIR="${BASH_SRCDIR}/${NAME}.v${version_num}"
 	mkdir "${WORKDIR}"
-	cd    "${WORKDIR}"
-	tar -czvf ${NAME}.v${version_num}.tgz `GET_FILES`
+	cd "${BASH_SRCDIR}"
+	tar -czvf "${WORKDIR}/${NAME}.v${version_num}.tgz" `GET_FILES`
 
 
 }
@@ -23,12 +23,13 @@ function GET_VERSION(){
 }
 function GET_FILES(){
 	local major=""
+	cd "${BASH_SRCDIR}"
 	for major in ${majors}; do
-		ls -1 "${BASH_SRCDIR}"/${major}
+		ls -1 ${major}
 	done
 	local include=""
 	for include in ${includes}; do
-		ls -1 "${BASH_SRCDIR}"/${include}
+		ls -1 ${include}
 	done
 }
 function canonicalpath(){
