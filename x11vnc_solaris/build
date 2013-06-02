@@ -52,7 +52,7 @@ BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 MAX_SPLIT='10M'
 
 # Project NAME
-NAME='x11vnc'
+NAME='x11vnc_test'
 
 # Projects major scripts
 read -d $'' majors <<-EOE
