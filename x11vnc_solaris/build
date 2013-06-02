@@ -5,6 +5,7 @@ function main(){
 	local version_num=`GET_VERSION`
 	local WORKDIR="${BASH_SRCDIR}/${NAME}.v${version_num}"
 	mkdir "${WORKDIR}"
+	# create compresses 
 	cd "${BASH_SRCDIR}"
 	tar -czvf "${WORKDIR}/${NAME}.v${version_num}.tgz" `GET_FILES`
 
