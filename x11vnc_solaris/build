@@ -19,6 +19,7 @@ function GET_VERSION(){
 	done
 
 
+	shopt -u extglob
 
 
 }
