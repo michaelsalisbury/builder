@@ -7,8 +7,6 @@ function main(){
 	# If an update is need then re-download and re-run install
 	if (( $? == 0 )); then
 		local version=`echo "${latest}" | head -1 | xargs dirname`
-		echo $version
-		return
 		local part=""
 		rm -rf    /etc/x11vnc/${version}
 		mkdir  -p /etc/x11vnc/${version}
