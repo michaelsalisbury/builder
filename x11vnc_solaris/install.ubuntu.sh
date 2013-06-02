@@ -5,7 +5,7 @@ function main(){
 	# Verify that currect version is latest
 	diff <(echo "${latest}") "${BASH_SRCDIR}/LATEST.TXT" &>/dev/null
 	# If an update is need then re-download and re-run install
-	if (( $? != 0 )); then
+	if (( $? == 0 )); then
 		local version=`echo "${latest}" | xargs dirname | sort -u`
 		local part=""
 		rm -rf    /etc/x11vnc/${version}
