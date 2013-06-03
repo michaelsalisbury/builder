@@ -47,7 +47,7 @@ function main(){
 	done
 	start xinetd
 
-	# update root command aliases for unlock and kick
+	# update root command aliases
 	local root_home=$(grep ^root /etc/passwd | cut -d: -f6)
 	if ! grep "^alias[[:space:]]" "${root_home}/.bashrc" &>/dev/null
 		cat <<-ENTRIES >> "${root_home}/.bashrc"
@@ -57,9 +57,18 @@ function main(){
 		ENTRIES
 		cat "${BASH_SRCDIR}/aliases" >> "${root_home}/.bashrc"
 	else
+		local ALIAS=""
+		while read ALIAS; do
+			echo $ALIAS
+		done < <(
+			cat <<-SED |sed -f <(cat) "${root_home}/.bashrc"
+				/^alias[[:space:]]/{
+					s/^alias[[:space:]]\+\([^=]\+\).*/\1/p
+				}
+			SED
+		)
 
-
-		sed '/^alias[[:space:]]\+unlock='
+		#sed '/^alias[[:space:]]\+unlock='
 
 	fi
 }
