@@ -43,6 +43,7 @@ function main(){
 
 	# Update tigervnc in /opt
 	rm   -rf /opt/TigerVNC
+	cd "${version_dir}"
 	tar -zxvf "${version_dir}"/tigervnc-Linux-`uname -m`-*.tar.gz
 	#ln -s    /opt/tigervnc/bin/* 
 
