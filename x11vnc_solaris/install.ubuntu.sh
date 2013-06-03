@@ -28,7 +28,8 @@ function main(){
 	rm   -rf /opt/tigervnc
 	mkdir -p /opt/tigervnc
 	cd       /opt/tigervnc
-	tar -zxvf /etc/x11vnc/${version}/
+	tar -zxvf /etc/x11vnc/${version}/tigervnc-Linux-`uname -m`-*.tar.gz
+	#ln -s    /opt/tigervnc/bin/* 
 
 	# Update major scripts
 	local major=""
