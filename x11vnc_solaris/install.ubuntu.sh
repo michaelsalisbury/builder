@@ -46,9 +46,9 @@ function main(){
 	for xinetd in vncserver x11vnc; do
 		local newXinetd="${version_dir}/xinetd.${xinetd}"
 		local oldXinetd="/etc/xinetd.d/${xinetd}"
-		if ! diff    "${oldXinetd}" "${newXinetd}" &>/dev/null; then
-			[ -f "${oldXinetd}" ] &&\
-			cp   "${oldXinetd}" "${newXinetd}".bk_`date "+%s"`
+		if ! diff     "${oldXinetd}" "${newXinetd}" &>/dev/null; then
+			[  -f "${oldXinetd}" ] &&\
+			cp    "${oldXinetd}" "${newXinetd}".bk_`date "+%s"`
 			cp -f "${newXinetd}" "${oldXinetd}"
 			stop xinetd
 		fi
@@ -88,7 +88,7 @@ function MOVE_TO_ETC(){
 		exit
 	fi
 
-	cat "${version}".tgz_* | tar -zxvf -
+	cat "${version}".tgz_* | tar -zxf -
 	./"${BASH_SRCNAME}"
 	exit
 }
@@ -105,7 +105,7 @@ function DOWNLOAD_UPDATE(){
 	local version=`echo "${latest}" | head -1 | xargs dirname`
 	local version_dir="/etc/${NAME}/${version}"
 
-	rm -rf    "${version_dir}"
+	rm    -rf "${version_dir}"
 	mkdir  -p "${version_dir}"
 	cd        "${version_dir}"
 	local part=""
