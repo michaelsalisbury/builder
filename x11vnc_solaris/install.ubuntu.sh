@@ -67,7 +67,7 @@ function main(){
 	fi
 
 	# Install or skip allowed users files for vncserver and x11vnc
-	echo Installing or skipping allowed users config files
+	echo Installing or skipping allowed users config files...
 	for xinetd in vncserver x11vnc; do
 		if [ -f "/etc/${NAME}/allowed.${xinetd}" ]; then
 			echo Config file \""allowed.${xinetd}"\" already exists\!
