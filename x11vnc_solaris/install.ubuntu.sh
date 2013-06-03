@@ -49,12 +49,19 @@ function main(){
 
 	# update root command aliases for unlock and kick
 	local root_home=$(grep ^root /etc/passwd | cut -d: -f6)
-	if [ ! -e "${root_home}/.bashrc" ]; then
-		cp "${BASH_SRCDIR}/aliases" "${root_home}/.bashrc"
-	elif ! grep -q "^alias[[:space:]]" "${root_home}/.bashrc"
+	if ! grep "^alias[[:space:]]" "${root_home}/.bashrc" &>/dev/null
 		cat <<-ENTRIES >> "${root_home}/.bashrc"
 
+			# User specific aliases and functions
 
+		ENTRIES
+		cat "${BASH_SRCDIR}/aliases" >> "${root_home}/.bashrc"
+	else
+
+
+		sed '/^alias[[:space:]]\+unlock='
+
+	fi
 }
 function MOVE_TO_ETC{
 	# Dependant on GLOBAL var "NAME"
