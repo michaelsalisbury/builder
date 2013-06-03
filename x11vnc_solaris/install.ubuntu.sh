@@ -132,7 +132,8 @@ function VERSION_IS_CURRENT(){
 
 
 	[ -x "${LATEST}" ] &&\
-	diff "${LATEST}" <(GET_LATEST) &>/dev/null
+	diff "${LATEST}" <(GET_LATEST)
+	#diff "${LATEST}" <(GET_LATEST) &>/dev/null
 }
 function GET_LATEST(){
 	# deplendant on GLOBAL var "http" and "latest"
