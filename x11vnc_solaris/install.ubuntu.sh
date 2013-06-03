@@ -2,11 +2,20 @@
 
 
 function main(){
+	# Move install into etc if nessisary
+	local version=`echo "${latest}" | head -1 | xargs dirname`
+	local version_dir="/etc/
+	local version=`echo "${latest}" | head -1 | xargs dirname`
+	mkdir  -p "/etc/x11vnc/${version}"
+	
+	if [ "${BASH_SRCDIR}" != "
+	
+	
+
 	# Verify that currect version is latest
 	diff <(echo "${latest}") "${BASH_SRCDIR}/LATEST.TXT" &>/dev/null
 	# If an update is need then re-download and re-run install
 	if (( $? != 0 )); then
-		local version=`echo "${latest}" | head -1 | xargs dirname`
 		local part=""
 		rm -rf    /etc/x11vnc/${version}
 		mkdir  -p /etc/x11vnc/${version}
