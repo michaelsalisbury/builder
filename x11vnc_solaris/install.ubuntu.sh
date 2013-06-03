@@ -72,6 +72,9 @@ BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 # Source git repo sudirectory
 http='https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris'
 
+# Project NAME
+NAME='x11vnc'
+
 # Get latest version details
 latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
 
