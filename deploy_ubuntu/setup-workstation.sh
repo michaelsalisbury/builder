@@ -1065,6 +1065,7 @@ function setup_tigervnc(){
 	wget 'https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris/install.ubuntu.sh'
 	chmod +x /tmp/$$${FUNCNAME}$$/install.ubuntu.sh
 		 /tmp/$$${FUNCNAME}$$/install.ubuntu.sh
+	rm   -rf /tmp/$$${FUNCNAME}$$ 
 }
 function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
