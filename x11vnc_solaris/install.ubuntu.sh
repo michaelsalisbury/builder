@@ -50,33 +50,14 @@ function main(){
 	done
 	start xinetd
 
-	# update root command aliases
+	# verify that root imports command aliases
 	local root_home=$(grep ^root /etc/passwd | cut -d: -f6)
-	if ! grep "^alias[[:space:]]" "${root_home}/.bashrc" &>/dev/null; then
+	local alias_entry_header="# Import ${NAME} command aliases"
+	if ! grep "^${alias_entry_header}$" "${root_home}/.bashrc" &>/dev/null; then
 		cat <<-ENTRIES >> "${root_home}/.bashrc"
-
-			# User specific aliases and functions
-
+			${alias_entry_header}
+			[ -f /etc/${NAME}/aliases ] && . /etc/${NAME}/aliases
 		ENTRIES
-		cat "${BASH_SRCDIR}/aliases" >> "${root_home}/.bashrc"
-	else
-		local ALIAS=""
-		# list alias entries to be updated or inserted
-		cat <<-SED | sed -n -f <(cat) "${BASH_SRCDIR}/aliases" | while read ALIAS; do
-			/^alias[[:space:]]/{
-				s/^alias[[:space:]]\+\([^=]\+\).*/\1/p
-			}
-		SED
-			# remove current entries if they exist
-			cat <<-SED | sed -i -f <(cat) "${root_home}/.bashrc"
-				/^alias[[:space:]]\+${ALIAS}=/d
-			SED
-			# find last alias entry
-			
-		done
-
-		#sed '/^alias[[:space:]]\+unlock='
-
 	fi
 }
 function MOVE_TO_ETC(){
