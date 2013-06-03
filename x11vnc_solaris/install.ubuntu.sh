@@ -130,10 +130,11 @@ function VERSION_IS_CURRENT(){
 	echo variable
 	GET_LATEST
 
-
-	[ -x "${LATEST}" ] &&\
 	diff "${LATEST}" <(GET_LATEST)
-	echo $?
+
+	#[ -f "${LATEST}" ] &&\
+	#diff "${LATEST}" <(GET_LATEST)
+	#echo $?
 	#diff "${LATEST}" <(GET_LATEST) &>/dev/null
 }
 function GET_LATEST(){
