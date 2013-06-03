@@ -1,5 +1,6 @@
                 
 		root_home=$(grep ^root /etc/passwd | cut -d: -f6)
+		echo $root_home
 
 
 		#while read ALIAS; do
