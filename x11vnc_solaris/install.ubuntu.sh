@@ -41,8 +41,9 @@ function main(){
 	for xinetd in vncserver x11vnc; do
 		local newXinetd="${version_dir}/xinetd.${xinetd}"
 		local oldXinetd="/etc/xinetd.d/${xinetd}"
-		if ! diff  "${oldXinetd}" "${newXinetd}" &>/dev/null; then
-			cp "${oldXinetd}" "${newXinetd}".bk_`date "+%s"`
+		if ! diff    "${oldXinetd}" "${newXinetd}" &>/dev/null; then
+			[ -f "${oldXinetd}" ] &&\
+			cp   "${oldXinetd}" "${newXinetd}".bk_`date "+%s"`
 			cp -f "${newXinetd}" "${oldXinetd}"
 			stop xinetd
 		fi
@@ -60,12 +61,18 @@ function main(){
 		cat "${BASH_SRCDIR}/aliases" >> "${root_home}/.bashrc"
 	else
 		local ALIAS=""
+		# list alias entries to be updated or inserted
 		cat <<-SED | sed -n -f <(cat) "${BASH_SRCDIR}/aliases" | while read ALIAS; do
 			/^alias[[:space:]]/{
 				s/^alias[[:space:]]\+\([^=]\+\).*/\1/p
 			}
 		SED
-			echo $ALIAS
+			# remove current entries if they exist
+			cat <<-SED | sed -i -f <(cat) "${root_home}/.bashrc"
+				/^alias[[:space:]]\+${ALIAS}=/d
+			SED
+			# find last alias entry
+			
 		done
 
 		#sed '/^alias[[:space:]]\+unlock='
