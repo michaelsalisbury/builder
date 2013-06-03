@@ -16,10 +16,11 @@ function main(){
 	ls $(basename "${version_dir}")/* | tee LATEST.TXT
 
 	# push changes to git
+	cd "${version_dir}"
+	git add .
 	cd "${BASH_SRCDIR}"
-	git add "${version}"/*
-	git commit 
-	
+	git commit -a -m "${version}"
+	git push
 }
 function GET_VERSION(){
 	# requires; shopt -s extglob
