@@ -1058,25 +1058,14 @@ function setup_tigervnc(){
 	#			  tigervnc-xorg-extension	\
 	#			  xfonts-100dpi xfonts-75dpi	\
 	#			  x11vnc xinetd
-	local http='https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris'
+	mkdir "/tmp/$$${FUNCNAME}$$"
+	cd    "/tmp/$$${FUNCNAME}$$"
+	wget 'https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris/install.ubuntu.sh'
+	"/tmp/$$${FUNCNAME}$$"
 	local latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
 	local version=`echo "${latest}" | head -1 | xargs dirname`
-	local part=""
-	rm -rf    /etc/x11vnc/${version}
-	mkdir  -p /etc/x11vnc/${version}
-	cd        /etc/x11vnc/${version}
-	for part in ${latest}; do
-		wget "${http}/${part}"
-	done
-	cat * | tar -zxvf -
-	cd /etc/x11vnc
 	
-	return
-	mkdir /opt/tigervnc
-	cd    /opt/tigervnc
-	tar -zxvf /etc/x11vnc/tigervnc-Linux-`uname -m`-*.tar.gz
-
-
+	local part=""
 
 }
 function setup_Clean_Update_Upgrade(){
