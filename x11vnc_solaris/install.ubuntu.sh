@@ -20,7 +20,15 @@ function main(){
 	fi
 
 	# Install dependencies
+	apt-get ${aptopt} install x11vnc xinetd \
+				  xfonts-base xfonts-100dpi xfonts-75dpi \
+				  xfonts-biznet-base xfonts-biznet-100dpi xfonts-biznet-75dpi
 
+	# Update tigervnc in /opt
+	rm   -rf /opt/tigervnc
+	mkdir -p /opt/tigervnc
+	cd       /opt/tigervnc
+	tar -zxvf /etc/x11vnc/${version}/
 
 	# Update major scripts
 	local major=""
