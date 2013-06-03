@@ -5,7 +5,11 @@
 
 		#while read ALIAS; do
                  #       echo $ALIAS
-                        cat <<-SED | sed -n -f <(cat) "aliases"
+                        cat <<-SED | sed -n -f <(cat) "aliases" | while read name; do
+				echo $name
+
+
+			done
                                 /^alias[[:space:]]/{
                                         s/^alias[[:space:]]\+\([^=]\+\).*/\1/p
                                 }
