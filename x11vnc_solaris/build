@@ -3,7 +3,8 @@ shopt -s extglob
 
 function main(){
 	local version_num=`GET_VERSION`
-	local version_dir="${BASH_SRCDIR}/${NAME}.v${version_num}"
+	local version="${NAME}.v${version_num}"
+	local version_dir="${BASH_SRCDIR}/${version}"
 	mkdir -p "${version_dir}"
 
 	# compress and split
@@ -16,7 +17,8 @@ function main(){
 
 	# push changes to git
 	cd "${BASH_SRCDIR}"
-	git add 
+	git add "${version}"/*
+	git commit 
 	
 }
 function GET_VERSION(){
