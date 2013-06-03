@@ -42,16 +42,14 @@ function main(){
 				  xfonts-biznet-base xfonts-biznet-100dpi xfonts-biznet-75dpi
 
 	# Update tigervnc in /opt
-	rm   -rf /opt/tigervnc
-	mkdir -p /opt/tigervnc
-	cd       /opt/tigervnc
-	tar -zxvf /etc/x11vnc/${version}/tigervnc-Linux-`uname -m`-*.tar.gz
+	rm   -rf /opt/TigerVNC
+	tar -zxvf "${version_dir}"/tigervnc-Linux-`uname -m`-*.tar.gz
 	#ln -s    /opt/tigervnc/bin/* 
 
 	# Update major scripts
 	local major=""
 	for major in ${majors}; do
-		cp -f "${major}" /etc/x11vnc/.
+		cp -f "${version_dir}/${major}" /etc/x11vnc/.
 	done
 
 	# Update xinetd configs and re-start xinetd
