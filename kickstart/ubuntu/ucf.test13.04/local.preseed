@@ -1,0 +1,29 @@
+# https://help.ubuntu.com/10.04/installation-guide/i386/preseed-contents.html
+#############################################################################
+# Apt-Cache Server
+d-i mirror/http/proxy string http://10.173.119.78:3142/
+d-i mirror/http/proxy string http://10.173.119.72:3142/
+d-i mirror/http/proxy string http://192.168.253.3:3142/
+
+# Primary instalation task
+tasksel tasksel/first multiselect Basic Ubuntu Server
+#tasksel tasksel/first multiselect Xubuntu desktop
+#tasksel tasksel/first multiselect Ubuntu desktop
+#tasksel tasksel/first multiselect Kubuntu full
+#tasksel tasksel/first multiselect lamp-server, print-server
+
+# Individual additional packages to install
+#d-i pkgsel/include string openssh-server build-essential
+
+# Whether to upgrade packages after debootstrap.
+# Allowed values: none, safe-upgrade, full-upgrade
+#d-i pkgsel/upgrade select none
+
+# Network name preseed config
+d-i netcfg/get_hostname string DLPBMM1-ubuntu-test-deploy
+d-i netcfg/get_domain string   cos.ucf.edu
+
+# download-installer.postinst stage
+d-i preseed/early_command string \
+	cat /tmp/preseed/preseed.hd.fdisk.sh \
+	>> /var/lib/dpkg/info/download-installer.postinst
