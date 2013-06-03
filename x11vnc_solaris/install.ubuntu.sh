@@ -19,24 +19,29 @@ function main(){
 	fi
 
 	# Install dependencies
+	echo Installing Depndencies...
 	apt-get ${aptopt} install x11vnc xinetd \
 				  xfonts-base xfonts-100dpi xfonts-75dpi \
 				  xfonts-biznet-base xfonts-biznet-100dpi xfonts-biznet-75dpi
 
 	# Update tigervnc in /opt
+	echo Installing TigerVNC...
 	rm   -rf /opt/TigerVNC
-	cd "${version_dir}"
-	tar -zxvf "${version_dir}"/tigervnc-Linux-`uname -m`-*.tar.gz
-	cp -rvf "${version_dir}"/opt/* /opt/.
-	ln -sf /opt/TigerVNC/bin/* /usr/bin/.
+	cd       "${version_dir}"
+	tar -zxf "${version_dir}"/tigervnc-Linux-`uname -m`-*.tar.gz
+	cp   -rf "${version_dir}"/opt/* /opt/.
+	rm   -rf "${version_dir}"/opt/
+	ln   -sf /opt/TigerVNC/bin/* /usr/bin/.
 
 	# Update major scripts
+	echo Installing/Updating scripts...
 	local major=""
 	for major in ${majors}; do
 		cp -f "${version_dir}/${major}" /etc/x11vnc/.
 	done
 
 	# Update xinetd configs and re-start xinetd
+	echo Installing/Updating xinetd...
 	local xinetd=""
 	for xinetd in vncserver x11vnc; do
 		local newXinetd="${version_dir}/xinetd.${xinetd}"
@@ -51,6 +56,7 @@ function main(){
 	start xinetd
 
 	# verify that root imports command aliases
+	echo Sourcing command aliases for root...
 	local root_home=$(grep ^root /etc/passwd | cut -d: -f6)
 	local alias_entry_header="# Import ${NAME} command aliases"
 	if ! grep "^${alias_entry_header}$" "${root_home}/.bashrc" &>/dev/null; then
