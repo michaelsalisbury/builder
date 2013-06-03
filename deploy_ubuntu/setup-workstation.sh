@@ -1046,7 +1046,7 @@ function setup_adobe(){
 function setup_tigervnc(){
 	desc Tiger VNC server from Neuro Debian Repo, dynamix xinetd
         ###################################################################################
-	# dynamic script supports desktops gnome(classic) xfce kde ice lwm fluxbox
+	# although the installer handles dependencies it won't do waitAptgetInstall
         waitAptgetInstall
 	apt-get ${aptopt} install x11vnc xinetd \
 				  xfonts-base xfonts-100dpi xfonts-75dpi \
@@ -1058,15 +1058,13 @@ function setup_tigervnc(){
 	#			  tigervnc-xorg-extension	\
 	#			  xfonts-100dpi xfonts-75dpi	\
 	#			  x11vnc xinetd
-	mkdir "/tmp/$$${FUNCNAME}$$"
-	cd    "/tmp/$$${FUNCNAME}$$"
-	wget 'https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris/install.ubuntu.sh'
-	"/tmp/$$${FUNCNAME}$$"
-	local latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
-	local version=`echo "${latest}" | head -1 | xargs dirname`
-	
-	local part=""
 
+	# dynamic script supports desktops gnome(classic) xfce kde ice lwm fluxbox
+	mkdir    /tmp/$$${FUNCNAME}$$
+	cd       /tmp/$$${FUNCNAME}$$
+	wget 'https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris/install.ubuntu.sh'
+	chmod +x /tmp/$$${FUNCNAME}$$/install.ubuntu.sh
+		 /tmp/$$${FUNCNAME}$$/install.ubuntu.sh
 }
 function setup_Clean_Update_Upgrade(){
 	desc Apt clean, update \& upgrade
