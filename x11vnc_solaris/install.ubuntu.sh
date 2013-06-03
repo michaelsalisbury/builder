@@ -47,7 +47,9 @@ function main(){
 	done
 	start xinetd
 
-	# copy config files but don't overwrite  
+	# update root command aliases for unlock and kick
+	local root_home=$(grep ^root /etc/passwd | cut -d: -f6
+	if [ -e /root/.bashrc
 
 
 }
