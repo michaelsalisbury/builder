@@ -5,7 +5,7 @@
 
 		#while read ALIAS; do
                  #       echo $ALIAS
-                        cat <<-SED | sed -f <(cat) "${root_home}/.bashrc"
+                        cat <<-SED | sed -n -f <(cat) "${root_home}/.bashrc"
                                 /^alias[[:space:]]/{
                                         s/^alias[[:space:]]\+\([^=]\+\).*/\1/p
                                 }
