@@ -26,7 +26,11 @@ function main(){
 		rm    -rf "${version_dir}"
 		mkdir  -p "${version_dir}"
 		cd        "${version_dir}"
-		cp -f "${BASH_SRCDIR}/${version}".tgz_* .
+		if [ -d "${BASH_SRCDIR}/${version}" ]; then 
+			cp -f "${BASH_SRCDIR}/${version}/${version}".tgz_* .
+		else
+			cp -f "${BASH_SRCDIR}/${version}".tgz_* .
+		fi
 		cat * | tar -zxvf -
 		./"${BASH_SRCNAME}"
 		return
