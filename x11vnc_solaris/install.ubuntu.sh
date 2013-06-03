@@ -58,13 +58,13 @@ function main(){
 		cat "${BASH_SRCDIR}/aliases" >> "${root_home}/.bashrc"
 	else
 		local ALIAS=""
-		cat <<-SED | sed -n -f <(cat) "${BASH_SRCDIR}/aliases" | while read ALIAS; do
-			/^alias[[:space:]]/{
-				s/^alias[[:space:]]\+\([^=]\+\).*/\1/p
-			}
-		SED
-			echo $ALIAS
-		done
+		#cat <<-SED | sed -n -f <(cat) "${BASH_SRCDIR}/aliases" | while read ALIAS; do
+		#	/^alias[[:space:]]/{
+		#		s/^alias[[:space:]]\+\([^=]\+\).*/\1/p
+		#	}
+		#SED
+		#	echo $ALIAS
+		#done
 
 		#sed '/^alias[[:space:]]\+unlock='
 
