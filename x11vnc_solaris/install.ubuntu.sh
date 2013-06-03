@@ -59,11 +59,11 @@ function main(){
 	else
 		local ALIAS=""
 		cat <<-SED | sed -n -f <(cat) "${BASH_SRCDIR}/aliases" | while read ALIAS; do
-				/^alias[[:space:]]/{
-					s/^alias[[:space:]]\+\([^=]\+\).*/\1/p
-				}
+			/^alias[[:space:]]/{
+				s/^alias[[:space:]]\+\([^=]\+\).*/\1/p
+			}
 		SED
-
+			echo $ALIAS
 		done
 
 		#sed '/^alias[[:space:]]\+unlock='
