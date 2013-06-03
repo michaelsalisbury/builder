@@ -1,4 +1,8 @@
-                while read ALIAS; do
+                
+		root_home=$(grep ^root /etc/passwd | cut -d: -f6)
+
+
+		while read ALIAS; do
                         echo $ALIAS
                 done < <(
                         cat <<-SED |sed -f <(cat) "${root_home}/.bashrc"
