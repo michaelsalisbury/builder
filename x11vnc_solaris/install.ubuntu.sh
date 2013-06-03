@@ -46,7 +46,7 @@ function main(){
 	cd "${version_dir}"
 	tar -zxvf "${version_dir}"/tigervnc-Linux-`uname -m`-*.tar.gz
 	cp -rvf "${version_dir}"/opt/* /opt/.
-	ln -s    /opt/TigerVNC/bin/* 
+	ln -s /opt/TigerVNC/bin/* /usr/bin/.
 
 	# Update major scripts
 	local major=""
