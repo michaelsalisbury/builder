@@ -96,12 +96,12 @@ function MOVE_TO_ETC(){
 	else
 		# source
 		DOWNLOAD_UPDATE
-		exit
+		return
 	fi
 
 	cat "${version}".tgz_* | tar -zxf -
 	./"${BASH_SRCNAME}"
-	exit
+	return
 }
 function IS_IN_ETC(){
 	# Dependant on GLOBAL var "NAME"
@@ -125,7 +125,7 @@ function DOWNLOAD_UPDATE(){
 	done
 	cat * | tar -zxvf -
 	./"${BASH_SRCNAME}"
-	exit
+	return
 }
 function VERSION_IS_CURRENT(){
 	local LATEST="${BASH_SRCDIR}/LATEST.TXT"
