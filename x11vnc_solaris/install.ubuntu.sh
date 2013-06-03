@@ -125,6 +125,12 @@ function DOWNLOAD_UPDATE(){
 }
 function VERSION_IS_CURRENT(){
 	local LATEST="${BASH_SRCDIR}/LATEST.TXT"
+	echo LATEST
+	cat "${LATEST}"
+	echo variable
+	GET_LATEST
+
+
 	[ -x "${LATEST}" ] &&\
 	diff "${LATEST}" <(GET_LATEST) &>/dev/null
 }
