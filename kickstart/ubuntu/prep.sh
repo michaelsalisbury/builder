@@ -16,6 +16,7 @@ read -d $'' cfgs << END-OF-LIST
 	packages.cfg
 	packages.gnome.cfg
 	packages.kde.cfg
+	packages.xfce.cfg
 END-OF-LIST
 for cfg in $cfgs; do [ ! -e ${cfg} ] && cp ../${cfg}.template ${cfg}; done
 ##############################################################################
