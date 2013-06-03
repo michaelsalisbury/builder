@@ -2,27 +2,31 @@
 
 
 function main(){
-	# Move install into etc if nessisary
 	local version=`echo "${latest}" | head -1 | xargs dirname`
-	local version_dir="/etc/
-	local version=`echo "${latest}" | head -1 | xargs dirname`
-	mkdir  -p "/etc/x11vnc/${version}"
+	local version_dir="/etc/${NAME}/${version}"
 	
-	if [ "${BASH_SRCDIR}" != "
-	
-	
-
 	# Verify that currect version is latest
 	diff <(echo "${latest}") "${BASH_SRCDIR}/LATEST.TXT" &>/dev/null
 	# If an update is need then re-download and re-run install
 	if (( $? != 0 )); then
+		rm -rf    "${version_dir}"
+		mkdir  -p "${version_dir}"
+		cd        "${version_dir}"
 		local part=""
-		rm -rf    /etc/x11vnc/${version}
-		mkdir  -p /etc/x11vnc/${version}
-		cd        /etc/x11vnc/${version}
 		for part in ${latest}; do
 			wget "${http}/${part}"
 		done
+		cat * | tar -zxvf -
+		./"${BASH_SRCNAME}"
+		return
+	fi
+
+	# Move install into etc if nessisary and re-run install
+	if [ "${BASH_SRCDIR}" != "${version_dir}" ]; then
+		rm    -rf "${version_dir}"
+		mkdir  -p "${version_dir}"
+		cd        "${version_dir}"
+		cp -f "${BASH_SRCDIR}/${version}".tgz_* .
 		cat * | tar -zxvf -
 		./"${BASH_SRCNAME}"
 		return
