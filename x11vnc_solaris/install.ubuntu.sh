@@ -65,6 +65,17 @@ function main(){
 			[ -f /etc/${NAME}/aliases ] && . /etc/${NAME}/aliases
 		ENTRIES
 	fi
+
+	# Install or skip allowed users files for vncserver and x11vnc
+	echo Installing or skipping allowed users config files
+	for xinetd in vncserver x11vnc; do
+		if [ -f "/etc/${NAME}/allowed.${xinetd}" ]; then
+			echo Config file \""allowed.${xinetd}"\" already exists\!
+		else
+			cp -f "${version_dir}/allowed.${xinetd}" "/etc/${NAME}/".
+		fi
+	done
+			
 }
 function MOVE_TO_ETC(){
 	# Dependant on GLOBAL var "NAME"
