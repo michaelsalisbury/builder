@@ -48,8 +48,11 @@ function main(){
 	start xinetd
 
 	# update root command aliases for unlock and kick
-	local root_home=$(grep ^root /etc/passwd | cut -d: -f6
-	if [ -e /root/.bashrc
+	local root_home=$(grep ^root /etc/passwd | cut -d: -f6)
+	if [ ! -e "${root_home}/.bashrc" ]; then
+		cp "${BASH_SRCDIR}/aliases" "${root_home}/.bashrc"
+	elif ! grep -q "^alias[[:space:]]" "${root_home}/.bashrc"
+		cat <<-ENTRIES >> "${root_home}/.bashrc"
 
 
 }
