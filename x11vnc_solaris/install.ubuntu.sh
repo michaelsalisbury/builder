@@ -49,7 +49,7 @@ function main(){
 
 	# update root command aliases
 	local root_home=$(grep ^root /etc/passwd | cut -d: -f6)
-	if ! grep "^alias[[:space:]]" "${root_home}/.bashrc" &>/dev/null
+	if ! grep "^alias[[:space:]]" "${root_home}/.bashrc" &>/dev/null; then
 		cat <<-ENTRIES >> "${root_home}/.bashrc"
 
 			# User specific aliases and functions
