@@ -1,33 +1,4 @@
 #!/bin/bash
-function IS_IN_ETC(){
-	# Dependant on GLOBAL var "NAME"
-	local latest=`GET_LATEST`
-	local version=`echo "${latest}" | head -1 | xargs dirname`
-	local version_dir="/etc/${NAME}/${version}"
-	[ "${BASH_SRCDIR}" == "${version_dir}" ]
-}
-function MOVE_TO_ETC{
-	local latest=`GET_LATEST`
-	local version=`echo "${latest}" | head -1 | xargs dirname`
-	local version_dir="/etc/${NAME}/${version}"
-	rm    -rf "${version_dir}"
-	mkdir  -p "${version_dir}"
-	cd        "${version_dir}"
-
-	# FIX THIS use ls ... &>/dev/null
-	if [ -d "${BASH_SRCDIR}/${version}" ]; then 
-		cp -f "${BASH_SRCDIR}/${version}/${version}".tgz_* .
-	elif
-		cp -f "${BASH_SRCDIR}/${version}".tgz_* .
-	else
-
-	fi
-	cat * | tar -zxvf -
-	./"${BASH_SRCNAME}"
-
-
-
-}
 function main(){
 	local version=`echo "${latest}" | head -1 | xargs dirname`
 	local version_dir="/etc/${NAME}/${version}"
@@ -44,18 +15,6 @@ function main(){
 		MOVE_TO_ETC
 		return
 	fi
-		rm    -rf "${version_dir}"
-		mkdir  -p "${version_dir}"
-		cd        "${version_dir}"
-		if [ -d "${BASH_SRCDIR}/${version}" ]; then 
-			cp -f "${BASH_SRCDIR}/${version}/${version}".tgz_* .
-		else
-			cp -f "${BASH_SRCDIR}/${version}".tgz_* .
-		fi
-		cat * | tar -zxvf -
-		./"${BASH_SRCNAME}"
-		return
-	fi
 
 	# Install dependencies
 	apt-get ${aptopt} install x11vnc xinetd \
@@ -67,7 +26,7 @@ function main(){
 	cd "${version_dir}"
 	tar -zxvf "${version_dir}"/tigervnc-Linux-`uname -m`-*.tar.gz
 	cp -rvf "${version_dir}"/opt/* /opt/.
-	ln -s /opt/TigerVNC/bin/* /usr/bin/.
+	ln -sf /opt/TigerVNC/bin/* /usr/bin/.
 
 	# Update major scripts
 	local major=""
@@ -80,6 +39,39 @@ function main(){
 	# copy config files but don't overwrite  
 
 
+}
+function MOVE_TO_ETC{
+	# Dependant on GLOBAL var "NAME"
+	local latest=`GET_LATEST`
+	local version=`echo "${latest}" | head -1 | xargs dirname`
+	local version_dir="/etc/${NAME}/${version}"
+	rm    -rf "${version_dir}"
+	mkdir  -p "${version_dir}"
+	cd        "${version_dir}"
+
+	# find and copy compressed package
+	if   cp -f "${BASH_SRCDIR}/${version}/${version}".tgz_* .; then
+		# copy successfull
+		echo -n
+	elif cp -f "${BASH_SRCDIR}/${version}".tgz_* .; then
+		# copy successfull
+		echo -n
+	else
+		# source
+		DOWNLOAD_UPDATE
+		exit
+	fi
+
+	cat "${version}".tgz_* | tar -zxvf -
+	./"${BASH_SRCNAME}"
+	exit
+}
+function IS_IN_ETC(){
+	# Dependant on GLOBAL var "NAME"
+	local latest=`GET_LATEST`
+	local version=`echo "${latest}" | head -1 | xargs dirname`
+	local version_dir="/etc/${NAME}/${version}"
+	[ "${BASH_SRCDIR}" == "${version_dir}" ]
 }
 function DOWNLOAD_UPDATE(){
 	# Dependant on GLOBAL var "NAME"
