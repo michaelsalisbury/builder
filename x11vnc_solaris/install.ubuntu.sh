@@ -133,6 +133,7 @@ function VERSION_IS_CURRENT(){
 
 	[ -x "${LATEST}" ] &&\
 	diff "${LATEST}" <(GET_LATEST)
+	echo $?
 	#diff "${LATEST}" <(GET_LATEST) &>/dev/null
 }
 function GET_LATEST(){
