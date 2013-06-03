@@ -35,6 +35,17 @@ function main(){
 	done
 
 	# Update xinetd configs and re-start xinetd
+	local xinetd=""
+	for xinetd in vncserver x11vnc; do
+		local newXinetd="${version_dir}/xinetd.${xinetd}"
+		local oldXinetd="/etc/xinetd.d/${xinetd}"
+		if ! diff  "${oldXinetd}" "${newXinetd}" &>/dev/null; then
+			cp "${oldXinetd}" "${newXinetd}".bk_`date "+%s"`
+			cp -f "${newXinetd}" "${oldXinetd}"
+			stop xinetd
+		fi
+	done
+	start xinetd
 
 	# copy config files but don't overwrite  
 
