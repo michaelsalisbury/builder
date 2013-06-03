@@ -6,15 +6,14 @@ function main(){
 	# Verify that currect version is latest
 	# If an update is need then re-download and re-run install
 	if ! VERSION_IS_CURRENT; then
-		echo not current
-		return
-
+		echo Version not current, downloading...
 		DOWNLOAD_UPDATE
 		return
 	fi
 
 	# Move install into etc if nessisary and re-run install
 	if ! IS_IN_ETC; then
+		echo Version not in etc, moving...
 		MOVE_TO_ETC
 		return
 	fi
@@ -125,17 +124,8 @@ function DOWNLOAD_UPDATE(){
 }
 function VERSION_IS_CURRENT(){
 	local LATEST="${BASH_SRCDIR}/LATEST.TXT"
-	#echo LATEST
-	#cat "${LATEST}"
-	#echo variable
-	#GET_LATEST
-
-	#diff "${LATEST}" <(GET_LATEST)
-
 	[ -f "${LATEST}" ] &&\
 	diff "${LATEST}" <(GET_LATEST) &>/dev/null
-	#diff "${LATEST}" <(GET_LATEST)
-	#echo $?
 }
 function GET_LATEST(){
 	# deplendant on GLOBAL var "http" and "latest"
