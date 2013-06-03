@@ -70,9 +70,9 @@ function main(){
 
 	fi
 }
-function MOVE_TO_ETC{
+function MOVE_TO_ETC(){
 	# Dependant on GLOBAL var "NAME"
-	local latest=$(GET_LATEST)
+	local latest=`GET_LATEST`
 	local version=`echo "${latest}" | head -1 | xargs dirname`
 	local version_dir="/etc/${NAME}/${version}"
 	rm    -rf "${version_dir}"
