@@ -24,6 +24,8 @@ compizconfig-settings-manager
 gnome-session-fallback
 # cifs
 samba cifs-utils winbind
+# sshfs
+fuse-utils sshfs
 
 # VPN
 openconnect
