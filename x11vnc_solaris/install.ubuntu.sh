@@ -7,7 +7,23 @@ function IS_IN_ETC(){
 	[ "${BASH_SRCDIR}" == "${version_dir}" ]
 }
 function MOVE_TO_ETC{
+	local latest=`GET_LATEST`
+	local version=`echo "${latest}" | head -1 | xargs dirname`
+	local version_dir="/etc/${NAME}/${version}"
+	rm    -rf "${version_dir}"
+	mkdir  -p "${version_dir}"
+	cd        "${version_dir}"
 
+	# FIX THIS use ls ... &>/dev/null
+	if [ -d "${BASH_SRCDIR}/${version}" ]; then 
+		cp -f "${BASH_SRCDIR}/${version}/${version}".tgz_* .
+	elif
+		cp -f "${BASH_SRCDIR}/${version}".tgz_* .
+	else
+
+	fi
+	cat * | tar -zxvf -
+	./"${BASH_SRCNAME}"
 
 
 
