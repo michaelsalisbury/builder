@@ -9,5 +9,5 @@
                                 /^alias[[:space:]]/{
                                         s/^alias[[:space:]]\+\([^=]\+\).*/\1/p
                                 }
-                        SED
+			SED
 
