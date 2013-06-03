@@ -65,6 +65,7 @@ function main(){
 			[ -f /etc/${NAME}/aliases ] && . /etc/${NAME}/aliases
 		ENTRIES
 	fi
+	cp -f "${version_dir}/aliases" "/etc/${NAME}/".
 
 	# Install or skip allowed users files for vncserver and x11vnc
 	echo Installing or skipping allowed users config files...
