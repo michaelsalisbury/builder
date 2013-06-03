@@ -4,7 +4,7 @@
 function main(){
 	local version=`echo "${latest}" | head -1 | xargs dirname`
 	local version_dir="/etc/${NAME}/${version}"
-	echo START :: ${BASH_SRCDIR} :: ${version}
+	echo START :: ${BASH_SRCDIR} :: ${version_dir}
 	
 	# Verify that currect version is latest
 	diff <(echo "${latest}") "${BASH_SRCDIR}/LATEST.TXT" &>/dev/null
