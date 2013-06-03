@@ -16,7 +16,7 @@ function main(){
 
 	# push changes to git
 	cd "${BASH_SRCDIR}"
-	git add "${
+	git add 
 	
 }
 function GET_VERSION(){
