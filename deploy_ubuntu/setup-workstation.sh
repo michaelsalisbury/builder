@@ -78,7 +78,7 @@ function setup_Prep_UCF(){
 	local OEM_ID=$(hwinfo --bios 2>/dev/null |\
 			awk -F: '$1~"OEM id"{print $2}' |\
 			tr -d '\"\ ')
-	case "${OEM_ID}"
+	case "${OEM_ID}" in
 		DELL)		hwinfo --bios | sed -n '/System Info:/,/Serial:/p';;
 
 
