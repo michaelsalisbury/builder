@@ -74,7 +74,7 @@ function setup_Prep_Policy_Changes(){
 }
 function setup_Prep_UCF(){
 	desc Prep: openconnect, cifs, hostname
-	# Setup hostname on Dell workstations
+	# Setup hostname on systems Dell,vbox,other
 	local OEM_ID=$(hwinfo --bios 2>/dev/null |\
 			awk -F: '$1~"OEM id"{print $2}' |\
 			tr -d '\"\ ')
@@ -91,16 +91,11 @@ function setup_Prep_UCF(){
 				HOSTNAME="VBox${VBOX_VER}_${VBOX_REV}";;
 		*)		HOSTNAME=${OEM_ID}
 	esac
-	echo HOSTNAME is ${HOSTNAME}
-	awk '/kickseed/{print $2'         /etc/hosts > /etc/hostname
-	sed -i "s/kickseed/${HOSTNAME}/g" /etc/hosts   /etc/hostname
-	
-
-
-	
-	return
-
-
+	if cat /etc/hostname | grep -q ^kickseed$; then
+		awk '/kickseed/{print $2'         /etc/hosts > /etc/hostname
+		sed -i "s/kickseed/${HOSTNAME}/g" /etc/hosts   /etc/hostname
+		echo HOSTNAME changed to $(cat /etc/hostname)
+	fi
 
 	# setup defaults for the following applications
 		read -d $'' apps << EOL
