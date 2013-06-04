@@ -616,6 +616,6 @@ $'{'
    "was": {
       "restarted": false
    }
-$'}'
+$(echo })
 END-OF-LOCALSTATE
 }
