@@ -83,14 +83,20 @@ function setup_Prep_UCF(){
 					sed -n '/System Info:/,/Serial:/p' |\
 					awk -F: '$1~"Serial"{print $2}' |\
 					tr -d '\"\ ')
-				echo ${OEM_ID} ${DELL_TAG};;
-					
-					
-
-
-		VBOXCPU)	;;
-
+				local HOSTNAME=${DELL_TAG};;
+		VBOXCPU)	local VBOX_VER=$(hwinfo --bios 2>/dev/null |\
+						awk -F_ '$1==vboxVer{print $2}')
+				local VBOX_REV=$(hwinfo --bios 2>/dev/null |\
+						awk -F_ '$1==vboxRer{print $2}')
+				HOSTNAME="VBox${VBOX_VER}_${VBOX_REV}";;
+		*)		HOSTNAME=${OEM_ID}
 	esac
+	echo HOSTNAME is ${HOSTNAME}
+	awk '/kickseed/{print $2'         /etc/hosts > /etc/hostname
+	sed -i "s/kickseed/${HOSTNAME}/g" /etc/hosts   /etc/hostname
+	
+
+
 	
 	return
 
