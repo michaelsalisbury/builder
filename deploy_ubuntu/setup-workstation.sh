@@ -350,7 +350,6 @@ function setup_Package_Holds(){
 	desc Apt package holds
         ###################################################################################
 	cat <<-SELECTIONS | awk '{print $0" hold"}' | dpkg --set-selections
-		linux-image
 		linux-image-generic
 		linux-headers-generic
 		linux-firmware
