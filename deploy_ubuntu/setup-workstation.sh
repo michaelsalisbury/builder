@@ -88,13 +88,14 @@ function setup_Prep_UCF(){
 						awk -F_ '$1~"vboxVer"{print $2}')
 				local VBOX_REV=$(hwinfo --bios 2>/dev/null |\
 						awk -F_ '$1~"vboxRev"{print $2}')
-				HOSTNAME="VBox${VBOX_VER}_${VBOX_REV}";;
+				HOSTNAME="VBox${VBOX_VER}-${VBOX_REV}";;
 		*)		HOSTNAME=${OEM_ID}
 	esac
 	if cat /etc/hostname | grep -q ^kickseed$; then
 		awk '/kickseed/{print $2}'        /etc/hosts > /etc/hostname
 		sed -i "s/kickseed/${HOSTNAME}/g" /etc/hosts   /etc/hostname
 		echo HOSTNAME changed to $(cat /etc/hostname)
+		hostname -F /etc/hostname
 	fi
 
 	# setup defaults for the following applications
