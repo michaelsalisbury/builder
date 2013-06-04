@@ -12,6 +12,8 @@ terminator multitail
 incron
 # hardware diagnostics and detection
 hwinfo ethtool ipcalc smartmontools
+# kernel
+
 # debian package managment helpers
 tasksel apt-file dlocate software-properties-common # add-apt-repositories
 aptitude wajig
