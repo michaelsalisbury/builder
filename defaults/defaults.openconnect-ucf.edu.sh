@@ -27,7 +27,7 @@ function setup_skel_Structure(){
 	chmod 600  /etc/skel/.vpn.cred
 	touch      /etc/sudoers.d/openconnect
 	chmod 440  /etc/sudoers.d/openconnect
-	groupadd -g $(free_group_ID 100) openconnect
+	groupadd -g $(free_ID_pair 100) openconnect
 }
 function setup_make_Config(){
 	desc Setting up default config
@@ -38,7 +38,7 @@ function setup_make_Config(){
 		alias vpnd='sudo killall openconnect'
 		alias vpns='ifconfig tun; tail \${HOME}/.logs/openconnect'
 	END-OF-ALIASES
-	cat <<-END-OF-VPNCONF >> /etc/skel/.vpn.cred
+	cat <<-END-OF-VPNCONF > /etc/skel/.vpn.cred
 		username = [NID]
 		password = [***]
 		group    = [ucffaculty|ucfstudent]
