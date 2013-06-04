@@ -85,9 +85,9 @@ function setup_Prep_UCF(){
 					tr -d '\"\ ')
 				local HOSTNAME=${DELL_TAG};;
 		VBOXCPU)	local VBOX_VER=$(hwinfo --bios 2>/dev/null |\
-						awk -F_ '$1==vboxVer{print $2}')
+						awk -F_ '$1~"vboxVer"{print $2}')
 				local VBOX_REV=$(hwinfo --bios 2>/dev/null |\
-						awk -F_ '$1==vboxRer{print $2}')
+						awk -F_ '$1~"vboxRev"{print $2}')
 				HOSTNAME="VBox${VBOX_VER}_${VBOX_REV}";;
 		*)		HOSTNAME=${OEM_ID}
 	esac
