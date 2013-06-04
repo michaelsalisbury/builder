@@ -328,15 +328,17 @@ function setup_Package_Autoresponces(){
 	waitForNetwork || return 1
 	# debconf-show --listdbs
 	# debconf-show --listowners | sort
-        echo hddtemp hddtemp/daemon select false | debconf-set-selections
-	echo gdm gdm/daemon_name select /usr/sbin/gdm | debconf-set-selections
-	echo gdm shared/default-x-display-manager select lightdm | debconf-set-selections
-	echo lightdm shared/default-x-display-manager select lightdm | debconf-set-selections
-        echo acroread-common acroread-common/default-viewer select true | debconf-set-selections
-	echo oracle-java6-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
-	echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
-	echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
-        echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
+	cat <<-SELECTIONS | debconf-set-selections
+	hddtemp				hddtemp/daemon				select false
+	gdm				gdm/daemon_name				select /usr/sbin/gdm
+	gdm				shared/default-x-display-manager	select lightdm
+	lightdm				shared/default-x-display-manager	select lightdm
+	acroread-common			acroread-common/default-viewer		select true
+	oracle-java6-installer		shared/accepted-oracle-license-v1-1	select true
+	oracle-java7-installer		shared/accepted-oracle-license-v1-1	select true
+	oracle-java8-installer		shared/accepted-oracle-license-v1-1	select true
+	ttf-mscorefonts-installer	msttcorefonts/accepted-mscorefonts-eula	select true
+	SELECTIONS
 	# Output debconf settings to verify changes made above
 	debconf-show --listowners |\
 	egrep "(hddtemp|gdm|lightdm|acroread|oracle|ttf)" |\
@@ -347,18 +349,19 @@ function setup_Package_Autoresponces(){
 function setup_Package_Holds(){
 	desc Apt package holds
         ###################################################################################
-
-	echo linux-image		hold	| dpkg --set-selections
-	echo linux-image-generic	hold	| dpkg --set-selections
-	echo linux-headers-generic	hold	| dpkg --set-selections
-	echo linux-firmware		hold	| dpkg --set-selections
-	echo linux-firmware-nonfree	hold	| dpkg --set-selections
-	echo grub-pc			hold	| dpkg --set-selections
-	echo grub-common		hold	| dpkg --set-selections
-	echo grub-gfxpayload-lists	hold	| dpkg --set-selections
-	echo grub-pc			hold	| dpkg --set-selections
-	echo grub-pc-bin		hold	| dpkg --set-selections
-	echo grub2-common		hold	| dpkg --set-selections
+	cat <<-SELECTIONS | awk '{print $0" hold"}' | dpkg --set-selections
+		linux-image
+		linux-image-generic
+		linux-headers-generic
+		linux-firmware
+		linux-firmware-nonfree
+		grub-pc
+		grub-common
+		grub-gfxpayload-lists
+		grub-pc
+		grub-pc-bin
+		grub2-common
+	SELECTIONS
 	dpkg --get-selections | grep -v install
 }
 function setup_Package_Gnome_Defaults(){
