@@ -235,7 +235,7 @@ function setup_Prep_Add_Repos(){
 	wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 
 	# Add UCK Repos
-	local list='/etc/apt/sources.list.d/uck-team'
+	local list='/etc/apt/sources.list.d/uck-team-uck'
 	local do_release=`lsb_release -sc`
 	rm -f "${list}"*
 	add-apt-repository -y ppa:uck-team/uck-stable
