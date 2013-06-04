@@ -2,7 +2,8 @@
 skip=( false false false false )
 step=1
 prefix="setup"
-source=http://192.168.248.24/config/$scriptName
+source="https://raw.github.com/michaelsalisbury/builder/master/defaults/${scriptName}"
+#source=http://192.168.248.24/config/$scriptName
 
 #function includes(){
 #	functions.*.sh
