@@ -1057,7 +1057,7 @@ function setup_adobe(){
         #waitAptgetInstall
         #apt-get ${aptopt} install oracle-java8-installer
 }
-function setup_tigervnc(){
+function setup_TigerVNC(){
 	desc TigerVNC server with dynamix xinetd scripts
         ###################################################################################
 	# although the installer handles dependencies it won't do waitAptgetInstall
