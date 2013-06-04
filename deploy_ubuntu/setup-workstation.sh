@@ -73,7 +73,16 @@ function setup_Prep_Policy_Changes(){
 	policy_change  NetworkManager  system  auth_admin_keep  yes
 }
 function setup_Prep_UCF(){
-	desc Prep: openconnect, cifs
+	desc Prep: openconnect, cifs, hostname
+	# Setup hostname on Dell workstations
+	local OEM_ID=$(hwinfo --bios 2>/dev/null |\
+			awk -F: '\$1~"OEM id"{print $2}' |\
+			tr -d '\"\ ')
+	echo $OEM_ID
+	return
+
+
+
 	# setup defaults for the following applications
 		read -d $'' apps << EOL
 			openconnect-ucf.edu
@@ -87,8 +96,6 @@ EOL
 		done | while read script; do
 			"${script:-false}" -rr
 		done
-	# Setup hostname on Dell workstations
-
 
 }
 function setup_Prep_Add_SSH_Keys(){
