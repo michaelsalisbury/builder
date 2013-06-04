@@ -347,14 +347,15 @@ function setup_Package_Autoresponces(){
 function setup_Package_Holds(){
 	desc Apt package holds
         ###################################################################################
-	echo linux-image-generic hold		| dpkg --set-selections
-	echo linux-headers-generic hold		| dpkg --set-selections
-	echo grub-pc hold			| dpkg --set-selections
-	echo grub-common hold			| dpkg --set-selections
-	echo grub-gfxpayload-lists hold		| dpkg --set-selections
-	echo grub-pc hold			| dpkg --set-selections
-	echo grub-pc-bin hold			| dpkg --set-selections
-	echo grub2-common hold			| dpkg --set-selections
+	echo linux-image		hold	| dpkg --set-selections
+	echo linux-image-generic	hold	| dpkg --set-selections
+	echo linux-headers-generic	hold	| dpkg --set-selections
+	echo grub-pc			hold	| dpkg --set-selections
+	echo grub-common		hold	| dpkg --set-selections
+	echo grub-gfxpayload-lists	hold	| dpkg --set-selections
+	echo grub-pc			hold	| dpkg --set-selections
+	echo grub-pc-bin		hold	| dpkg --set-selections
+	echo grub2-common		hold	| dpkg --set-selections
 	dpkg --get-selections | grep -v install
 }
 function setup_Package_Gnome_Defaults(){
