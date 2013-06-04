@@ -76,7 +76,7 @@ function setup_Prep_UCF(){
 	desc Prep: openconnect, cifs, hostname
 	# Setup hostname on Dell workstations
 	local OEM_ID=$(hwinfo --bios 2>/dev/null |\
-			awk -F: '\$1~"OEM id"{print \$2}' |\
+			awk -F: '$1~"OEM id"{print $2}' |\
 			tr -d '\"\ ')
 	echo $OEM_ID
 	return
