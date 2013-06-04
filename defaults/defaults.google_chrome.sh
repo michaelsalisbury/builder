@@ -105,7 +105,7 @@ function setup_files(){
 #######################################################################################
 
 function setup_cat_preferences(){
-	echo "${GOOGLE_CHROME_URLS}" | sed 's/^/"/;$!s/$/",/;$s/$/"/' | tr \n \ 
+	echo "${GOOGLE_CHROME_URLS}" | sed 's/^/"/;$!s/$/",/;$s/$/"/' | tr '\n' '\ '
 	echo
 
 	return
