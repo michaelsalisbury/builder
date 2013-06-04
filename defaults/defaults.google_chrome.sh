@@ -548,7 +548,7 @@ $'{'
       "startup_count": 1,
       "view_count": 1
    }
-$'}'
+$(echo })
 END-OF-PREFERENCES
 }
 
