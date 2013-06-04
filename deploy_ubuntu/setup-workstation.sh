@@ -248,7 +248,7 @@ function setup_Prep_Add_Repos(){
 					h
 					s/^/#/
 					x
-					s/${di_release}/precise/
+					s/${do_release}/precise/
 					G
 				}
 			SED
