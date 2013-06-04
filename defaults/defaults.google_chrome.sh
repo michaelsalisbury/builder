@@ -11,9 +11,13 @@ source="https://raw.github.com/michaelsalisbury/builder/master/defaults/${script
 #}
 
 # GLOBAL VARIABLES
-#function global_variables(){
-#	echo
-#}
+function global_variables(){
+	read -d $'' GOOGLE_CHROME_URLS <<-END-OF-URLS
+		http://www.cos.ucf.edu/
+		http://www.cos.ucf.edu/it/
+		https://www.google.com/
+	END-OF-URLS
+}
 
 function setup_skel_Structure(){
 	desc Build skel directory structure
@@ -100,7 +104,12 @@ function setup_files(){
 #######################################################################################
 #######################################################################################
 
-function cat_preferences(){
+function setup_cat_preferences(){
+	echo $GOOGLE_CHROME_URLS
+
+	return
+
+
 	cat << END-OF-PREFERENCES
 $'{'
    "backup": {
