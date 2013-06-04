@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false )
+skip=( false false false false false false )
 step=1
 prefix="setup"
 source="https://raw.github.com/michaelsalisbury/builder/master/defaults/${scriptName}"
@@ -105,7 +105,7 @@ function setup_files(){
 #######################################################################################
 
 function setup_cat_preferences(){
-	echo $GOOGLE_CHROME_URLS
+	echo "${GOOGLE_CHROME_URLS}" | tr '\n' ','
 
 	return
 
