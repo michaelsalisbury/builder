@@ -434,7 +434,7 @@ function setup_Must_Have_Tools(){
 					google-chrome-stable
 	# clean up
 	waitAptgetUpdate
-	apt-file ${aptopt} update
+	apt-file update
 	waitAptgetInstall
 	apt-get ${aptopt} -f install
 	waitAptgetInstall
@@ -638,12 +638,18 @@ function setup_X2GO(){
         ###################################################################################
 	waitForNetwork || return 1
 	stall 3
+	# setup x2go user group pair
+	local UID_GID_PAIR=$(free_ID_pair 100)
+	groupadd -g ${UID_GID_PAIR} x2gouser
+	useradd  -u ${UID_GID_PAIR} -g ${UID_GID_PAIR} -d /var/lib/x2go -s /bin/false
+	# Add repo
 	if ! ls /etc/apt/sources.list.d/x2go-stabe* &> /dev/null; then
         	waitAptgetUpdate
         	/usr/bin/add-apt-repository -y ppa:x2go/stable
         	waitAptgetUpdate
         	apt-get ${aptopt} update
 	fi
+	#
         waitAptgetInstall
         apt-get ${aptopt} install python-software-properties
         apt-cache search x2go
