@@ -2,7 +2,7 @@
 skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
-source=http://$scriptName
+source="https://raw.github.com/michaelsalisbury/builder/master/deploy_ubuntu/${scriptName}"
 #source=http://192.168.253.1/kickstart/ubuntu/s.xubuntu/deploys/$scriptName
 
 function includes(){
