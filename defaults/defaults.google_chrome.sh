@@ -107,9 +107,6 @@ function setup_files(){
 function setup_cat_preferences(){
 	GOOGLE_CHROME_URLS=$(echo "${GOOGLE_CHROME_URLS}" | sed 's/^/"/;$!s/$/",/;$s/$/"/' | tr '\n' '\ ')
 	echo "${GOOGLE_CHROME_URLS}"
-	return
-
-
 	cat << END-OF-PREFERENCES
 $'{'
    "backup": {
@@ -122,7 +119,7 @@ $'{'
       "homepage_is_newtabpage": true,
       "session": {
          "restore_on_startup": 4,
-         "urls_to_restore_on_startup": [ "http://www.cos.ucf.edu/", "http://www.cos.ucf.edu/it/", "https://www.google.com/" ]
+         "urls_to_restore_on_startup": [ ${GOOGLE_CHROME_URLS} ]
       }
    },
    "browser": {
