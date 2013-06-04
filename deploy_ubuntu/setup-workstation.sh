@@ -79,7 +79,13 @@ function setup_Prep_UCF(){
 			awk -F: '$1~"OEM id"{print $2}' |\
 			tr -d '\"\ ')
 	case "${OEM_ID}" in
-		DELL)		hwinfo --bios | sed -n '/System Info:/,/Serial:/p';;
+		DELL)		local DELL_TAG=$(hwinfo --bios 2>/dev/null |\
+					sed -n '/System Info:/,/Serial:/p' |\
+					awk -F: '$1~"Serial"{print $2}' |\
+					tr -d '\"\ ')
+				echo ${OEM_ID} ${DELL_TAG};;
+					
+					
 
 
 		VBOXCPU)	;;
