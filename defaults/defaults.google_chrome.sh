@@ -548,14 +548,14 @@ $'{'
       "startup_count": 1,
       "view_count": 1
    }
-\}
+$'}'
 END-OF-PREFERENCES
 }
 
 
 function cat_local_state(){
 	cat << END-OF-LOCALSTATE
-\{
+$'{'
    "browser": {
       "last_redirect_origin": ""
    },
