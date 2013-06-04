@@ -24,8 +24,8 @@ function setup_skel_Structure(){
 	touch      /etc/sudoers.d/cifs
 	chmod 440  /etc/sudoers.d/cifs
 	touch      /etc/xdg/autostart/mount.domain_cifs.desktop
-        ln         /etc/xdg/autostart/mount.domain_cifs.desktop /etc/xdg/xdg-xubuntu/autostart/.
-        ln         /etc/xdg/autostart/mount.domain_cifs.desktop /etc/xdg/xdg-kubuntu/autostart/.
+        ln         /etc/xdg/autostart/mount.domain_cifs.desktop /etc/xdg/xdg-xubuntu/autostart/. 2>/dev/null
+        ln         /etc/xdg/autostart/mount.domain_cifs.desktop /etc/xdg/xdg-kubuntu/autostart/. 2>/dev/null
 	mkdir -p   /etc/skel/.scripts
 	chmod 700  /etc/skel/.scripts
 	mkdir -p   /etc/skel/.logs
