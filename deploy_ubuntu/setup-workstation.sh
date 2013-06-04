@@ -87,6 +87,9 @@ EOL
 		done | while read script; do
 			"${script:-false}" -rr
 		done
+	# Setup hostname on Dell workstations
+
+
 }
 function setup_Prep_Add_SSH_Keys(){
 	desc Prep: Add SSH Keys to root \& users: uid \>= 1000
