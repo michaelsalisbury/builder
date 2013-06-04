@@ -548,14 +548,14 @@ $(echo \{)
       "startup_count": 1,
       "view_count": 1
    }
-$(echo })
+$(echo \})
 END-OF-PREFERENCES
 }
 
 
 function cat_local_state(){
 	cat << END-OF-LOCALSTATE
-$'{'
+$(echo \{)
    "browser": {
       "last_redirect_origin": ""
    },
@@ -616,6 +616,6 @@ $'{'
    "was": {
       "restarted": false
    }
-$(echo })
+$(echo \})
 END-OF-LOCALSTATE
 }
