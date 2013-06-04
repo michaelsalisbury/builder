@@ -102,7 +102,7 @@ function setup_files(){
 
 function cat_preferences(){
 	cat << END-OF-PREFERENCES
-\{
+$'{'
    "backup": {
       "_signature": "wrshpwGoyIry3vvW05eHh7Wylxonfm5gLuyfVLdT8RM=",
       "_version": 4,
@@ -610,6 +610,6 @@ function cat_local_state(){
    "was": {
       "restarted": false
    }
-\}
+$'}'
 END-OF-LOCALSTATE
 }
