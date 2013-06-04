@@ -92,7 +92,7 @@ function setup_Prep_UCF(){
 		*)		HOSTNAME=${OEM_ID}
 	esac
 	if cat /etc/hostname | grep -q ^kickseed$; then
-		awk '/kickseed/{print $2'         /etc/hosts > /etc/hostname
+		awk '/kickseed/{print $2}'        /etc/hosts > /etc/hostname
 		sed -i "s/kickseed/${HOSTNAME}/g" /etc/hosts   /etc/hostname
 		echo HOSTNAME changed to $(cat /etc/hostname)
 	fi
