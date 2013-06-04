@@ -106,6 +106,7 @@ function setup_files(){
 
 function setup_cat_preferences(){
 	echo "${GOOGLE_CHROME_URLS}" | tr '\n' ','
+	echo
 
 	return
 
