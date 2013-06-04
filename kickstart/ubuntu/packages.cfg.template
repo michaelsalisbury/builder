@@ -13,6 +13,7 @@ incron
 # hardware diagnostics and detection
 hwinfo ethtool ipcalc smartmontools
 # kernel
+linux-firmware linux-firmware-nonfree
 
 # debian package managment helpers
 tasksel apt-file dlocate software-properties-common # add-apt-repositories
@@ -28,6 +29,8 @@ gnome-session-fallback
 samba cifs-utils winbind
 # sshfs
 fuse-utils sshfs
+# vnc
+x11vnc
 
 # VPN
 openconnect
