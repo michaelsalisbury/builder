@@ -362,6 +362,7 @@ function setup_Package_Holds(){
 		grub-pc-bin
 		grub2-common
 	SELECTIONS
+	# Output debconf settings to verify changes made above
 	dpkg --get-selections | grep -v install
 }
 function setup_Package_Gnome_Defaults(){
