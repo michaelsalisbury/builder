@@ -108,7 +108,7 @@ function setup_cat_preferences(){
 	GOOGLE_CHROME_URLS=$(echo "${GOOGLE_CHROME_URLS}" | sed 's/^/"/;$!s/$/",/;$s/$/"/' | tr '\n' '\ ')
 	echo "${GOOGLE_CHROME_URLS}"
 	cat << END-OF-PREFERENCES
-$'{'
+$(echo \{)
    "backup": {
       "_signature": "wrshpwGoyIry3vvW05eHh7Wylxonfm5gLuyfVLdT8RM=",
       "_version": 4,
