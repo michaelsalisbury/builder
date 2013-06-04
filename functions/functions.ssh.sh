@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#source="https://raw.github.com/michaelsalisbury/builder/master/functions/${scriptName}"
+
 function main(){
 	local LOG="~/.logs/${scriptName}"
 	local DOM='ucf.edu'
