@@ -79,10 +79,10 @@ function setup_Prep_UCF(){
 			awk -F: '$1~"OEM id"{print $2}' |\
 			tr -d '\"\ ')
 	case "${OEM_ID}"
-		DELL)		hwinfo --bios | sed '/System Info:/,/Serial:/!d';;
+		DELL)		hwinfo --bios | sed -n '/System Info:/,/Serial:/p';;
 
 
-		VBOXCPU)
+		VBOXCPU)	;;
 
 	esac
 	
