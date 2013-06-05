@@ -1,5 +1,5 @@
 #!/bin/bash
-shopt -s extglob
+#shopt -s extglob
 
 function main(){
 	local version_num=`GET_VERSION`
@@ -26,8 +26,11 @@ function GET_VERSION(){
 	# requires; shopt -s extglob
 	local major=""
 	for major in ${majors}; do
-		ls -1 "${BASH_SRCDIR}/${major}".v+([0-9])           2>/dev/null
-		ls -1 "${BASH_SRCDIR}/REVISIONS/${major}".v+([0-9]) 2>/dev/null
+		cat <<-BASH | /bin/bash
+			shopt -s extglob
+			ls -1 "${BASH_SRCDIR}/${major}".v+([0-9])           2>/dev/null
+			ls -1 "${BASH_SRCDIR}/REVISIONS/${major}".v+([0-9]) 2>/dev/null
+		BASH
 	done		|\
 	sed 's/.*\.v//'	|\
 	sort -n -u	|\
