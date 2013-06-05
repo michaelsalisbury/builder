@@ -415,7 +415,7 @@ function setup_Package_Fix_Tweak_Plymouth(){
 	# Fix broken spash screen after grub update
 	local grub_file='/etc/grub.d/10_linux'
 	cat <<-SED | sed -n -f <(cat) "${grub_file}"
-		/GRUB_CMDLINE_LINUX_DEFAULT="\$GRUB_CMDLINE_LINUX_DEFAULT \\\\$vt_handoff"/{
+		/GRUB_CMDLINE_LINUX_DEFAULT="\$GRUB_CMDLINE_LINUX_DEFAULT \\\\\$vt_handoff/{
 			p
 		}
 	SED
