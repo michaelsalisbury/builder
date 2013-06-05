@@ -1127,7 +1127,8 @@ function setup_Clean_Update_Upgrade(){
         ###################################################################################
 	waitForNetwork || return 1
 	echo up
-	#apt_clean_update_upgrade
+	apt_clean_update_upgrade
+	setup_Package_Holds
 }
 
 #function waitForNetwork(){
