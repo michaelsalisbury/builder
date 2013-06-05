@@ -96,6 +96,8 @@ function apt_update_n_upgrade(){
 	waitAptgetUpdate
 	apt-get -y -q update
 	waitAptgetInstall
+	apt-get -y -q -f install
+	waitAptgetInstall
 	apt-get -y -q upgrade
 }
 function apt_clean_update_upgrade(){
@@ -106,6 +108,8 @@ function apt_clean_update_upgrade(){
 	apt-get autoclean
 	waitAptgetUpdate
 	apt-get -y -q update
+	waitAptgetInstall
+	apt-get -y -q -f install
 	waitAptgetInstall
 	apt-get -y -q upgrade
 }
