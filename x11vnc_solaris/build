@@ -15,6 +15,10 @@ function main(){
 	cd "${BASH_SRCDIR}"
 	ls $(basename "${version_dir}")/* | tee LATEST.TXT
 
+	# recompress and split to include LATEST.TXT
+	cd "${BASH_SRCDIR}"
+	tar -cz `GET_FILES` | split -b ${MAX_SPLIT} - "${version_dir}/${NAME}.v${version_num}.tgz"_
+
 	# push changes to git
 	cd "${version_dir}"
 	git add .
