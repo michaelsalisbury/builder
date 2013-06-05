@@ -290,7 +290,7 @@ function DISPLAY_READ_KEYS(){
 	local fifo_OUT="${TMP}/${FUNCNAME}_FIFO-OUT"
 	# setup missing ~/.vnc folder
 	[ -d "${vncfolder}" ] ||\
-		cat <<-SU | su - ${username} 
+		su - ${username} <<-SU
 			mkdir -p "${vncfolder}"
 		SU
 	# setup file if missing
