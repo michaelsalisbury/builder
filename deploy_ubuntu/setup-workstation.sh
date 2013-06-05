@@ -92,8 +92,8 @@ function setup_Prep_UCF(){
 				local VBOX_REV=$(hwinfo --bios 2>/dev/null |\
 						awk -F_ '$1~"vboxRev"{print $2}')
 				HOSTNAME="VBox${VBOX_VER}-${VBOX_REV}";;
-		vmware)		HOSTNAME="VMWare"
-		*)		HOSTNAME=rename-me
+		vmware)		HOSTNAME="VMWare";;
+		*)		HOSTNAME="rename-me";;
 	esac
 	if cat /etc/hostname | grep -q ^kickseed$; then
 		awk '/kickseed/{print $2}'        /etc/hosts > /etc/hostname
