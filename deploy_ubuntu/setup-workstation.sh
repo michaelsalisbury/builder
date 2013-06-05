@@ -182,20 +182,20 @@ function setup_Prep_Config_Autostart(){
 	ln ${home}/${desktop} ${home}/.kde/Autostart/.
 END-OF-MKDIR
 	# autostart terminator -l Deploy desktop config file
-	su ${user} << END-OF-TERMINATOR.DESKTOP
-	cat << END-OF-DESKTOP_ENTRY > ${home}/${desktop}
-[Desktop Entry]
-Type=Application
-Exec=/usr/bin/terminator -m -l Deploy
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name[en_US]=Terminator-Deploy
-Name=Terminator-Deploy
-Comment[en_US]=Terminator Deploy Layout
-Comment=Terminator Deploy Layout
-END-OF-DESKTOP_ENTRY
-END-OF-TERMINATOR.DESKTOP
+	su ${user} <<-END-OF-TERMINATOR.DESKTOP
+	cat <<-END-OF-DESKTOP_ENTRY > ${home}/${desktop}
+		[Desktop Entry]
+		Type=Application
+		Exec=/usr/bin/terminator -m -l Deploy
+		Hidden=false
+		NoDisplay=false
+		X-GNOME-Autostart-enabled=true
+		Name[en_US]=Terminator-Deploy
+		Name=Terminator-Deploy
+		Comment[en_US]=Terminator Deploy Layout
+		Comment=Terminator Deploy Layout
+	END-OF-DESKTOP_ENTRY
+	END-OF-TERMINATOR.DESKTOP
 	su ${user} << END-OF-MKDIR
 END-OF-MKDIR
 }
@@ -586,7 +586,6 @@ function setup_Unity_Classic_Menu(){
         wget https://launchpad.net/~diesch/+archive/testing/+build/3076110/+files/classicmenu-indicator_0.07_all.deb
         waitAptgetInstall
         dpkg -i classicmenu-indicator_0.07_all.deb
-        waitAptgetInstall
         cat <<-EOF > /etc/xdg/autostart/classicmenu-indicator.desktop
 		[Desktop Entry]
 		Name=ClassicMenu Indicator
@@ -597,6 +596,9 @@ function setup_Unity_Classic_Menu(){
 		Icon=gnome-main-menu
 		Type=Application
 	EOF
+        waitAptgetInstall
+	apt-get ${aptopt} -f install
+	apt-get ${aptopt} upgrade
 }
 function setup_Synergy(){
 	desc Synergy Keybard and Mouse share
