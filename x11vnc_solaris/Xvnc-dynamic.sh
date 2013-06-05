@@ -187,7 +187,7 @@ function SET_xstartup(){
 		fi
 	fi
 	# setup the custom xstartup file
-	cat <<-SU | su - ${username} 
+	su - ${username} <<-SU
 		cp -f "${Xcommon_FUNCS}" "${xstartup}.Xcommon"
 		cp -f "${Xstartup_MAIN}" "${xstartup}"
 		chmod +x                 "${xstartup}"
