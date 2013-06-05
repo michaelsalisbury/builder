@@ -417,6 +417,7 @@ function setup_Package_Fix_Tweak_Plymouth(){
 	cat <<-SED | sed -n -f <(cat) "${grub_file}"
 		/GRUB_CMDLINE_LINUX_DEFAULT="\$GRUB_CMDLINE_LINUX_DEFAULT \\\\\$vt_handoff"/{
 			s/ \\\\\$vt_handoff//
+			p
 		}
 	SED
 		#/GRUB_CMDLINE_LINUX_DEFAULT="\$GRUB_CMDLINE_LINUX_DEFAULT \\\$vt_handoff"/{
