@@ -158,7 +158,7 @@ END-OF-TOPRC
 function xinit_start(){
 	local user=${1:- root}
 	xinit 	/bin/su ${user} -c \
-		"/usr/bin/gnome-session --session=gnome-classic" \
+		"/usr/bin/gnome-session --session=gnome-fallback" \
 		-- :1 vt8 &> /dev/null &
 }
 function xinit_stop(){
