@@ -259,7 +259,7 @@ function DISPLAY_NEW(){
 	local username="$1"
 	local homedir=$(GET_USER_HOMEDIR "${username}")
 	local displays="${homedir}/${DISPLAY_FILE}"
-	cat <<-SU | su ${username} -s /bin/bash
+	su ${username} -s /bin/bash <<-SU
 		touch     "${displays}"
 		chmod 600 "${displays}"
 	SU
