@@ -75,21 +75,25 @@ function setup_Prep_Policy_Changes(){
 function setup_Prep_UCF(){
 	desc Prep: openconnect, cifs, hostname
 	# Setup hostname on systems Dell,vbox,other
-	local OEM_ID=$(hwinfo --bios 2>/dev/null |\
-			awk -F: '$1~"OEM id"{print $2}' |\
-			tr -d '\"\ ')
-	case "${OEM_ID}" in
+	local SYSTEM=""
+	for SYSTEM in dell virtualbox vmware noid; do
+		hwinfo --bios 2>/dev/null |\
+		grep -q -i ${SYSTEM} &&\
+		break
+	done
+	case "${SYSTEM}" in
 		DELL)		local DELL_TAG=$(hwinfo --bios 2>/dev/null |\
 					sed -n '/System Info:/,/Serial:/p' |\
 					awk -F: '$1~"Serial"{print $2}' |\
 					tr -d '\"\ ')
 				local HOSTNAME=${DELL_TAG};;
-		VBOXCPU)	local VBOX_VER=$(hwinfo --bios 2>/dev/null |\
+		virtualbox)	local VBOX_VER=$(hwinfo --bios 2>/dev/null |\
 						awk -F_ '$1~"vboxVer"{print $2}')
 				local VBOX_REV=$(hwinfo --bios 2>/dev/null |\
 						awk -F_ '$1~"vboxRev"{print $2}')
 				HOSTNAME="VBox${VBOX_VER}-${VBOX_REV}";;
-		*)		HOSTNAME=${OEM_ID}
+		vmware)		HOSTNAME="VMWare"
+		*)		HOSTNAME=rename-me
 	esac
 	if cat /etc/hostname | grep -q ^kickseed$; then
 		awk '/kickseed/{print $2}'        /etc/hosts > /etc/hostname
