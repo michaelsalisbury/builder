@@ -82,7 +82,7 @@ function setup_Prep_UCF(){
 		break
 	done
 	case "${SYSTEM}" in
-		DELL)		local DELL_TAG=$(hwinfo --bios 2>/dev/null |\
+		dell)		local DELL_TAG=$(hwinfo --bios 2>/dev/null |\
 					sed -n '/System Info:/,/Serial:/p' |\
 					awk -F: '$1~"Serial"{print $2}' |\
 					tr -d '\"\ ')
