@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source="https://raw.github.com/michaelsalisbury/builder/master/deploy_ubuntu/${scriptName}"
@@ -415,10 +415,11 @@ function setup_Package_Fix_Tweak_Plymouth(){
 	# Fix broken spash screen after grub update
 	local grub_file='/etc/grub.d/10_linux'
 	cat <<-SED | sed -n -f <(cat) "${grub_file}"
-		/GRUB_CMDLINE_LINUX_DEFAULT="\$GRUB_CMDLINE_LINUX_DEFAULT \\\$vt_handoff"/{
+		/GRUB_CMDLINE_LINUX_DEFAULT=/{
 			p
 		}
 	SED
+		#/GRUB_CMDLINE_LINUX_DEFAULT="\$GRUB_CMDLINE_LINUX_DEFAULT \\\$vt_handoff"/{
 }
 function setup_Install_Daemons(){
         desc openssh apache2 nfs tftp
