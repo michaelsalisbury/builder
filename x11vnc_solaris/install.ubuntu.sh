@@ -171,6 +171,7 @@ latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
 
 # Projects major scripts
 read -d $'' majors <<-EOE
+	Xcommon-functions.sh
 	Xvnc-dynamic.sh
 	x11vnc.sh
 	xstartup
