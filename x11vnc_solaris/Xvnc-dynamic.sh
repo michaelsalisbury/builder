@@ -289,17 +289,19 @@ function VERIFY_UBUNTU_GNOME_LOGOUT(){
 	# verify Ubuntu and gnome
 	cat /etc/lsb-release | grep -i ubuntu &>/dev/null	&&\
 	[ "${desktop}" == "gnome" ]				&&\
-	cat <<-DESKTOP | su ${username} -c "tee \"${logout_desktop}\"" &>/dev/null
-		#!/usr/bin/env xdg-open
-		[Desktop Entry]
-		Name=Gnome Session Logout
-		GenericName=Logout
-		Exec=/usr/bin/gnome-session-quit
-		Icon=/usr/share/icons/Humanity/apps/48/gnome-session-logout.svg
-		StartupNotify=true
-		Terminal=false
-		Type=Application
-	DESKTOP
+	su - ${username} <<-SU
+		cat <<-DESKTOP > "${logout_desktop}"
+			#!/usr/bin/env xdg-open
+			[Desktop Entry]
+			Name=Gnome Session Logout
+			GenericName=Logout
+			Exec=/usr/bin/gnome-session-quit
+			Icon=/usr/share/icons/Humanity/apps/48/gnome-session-logout.svg
+			StartupNotify=true
+			Terminal=false
+			Type=Application
+		DESKTOP
+	SU
 	chmod +x "${logout_desktop}"
 }
 function canonicalpath(){
