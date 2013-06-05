@@ -410,6 +410,16 @@ function setup_Package_Gnome_Defaults(){
 	gconftool-2 $opt -t string -s /desktop/gnome/applications/terminal/exec terminator
 
 }
+function setup_Package_Fix_Tweak_Plymouth(){
+	desc Fix vt_handoff bug
+	# Fix broken spash screen after grub update
+	local grub_file='/etc/grub.d/10_linux'
+	cat <<-SED | sed -n -f <(cat) "${grub_file}"
+		/GRUB_CMDLINE_LINUX_DEFAULT="\$GRUB_CMDLINE_LINUX_DEFAULT \\\$vt_handoff"/{
+			p
+		}
+	SED
+}
 function setup_Install_Daemons(){
         desc openssh apache2 nfs tftp
 	waitForNetwork || return 1
