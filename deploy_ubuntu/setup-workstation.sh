@@ -414,13 +414,11 @@ function setup_Package_Fix_Tweak_Plymouth(){
 	desc Fix vt_handoff bug
 	# Fix broken spash screen after grub update
 	local grub_file='/etc/grub.d/10_linux'
-	cat <<-SED | sed -n -f <(cat) "${grub_file}"
+	cat <<-SED | sed -f <(cat) "${grub_file}"
 		/GRUB_CMDLINE_LINUX_DEFAULT="\$GRUB_CMDLINE_LINUX_DEFAULT \\\\\$vt_handoff"/{
 			s/ \\\\\$vt_handoff//
-			p
 		}
 	SED
-		#/GRUB_CMDLINE_LINUX_DEFAULT="\$GRUB_CMDLINE_LINUX_DEFAULT \\\$vt_handoff"/{
 }
 function setup_Install_Daemons(){
         desc openssh apache2 nfs tftp
