@@ -71,7 +71,8 @@ function main(){
 		SET_VNCDESKTOP ${srcUSER} ${vncPORT} ${rfbport} ${desktop}
 		echo GLOBAL :: VNCDESKTOP :: ${VNCDESKTOP}
 		# setup vncserver display port
-		cat <<-END-OF-VNCSERVER-SETUP | su - ${srcUSER} $(IS_OS_SOLARIS || echo -s /bin/bash)
+		su - ${srcUSER} $(IS_OS_SOLARIS || echo -s /bin/bash)\
+		cat <<-END-OF-VNCSERVER-SETUP
 			#export `grep ^PATH /etc/default/login`
 			export PATH=${PATH}
 			echo \${PATH} | tr ':' '\n' | sort
