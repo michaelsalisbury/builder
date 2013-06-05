@@ -381,15 +381,15 @@ function setup_Package_Holds(){
 	cat <<-SELECTIONS | awk '{print $0" hold"}' | dpkg --set-selections
 		linux-image-generic
 		linux-headers-generic
-		linux-firmware
-		linux-firmware-nonfree
-		grub-pc
-		grub-common
-		grub-gfxpayload-lists
-		grub-pc
-		grub-pc-bin
-		grub2-common
 	SELECTIONS
+		#linux-firmware
+		#linux-firmware-nonfree
+		#grub-pc
+		#grub-common
+		#grub-gfxpayload-lists
+		#grub-pc
+		#grub-pc-bin
+		#grub2-common
 	# Output debconf settings to verify changes made above
 	dpkg --get-selections | grep -v install
 }
