@@ -11,7 +11,13 @@ function main(){
 	rfbauth_passwd_file=/etc/x11vnc/passwd
 
 	# enter into array "auth_array" the xauth display sockets sorted by newest first
-	IFS=$'\n' read -d $'' -a auth_array < <(ls -tc /var/run/gdm/*/database)
+	if IS_OS_REDHAT; then
+		IFS=$'\n' read -d $'' -a auth_array < <(ls -tc /var/run/gdm/*/database)
+	elif IS_OS_UBUNTU; then
+		IFS=$'\n' read -d $'' -a auth_array < <(ls -tc /var/run/lightdm/root/\:0)
+	elif IS_OS_SOLARIS; then
+		IFS=$'\n' read -d $'' -a auth_array < <(ls -tc /var/run/gdm/*/database)
+	fi
 	
 	# log "auth_array" socket list
 	for auth in "${auth_array[@]}"; do echo gdmDB $(( auth_count++ )) : ${auth}; done
