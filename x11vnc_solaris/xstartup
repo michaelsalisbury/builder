@@ -81,8 +81,8 @@ function main(){
                 fi
 
 		#local GSESSION=$(WHICH gnome-session	2>/dev/null)
-		local GSESSION+=\ --session=gnome-classic
-		#local GSESSION+=" --session=gnome-fallback"
+		#local GSESSION+=\ --session=gnome-classic
+		local GSESSION+=\ --session=gnome-fallback
 		#local GSESSION=" $(WHICH gnome-session-fallback	2>/dev/null)"
 
 	# is Red Hat | CentOS
