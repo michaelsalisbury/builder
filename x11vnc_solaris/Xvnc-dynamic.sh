@@ -7,8 +7,6 @@ DESKTOPS='gnome twm ice fluxbox xfce4 kde'
 function main(){
 	echo ----------------------------------------- `date "+%Y.%m.%d-%T"`
 
-	#DISPLAY_SETUP_DEFAULTS mi164210 5901
-	
 	# These two GLOBAL vars must be captures ASAP or the connection times out
 	GET_PROC_SOCKETS  $$ &>/dev/null		# Set GLOBAL var SOCKETS
 	GET_PROC_SRC_PID  $$ &>/dev/null		# Set GLOBAL var SRCPID
