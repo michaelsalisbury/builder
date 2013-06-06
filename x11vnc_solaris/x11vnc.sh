@@ -180,5 +180,8 @@ chmod 777 ${LOG}
 [ -f "${CONFIG_FOLDER}/Xcommon-functions.sh" ] &&\
 	source "${CONFIG_FOLDER}/Xcommon-functions.sh" >> "${LOG}" 2>&1
 
+# set DEBUG to true for excessive function logging
+DEBUG=true
+DEBUG=false
 
 main "$@" 2>&1 >> "${LOG}"
