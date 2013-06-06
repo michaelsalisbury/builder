@@ -197,9 +197,7 @@ function GET_PROC_SRC_PID(){
 			${lsof} -n -P			\
 				-p ^${process}		\
 				-a			\
-				-c \^${BASH_SRCNAME}	\
-				-a			\
-				-c \^lsof		\
+				-c sshd			\
 				-a			\
 				-i TCP@${sockets[1]}	\
 				-F pu
