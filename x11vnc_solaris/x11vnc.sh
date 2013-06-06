@@ -3,12 +3,14 @@
 
 function main(){
 	echo -------------------------------------------------------- `date "+%Y.%m.%d-%T"`
-	env
-	echo --------------------------------------------------------
-	# to create password file "x11vnc -storepasswd" the password will be stored in
-	# ~/.vnc/passwd and can be relocated as nessisary
-	# currently this script does not use a password file
-	rfbauth_passwd_file=/etc/x11vnc/passwd
+	#env
+	#echo --------------------------------------------------------
+
+	# These two GLOBAL vars must be captures ASAP or the connection times out
+	GET_PROC_SOCKETS  $$ &>/dev/null		# Set GLOBAL var SOCKETS
+	GET_PROC_SRC_PID  $$ &>/dev/null		# Set GLOBAL var SRCPID
+	GET_PROC_SRC_UID  $$ &>/dev/null		# Set GLOBAL var SRCUID
+	GET_PROC_SRC_USER $$ &>/dev/null		# Set GLOBAL var SRCUSER
 
 	# enter into array "auth_array" the xauth display sockets sorted by newest first
 	if IS_OS_REDHAT; then
