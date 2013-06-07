@@ -11,9 +11,9 @@
                         --title=\"Remote user attempting connection ALLERT\"
                         --text=\"User \\\"${srcUSER}\\\" wants to share your desktop\"
                 )
-                su ${DISPLAY_0_USER}    \
+                su - localcosadmin    \
                         -s /bin/bash            \
-                        -c "DISPLAY=:0 zenity ${dlgOPTS[*]}"
+                        -c "DISPLAY=172.31.6.130 zenity ${dlgOPTS[*]}"
 
 
 
