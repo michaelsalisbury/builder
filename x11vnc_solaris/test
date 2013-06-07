@@ -3,6 +3,17 @@
 
 
 
+                local dlgOPTS=(
+                        --question
+                        --timeout=10
+                        --ok-label=\"Allow\"
+                        --cancel-label=\"NO\"
+                        --title=\"Remote user attempting connection ALLERT\"
+                        --text=\"User \\\"${srcUSER}\\\" wants to share your desktop\"
+                )
+                su ${DISPLAY_0_USER}    \
+                        -s /bin/bash            \
+                        -c "DISPLAY=:0 zenity ${dlgOPTS[*]}"
 
 
 
