@@ -11,6 +11,9 @@ cat <<-ZENITY | su - localcosadmin -s /bin/bash
 		--title="Remote user attempting connection ALLERT"\
 		--text="User \"${srcUSER}\" wants to share your desktop"
 	ZENITY
+echo result $?
+
+
 
 exit
 
