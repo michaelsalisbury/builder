@@ -141,7 +141,6 @@ function GET_LATEST(){
 		latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
 		echo "${latest}"
 	fi
-
 }
 function canonicalpath(){
 	if [ -d $1 ]; then
