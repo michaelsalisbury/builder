@@ -53,6 +53,7 @@ function main(){
 			stop xinetd
 		fi
 	done
+
 	start xinetd
 
 	# verify that root imports command aliases
