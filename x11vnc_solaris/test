@@ -13,7 +13,7 @@
                 )
                 su - localcosadmin    \
                         -s /bin/bash            \
-                        -c "DISPLAY=172.31.6.130 zenity ${dlgOPTS[*]}"
+                        -c "DISPLAY=:11 zenity ${dlgOPTS[*]}"
 
 
 
