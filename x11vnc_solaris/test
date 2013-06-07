@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+srcUSER=localcosadmin
 
 cat <<-ZENITY | su - localcosadmin -s /bin/bash
 	DISPLAY=:11 zenity		\
