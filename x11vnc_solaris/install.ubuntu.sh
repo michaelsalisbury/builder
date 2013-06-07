@@ -53,8 +53,7 @@ function main(){
 			stop xinetd
 		fi
 	done
-
-	start xinetd
+	status xinetd | grep -q "^xinetd stop/waiting$" && start xinetd
 
 	# verify that root imports command aliases
 	echo Sourcing command aliases for root...
