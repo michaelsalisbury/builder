@@ -80,6 +80,17 @@ function main(){
 		echo CONNECTING\!\!\! User \"${srcUSER}\" posting query to\
 			${DISPLAY_0_USER} for access.
 
+		cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash
+			DISPLAY=:11 zenity		\
+				--question		\
+				--timeout=10		\
+				--ok-label="Allow"	\
+				--cancel-label="NO"	\
+				--title="Remote user attempting connection ALLERT"\
+				--text="User \"${srcUSER}\" wants to share your desktop"
+		ZENITY
+
+
 		local dlgOPTS=(
 			--question
 			--timeout=10
