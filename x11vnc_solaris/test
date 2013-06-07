@@ -1,4 +1,15 @@
 #!/bin/bash
+
+
+
+
+
+
+
+
+
+exit
+
 		root_home=$(grep ^root /etc/passwd | cut -d: -f6)
 		echo $root_home
 
