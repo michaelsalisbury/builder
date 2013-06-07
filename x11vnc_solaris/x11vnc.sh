@@ -22,24 +22,20 @@ function main(){
 	fi
 	
 	# log "auth_array" socket list
-	for auth in "${auth_array[@]}"; do echo gdmDB $(( auth_count++ )) : ${auth}; done
+	# for auth in "${auth_array[@]}"; do echo gdmDB $(( auth_count++ )) : ${auth}; done
 
 	# get the name of the user logged into DISPLAY :0
 	local DISPLAY_0_USER=$(who -u | awk '/tty.*\(:0/{print $1}')
 	
 	echo DISPLAY : ${DISPLAY_0_USER}	
 
-	# get sockets
-	local -a sockets=( `GET_PROC_SOCKETS $$` )
-	#local ock='\([0-9\.]\+:[0-9]\+\)'	# sed socket filter
-	#local p='[[:space:]]'			# sed white space key
-	# "/,$$,/s/.*[[:s:]]\([0-9\.]\+:[0-9]\+\)[[:s:]]*\([0-9\.]\+:[0-9]\+\)[[:s:]].*/p;d"
-	#local -a sockets=($(ss -np | sed "/,$$,/s/.*$p$ock$p*$ock$p.*/\1 \2/p;d"))
-	
 	# get connecting username
 	local srcUSER=`GET_PROC_SRC_USER $$`
 	local vncPORT=`GET_PROC_DST_PORT $$`
 	local usrHOME=`GET_USER_HOMEDIR ${srcUSER}`
+	
+	# get sockets
+	local -a sockets=( `GET_PROC_SOCKETS $$` )
 	local vncSOCK=${sockets[0]}
 	local usrSOCK=${sockets[1]}
 
