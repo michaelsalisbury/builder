@@ -61,8 +61,8 @@ function main(){
 		echo CONNECTING\!\!\! User \"${srcUSER}\" is connecting with\
 			VNC via $'('${vncSOCK}$')'.
 
-	# if connecting users belongs is an admin as defined in Xcommon-functions
-	# currently defined as root or member of the wheel group
+	# if connecting users is an admin as defined in Xcommon-functions
+	# admin users currently defined as root or member of the wheel group
 	elif IS_USER_ADMIN ${srcUSER}; then
 		DISPLAY_UNLOCK ${DISPLAY_0_USER}
 		echo CONNECTING\!\!\! wheel User \"${srcUSER}\" is connecting with\
@@ -70,7 +70,7 @@ function main(){
 
 	# if a user is logged in but the screen is locked allow access
 	elif DISPLAY_ISLOCKED ${DISPLAY_0_USER}; then
-		echo CONNECTING\!\!\! User \"${srcUSER}\" is connected with\
+		echo CONNECTING\!\!\! User \"${DISPLAY_0_USER}\" is logged in with\
 			screensaver active.
 		echo CONNECTING\!\!\! User \"${srcUSER}\" is connecting with\
 			VNC via $'('${vncSOCK}$')'.
@@ -89,36 +89,23 @@ function main(){
 				--title="Remote user attempting connection ALLERT"\
 				--text="User \"${srcUSER}\" wants to share your desktop"
 		ZENITY
-
-
-		local dlgOPTS=(
-			--question
-			--timeout=10
-			--ok-label=\"Allow\"
-			--cancel-label=\"NO\"
-			--title=\"Remote user attempting connection ALLERT\"
-			--text=\"User \\\"${srcUSER}\\\" wants to share your desktop\"
-		)
-		su ${DISPLAY_0_USER}	\
-			-s /bin/bash		\
-			-c "DISPLAY=:0 zenity ${dlgOPTS[*]}"
-		local dlgDATA=$?
-		#echo DIALOG RESULYS :: ${dlgDATA}		
-
-		if (( dlgDATA > 0 )); then
-			echo EXITING\!\!\! User \"${DISPLAY_0_USER}\"\
-				said NO to \"${srcUSER}\"\!
-			exit ${dlgDATA}
-		else
-			echo CONNECTING\!\!\! User \"${srcUSER}\" is connecting with\
-				VNC via $'('${vncSOCK}$')'.
-		fi
+		local zenity_dlg=$?
+		case ${zenity_dlg} in
+			0|5)	echo CONNECTING\!\!\! User \"${srcUSER}\" is connecting with\
+					VNC via $'('${vncSOCK}$')'.;;
+			1)	echo EXITING\!\!\! User \"${DISPLAY_0_USER}\"\
+					said NO to \"${srcUSER}\"\!
+				exit ${dlgDATA};;
+			*)	echo ERROR\!\!\! Unknown error code from zenity\;\
+					${zenity_dlg}
+				exit ${dlgDATA};;
+		esac
 	fi
 
 	# start x11vnc socket on localhost
 	/usr/bin/x11vnc				\
 		-bg				\
-		-o /var/log/x11vnc.log		\
+		-o "${LOG}"			\
 		-accept /bin/true		\
 		-gone /bin/true			\
 		-noxdamage			\
