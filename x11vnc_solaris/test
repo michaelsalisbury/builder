@@ -10,6 +10,7 @@ cat <<-ZENITY | su - localcosadmin -s /bin/bash
 		--cancel-label="NO"	\
 		--title="Remote user attempting connection ALLERT"\
 		--text="User \"${srcUSER}\" wants to share your desktop"
+	echo result \$?
 	ZENITY
 echo result $?
 
