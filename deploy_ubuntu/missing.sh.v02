@@ -1,0 +1,165 @@
+#!/bin/bash
+
+function main(){
+	# Prep PACKAGES and record total count
+	cat ${MISSING} > ${PACKAGES}
+	local TOTAL=`cat ${PACKAGES} | wc -l`
+
+	# Process out all Dependencies
+	while (( `cat ${PACKAGES} | wc -l` > 0 )); do
+		MOVE_DEPENDENCIES
+	done
+	cat ${DEPENDENCIES} > list-dependencies
+
+	# Prep Packages
+	cat ${MISSING} > ${PACKAGES}
+	
+	# Run show package and process out unavailable or virtual selections
+	while (( `cat ${PACKAGES} | wc -l` > 0 )); do
+		PACKAGE_SHOW
+	done
+	cat ${UNAVAILABLE}  > list-unavailable
+	cat ${VIRTUAL_AUTO} > list-virtual_auto-select
+	cat ${VIRTUAL_MAN}  > list virtual_manual-select
+	cat ${TROUBLE}      > list-trouble
+
+	# Prep PACKAGES and record total count
+	cat ${MISSING} > ${PACKAGES}
+
+	# Run Ordering simulation and process out additional selections
+	while (( `cat ${PACKAGES} | wc -l` > 0 )); do
+		ORDERING_SIMULATION
+	done
+
+	# Dump shared memory files
+	cat ${MISSING}      > list-missing
+	cat ${ADDONS}       > list-addons
+	cat ${DEPENDENCIES} > list-dependencies
+
+	# calculate package list combination for check
+	local TOTAL_MIS=`cat ${MISSING} | wc -l`
+	local TOTAL_DEPS=`cat ${ADDONS} ${DEPENDENCIES} | wc -l`
+	local TOTAL_SHOW=`cat ${UNAVAILABLE} ${VIRTUAL_AUTO}\
+				${VIRTUAL_MAN} ${TROUBLE} | wc -l`
+	local TOTAL_CHECK=`cat ${MISSING} ${ADDONS} ${DEPENDENCIES}\
+				${UNAVAILABLE} ${VIRTUAL_AUTO}\
+				${VIRTUAL_MAN} ${TROUBLE} | wc -l`
+
+	# display counts
+	echo
+	echo "TOTAL       :: ${TOTAL}"
+	echo "TOTAL_MIS   :: ${TOTAL_MIS}"
+	echo "TOTAL_DEPS  :: ${TOTAL_DEPS}"
+	echo "TOTAL_SHOW  :: ${TOTAL_SHOW}"
+	echo "TOTAL_CHECK :: ${TOTAL_CHECK}"
+}
+function PACKAGE_SHOW(){
+	local PACKAGE=`sed '1!d' ${PACKAGES}`
+	local TEST="Package ${PACKAGE} is not available, but is referred to by another package."
+
+	apt-cache show ${PACKAGE} | grep "" &>/dev/null
+	case "$(echo ${PIPESTATUS[*]} | tr \  \.)" in
+		0.0)	;;
+
+		0.1)	if apt-get -s install ${PACKAGE} 2>/dev/null |\
+			grep "${TEST}" &>/dev/null; then
+				apt-get -s install ${PACKAGE} 2>/dev/null	|\
+                                grep :						|\
+                                tail -n +2					|\
+                                xargs echo ${PACKAGE} :: >> ${VIRTUAL_MAN}
+			else
+				echo ${PACKAGE} >> ${VIRTUAL_AUTO}
+			fi
+			sed -i "/^${PACKAGE}$/d" ${MISSING};;
+
+		100.1)	echo ${PACKAGE} >> ${UNAVAILABLE}
+			sed -s "/^${PACKAGE}$/d" ${MISSING};;
+
+		*)	echo ${PACKAGE} >> ${TROUBLE}
+			sed -s "/^${PACKAGE}$/d" ${MISSING};;
+			
+	esac	
+
+	sed -i "/^${PACKAGE}$/d" ${PACKAGES};;
+
+	echo PACKAGE = ${PACKAGE}
+	for FILE in PACKAGES MISSING DEPENDENCIES VIRTUAL_AUTO VIRTUAL_MAN UNAVAILABLE; do
+		echo ${FILE} :: `wc -l ${!FILE}`
+	done
+}
+function ORDERING_SIMULATION(){
+	local PACKAGE=`sed '1!d' ${PACKAGES}`
+
+	apt-get -s install ${PACKAGE}		|\
+	awk '/^Inst/{print "/^"$2"$/p"}'	|\
+	sed -n -f <(cat) ${MISSING}		|\
+	tee -a ${ADDONS}			|\
+	awk '{print "/^"$0"$/d"}'		|\
+	sed -i -f <(cat) ${MISSING} ${PACKAGES}
+
+	sed -i "/^${PACKAGE}$/d" ${PACKAGES}
+
+	echo PACKAGE = ${PACKAGE}
+	for FILE in PACKAGES MISSING ADDONS DEPENDENCIES; do
+		echo ${FILE} :: `wc -l ${!FILE}`
+	done
+}
+function MOVE_DEPENDENCIES(){
+	local PACKAGE=`sed '1!d' ${PACKAGES}`
+
+	apt-cache depends ${PACKAGE}		|\
+	sort -u					|\
+	awk '/Depends:/{print "/^"$2"$/p"}'	|\
+	sed -n -f <(cat) ${MISSING}		|\
+	tee -a ${DEPENDENCIES}			|\
+	awk '{print "/^"$0"$/d"}'		|\
+	sed -i -f <(cat) ${MISSING} ${PACKAGES}
+
+	sed -i "/^${PACKAGE}$/d" ${PACKAGES}
+
+	echo PACKAGE = ${PACKAGE}
+	for FILE in PACKAGES MISSING DEPENDENCIES; do
+		echo ${FILE} :: `wc -l ${!FILE}`
+	done
+}
+function canonicalpath(){
+        if [ -d $1 ]; then
+                pushd $1 > /dev/null 2>&1
+                echo $PWD
+        elif [ -f $1 ]; then
+                pushd $(dirname $1) > /dev/null 2>&1
+                echo $PWD/$(basename $1)
+        else
+                echo "Invalid path $1"
+        fi
+        popd > /dev/null 2>&1
+}
+# GLOBAL vars; fully qualified script paths and names
+BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
+BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
+BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
+
+# GLOBAL vars; list of selections from established system
+[ -f "$1" ] && SELECTIONS="$1" || { echo Bad or missing selections file.  Exiting\!; exit; }
+
+# GLOBAL vars; list of missing packages
+TROUBLE="/dev/shm/$$TROUBLE$$"
+ADDONS="/dev/shm/$$ADDONS$$"
+DEPENDENCIES="/dev/shm/$$DEPENDENCIES$$"
+PACKAGES="/dev/shm/$$PACKAGES$$"
+UNAVAILABLE="/dev/shm/$$UNAVAILABLE$$"
+VIRTUAL_AUTO="/dev/shm/$$VIRTUAL_AUTO$$"
+VIRTUAL_MAN="/dev/shm/$$VIRTUAL_MAN$$"
+MISSING="/dev/shm/$$MISSING$$"
+diff --suppress-common-lines\
+	<(dpkg --get-selections | awk '{print $1}')\
+	"${SELECTIONS}" |\
+	awk '/^>/{print $2}' > "${MISSING}"
+
+# touch all FILES
+for FILES in TROUBLE ADDONS DEPENDENCIES PACKAGES UNAVAILABLE VIRTUAL_AUTO VIRTUAL_MAN MISSING; do
+	touch ${!FILES}
+done
+
+main "$@"
+rm -f "/dev/shm/$$"*"$$"

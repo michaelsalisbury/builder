@@ -1,0 +1,88 @@
+#!/bin/bash
+
+function main(){
+	for FILE in PACKAGES MISSING DEPENDENCIES; do
+		echo ${FILE} :: `wc -l ${!FILE}`
+	done
+
+	local TOTAL=`cat ${PACKAGES} | wc -l`
+	#cat ${PACKAGES} > list-packages
+
+	# Process out all Dependencies
+	while (( `cat ${PACKAGES} | wc -l` > 0 )); do
+		MOVE_DEPENDENCIES
+	done
+
+	# Run Ordering simulation and process out additional selections
+
+
+
+
+	local COMBINED=`{ cat ${MISSING};cat ${DEPENDENCIES}; } | wc -l`
+
+	echo TOTAL :: ${TOTAL}
+	echo COMBINED :: ${COMBINED}
+
+	cat ${MISSING} > list-missing
+	cat ${DEPENDENCIES} > list-dependencies
+	#cat list-packages | sort > list-packages-sort
+	#{ cat ${MISSING}; cat ${DEPENDENCIES}; } | sort > list-combined-sort
+}
+function ORDERING_SIMULATION(){
+
+
+
+
+
+
+
+}
+function MOVE_DEPENDENCIES(){
+	local PACKAGE=`sed '1!d' ${PACKAGES}`
+
+	apt-cache depends ${PACKAGE}		|\
+	sort -u					|\
+	awk '/Depends:/{print "/^"$2"$/p"}'	|\
+	sed -n -f <(cat) ${MISSING}		|\
+	tee -a ${DEPENDENCIES}			|\
+	awk '{print "/^"$0"$/d"}'		|\
+	sed -i -f <(cat) ${MISSING} ${PACKAGES}
+
+	sed -i "/^${PACKAGE}$/d" ${PACKAGES}
+
+	echo PACKAGE = ${PACKAGE}
+	for FILE in PACKAGES MISSING DEPENDENCIES; do
+		echo ${FILE} :: `wc -l ${!FILE}`
+	done
+}
+function canonicalpath(){
+        if [ -d $1 ]; then
+                pushd $1 > /dev/null 2>&1
+                echo $PWD
+        elif [ -f $1 ]; then
+                pushd $(dirname $1) > /dev/null 2>&1
+                echo $PWD/$(basename $1)
+        else
+                echo "Invalid path $1"
+        fi
+        popd > /dev/null 2>&1
+}
+# GLOBAL vars; fully qualified script paths and names
+BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
+BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
+BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
+
+# GLOBAL vars; list of selections from established system
+[ -f "$1" ] && SELECTIONS="$1" || { echo Bad or missing selections file.  Exiting\!; exit; }
+
+# GLOBAL vars; list of missing packages
+DEPENDENCIES="/dev/shm/$$DEPENDENCIES$$"
+PACKAGES="/dev/shm/$$PACKAGES$$"
+MISSING="/dev/shm/$$MISSING$$"
+diff --suppress-common-lines\
+	<(dpkg --get-selections | awk '{print $1}')\
+	"${SELECTIONS}" |\
+	awk '/^>/{print $2}' | tee "${MISSING}" > "${PACKAGES}"
+
+main "$@"
+rm -f "/dev/shm/$$"*"$$"
