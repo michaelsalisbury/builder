@@ -197,6 +197,57 @@ END-OF-CMDS
 END-OF-SU
 }
 ###########################################################################################
+#                                                                Hardware Identification
+###########################################################################################
+function system_hardware_platform_id(){
+	# currently programmed to ID Dell, VirtualBox, VMWare
+	if ! which hwinfo 2>/dev/null; then
+		echo noid
+		return 1
+	fi
+	local SYSTEMID=""
+	for SYSTEMID in		\
+		dell		\
+		virtualbox	\
+		vmware		\
+		noid
+	do
+		hwinfo --bios 2>/dev/null |\
+		grep -q -i ${SYSTEMID} &&\
+		break
+	done
+}
+function system_serial(){
+	# for virtualbox and vmware generate host version
+	local SYSTEMID=$(system_hardware_platform_id)
+	if ! which hwinfo 2>/dev/null; then
+		echo ${SYSTEMID}
+		return 1
+	fi
+	case "${SYSTEMID}" in
+		dell)		local DELL_TAG=$(hwinfo --bios 2>/dev/null |\
+					sed -n '/System Info:/,/Serial:/p' |\
+					awk -F: '$1~"Serial"{print $2}' |\
+					tr -d '\"\ ')
+				local SERIAL=${DELL_TAG};;
+		virtualbox)	local VBOX_VER=$(hwinfo --bios 2>/dev/null |\
+						awk -F_ '$1~"vboxVer"{print $2}')
+				local VBOX_REV=$(hwinfo --bios 2>/dev/null |\
+						awk -F_ '$1~"vboxRev"{print $2}')
+				SERIAL="VBox${VBOX_VER}-${VBOX_REV}";;
+		vmware)		SERIAL="VMWare";;
+		*)		SERIAL="${SYSTEMID}";;
+	esac
+	echo ${SERIAL}
+}
+function system_is_virtualbox(){
+	system_hardware_platform_id | grep -q -i virtualbox
+}
+function system_is_vmware(){
+	system_hardware_platform_id | grep -q -i vmware
+}
+
+###########################################################################################
 #                                                                Ubuntu Policy
 ###########################################################################################
 function policy_change(){

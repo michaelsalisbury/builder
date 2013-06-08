@@ -75,26 +75,7 @@ function setup_Prep_Policy_Changes(){
 function setup_Prep_UCF(){
 	desc Prep: openconnect, cifs, hostname
 	# Setup hostname on systems Dell,vbox,other
-	local SYSTEM=""
-	for SYSTEM in dell virtualbox vmware noid; do
-		hwinfo --bios 2>/dev/null |\
-		grep -q -i ${SYSTEM} &&\
-		break
-	done
-	case "${SYSTEM}" in
-		dell)		local DELL_TAG=$(hwinfo --bios 2>/dev/null |\
-					sed -n '/System Info:/,/Serial:/p' |\
-					awk -F: '$1~"Serial"{print $2}' |\
-					tr -d '\"\ ')
-				local HOSTNAME=${DELL_TAG};;
-		virtualbox)	local VBOX_VER=$(hwinfo --bios 2>/dev/null |\
-						awk -F_ '$1~"vboxVer"{print $2}')
-				local VBOX_REV=$(hwinfo --bios 2>/dev/null |\
-						awk -F_ '$1~"vboxRev"{print $2}')
-				HOSTNAME="VBox${VBOX_VER}-${VBOX_REV}";;
-		vmware)		HOSTNAME="VMWare";;
-		*)		HOSTNAME="rename-me";;
-	esac
+	local HOSTNAME=$(system_serial)
 	if cat /etc/hostname | grep -q ^kickseed$; then
 		awk '/kickseed/{print $2}'        /etc/hosts > /etc/hostname
 		sed -i "s/kickseed/${HOSTNAME}/g" /etc/hosts   /etc/hostname
@@ -130,9 +111,9 @@ function setup_Prep_Tweak_Apt_Cacher(){
 	desc append options to apt cacher client config
         waitForNetwork || return 1
 	# Find apt cacher client config and append changes
-	read -d $'' new_entries << END-OF-ENTRIES
-Acquire::http::Timeout "2";
-END-OF-ENTRIES
+	read -d $'' new_entries <<-END-OF-ENTRIES
+		Acquire::http::Timeout "2";
+	END-OF-ENTRIES
 	new_entries=${new_entries//$'\n'/\\\n} ### prep variable for multi-line sed append ###
 	egrep -l -R "^Acquire::http::Proxy " /etc/apt |\
 	xargs -i@ sed -i.bk`date "+%s"` "/^Acquire::http::Proxy /a${new_entries}" @
@@ -620,11 +601,23 @@ function setup_Synergy(){
 	[ ! -f  "${package}" ] && return 1
 	dpkg -i "${package}"
 }
+function setup_VMWare_Additions(){
+        desc Install VMWare Linux Additions
+        ###################################################################################
+	waitForNetwork || return 1
+	stall 3
+	# Test is system vmware
+	system_is_vmware || return
+
+}
 function setup_VBox_Additions(){
         desc Install Virtual Box Linux Additions
         ###################################################################################
 	waitForNetwork || return 1
 	stall 3
+	# Test is system virtualbox
+	system_is_virtualbox || return
+
 	# Prep for vbox extentions
 	waitAptgetInstall
 	local kernel_headers=$(apt-cache search "linux-headers-$(uname -r)" | awk '{print $1}')
