@@ -1,0 +1,12 @@
+#CreateDir#
+KERNEL=="sd?", SUBSYSTEM=="block", BUS=="usb", ACTION=="add", RUN+="/root/.custApps/udev.add.sh %k"
+#KERNEL=="sd*", SUBSYSTEM=="block", BUS=="usb", ACTION=="add", RUN+="sudo gnome-terminal --profile=driveInfo -e 'watch -n 3 /root/.custApps/driveInfo.sh'"
+#KERNEL=="sd*", SUBSYSTEM=="block", BUS=="usb", ACTION=="add", RUN+="/bin/mkdir -p /media/exfat-%k"
+#Mount#
+#KERNEL=="sd*", SUBSYSTEM=="block", BUS=="usb", ACTION=="add", SYMLINK+="usb%k", RUN+="/sbin/mount.exfat-fuse -o defaults /dev/%k /media/exfat-%k"
+#UmountDir#
+#KERNEL=="sd*", SUBSYSTEM=="block", BUS=="usb", ACTION=="remove", RUN+="/bin/umount -l /media/exfat-%k"
+#RemoveDir#
+KERNEL=="sd?", SUBSYSTEM=="block", BUS=="usb", ACTION=="remove", RUN+="/root/.custApps/udev.remove.sh %k"
+#KERNEL=="sd*", SUBSYSTEM=="block", BUS=="usb", ACTION=="remove", RUN+="/bin/rmdir /media/exfat-%k"
+#DontRemoveThisRow#
