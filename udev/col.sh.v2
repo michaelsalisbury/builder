@@ -1,0 +1,144 @@
+#!/bin/bash
+
+
+function color(){
+
+	local color=$(echo $1 | tr A-Z a-z)
+	shift 1
+	local text=$(echo $@)
+
+	[ "${color:0:1}" == "u" ] && { local underline="true"; color=${color:1}; }
+
+	case ${color} in
+	black)		color='30m';;	blue)		color='34m';;	brown)		color='33m';;	cyan)		color='36m';;
+        darkbrown)	color='1;33m';;	darkgray)	color='1;30m';;	green)		color='32m';;	lightblue)	color='1;34m';;
+        lightcyan)	color='1;36m';;	lightgray)	color='37m';;	lightgreen)	color='1;32m';;	lightpurple)	color='1;35m';;
+        lightred)	color='1;31m';;	purple)		color='35m';;	red)		color='1;31m';;	white)		color='1;37m';;
+        yellow)		color='1;33m';;	*)		return;;
+	esac
+
+	[ "${underline}" == "true" ] && color='4;'${color}	
+	echo "\e[${color}${text}\e[00m"
+}
+
+################################################################################################################
+################################################################################################################
+
+IF=eth1
+IP=$(ifconfig | sed -n "/${IF}/,/^$/{/inet addr/p}" | sed "s/.*inet addr://;s/ Bcast.*//")
+echo -e            "             "`color green "System IP"`"  $IP"
+echo -e `color red --------------------------------------------------------------------------------------------`
+
+
+################################################################################################################
+################################################################################################################
+
+echo
+columnc=(green  white   red     white   white   white   white   white   red)
+justify=(l      r       r       r       r       r       l       r       r)
+columns=(7     8       5      11      35      10      10      10      7)
+while read line; do
+        column=0
+        for word in `echo $line`; do
+		whitesp=$(( ${columns[$column]} - ${#word} + 1 ))
+		whitesp="`echo $(yes i|head -n${whitesp//-*/1})|sed 's/i//g'`"
+                case ${justify[$column]} in
+                        l)      echo -ne `color ${columnc[$column]} ${word}`"$whitesp";;
+              	        r)      echo -ne "$whitesp"`color ${columnc[$column]} ${word}`;;
+                esac
+                echo -n " "
+                let column++
+        done
+        echo
+done < <(ps -o pid,time,pcpu,comm,args -C VirtualBox)
+#       Modify line above to feed "while read"
+
+################################################################################################################
+################################################################################################################
+
+echo 
+columnc=(green	white	red	white	red	white	white	white	white)
+justify=(l	r	r	r	r	r	r	r	r)
+columns=(10	2	12	12	12	12	12	12	7)
+while read line; do
+	column=0
+	for word in `echo $line`; do
+		# Modify data here		
+		word=${word//kb/Kb }
+		word=${word//\%/\% }
+		word=${word//mem/mem }
+		word=${word//swp/swp }
+		[ -n "`echo $word | sed -n '/[0-9]\{3,\}/p'`" ]	&& word=`printf "%'d\n" $word`
+		# Don't modify code below, this prints columns
+                whitesp=$(( ${columns[$column]} - ${#word} + 1 ))
+                whitesp="`echo $(yes i|head -n${whitesp//-*/1})|sed 's/i//g'`"
+                case ${justify[$column]} in
+                        l)      echo -ne `color ${columnc[$column]} ${word}`"$whitesp";;
+                        r)      echo -ne "$whitesp"`color ${columnc[$column]} ${word}`;;
+                esac
+		echo -n " "
+		let column++
+	done
+	echo
+done < <(sar -S -r 1 1 | grep -vE "Average|Linux|^$")
+#	Modify line above to feed "while read"
+
+
+################################################################################################################
+################################################################################################################
+
+echo 
+columnc=(green  white   red     white   white   white   white   white   red)
+justify=(l      r       r       r       r       r       r       r       r)
+columns=(10     2       10      10      10      10      10      10      7)
+while read line; do
+        column=0
+        for word in `echo $line`; do
+                # Modify data here
+                #[ -n "`echo $word | sed -n '/kb/p'`" ]          && word=${word//kb/Kb }
+                #[ -n "`echo $word | sed -n '/[0-9]\{3,\}/p'`" ] && word=`printf "%'d\n" $word`
+                # Don't modify code below, this prints columns
+                whitesp=$(( ${columns[$column]} - ${#word} + 1 ))
+                whitesp="`echo $(yes i|head -n${whitesp//-*/1})|sed 's/i//g'`"
+                case ${justify[$column]} in
+                        l)      echo -ne `color ${columnc[$column]} ${word}`"$whitesp";;
+                        r)      echo -ne "$whitesp"`color ${columnc[$column]} ${word}`;;
+                esac
+                echo -n " "
+                let column++
+        done
+        echo
+done < <(sar -P ALL 1 1 | grep -vE "Average|all|^$|Linux")
+#       Modify line above to feed "while read"
+
+exit 0
+################################################################################################################
+################################################################################################################
+
+echo
+columnn=(-----  user    nice    system  idle    iowait  irq     softirq)
+columnc=(green  white   red     white   white   white   white   white   red)
+justify=(l      r       r       r       r       r       r       r       r)
+columns=(7     8       5      11      10      10      10      10      7)
+while read line; do
+        column=0
+        for word in `echo $line`; do
+                whitesp=$(( ${columns[$column]} - ${#word} + 1 ))
+                whitesp="`echo $(yes i|head -n${whitesp//-*/1})|sed 's/i//g'`"
+                case ${justify[$column]} in
+                        l)      echo -ne `color ${columnc[$column]} ${word}`"$whitesp";;
+                        r)      echo -ne "$whitesp"`color ${columnc[$column]} ${word}`;;
+                esac
+                echo -n " "
+                let column++
+        done
+        echo
+done < <(echo ${columnn[*]}; cat /proc/stat | grep -E "cpu[0-9]")
+
+
+
+
+
+
+
+
