@@ -19,5 +19,3 @@ MAC = 080027ABCD
 VRDEPORT = 33890
 
 # LOG
-TEST = `123`
-TEST2 = $(my shit)
