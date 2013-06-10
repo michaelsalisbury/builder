@@ -262,7 +262,7 @@ function SOURCE_CONFIG_GLOBAL_VARS(){
 			s/[\"\']//g				# remove punctuation
 			s/[[:space:]]*=[[:space:]]*/=\"/	# ammend quotes to =
 			s/[[:space:]]*$/\"/			# ammend quotes to $
-			s/[[:space:]]\+/\s/g			# remove tabs, reduce spaces
+			s/[[:space:]]\+/ /g			# remove tabs, reduce spaces
 			p					# print
 		}
 	SED
