@@ -293,7 +293,7 @@ TOOl_LIST_FILE_NAME=${TOOl_LIST_FILE_NAME:-tool.list.txt}
 USER_TOOL_LIST_PATH=${USER_TOOL_DIR}/${TOOl_LIST_FILE_NAME}
 cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
 	mkdir -p ~/"${USER_TOOL_DIR}"
-	touch ~/"${USER_TOOL_LIST_PATH}"	
+	touch ~/"${USER_TOOL_LIST_PATH}" 2>/dev/null
 SU
 
 # GLOBAL vars; Config file section headers
