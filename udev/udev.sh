@@ -115,7 +115,7 @@ function zenity_name_task(){
 	# get drive size
 	local zenityTitle=$(GET_DEVICE_DETAIL)
 	# naming instructions
-	local zenityText=$(GET_CONFIG_SECTION "${CONFIG_NAME_INSTRUCTIONS}")
+	local zenityText=$(GET_CONFIG_SECTION "${NAMING_INSTRUCTIONS}")
 
 	(
 	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
@@ -171,7 +171,7 @@ function zenity_choose_tool(){
 	local zenityTitle=$(GET_DEVICE_DETAIL)
 
 	# get selection instructions
-	local zenityText=$(GET_CONFIG_SECTION "${CONFIG_TOOL_INSTRUCTIONS}")
+	local zenityText=$(GET_CONFIG_SECTION "${TOOL_INSTRUCTIONS}")
 
 	# get column headers
 	eval local column=( $(GET_CONFIG_SECTION "${CONFIG_COLUMN_HEADERS}") )
@@ -207,13 +207,13 @@ function zenity_selection_list(){
 function GET_SELECTIONS(){
 	# dependant on global variables; CONFIG_TOOL_SELECTIONS
 	GET_DEFAULT_SELECTION
-	GET_CONFIG_SECTION "${CONFIG_TOOL_SELECTIONS}" | cat -n
+	GET_CONFIG_SECTION "${TOOL_SELECTIONS}" | cat -n
 }
 function GET_CONFIG_SECTION(){
-	# dependant on global variables; TOOLDIR, TOOLLIST
+	# dependant on global variables; USER_TOOL_LIST_PATH
 	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
 	local SECTION=$1
-	cat <<-SED | sed -n -f <(cat) "${DISPLAY_0_HOME}/${TOOLLIST}"
+	cat <<-SED | sed -n -f <(cat) "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}"
 		/[[:space:]]*\[\s${SECTION}\s\]/,/[[:space:]]*\[/{
 			/[[:space:]]*\[/d	# delete first and last line
 			/^$/d			# delete empty lines
@@ -286,10 +286,10 @@ cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
 SU
 
 # GLOBAL vars; Config file section headers
-CONFIG_COLUMN_HEADERS=${CONFIG_COLUMN_HEADERS:-Task List Column Headers}
-CONFIG_TOOL_SELECTIONS=${CONFIG_TOOL_SELECTIONS:-Task List Selections}
-CONFIG_TOOL_INSTRUCTIONS=${CONFIG_TOOL_INSTRUCTIONS:-Task Selection Instructions}
-CONFIG_NAME_INSTRUCTIONS=${CONFIG_NAME_INSTRUCTIONS:-Naming Instructions}
+TOOL_COLUMN_HEADERS=${TOOL_COLUMN_HEADERS:-Task List Column Headers}
+TOOL_SELECTIONS=${TOOL_SELECTIONS:-Task List Selections}
+TOOL_INSTRUCTIONS=${TOOL_INSTRUCTIONS:-Task Selection Instructions}
+NAMING_INSTRUCTIONS=${NAMING_INSTRUCTIONS:-Naming Instructions}
 
 # GLOBAL vars; mac address base, vrdeport base
 MAC=${MAC:-080027ABCD}
