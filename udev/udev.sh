@@ -181,7 +181,7 @@ function GET_DEFAULT_SELECTION(){
 function SET_DEFAULT_SELECTION(){
 	# dependant on global variables; SELECTION
 	IFS=$DIFS SELECTION=( ${SELECTION[0]} $(GET_DEFAULT_SELECTION) )
-	IFS=$DIFS SELECTION=( ${SELECTION[*]:0:4} )
+	IFS=$DIFS SELECTION=( ${SELECTION[*]:0:6} )
 }
 function SET_DEFAULT_NAME(){
 	# dependant on global variables; NAME
