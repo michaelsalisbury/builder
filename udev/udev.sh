@@ -166,7 +166,7 @@ function SET_DEFAULT_SELECTION(){
 function SET_DEFAULT_NAME(){
 	# dependant on global variables; NAME
 	IFS=$DIFS NAME=( ${NAME[0]} $(GET_DEVICE_DETAIL) )
-	IFS=$DIFS NAME=( ${NAME[0]} "${DEVICE}_${NAME[3]}${NAME[4]}" )
+	IFS=$DIFS NAME=( ${NAME[0]} "${DEVICE}-${NAME[3]}${NAME[4]}" )
 }
 function zenity_choose_tool(){
 	# dependant on global variables; DEVICE
