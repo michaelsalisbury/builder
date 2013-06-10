@@ -2,6 +2,7 @@
 sed -n config -f <(cat <<-SED
 		/^$/d
 		/^#/d
+		s/[[:punct:]]\+//g
 		/^[[:space:][:alnum:]\'\'=_]*$/{
 			s/[[:space:]]*=[[:space:]]/=/
 			s/[[:space:]]\+/ /g
