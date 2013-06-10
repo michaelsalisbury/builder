@@ -10,9 +10,9 @@ echo # DO NOT REMOVE THIS BLANK LINE
 include local.cfg
 include ../defaults.cfg.template
 include ../packages.cfg.template
-#include ../packages.gnome.cfg.template
+include ../packages.gnome.cfg.template
 #include ../packages.kde.cfg.template
-#include ../packages.xfce.cfg.template
+include ../packages.xfce.cfg.template
 
 #############################################################################
 include ../post.nochroot.setup_builder.cfg
