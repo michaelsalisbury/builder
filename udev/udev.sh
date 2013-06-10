@@ -112,15 +112,36 @@ function SET_VM(){
 	SU
 	# memory
 	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
-		${VBM} modifyvm --memory $(GET_SELECTION_MEM)
+		${VBM} modifyvm ${NAME[1]} --memory $(GET_SELECTION_MEM)
 	SU
 	# set boot device
-	if (( ${SELECTION[1]} == 0 )); then
-		echo	
-	fi
+	case ${SELECTION[1]} in
+		-)	local boot1='net';;
+		0)	local boot1='disk';;
+		*)	local boot1='dvd';;
+	esac
 	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
-		${VBM} modifyvm --boot1 	
+		${VBM} modifyvm ${NAME[1]} --boot1 ${boot1} \
+					   --boot2 none     \
+					   --boot3 none     \
+					   --boot4 none
 	SU
+	# set nic
+	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
+		${VBM} modifyvm ${NAME[1]} --nic1 bridged        \
+					   --cableconnected1 on  \
+					   --bridgeadapter1 eth1 \
+					   --nictype1 82540EM    \
+					   --macaddress1 $(GET_MAC)
+	SU
+	# set VRDE
+	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
+		${VBM} modifyvm ${NAME[1]} --vrde on                  \
+					   --vrdeport $(GET_VRDEPORT) \
+					   --vrdeauthtype null        \
+					   --vrdemulticon on
+	SU
+	# 
 
 
 }
