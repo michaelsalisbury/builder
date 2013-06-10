@@ -10,3 +10,7 @@ sed: can't read /ISO/tool.list.txt: No such file or directory
 sed: can't read /ISO/tool.list.txt: No such file or directory
 last_lba(): I don't know how to handle files with mode 40755
 sed: can't read /ISO/tool.list.txt: No such file or directory
+last_lba(): I don't know how to handle files with mode 40755
+sed: can't read /ISO/tool.list.txt: No such file or directory
+sed: can't read /ISO/tool.list.txt: No such file or directory
+sed: can't read /ISO/tool.list.txt: No such file or directory
