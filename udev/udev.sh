@@ -234,7 +234,7 @@ function GET_SELECTION_MEM(){
 }
 function GET_DISPLAY_0_USER(){
 	# get user logged into disaply :0
-	who -u | awk '/[[:space:]]\(:0\)/{print $1}'
+	who -u | awk '/[[:space:]]\(:0\)/{print $1}' | tee -a >(xargs echo D0U >> "${LOG}")
 }
 function GET_DISPLAY_0_HOME(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
