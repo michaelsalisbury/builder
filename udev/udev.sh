@@ -251,6 +251,8 @@ function canonicalpath(){
 	fi
 	popd > /dev/null 2>&1
 }
+function SET_CONFIG_GLOBAL_VARS(){
+
 # GLOBAL vars; fully qualified script paths and names
 BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
 BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
