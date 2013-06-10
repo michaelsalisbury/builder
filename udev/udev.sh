@@ -66,6 +66,7 @@ function main(){
 
 	# unmount devices
 	for DEV in ${DEVICE[*]}; do
+		echo
 		#umount /dev/${DEV}*
 		#umount /dev/${DEV}*
 	done
