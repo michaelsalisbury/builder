@@ -6,7 +6,6 @@ function main(){
 	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
 
 	# Set GLOBAL VARS
-	echo start >> "${LOG}"
 	GET_DEVICE_DETAIL &>/dev/null
 
 	# filter out root; system drive
@@ -141,8 +140,8 @@ function GET_DEVICE_DETAIL(){
 			sed -n "\|^Disk[[:space:]]\+/dev/${DEVICE}:[[:space:]]|p" |\
 			cut -d, -f1)
 	fi	
-	#tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	echo ${DEVICE_DETAIL} |\
+	tee -a >(${DEBUG} && xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	grep ""
 	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
 }
@@ -217,9 +216,7 @@ function GET_CONFIG_SECTION(){
 	# dependant on global variables; USER_TOOL_LIST_PATH
 	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
 	local SECTION=$1
-	echo ERROR \"${FUNCNAME}\" :: ${SECTION} >> "${LOG}"
-	#cat "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}" >> "${LOG}"
-	cat <<-SED | sed -n -f <(cat) "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}" | tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}")
+	cat <<-SED | sed -n -f <(cat) "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}"
 		/[[:space:]]*\[ ${SECTION} \]/,/[[:space:]]*\[/{
 			/[[:space:]]*\[/d	# delete first and last line
 			/^$/d			# delete empty lines
@@ -241,9 +238,9 @@ function GET_DISPLAY_0_USER(){
 	# get user logged into disaply :0
 	who -u |\
 	awk '/ tty[0-9].* \(:0\)/{print $1}' |\
+	tee -a >(${DEBUG} && xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	grep ""
 	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
-	#tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 }
 function GET_DISPLAY_0_HOME(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
