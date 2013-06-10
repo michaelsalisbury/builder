@@ -57,3 +57,20 @@ sed: can't read /ISO/tool.list.txt: No such file or directory
 help ::
 /ISO/tool.list.txt
 sed: can't read /ISO/tool.list.txt: No such file or directory
+D0U
+D0U
+help ::
+D0U
+last_lba(): I don't know how to handle files with mode 40755
+D0U
+help ::
+/ISO/tool.list.txt
+sed: can't read /ISO/tool.list.txt: No such file or directory
+D0U
+help ::
+/ISO/tool.list.txt
+sed: can't read /ISO/tool.list.txt: No such file or directory
+D0U
+help ::
+/ISO/tool.list.txt
+sed: can't read /ISO/tool.list.txt: No such file or directory
