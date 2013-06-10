@@ -1,0 +1,10 @@
+
+sed -n config -f <(cat <<-SED
+		/^$/d
+		/^#/d
+		/^[[:space:][:alnum:]\'\'=_]*$/{
+			s/[[:space:]]*=[[:space:]]/=/
+			s/[[:space:]]*/\s/g
+		}
+	SED
+) >> udev.log
