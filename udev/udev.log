@@ -156,3 +156,21 @@ GET_DISPLAY_0_USER :: localcosadmin
 help :: localcosadmin
 GET_DISPLAY_0_HOME :: /home/localcosadmin
 GET_CONFIG_SECTION ::
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_USER :: localcosadmin
+help :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+GET_DISPLAY_0_USER :: localcosadmin
+last_lba(): I don't know how to handle files with mode 40755
+GET_DISPLAY_0_USER :: localcosadmin
+help :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+GET_CONFIG_SECTION ::
+GET_DISPLAY_0_USER :: localcosadmin
+help :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+GET_CONFIG_SECTION ::
+GET_DISPLAY_0_USER :: localcosadmin
+help :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+GET_CONFIG_SECTION ::
