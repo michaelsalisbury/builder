@@ -1,5 +1,5 @@
 
-sed -n config -f <(cat <<-SED
+source <(sed -n config -f <(cat <<-SED
 	/^[[:space:]]*$/d				# remove blank lines
 	/^[[:space:]]*#/d				# remove comment lines
 	/^[[:space:][:alnum:]\"\'=_]*$/{		# ensure no command execution
@@ -10,5 +10,10 @@ sed -n config -f <(cat <<-SED
 		p					# print
 	}
 	SED
-) 
+))
+
+echo ${TEST}
+echo $MAC
+echo 
+
 #) >> udev.log
