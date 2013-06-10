@@ -327,9 +327,8 @@ chmod 777 "${LOG}"
 # GLOBAL vars; DIFS = default array delimiter
 DIFS=${IFS}
 
-
 # Source git repo sudirectory
-#http='https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris'
+#http='https://raw.github.com/michaelsalisbury/builder/master/udev'
 
 # Project NAME
 #NAME='x11vnc'
