@@ -12,3 +12,9 @@ CONFIG_NAME_INSTRUCTIONS = Naming Instructions
 CONFIG_COLUMN_HEADERS    = Task List Column Headers
 CONFIG_TOOL_SELECTIONS   = Task List Selections
 
+# MAC address base: must have the first 5 octets
+MAC = 080027ABCD
+
+# VRDE base port number for RDP connections
+VRDEPORT = 33890
+
