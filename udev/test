@@ -4,7 +4,7 @@ sed -n config -f <(cat <<-SED
 		/^#/d
 		/^[[:space:][:alnum:]\"\'=_]*$/{
 			s/[\"\']//g
-			s/[[:space:]]*=[[:space:]]/=/
+			s/[[:space:]]*=[[:space:]]/=\"/
 			s/[[:space:]]\+/ /g
 			p
 		}
