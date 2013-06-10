@@ -1,0 +1,6 @@
+# Working dir for tool list and ISO's
+# ISO's can have a relative path to this dir or a full path anywhere
+USER_DIR = ISO
+
+
+
