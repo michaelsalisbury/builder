@@ -673,3 +673,4 @@ select err :: 5
        mem :: 128
       name :: sdc_320.1GB-33890.sdc
 add sdc
+GET_DISPLAY_0_USER :: localcosadmin
