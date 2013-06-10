@@ -138,7 +138,7 @@ function GET_DEVICE_DETAIL(){
 	# dependant on global variables; DEVICE_DETAIL, DEVICE
 	if [ -z "${DEVICE_DETAIL}" ];then
 		DEVICE_DETAIL=$(fdisk -l /dev/${DEVICE} |\
-				grep "^Disk[[:space:]]\+/dev/${DEVICE}:[[:space:]]" |\
+				sed -n "\|^Disk[[:space:]]\+/dev/${DEVICE}:[[:space:]]|p |\
 				cut -d, -f1)
 	fi	
 	echo ${DEVICE_DETAIL}
