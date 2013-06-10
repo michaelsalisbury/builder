@@ -145,8 +145,7 @@ function SET_VM(){
 					   --vrdeauthtype null        \
 					   --vrdemulticon on
 	SU
-	# set disks
-	
+	# set ide controler and dvd
 	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
 		${VBM} modifyvm ${NAME[1]} --name ${SCTL}	\
 					   --add ${SCTL}	\
@@ -155,13 +154,18 @@ function SET_VM(){
 					   --port 0		\
 					   --device 1		\
 					   --type dvddrive	\
-					   --
+					   ${DVD:+--medium} "${DVD}"
 	SU
-		${VBM} modifyvm ${NAME[1]} --storagectl 
-
-
+	# set disks
+	for dev in ${DEVICE[*]}; do
+	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
+		${VBM} modifyvm ${NAME[1]} --storagectl ${SCTL}	\
+					   --port $(( index++ ))\
+					   --device 0		\
+					   --type hdd		\
+					   --medium "${VMDK[${DEV}]}"
 	SU
-
+	done
 }
 function GET_VRDEPORT(){
 	# dependant on global variables; VRDEPORT, DEVICE
