@@ -238,7 +238,7 @@ function GET_DISPLAY_0_USER(){
 }
 function GET_DISPLAY_0_HOME(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
-	awk -F: -v USER=${DISPLAY_0_USER} '$1~"^"USER"$"{print $6}' /etc/passwd
+	awk -F: -v USER=${DISPLAY_0_USER} '$1~"^"USER"$"{print $6}' /etc/passwd | tee -a "{LOG}"
 }
 function canonicalpath(){
 	if [ -d $1 ]; then
