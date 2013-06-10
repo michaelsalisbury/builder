@@ -213,6 +213,7 @@ function GET_CONFIG_SECTION(){
 	# dependant on global variables; USER_TOOL_LIST_PATH
 	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
 	local SECTION=$1
+	echo ERROR \"${FUNCNAME}\" >> "${LOG}"
 	cat <<-SED | sed -n -f <(cat) "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}" | tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}")
 		/[[:space:]]*\[\s${SECTION}\s\]/,/[[:space:]]*\[/{
 			/[[:space:]]*\[/d	# delete first and last line
@@ -241,7 +242,6 @@ function GET_DISPLAY_0_USER(){
 }
 function GET_DISPLAY_0_HOME(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
-	echo help :: ${DISPLAY_0_USER} >> "${LOG}"
 	awk -F: -v USER=${DISPLAY_0_USER} '$1~"^"USER"$"{print $6}' /etc/passwd |\
 	tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	grep ""
