@@ -9,10 +9,7 @@ function main(){
 	GET_DEVICE_DETAIL &>/dev/null
 
 	# filter out root; system drive
-	awk '/[[:space:]]\/[[:space:]]/{print $1}' /etc/mtab |\
-		grep -q "/dev/${DEVICE}[0-9]\+" &&\
-		echo SYSTEM DRIVE EXITING &&\
-		exit
+	IS_DEVICE_ROOT # function exits if positive
 
 	# prompt user to choose tool or disregard
 	IFS=: SELECTION=( $(zenity_choose_tool) )
@@ -37,14 +34,13 @@ function main(){
 	# set default name if start vm was selected without entering a name
 	(( ${#NAME[*]} > 1 )) || SET_DEFAULT_NAME
 
-	# ammend VRDEPORT and DEVICE to NAME
+	# amend VRDEPORT and DEVICE to NAME[1]
 	NAME[1]="${NAME[1]}-${VRDEPORT}.${DEVICE}"
 
 	# set path for vmdk files
 	declare -A VMDK
 	for DEV in ${DEVICE[*]}; do
 		VMDK[${DEV}]="${DISPLAY_0_HOME}/.VirtualBox/udev.${DEV}.${NAME[1]}.vmdk"
-		echo VMDK[${DEV}] = ${VMDK[${DEV}]}
 	done
 	
 	# cleanup old primary vmdk files
@@ -100,6 +96,15 @@ function main(){
 	# 
 
 	echo "$@"
+}
+function IS_DEVICE_ROOT(){
+	if awk '/[[:space:]]\/[[:space:]]/{print $1}' /etc/mtab |\
+	   grep -q "/dev/${DEVICE}[0-9]\+"; then
+		echo SYSTEM DRIVE EXITING
+		exit 1
+	else
+		return 0
+	fi
 }
 function SET_VM(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
@@ -189,7 +194,7 @@ function zenity_name_task(){
 
 	(
 	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
-		DISPLAY=:0 zenity			\
+		DISPLAY=${DISPLAY} zenity			\
 			--timeout=25			\
 			--ok-label="START VM"		\
 			--cancel-label="CANCEL"		\
@@ -252,7 +257,7 @@ function zenity_choose_tool(){
 
 	(
 	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
-		DISPLAY=:0 zenity			\
+		DISPLAY=${DISPLAY} zenity		\
 			--width=250			\
 			--height=400			\
 			--timeout=25			\
@@ -323,7 +328,7 @@ function GET_SELECTION_MEM(){
 	echo ${SELECTION[5]} | sed 's/^$/128/'
 }
 function GET_DISPLAY_0_USER(){
-	# get user logged into disaply :0
+	# get user logged into disaply ${DISPLAY}, DEFAULTS to :0
 	who -u |\
 	awk '/ tty[0-9].* \(:0\)/{print $1}' |\
 	tee -a >(${DEBUG} && xargs echo ${FUNCNAME} :: >> "${LOG}") |\
@@ -416,6 +421,9 @@ DIFS=${IFS}
 # GLOBAL vars; DEBUG
 DEBUG=true
 DEBUG=false
+
+# GLOBAL vars; DISPLAY
+DISPLAY=:0
 
 # Source git repo sudirectory
 #http='https://raw.github.com/michaelsalisbury/builder/master/udev'
