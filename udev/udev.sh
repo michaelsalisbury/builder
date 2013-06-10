@@ -287,6 +287,11 @@ BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 # GLOBAL vars; source config file
 SOURCE_CONFIG_GLOBAL_VARS "config"
 
+# GLOBAL vars; LOG
+LOG="${BASH_SRCDIR}"/$(basename "${BASH_SRCNAME}" .sh).log
+touch     "${LOG}"
+chmod 777 "${LOG}"
+
 # User Task Managment Folder
 USER_TOOL_DIR=${USER_TOOL_DIR:-ISO}
 TOOl_LIST_FILE_NAME=${TOOl_LIST_FILE_NAME:-tool.list.txt}
@@ -318,10 +323,6 @@ SHM="/dev/shm/$$_${BASH_SRCNAME}_$$"
 mkdir    "${SHM}"
 chmod +t "${SHM}"
 
-# GLOBAL vars; LOG
-LOG="${BASH_SRCDIR}"/$(basename "${BASH_SRCNAME}" .sh).log
-touch     "${LOG}"
-chmod 777 "${LOG}"
 
 # GLOBAL vars; DIFS = default array delimiter
 DIFS=${IFS}
