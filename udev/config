@@ -1,7 +1,7 @@
 # Working dir for tool list and ISO's
 # ISO's can have a relative path to this dir or a full path anywhere
 # DEFAULT = ISO
-USER_DIR = ISO
+USER_TOOL_DIR = ISO
 
 # tool list config file name: DEFAULT = tool.list.iso
 TOOl_LIST_FILE_NAME = tool.list.txt
