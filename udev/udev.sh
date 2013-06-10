@@ -6,6 +6,7 @@ function main(){
 	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
 
 	# Set GLOBAL VARS
+	echo start >> "${LOG}"
 	GET_DEVICE_DETAIL &>/dev/null
 
 	# filter out root; system drive
