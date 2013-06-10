@@ -52,8 +52,9 @@ function main(){
 		rm -f "${DISPLAY_0_HOME}/.VirtualBox/udev.${DEV}."*.vmdk
 	done
 
-	# cleanup old virtual machine
+	# cleanup conflicting stale virtual machines
 	for DEV in ${DEVICE[*]}; do
+		# unregister vm
 		cat <<-SU | su - $username -s /bin/bash
 			VBoxManage list vms |\
 			while read line; do
@@ -62,6 +63,8 @@ function main(){
 				VBoxManage unregistervm \${words[1]} --delete
 			done
 		SU
+		# remove rm folder
+		rm -rf "${DISPLAY_0_HOME}/.VirtualBox"/*.${DEV}
 	done
 
 	# unmount devices
@@ -82,8 +85,7 @@ function main(){
 		chown ${DISPLAY_0_USER}.vboxusers /dev/${DEV}
 	done
 
-	# 
-
+	
 
 
 	
@@ -98,6 +100,24 @@ function main(){
 	# 
 
 	echo "$@"
+}
+function SET_VM(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local VBM='VBoxManage'
+	# create vm
+	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
+		${VBM} createvm --name ${NAME[1]}	\
+				--ostype Other		\
+				--register
+	SU
+	# memory
+	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
+		${VBM} modifyvm --memory 
+	SU
+
+
+
+
 }
 function GET_VRDEPORT(){
 	# dependant on global variables; VRDEPORT, DEVICE
