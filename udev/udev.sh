@@ -307,21 +307,12 @@ function GET_SELECTION_PATH(){
 	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
 	local DISPLAY_0_TOOL_DIR="${DISPLAY_0_HOME}/${TOOL_DIR}"
 	local ISO=${SELECTION[4]}
-
-	if [[ "${ISO}" =~ ^\/ ]] && [ -f "${ISO}" ]; then
-		echo ${ISO}
-	elif 
-
-
-
-
-
-
-
 	if [[ "${ISO}" =~ ^\/ ]]; then
 		if [ ! -f "${ISO}" ]; then
 			if [ -f "${DISPLAY_0_TOOL_DIR}${ISO}" ]; then
 				local ISO="${DISPLAY_0_TOOL_DIR}${ISO}"
+			elif [ -f "${DISPLAY_0_HOME}${ISO}" ]; then
+				local ISO="${DISPLAY_0_HOME}${ISO}"
 			else
 				unset ISO
 			fi
@@ -329,6 +320,8 @@ function GET_SELECTION_PATH(){
 	else
 		if [ -f "${DISPLAY_0_TOOL_DIR}/${ISO}" ]; then
 			local ISO="${DISPLAY_0_TOOL_DIR}/${ISO}"
+		elif [ -f "${DISPLAY_0_HOME}/${ISO}" ]; then
+			local ISO="${DISPLAY_0_HOME}/${ISO}"
 		else
 			unset ISO
 		fi
