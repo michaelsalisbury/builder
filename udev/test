@@ -1,13 +1,14 @@
 
 sed -n config -f <(cat <<-SED
-		/^$/d
-		/^#/d
-		/^[[:space:][:alnum:]\"\'=_]*$/{
-			s/[\"\']//g
-			s/[[:space:]]*=[[:space:]]/=\"/
-			s/[[:space:]]\+/ /g
-			p
-		}
+	/^[[:space:]]*$/d				# remove blank lines
+	/^[[:space:]]*#/d				# remove comment lines
+	/^[[:space:][:alnum:]\"\'=_]*$/{		# ensure no command execution
+		s/[\"\']//g				# remove quotes
+		s/[[:space:]]*=[[:space:]]*/=\"/	# remove spaces, ammend ="
+		s/[[:space:]]*$/\"/			# ammend " to end
+		s/[[:space:]]\+/ /g			# replace tabs, reduce spaces
+		p					# print
+	}
 	SED
 ) 
 #) >> udev.log
