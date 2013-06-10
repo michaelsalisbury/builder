@@ -142,9 +142,9 @@ function GET_DEVICE_DETAIL(){
 			cut -d, -f1)
 	fi	
 	echo ${DEVICE_DETAIL} |\
-	tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
+	tee -a >(xargs echo ${FUNCNAME} ${DEVICE} :: >> "${LOG}") |\
 	grep ""
-	(( $? > 1 )) && { echo ERROR \"${FUNCNAME}\" ${DEVICE} >> "${LOG}"; exit; }
+	(( $? > 1 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
 }
 function GET_SELECTION_DETAILS(){
 	# dependant on global variables; SELECTION
