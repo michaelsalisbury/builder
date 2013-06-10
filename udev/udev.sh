@@ -256,6 +256,8 @@ BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
 BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
 BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 
+# import config file
+
 # User Task Managment Folder
 SET_USER_
 TOOLDIR="ISO"
