@@ -570,3 +570,22 @@ Diag	KNOPPIX			ADRIANE-KNOPPIX_V6.4.3CD-2010-12-20-EN.iso	768
 Diag	"Hirens BootCD"		Hirens.BootCD.14.0.iso				512
 Diag	Clone-Zilla		clonezilla.iso					256
 GET_CONFIG_SECTION ::
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+start
+GET_DEVICE_DETAIL :: Disk /dev/sdc: 320.1 GB
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DEVICE_DETAIL :: Disk /dev/sdc 320.1 GB
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+ERROR "GET_CONFIG_SECTION" :: TasksSelectionsInstructions
+GET_CONFIG_SECTION ::
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+ERROR "GET_CONFIG_SECTION" ::
+GET_CONFIG_SECTION ::
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+ERROR "GET_CONFIG_SECTION" :: TasksListsSelections
+GET_CONFIG_SECTION ::
