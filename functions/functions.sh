@@ -201,7 +201,7 @@ END-OF-SU
 ###########################################################################################
 function system_hardware_platform_id(){
 	# currently programmed to ID Dell, VirtualBox, VMWare
-	if ! which hwinfo 2>/dev/null; then
+	if ! which hwinfo &>/dev/null; then
 		echo noid
 		return 1
 	fi
@@ -216,11 +216,12 @@ function system_hardware_platform_id(){
 		grep -q -i ${SYSTEMID} &&\
 		break
 	done
+	echo ${SYSTEMID}
 }
 function system_serial(){
 	# for virtualbox and vmware generate host version
 	local SYSTEMID=$(system_hardware_platform_id)
-	if ! which hwinfo 2>/dev/null; then
+	if ! which hwinfo &>/dev/null; then
 		echo ${SYSTEMID}
 		return 1
 	fi
