@@ -275,6 +275,8 @@ CONFIG_NAME_INSTRUCTIONS=${CONFIG_NAME_INSTRUCTIONS:-Naming Instructions}
 
 # GLOBAL vars; mac address base, vrdeport base
 MAC=${MAC:-080027ABCD}
+MAC=${MAC//:/}
+MAC=${MAC:0:10}
 VRDEPORT=${VRDEPORT:-33890}
 
 # GLOBAL vars; VirtualBox
