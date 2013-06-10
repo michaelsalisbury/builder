@@ -7,10 +7,10 @@ USER_TOOL_DIR = ISO
 TOOl_LIST_FILE_NAME = tool.list.txt
 
 # tool list section headers (DEFAULTS)
-CONFIG_TOOL_INSTRUCTIONS = Task Selection Instructions
-CONFIG_NAME_INSTRUCTIONS = Naming Instructions
-CONFIG_COLUMN_HEADERS    = "Task List Column Headers"
-CONFIG_TOOL_SELECTIONS   = Task List   Selections
+TOOL_INSTRUCTIONS   = Task Selection Instructions
+NAMING_INSTRUCTIONS = Naming Instructions
+TOOL_COLUMN_HEADERS = "Task List Column Headers"
+TOOL_SELECTIONS     = Task List Selections
 
 # MAC address base: must have the first 5 octets
 MAC = 080027ABCD
