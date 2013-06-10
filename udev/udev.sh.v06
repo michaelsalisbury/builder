@@ -141,8 +141,8 @@ function GET_DEVICE_DETAIL(){
 			sed -n "\|^Disk[[:space:]]\+/dev/${DEVICE}:[[:space:]]|p" |\
 			cut -d, -f1)
 	fi	
+	#tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	echo ${DEVICE_DETAIL} |\
-	tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	grep ""
 	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
 }
@@ -241,14 +241,14 @@ function GET_DISPLAY_0_USER(){
 	# get user logged into disaply :0
 	who -u |\
 	awk '/ tty[0-9].* \(:0\)/{print $1}' |\
-	tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	grep ""
 	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
+	#tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 }
 function GET_DISPLAY_0_HOME(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
 	awk -F: -v USER=${DISPLAY_0_USER} '$1~"^"USER"$"{print $6}' /etc/passwd |\
-	tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
+	tee -a >(${DEBUG} && xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	grep ""
 	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
 }
@@ -327,9 +327,12 @@ chmod 777 "${LOG}"
 # GLOBAL vars; DIFS = default array delimiter
 DIFS=${IFS}
 
+# GLOBAL vars; DEBUG
+DEBUG=true
+DEBUG=false
 
 # Source git repo sudirectory
-#http='https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris'
+#http='https://raw.github.com/michaelsalisbury/builder/master/udev'
 
 # Project NAME
 #NAME='x11vnc'
