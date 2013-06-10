@@ -5,6 +5,8 @@ sed -n config -f <(cat <<-SED
 		/^[[:space:][:alnum:]\'\'=_]*$/{
 			s/[[:space:]]*=[[:space:]]/=/
 			s/[[:space:]]*/\s/g
+			p
 		}
 	SED
-) >> udev.log
+) 
+#) >> udev.log
