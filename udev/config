@@ -18,3 +18,4 @@ MAC = 080027ABCD
 # VRDE base port number for RDP connections
 VRDEPORT = 33890
 
+# LOG
