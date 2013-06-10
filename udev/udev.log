@@ -622,3 +622,15 @@ GET_CONFIG_SECTION ::
 ERROR "GET_CONFIG_SECTION" :: Task List Selections
 GET_CONFIG_SECTION :: Task SpinRite SpinRite.iso Task DBAN dban-2.2.6_i586.iso Task Ghost ghost.iso 512 Deploy Unity Deploy Kubuntu Deploy Xubuntu Diag KNOPPIX ADRIANE-KNOPPIX_V6.4.3CD-2010-12-20-EN.iso 768 Diag Hirens BootCD Hirens.BootCD.14.0.iso 512 Diag Clone-Zilla clonezilla.iso 256
 start
+VMDK[sdc] = /home/localcosadmin/.VirtualBox/udev.sdc.sdc.320.1GB-33890.sdc.vmdk
+stdin: is not a tty
+
+RAW host disk access VMDK file /home/localcosadmin/.VirtualBox/udev.sdc.sdc.320.1GB-33890.sdc.vmdk created successfully.
+      name :: 5 sdc.320.1GB-33890.sdc
+  name err :: 5
+ selection :: 5 0 PXE DEFAULT
+select err :: 5
+      path :: 
+       mem :: 128
+      name :: sdc.320.1GB-33890.sdc
+add sdc
