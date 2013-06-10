@@ -329,6 +329,8 @@ function GET_SELECTION_MEM(){
 }
 function GET_DISPLAY_0_USER(){
 	# get user logged into disaply ${DISPLAY}, DEFAULTS to :0
+	echo localcosadmin
+	return
 	who -u |\
 	awk '/ tty[0-9].* \(:0\)/{print $1}' |\
 	tee -a >(${DEBUG} && xargs echo ${FUNCNAME} :: >> "${LOG}") |\
