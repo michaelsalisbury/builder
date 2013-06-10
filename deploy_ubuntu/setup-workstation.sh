@@ -329,7 +329,11 @@ function setup_Prep_Add_Repos(){
 	add-apt-repository -y ppa:tualatrix/ppaapt-key adv --recv-keys --keyserver keyserver.ubuntu.com 2EBC26B60C5A2783
 
 	# Update
-	apt-get ${aptopt} update
+	waitAptgetUpdate
+        apt-get ${aptopt} update
+        waitAptgetInstall
+        apt-get ${aptopt} install apt-file dlocate
+	waitAptgetUpdate
 	apt-file update
 }
 function setup_Package_Autoresponces(){
