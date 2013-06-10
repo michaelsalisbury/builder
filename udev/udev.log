@@ -614,3 +614,10 @@ GET_DISPLAY_0_USER :: localcosadmin
 GET_DISPLAY_0_HOME :: /home/localcosadmin
 ERROR "GET_CONFIG_SECTION" :: Naming Instructions
 GET_CONFIG_SECTION :: Please enter a unique name to detail this task: Dashes and underscores are OK. NO spaces OR special characters, thank-you.
+start
+ERROR "GET_CONFIG_SECTION" :: Task Selection Instructions
+GET_CONFIG_SECTION :: Please choose a tool: PXE boot is the default.
+ERROR "GET_CONFIG_SECTION" ::
+GET_CONFIG_SECTION ::
+ERROR "GET_CONFIG_SECTION" :: Task List Selections
+GET_CONFIG_SECTION :: Task SpinRite SpinRite.iso Task DBAN dban-2.2.6_i586.iso Task Ghost ghost.iso 512 Deploy Unity Deploy Kubuntu Deploy Xubuntu Diag KNOPPIX ADRIANE-KNOPPIX_V6.4.3CD-2010-12-20-EN.iso 768 Diag Hirens BootCD Hirens.BootCD.14.0.iso 512 Diag Clone-Zilla clonezilla.iso 256
