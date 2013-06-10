@@ -219,7 +219,7 @@ function GET_CONFIG_SECTION(){
 	local SECTION=$1
 	echo ERROR \"${FUNCNAME}\" >> "${LOG}"
 	cat <<-SED | sed -n -f <(cat) "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}" | tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}")
-		/[[:space:]]*\[\s${SECTION}\s\]/,/[[:space:]]*\[/{
+		/[[:space:]]*\[ ${SECTION} \]/,/[[:space:]]*\[/{
 			/[[:space:]]*\[/d	# delete first and last line
 			/^$/d			# delete empty lines
 			/^[[:space:]]*#/d	# delete comment lines
