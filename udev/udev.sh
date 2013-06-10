@@ -315,7 +315,7 @@ function GET_SELECTION_PATH(){
 				unset ISO
 			fi
 	else
-		[ -f "${DISPLAY_0_TOOL_DIR}/${ISO}" ]; then
+		if [ -f "${DISPLAY_0_TOOL_DIR}/${ISO}" ]; then
 			local ISO="${DISPLAY_0_TOOL_DIR}/${ISO}"
 		else
 			unset ISO
