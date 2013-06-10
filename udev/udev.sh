@@ -44,6 +44,7 @@ function main(){
 	declare -A VMDK
 	for DEV in ${DEVICE[*]}; do
 		VMDK[${DEV}]="${DISPLAY_0_HOME}/.VirtualBox/udev.${DEV}.${NAME[1]}.vmdk"
+		echo VMDK[${DEV}] = ${VMDK[${DEV}]}
 	done
 	
 	# cleanup old primary vmdk files
@@ -65,8 +66,8 @@ function main(){
 
 	# unmount devices
 	for DEV in ${DEVICE[*]}; do
-		umount /dev/${DEV}*
-		umount /dev/${DEV}*
+		#umount /dev/${DEV}*
+		#umount /dev/${DEV}*
 	done
 
 	# create virtualbox raw vmdk files
