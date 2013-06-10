@@ -252,13 +252,17 @@ function canonicalpath(){
 	popd > /dev/null 2>&1
 }
 function SOURCE_CONFIG_GLOBAL_VARS(){
-	local config=$1
-	source <(sed -n "${BASH_SRCDIR}/config" -f <(cat <<-SED
-		/^[[:space:]]$/d
-		/^#/d
-		/^[[:space:][:alnum:]\'\'=_]*$/{
-			s/[[:space:]]*=[[:space:]]/=/
-			s/[[:space:]]*/\s/g
+	local config="${BASH_SRCDIR}/${1}"
+	[ -f "${config}" ] || return
+	source <(sed -n "${config}" -f <(cat <<-SED
+		/^[[:space:]]*$/d				# delete blank lines
+		/^[[:space:]]*#/d				# delete comment lines
+		/^[[:space:][:alnum:]\"\'=_]*$/{		# ensure no command execution
+			s/[\"\']//g				# remove punctuation
+			s/[[:space:]]*=[[:space:]]*/=\"/	# ammend quotes to =
+			s/[[:space:]]*$/\"/			# ammend quotes to $
+			s/[[:space:]]\+/\s/g			# remove tabs, reduce spaces
+			p					# print
 		}
 	SED
 	))
