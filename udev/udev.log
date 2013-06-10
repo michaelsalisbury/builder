@@ -702,3 +702,16 @@ select err :: 5
       name :: sdc-320.1GB-33890.sdc
 add sdc
 GET_DISPLAY_0_USER :: localcosadmin
+LINE ::      8	Diag	"Hirens BootCD"		Hirens.BootCD.14.0.iso				512
+VMDK[sdc] = /home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk
+stdin: is not a tty
+
+RAW host disk access VMDK file /home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk created successfully.
+      name :: 5 sdc-320.1GB-33890.sdc
+  name err :: 5
+ selection :: 5 8 Diag Hirens BootCD Hirens.BootCD.14.0.iso 512
+select err :: 5
+      path :: Hirens.BootCD.14.0.iso
+       mem :: 512
+      name :: sdc-320.1GB-33890.sdc
+add sdc
