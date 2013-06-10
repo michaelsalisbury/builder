@@ -142,9 +142,9 @@ function GET_DEVICE_DETAIL(){
 			cut -d, -f1)
 	fi	
 	echo ${DEVICE_DETAIL} |\
-	tee -a >(xargs echo ${FUNCNAME} ${DEVICE} :: >> "${LOG}") |\
+	tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	grep ""
-	(( $? > 1 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
+	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
 }
 function GET_SELECTION_DETAILS(){
 	# dependant on global variables; SELECTION
@@ -242,14 +242,14 @@ function GET_DISPLAY_0_USER(){
 	awk '/ tty[0-9].* \(:0\)/{print $1}' |\
 	tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	grep ""
-	(( $? > 1 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
+	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
 }
 function GET_DISPLAY_0_HOME(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
 	awk -F: -v USER=${DISPLAY_0_USER} '$1~"^"USER"$"{print $6}' /etc/passwd |\
 	tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
 	grep ""
-	(( $? > 1 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
+	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
 }
 function SOURCE_CONFIG_GLOBAL_VARS(){
 	local config="${BASH_SRCDIR}/${1}"
