@@ -268,14 +268,14 @@ cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
 SU
 
 # GLOBAL vars; Config file section headers
-CONFIG_COLUMN_HEADERS='Task List Column Headers'
-CONFIG_TOOL_SELECTIONS='Task List Selections'
-CONFIG_TOOL_INSTRUCTIONS='Task Selection Instructions'
-CONFIG_NAME_INSTRUCTIONS='Naming Instructions'
+CONFIG_COLUMN_HEADERS=${CONFIG_COLUMN_HEADERS:-Task List Column Headers}
+CONFIG_TOOL_SELECTIONS=${CONFIG_TOOL_SELECTIONS:-Task List Selections}
+CONFIG_TOOL_INSTRUCTIONS=${CONFIG_TOOL_INSTRUCTIONS:-Task Selection Instructions}
+CONFIG_NAME_INSTRUCTIONS=${CONFIG_NAME_INSTRUCTIONS:-Naming Instructions}
 
 # GLOBAL vars; mac address base, vrdeport base
-MAC=080027ABCD
-VRDEPORT=33890
+MAC=${MAC:-080027ABCD}
+VRDEPORT=${VRDEPORT:-33890}
 
 # GLOBAL vars; VirtualBox
 SCTLE='ide'
