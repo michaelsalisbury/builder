@@ -426,6 +426,7 @@ DEBUG=false
 
 # GLOBAL vars; DISPLAY
 DISPLAY=:0
+DISPLAY=:12
 
 # Source git repo sudirectory
 #http='https://raw.github.com/michaelsalisbury/builder/master/udev'
