@@ -236,7 +236,8 @@ function GET_DISPLAY_0_USER(){
 	# get user logged into disaply :0
 	who -u |\
 	awk '/ tty[0-9].* \(:0\)/{print $1}' |\
-	tee -a >(xargs echo D0U >> "${LOG}")
+	tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
+	grep ""
 }
 function GET_DISPLAY_0_HOME(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
