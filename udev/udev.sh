@@ -251,25 +251,26 @@ function canonicalpath(){
 	fi
 	popd > /dev/null 2>&1
 }
-function SET_CONFIG_GLOBAL_VARS(){
-
-# GLOBAL vars; fully qualified script paths and names
-BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
-BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
-BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
-
-# import config file
-#source <(
-sed -n "${BASH_SRCDIR}/config" -f <(cat <<-SED
-		/^$/d
+function SOURCE_CONFIG_GLOBAL_VARS(){
+	local config=$1
+	source <(sed -n "${BASH_SRCDIR}/config" -f <(cat <<-SED
+		/^[[:space:]]$/d
 		/^#/d
 		/^[[:space:][:alnum:]\'\'=_]*$/{
 			s/[[:space:]]*=[[:space:]]/=/
 			s/[[:space:]]*/\s/g
 		}
 	SED
-) >> udev.log
-#)
+	))
+}
+
+# GLOBAL vars; fully qualified script paths and names
+BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
+BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
+BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
+
+# GLOBAL vars; source config file
+SOURCE_CONFIG_GLOBAL_VARS "config"
 
 # User Task Managment Folder
 USER_TOOL_DIR=${USER_TOOL_DIR:-ISO}
