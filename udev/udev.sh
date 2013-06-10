@@ -218,6 +218,7 @@ function GET_CONFIG_SECTION(){
 	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
 	local SECTION=$1
 	echo ERROR \"${FUNCNAME}\" >> "${LOG}"
+	cat "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}" >> "${LOG}"
 	cat <<-SED | sed -n -f <(cat) "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}" | tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}")
 		/[[:space:]]*\[ ${SECTION} \]/,/[[:space:]]*\[/{
 			/[[:space:]]*\[/d	# delete first and last line
