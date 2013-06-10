@@ -213,6 +213,7 @@ function GET_CONFIG_SECTION(){
 	# dependant on global variables; USER_TOOL_LIST_PATH
 	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
 	local SECTION=$1
+	echo "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}" >> "${LOG}"
 	cat <<-SED | sed -n -f <(cat) "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}"
 		/[[:space:]]*\[\s${SECTION}\s\]/,/[[:space:]]*\[/{
 			/[[:space:]]*\[/d	# delete first and last line
