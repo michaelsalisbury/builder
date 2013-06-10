@@ -647,3 +647,4 @@ select err :: 5
       name :: sdc.320.1GB-33890.sdc
 add sdc
 wow hi
+GET_DISPLAY_0_USER :: localcosadmin
