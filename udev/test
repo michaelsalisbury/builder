@@ -1,17 +1,3 @@
-
-source <(sed -n config -f <(cat <<-SED
-	/^[[:space:]]*$/d				# remove blank lines
-	/^[[:space:]]*#/d				# remove comment lines
-	/^[[:space:][:alnum:]\"\'=_]*$/{		# ensure no command execution
-		s/[\"\']//g				# remove quotes
-		s/[[:space:]]*=[[:space:]]*/=\"/	# remove spaces, ammend ="
-		s/[[:space:]]*$/\"/			# ammend " to end
-		s/[[:space:]]\+/ /g			# replace tabs, reduce spaces
-		p					# print
-	}
-	SED
-))
-
 echo ${TEST}
 echo $MAC
 echo $CONFIG_COLUMN_HEADERS
