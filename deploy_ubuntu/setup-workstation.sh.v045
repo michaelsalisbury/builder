@@ -611,7 +611,7 @@ function setup_VMWare_Additions(){
 	waitForNetwork || return 1
 	stall 3
 	# Test is system vmware
-	system_is_vmware || return
+	system_is_vmware || return 0
 
 }
 function setup_VBox_Additions(){
@@ -620,7 +620,7 @@ function setup_VBox_Additions(){
 	waitForNetwork || return 1
 	stall 3
 	# Test is system virtualbox
-	system_is_virtualbox || return
+	system_is_virtualbox || return 0
 
 	# Prep for vbox extentions
 	waitAptgetInstall
