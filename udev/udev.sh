@@ -259,8 +259,8 @@ BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 # import config file
 
 # User Task Managment Folder
-SET_USER_
-TOOLDIR="ISO"
+USER_TOOL_DIR=${USER_TOOL_DIR:-ISO}
+USER_TOOL_LIST=$
 TOOLLIST="${TOOLDIR}/tool.list.txt"
 cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
 	mkdir -p ~/"${TOOLDIR}"
