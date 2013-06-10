@@ -1,14 +1,14 @@
 # Working dir for tool list and ISO's
 # ISO's can have a relative path to this dir or a full path anywhere
+# DEFAULT = ISO
 USER_DIR = ISO
 
-# tool list config file name
+# tool list config file name: DEFAULT = tool.list.iso
+TOOl_LIST_FILE_NAME = tool.list.txt
 
-
-
-# 
-CONFIG_COLUMN_HEADERS    = Task List Column Headers
-CONFIG_TOOL_SELECTIONS   = Task List Selections
+# tool list section headers (DEFAULTS)
 CONFIG_TOOL_INSTRUCTIONS = Task Selection Instructions
 CONFIG_NAME_INSTRUCTIONS = Naming Instructions
+CONFIG_COLUMN_HEADERS    = Task List Column Headers
+CONFIG_TOOL_SELECTIONS   = Task List Selections
 
