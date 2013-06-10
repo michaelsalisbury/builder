@@ -116,7 +116,7 @@ function SET_VM(){
 	SU
 	# set boot device
 	if (( ${SELECTION[1]} == 0 )); then
-	
+		echo	
 	fi
 	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
 		${VBM} modifyvm --boot1 	
