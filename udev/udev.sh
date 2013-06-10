@@ -103,7 +103,16 @@ function main(){
 }
 function SET_VM(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
+	local DISPLAY_0_TOOL_DIR="${DISPLAY_0_HOME}/${TOOL_DIR}"
 	local VBM='VBoxManage'
+	# prep
+	case ${SELECTION[1]} in
+		-)	local boot1='net';;
+		0)	local boot1='disk';;
+		*)	local boot1='dvd'
+			local DVD=$(GET_SELECTION_PATH);;
+	esac
 	# create vm
 	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
 		${VBM} createvm --name ${NAME[1]}	\
@@ -115,11 +124,6 @@ function SET_VM(){
 		${VBM} modifyvm ${NAME[1]} --memory $(GET_SELECTION_MEM)
 	SU
 	# set boot device
-	case ${SELECTION[1]} in
-		-)	local boot1='net';;
-		0)	local boot1='disk';;
-		*)	local boot1='dvd';;
-	esac
 	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
 		${VBM} modifyvm ${NAME[1]} --boot1 ${boot1} \
 					   --boot2 none     \
@@ -141,8 +145,22 @@ function SET_VM(){
 					   --vrdeauthtype null        \
 					   --vrdemulticon on
 	SU
-	# 
+	# set disks
+	
+	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
+		${VBM} modifyvm ${NAME[1]} --name ${SCTL}	\
+					   --add ${SCTL}	\
+					   --bootable on
+		${VBM} modifyvm ${NAME[1]} --storagectl ${SCTL} \
+					   --port 0		\
+					   --device 1		\
+					   --type dvddrive	\
+					   --
+	SU
+		${VBM} modifyvm ${NAME[1]} --storagectl 
 
+
+	SU
 
 }
 function GET_VRDEPORT(){
@@ -277,7 +295,24 @@ function GET_CONFIG_SECTION(){
 }
 function GET_SELECTION_PATH(){
 	# dependant on global variables; SELECTION
-	echo ${SELECTION[4]}
+	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
+	local DISPLAY_0_TOOL_DIR="${DISPLAY_0_HOME}/${TOOL_DIR}"
+	local ISO=${SELECTION[4]}
+	if [[ "${ISO}" =~ ^\/ ]]; then
+		if [ ! -f "${ISO}" ]; then
+			if [ -f "${DISPLAY_0_TOOL_DIR}${ISO}" ]; then
+				local ISO="${DISPLAY_0_TOOL_DIR}${ISO}"
+			else
+				unset ISO
+			fi
+	else
+		[ -f "${DISPLAY_0_TOOL_DIR}/${ISO}" ]; then
+			local ISO="${DISPLAY_0_TOOL_DIR}/${ISO}"
+		else
+			unset ISO
+		fi
+	fi
+	echo ${ISO}
 }
 function GET_SELECTION_MEM(){
 	# dependant on global variables; SELECTION
@@ -361,7 +396,7 @@ MAC=${MAC:0:10}
 VRDEPORT=${VRDEPORT:-33890}
 
 # GLOBAL vars; VirtualBox
-SCTLE='ide'
+SCTL='ide'
 
 # GLOBAL vars; TMP
 TMP="/tmp/$$_${BASH_SRCNAME}_$$"
