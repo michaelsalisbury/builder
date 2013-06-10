@@ -688,3 +688,16 @@ select err :: 5
       name :: sdc-320.1GB-33890.sdc
 add sdc
 GET_DISPLAY_0_USER :: localcosadmin
+LINE ::      1	Task	SpinRite		SpinRite.iso
+VMDK[sdc] = /home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk
+stdin: is not a tty
+
+RAW host disk access VMDK file /home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk created successfully.
+      name :: 5 sdc-320.1GB-33890.sdc
+  name err :: 5
+ selection :: 5 1 Task SpinRite SpinRite.iso
+select err :: 5
+      path :: SpinRite.iso
+       mem :: 128
+      name :: sdc-320.1GB-33890.sdc
+add sdc
