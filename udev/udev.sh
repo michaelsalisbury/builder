@@ -257,6 +257,7 @@ BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
 BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 
 # User Task Managment Folder
+SET_USER_
 TOOLDIR="ISO"
 TOOLLIST="${TOOLDIR}/tool.list.txt"
 cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
