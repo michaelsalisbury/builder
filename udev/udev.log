@@ -785,3 +785,15 @@ select err :: 5
        mem :: 128
       name :: sdc-320.1GB-33890.sdc
 add sdc
+LINE ::      3	Task	Ghost			ghost.iso					512
+stdin: is not a tty
+
+RAW host disk access VMDK file /home/localcosadmin/.VirtualBox/udev.sdc.test-33890.sdc.vmdk created successfully.
+      name :: 5 test-33890.sdc
+  name err :: 5
+ selection :: 5 3 Task Ghost ghost.iso 512
+select err :: 5
+      path :: 
+       mem :: 512
+      name :: test-33890.sdc
+add sdc
