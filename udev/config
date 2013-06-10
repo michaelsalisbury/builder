@@ -2,5 +2,13 @@
 # ISO's can have a relative path to this dir or a full path anywhere
 USER_DIR = ISO
 
+# tool list config file name
 
+
+
+# 
+CONFIG_COLUMN_HEADERS    = Task List Column Headers
+CONFIG_TOOL_SELECTIONS   = Task List Selections
+CONFIG_TOOL_INSTRUCTIONS = Task Selection Instructions
+CONFIG_NAME_INSTRUCTIONS = Naming Instructions
 
