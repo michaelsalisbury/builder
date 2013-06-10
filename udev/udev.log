@@ -350,3 +350,22 @@ GET_DISPLAY_0_USER :: localcosadmin
 GET_DISPLAY_0_HOME :: /home/localcosadmin
 ERROR "GET_CONFIG_SECTION"
 GET_CONFIG_SECTION ::
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+start
+GET_DEVICE_DETAIL :: Disk /dev/sdc: 320.1 GB
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DEVICE_DETAIL :: Disk /dev/sdc 320.1 GB
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+ERROR "GET_CONFIG_SECTION"
+GET_CONFIG_SECTION ::
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+ERROR "GET_CONFIG_SECTION"
+GET_CONFIG_SECTION ::
+GET_DISPLAY_0_USER :: localcosadmin
+GET_DISPLAY_0_HOME :: /home/localcosadmin
+ERROR "GET_CONFIG_SECTION"
+GET_CONFIG_SECTION ::
