@@ -1,0 +1,149 @@
+#!/bin/bash
+function main(){
+	ACTION=$1
+	DEVICE=$2
+
+	# filter out root; system drive
+	awk '/[[:space:]]\/[[:space:]]/{print $1}' /etc/mtab |\
+		grep -q "/dev/${DEVICE}[0-9]\+" &&\
+		echo SYSTEM DRIVE EXITING &&\
+		exit
+
+	local selection=$(zenity_choose_tool)
+	echo selection :: ${selection}
+
+	# 
+
+	echo "$@"
+}
+function zenity_choose_tool(){
+	# dependant on global variables; DEVICE
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
+	
+	# get drive size
+	local zenityTitle=$(fdisk -l /dev/${DEVICE} |\
+				grep "^Disk[[:space:]]\+/dev/${DEVICE}:[[:space:]]" |\
+				cut -d, -f1)
+
+	# get selection instructions
+	local zenityText=$(sed '/^[[:space:]]*#/d' "${DISPLAY_0_HOME}/${TOOLLIST}" | sed '1!d')
+
+	# get column headers
+	eval local column=( $(sed '/^[[:space:]]*#/d' "${DISPLAY_0_HOME}/${TOOLLIST}" | sed '2!d') )
+
+	(
+	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
+		DISPLAY=:0 zenity			\
+			--width=250			\
+			--height=400			\
+			--timeout=25			\
+			--ok-label="START VM"		\
+			--cancel-label="IGNORE"		\
+			--title="${zenityTitle// /   }"	\
+			--text="${zenityText}"		\
+			--list				\
+			--print-column=ALL		\
+			--separator=:			\
+			--column "#"			\
+			--column "${column[0]}"		\
+			--column "Selection"		\
+			$(zenity_selection_list)
+		ZENITY
+	echo $?:
+	) | sort -r | tr -d '\n'
+}
+function GET_DISPLAY_0_USER(){
+	# get user logged into disaply :0
+	who -u | awk '/[[:space:]]\(:0\)/{print $1}'
+}
+function GET_DISPLAY_0_HOME(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	awk -F: -v USER=${DISPLAY_0_USER} '$1~"^"USER"$"{print $6}' /etc/passwd
+}
+function zenity_selection_list(){
+	local LINE=""
+	local ARGS=""
+	zenity_selections |\
+	while read LINE; do
+		eval ARGS=( $(echo "${LINE}") )
+		echo ${ARGS[0]} ${ARGS[1]} \"${ARGS[2]}\"
+	done |\
+	tr '\n' ' '
+}
+function zenity_selections(){
+	# dependant on global variables; TOOLDIR, TOOLLIST
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
+	cat <<-SELECTIONS
+		0	PXE	DEFAULT
+	SELECTIONS
+	sed '/^[[:space:]]*#/d' "${DISPLAY_0_HOME}/${TOOLLIST}" | tail -n +3 | cat -n
+}
+
+
+
+function canonicalpath(){
+	if [ -d $1 ]; then
+		pushd $1 > /dev/null 2>&1
+		echo $PWD
+	elif [ -f $1 ]; then
+		pushd $(dirname $1) > /dev/null 2>&1
+		echo $PWD/$(basename $1)
+	else
+		echo "Invalid path $1"
+	fi
+	popd > /dev/null 2>&1
+}
+# GLOBAL vars; fully qualified script paths and names
+BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
+BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
+BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
+
+# GLOBAL vars; TMP
+TMP="/tmp/$$_${BASH_SRCNAME}_$$"
+mkdir "${TMP}"
+SHM="/dev/shm/$$_${BASH_SRCNAME}_$$"
+mkdir    "${SHM}"
+chmod +t "${SHM}"
+
+# GLOBAL vars; LOG
+LOG="${BASH_SRCDIR}"/$(basename "${BASH_SRCNAME}" .sh).log
+touch     "${LOG}"
+chmod 777 "${LOG}"
+
+# User Task Managment Folder
+TOOLDIR="ISO"
+TOOLLIST="${TOOLDIR}/tool.list.txt"
+cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
+	mkdir -p ~/"${TOOLDIR}"
+	touch ~/"${TOOLLIST}"	
+SU
+
+# Source git repo sudirectory
+#http='https://raw.github.com/michaelsalisbury/builder/master/x11vnc_solaris'
+
+# Project NAME
+#NAME='x11vnc'
+
+# Get details of the latest version
+#latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
+
+# main
+main "$@" >> "${LOG}" 2>&1
+
+# cleanup
+rm -rf "${TMP}"
+rm -rf "${SHM}"
+
+# simulation control
+#
+# trigger add and remove
+#   udevadm trigger --action=remove --sysname-match="sdb"
+#   udevadm trigger --action=add    --sysname-match="sdb"
+#
+# force re-read of linked udev rules
+#   stop udev; sleep 1; start udev
+
+
+

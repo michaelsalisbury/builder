@@ -1,0 +1,24 @@
+[ Task Selection Instructions ]
+	Please choose a tool:
+	PXE boot is the default.
+
+[ Seconday Drive Selection Instructions ]
+
+[ Naming Instructions ]
+	Please enter a unique name to detail this task:
+	  Dashes and underscores are OK.
+	  NO spaces OR special characters, thank-you.
+
+[ Task List Column Headers ]
+Tool	Selections		Locations					Memory
+
+[ Task List Selections ]
+Task	SpinRite		SpinRite.iso
+Task	DBAN			dban-2.2.6_i586.iso
+Task	Ghost			ghost.iso					512
+Deploy	Unity
+Deploy	Kubuntu
+Deploy	Xubuntu
+Diag	KNOPPIX			ADRIANE-KNOPPIX_V6.4.3CD-2010-12-20-EN.iso	768
+Diag	"Hirens BootCD"		Hirens.BootCD.14.0.iso				512
+Diag	Clone-Zilla		clonezilla.iso					256
