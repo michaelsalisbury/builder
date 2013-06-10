@@ -14,6 +14,5 @@ source <(sed -n config -f <(cat <<-SED
 
 echo ${TEST}
 echo $MAC
-echo 
+echo $CONFIG_COLUMN_HEADERS
 
-#) >> udev.log
