@@ -771,3 +771,4 @@ select err :: 5
 add sdc
 GET_DISPLAY_0_USER :: localcosadmin
 LINE ::      3	Task	Ghost			ghost.iso					512
+GET_DISPLAY_0_USER :: localcosadmin
