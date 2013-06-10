@@ -943,7 +943,7 @@ function setup_Multimedia(){
         waitAptgetInstall
 	apt-get ${aptopt} install libxine1-ffmpeg gxine mencoder \
 				  totem-mozilla icedax tagtool easytag\
-				  id3tool lame nautilus-script-audio-convert
+				  id3tool lame nautilus-script-audio-convert\
 				  libmad0 mpg321
 }
 function setup_grub_customizer(){
