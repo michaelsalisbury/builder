@@ -260,6 +260,7 @@ BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 
 # User Task Managment Folder
 USER_TOOL_DIR=${USER_TOOL_DIR:-ISO}
+TOOl_LIST_FILE_NAME=${TOOl_LIST_FILE_NAME:-tool.list.txt}
 USER_TOOL_LIST=$
 TOOLLIST="${TOOLDIR}/tool.list.txt"
 cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
