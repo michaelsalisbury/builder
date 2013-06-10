@@ -679,7 +679,7 @@ function setup_X2GO(){
 	# setup x2go user group pair
 	local UID_GID_PAIR=$(free_ID_pair 100)
 	groupadd -g ${UID_GID_PAIR} x2gouser
-	useradd  -u ${UID_GID_PAIR} -g ${UID_GID_PAIR} -d /var/lib/x2go -s /bin/false
+	useradd  -u ${UID_GID_PAIR} -g ${UID_GID_PAIR} -d /var/lib/x2go -s /bin/false x2gouser
 	# Add repo
 	if ! ls /etc/apt/sources.list.d/x2go-stabe* &> /dev/null; then
         	waitAptgetUpdate
