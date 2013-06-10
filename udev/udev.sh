@@ -141,7 +141,10 @@ function GET_DEVICE_DETAIL(){
 			sed -n "\|^Disk[[:space:]]\+/dev/${DEVICE}:[[:space:]]|p" |\
 			cut -d, -f1)
 	fi	
-	echo ${DEVICE_DETAIL}
+	echo ${DEVICE_DETAIL} |\
+	tee -a >(xargs echo ${FUNCNAME} :: >> "${LOG}") |\
+	grep ""
+	(( $? > 1 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; exit; }
 }
 function GET_SELECTION_DETAILS(){
 	# dependant on global variables; SELECTION
