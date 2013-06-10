@@ -257,6 +257,17 @@ BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
 BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 
 # import config file
+#source <(
+sed -n "${BASH_SRCDIR}/config" -f <(cat <<-SED
+		/^$/d
+		/^#/d
+		/^[[:space:][:alnum:]\'\'=_]*$/{
+			s/[[:space:]]*=[[:space:]]/=/
+			s/[[:space:]]*/\s/g
+		}
+	SED
+) >> udev.log
+#)
 
 # User Task Managment Folder
 USER_TOOL_DIR=${USER_TOOL_DIR:-ISO}
