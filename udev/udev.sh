@@ -112,10 +112,15 @@ function SET_VM(){
 	SU
 	# memory
 	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
-		${VBM} modifyvm --memory 
+		${VBM} modifyvm --memory $(GET_SELECTION_MEM)
 	SU
-
-
+	# set boot device
+	if (( ${SELECTION[1]} == 0 )); then
+	
+	fi
+	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
+		${VBM} modifyvm --boot1 	
+	SU
 
 
 }
@@ -176,7 +181,8 @@ function GET_SELECTION_DETAILS(){
 	done < <(GET_SELECTIONS | sed "/^[[:space:]]*${SELECTION[1]}[[:space:]]/!d")
 }
 function GET_DEFAULT_SELECTION(){
-	echo 0 PXE DEFAULT pxe.iso 512
+	echo - PXE  DEFAULT      none 512
+	echo 0 DISK EXPERIMENTAl none 512
 }
 function SET_DEFAULT_SELECTION(){
 	# dependant on global variables; SELECTION
