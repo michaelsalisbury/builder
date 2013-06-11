@@ -153,10 +153,10 @@ function SET_VM(){
 	SU
 	# set ide controler and dvd
 	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
-		${VBM} modifyvm ${NAME[1]} --name ${SCTL}	\
+		${VBM} storagectl ${NAME[1]} --name ${SCTL}	\
 					   --add ${SCTL}	\
 					   --bootable on
-		${VBM} modifyvm ${NAME[1]} --storagectl ${SCTL} \
+		${VBM} storageattach ${NAME[1]} --storagectl ${SCTL} \
 					   --port 0		\
 					   --device 1		\
 					   --type dvddrive	\
@@ -165,7 +165,7 @@ function SET_VM(){
 	# set disks
 	for dev in ${DEVICE[*]}; do
 	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
-		${VBM} modifyvm ${NAME[1]} --storagectl ${SCTL}	\
+		${VBM} storageattach ${NAME[1]} --storagectl ${SCTL}	\
 					   --port $(( index++ ))\
 					   --device 0		\
 					   --type hdd		\
