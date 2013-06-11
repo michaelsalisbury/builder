@@ -177,13 +177,15 @@ function GET_VRDEPORT(){
 	# dependant on global variables; VRDEPORT, DEVICE
 	local DEV=${1:-${DEVICE}}
 	# get vrdeport; convert the sd disk letter to a number and add to port base
+	# sdb = 33890, sdc = 33891, sdd = 33892,,,
 	echo $(( VRDEPORT + $(printf "%d\n" \'${DEV:2}) - 98 ))
 }
 function GET_MAC(){
 	# dependant on global variables; MAC
 	local DEV=${1:-${DEVICE}}
 	# get mac; convert the sd disk letter to a number and add to mac base
-	echo ${MAC}$(( 196 - $(printf "%d\n" \'${DEV:2}) ))
+	# sdb = 99, sdc = 98, sdd = 97,,,
+	echo ${MAC}$(( 197 - $(printf "%d\n" \'${DEV:2}) ))
 }
 function zenity_name_task(){
 	# dependant on global variables; DEVICE
