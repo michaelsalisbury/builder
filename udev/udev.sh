@@ -81,7 +81,8 @@ function main(){
 		chown ${DISPLAY_0_USER}.vboxusers /dev/${DEV}
 	done
 
-	
+	# create virtual machine
+	SET_VM	
 
 
 	
