@@ -224,7 +224,6 @@ function GET_SELECTION_DETAILS(){
 	# dependant on global variables; SELECTION
 	local LINE=""
 	while read LINE; do
-		echo LINE :: "${LINE}"
                 eval IFS=${DIFS} SELECTION=( ${SELECTION[0]} "${LINE}" )
 	done < <(GET_SELECTIONS | sed "/^[[:space:]]*${SELECTION[1]}[[:space:]]/!d")
 }
