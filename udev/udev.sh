@@ -177,7 +177,7 @@ function GET_VRDEPORT(){
 	# dependant on global variables; VRDEPORT, DEVICE
 	local DEV=${1:-${DEVICE}}
 	# get vrdeport; convert the sd disk letter to a number and add to port base
-	echo $(( VRDEPORT + $(printf "%d\n" \'${DEV:2}) -99 ))
+	echo $(( VRDEPORT + $(printf "%d\n" \'${DEV:2}) - 99 ))
 }
 function GET_MAC(){
 	# dependant on global variables; MAC
