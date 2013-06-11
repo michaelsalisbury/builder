@@ -31,6 +31,6 @@ Task	Ghost			Data/ISO.Misc/ghost.iso				512
 #Deploy	Unity
 #Deploy	Kubuntu
 #Deploy	Xubuntu
-#Diag	KNOPPIX			ADRIANE-KNOPPIX_V6.4.3CD-2010-12-20-EN.iso	768
+#Diag	KNOPPIX			KNOPPIX_V7.0.5DVD-2012-12-21-EN.iso		768
 #Diag	"Hirens BootCD"		Hirens.BootCD.14.0.iso				512
 #Diag	Clone-Zilla		clonezilla.iso					256
