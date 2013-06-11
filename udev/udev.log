@@ -1233,3 +1233,21 @@ select err :: 5
        mem :: 128
       name :: sdc-320.1GB-33890.sdc
 add sdc
+stdin: is not a tty
+
+RAW host disk access VMDK file /home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk created successfully.
+Virtual machine 'sdc-320.1GB-33890.sdc' is created and registered.
+UUID: 116ce382-fa29-4f73-823e-6fb12e434eff
+Settings file: '/home/localcosadmin/VirtualBox VMs/sdc-320.1GB-33890.sdc/sdc-320.1GB-33890.sdc.vbox'
+VBoxManage: error: Permission problem accessing the file for the medium '/home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk' (VERR_ACCESS_DENIED)
+VBoxManage: error: Details: code VBOX_E_FILE_ERROR (0x80bb0004), component Medium, interface IMedium, callee nsISupports
+VBoxManage: error: Context: "OpenMedium(Bstr(pszFilenameOrUuid).raw(), enmDevType, enmAccessMode, fForceNewUuidOnOpen, pMedium.asOutParam())" at line 178 of file VBoxManageDisk.cpp
+VBoxManage: error: Invalid UUID or filename "/home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk"
+      name :: 5 sdc-320.1GB-33890.sdc
+  name err :: 5
+ selection :: 5 4 Diag KNOPPIX Data/ISO.Linux/KNOPPIX/KNOPPIX_V7.0.5DVD-2012-12-21-EN.iso 768
+select err :: 5
+      path :: /home/localcosadmin//Data/ISO.Linux/KNOPPIX/KNOPPIX_V7.0.5DVD-2012-12-21-EN.iso
+       mem :: 768
+      name :: sdc-320.1GB-33890.sdc
+add sdc
