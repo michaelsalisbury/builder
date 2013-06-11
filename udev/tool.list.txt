@@ -27,7 +27,7 @@ Tool	Selections		Locations					Memory
 
 Task	SpinRite		SpinRite.iso
 Task	DBAN			dban-2.2.6_i586.iso
-Task	Ghost			ghost.iso					512
+Task	Ghost			Data/ISO.Misc/ghost.iso				512
 #Deploy	Unity
 #Deploy	Kubuntu
 #Deploy	Xubuntu
