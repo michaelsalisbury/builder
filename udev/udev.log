@@ -1215,3 +1215,21 @@ select err :: 5
        mem :: 512
       name :: sdc-320.1GB-33890.sdc
 add sdc
+stdin: is not a tty
+
+RAW host disk access VMDK file /home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk created successfully.
+VBoxManage: error: Machine settings file '/home/localcosadmin/VirtualBox VMs/sdc-320.1GB-33890.sdc/sdc-320.1GB-33890.sdc.vbox' already exists
+VBoxManage: error: Details: code VBOX_E_FILE_ERROR (0x80bb0004), component Machine, interface IMachine, callee nsISupports
+VBoxManage: error: Context: "CreateMachine(bstrSettingsFile.raw(), bstrName.raw(), ComSafeArrayAsInParam(groups), bstrOsTypeId.raw(), createFlags.raw(), machine.asOutParam())" at line 263 of file VBoxManageMisc.cpp
+VBoxManage: error: Permission problem accessing the file for the medium '/home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk' (VERR_ACCESS_DENIED)
+VBoxManage: error: Details: code VBOX_E_FILE_ERROR (0x80bb0004), component Medium, interface IMedium, callee nsISupports
+VBoxManage: error: Context: "OpenMedium(Bstr(pszFilenameOrUuid).raw(), enmDevType, enmAccessMode, fForceNewUuidOnOpen, pMedium.asOutParam())" at line 178 of file VBoxManageDisk.cpp
+VBoxManage: error: Invalid UUID or filename "/home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk"
+      name :: 5 sdc-320.1GB-33890.sdc
+  name err :: 5
+ selection :: 5 1 Task SpinRite Data/ISO.Misc/SpinRite.iso
+select err :: 5
+      path :: /home/localcosadmin//Data/ISO.Misc/SpinRite.iso
+       mem :: 128
+      name :: sdc-320.1GB-33890.sdc
+add sdc
