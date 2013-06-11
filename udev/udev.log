@@ -820,3 +820,398 @@ select err :: 5
        mem :: 768
       name :: sdc-320.1GB-33890.sdc
 add sdc
+stdin: is not a tty
+
+RAW host disk access VMDK file /home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk created successfully.
+Virtual machine 'sdc-320.1GB-33890.sdc' is created and registered.
+UUID: 01891472-80f0-4526-9e10-e68b29f923c3
+Settings file: '/home/localcosadmin/VirtualBox VMs/sdc-320.1GB-33890.sdc/sdc-320.1GB-33890.sdc.vbox'
+Oracle VM VirtualBox Command Line Management Interface Version 4.2.6
+(C) 2005-2012 Oracle Corporation
+All rights reserved.
+
+Usage:
+
+VBoxManage modifyvm         <uuid|name>
+                            [--name <name>]
+                            [--groups <group>, ...]
+                            [--ostype <ostype>]
+                            [--memory <memorysize in MB>]
+                            [--pagefusion on|off]
+                            [--vram <vramsize in MB>]
+                            [--acpi on|off]
+                            [--pciattach 03:04.0]
+                            [--pciattach 03:04.0@02:01.0]
+                            [--pcidetach 03:04.0]
+                            [--ioapic on|off]
+                            [--pae on|off]
+                            [--hpet on|off]
+                            [--hwvirtex on|off]
+                            [--hwvirtexexcl on|off]
+                            [--nestedpaging on|off]
+                            [--largepages on|off]
+                            [--vtxvpid on|off]
+                            [--synthcpu on|off]
+                            [--cpuidset <leaf> <eax> <ebx> <ecx> <edx>]
+                            [--cpuidremove <leaf>]
+                            [--cpuidremoveall]
+                            [--hardwareuuid <uuid>]
+                            [--cpus <number>]
+                            [--cpuhotplug on|off]
+                            [--plugcpu <id>]
+                            [--unplugcpu <id>]
+                            [--cpuexecutioncap <1-100>]
+                            [--rtcuseutc on|off]
+                            [--monitorcount <number>]
+                            [--accelerate3d on|off]
+                            [--accelerate2dvideo on|off]
+                            [--firmware bios|efi|efi32|efi64]
+                            [--chipset ich9|piix3]
+                            [--bioslogofadein on|off]
+                            [--bioslogofadeout on|off]
+                            [--bioslogodisplaytime <msec>]
+                            [--bioslogoimagepath <imagepath>]
+                            [--biosbootmenu disabled|menuonly|messageandmenu]
+                            [--biossystemtimeoffset <msec>]
+                            [--biospxedebug on|off]
+                            [--boot<1-4> none|floppy|dvd|disk|net>]
+                            [--nic<1-N> none|null|nat|bridged|intnet|hostonly|
+                                        generic]
+                            [--nictype<1-N> Am79C970A|Am79C973|
+                                            82540EM|82543GC|82545EM|
+                                            virtio]
+                            [--cableconnected<1-N> on|off]
+                            [--nictrace<1-N> on|off]
+                            [--nictracefile<1-N> <filename>]
+                            [--nicproperty<1-N> name=[value]]
+                            [--nicspeed<1-N> <kbps>]
+                            [--nicbootprio<1-N> <priority>]
+                            [--nicpromisc<1-N> deny|allow-vms|allow-all]
+                            [--nicbandwidthgroup<1-N> none|<name>]
+                            [--bridgeadapter<1-N> none|<devicename>]
+                            [--hostonlyadapter<1-N> none|<devicename>]
+                            [--intnet<1-N> <network name>]
+                            [--natnet<1-N> <network>|default]
+                            [--nicgenericdrv<1-N> <driver>
+                            [--natsettings<1-N> [<mtu>],[<socksnd>],
+                                                [<sockrcv>],[<tcpsnd>],
+                                                [<tcprcv>]]
+                            [--natpf<1-N> [<rulename>],tcp|udp,[<hostip>],
+                                          <hostport>,[<guestip>],<guestport>]
+                            [--natpf<1-N> delete <rulename>]
+                            [--nattftpprefix<1-N> <prefix>]
+                            [--nattftpfile<1-N> <file>]
+                            [--nattftpserver<1-N> <ip>]
+                            [--natbindip<1-N> <ip>
+                            [--natdnspassdomain<1-N> on|off]
+                            [--natdnsproxy<1-N> on|off]
+                            [--natdnshostresolver<1-N> on|off]
+                            [--nataliasmode<1-N> default|[log],[proxyonly],
+                                                         [sameports]]
+                            [--macaddress<1-N> auto|<mac>]
+                            [--mouse ps2|usb|usbtablet
+                            [--keyboard ps2|usb
+                            [--uart<1-N> off|<I/O base> <IRQ>]
+                            [--uartmode<1-N> disconnected|
+                                             server <pipe>|
+                                             client <pipe>|
+                                             file <file>|
+                                             <devicename>]
+                            [--lpt<1-N> off|<I/O base> <IRQ>]
+                            [--lptmode<1-N> <devicename>]
+                            [--guestmemoryballoon <balloonsize in MB>]
+                            [--gueststatisticsinterval <seconds>]
+                            [--audio none|null|oss|alsa|pulse]
+                            [--audiocontroller ac97|hda|sb16]
+                            [--clipboard disabled|hosttoguest|guesttohost|
+                                         bidirectional]
+                            [--draganddrop disabled|hosttoguest
+                            [--vrde on|off]
+                            [--vrdeextpack default|<name>
+                            [--vrdeproperty <name=[value]>]
+                            [--vrdeport <hostport>]
+                            [--vrdeaddress <hostip>]
+                            [--vrdeauthtype null|external|guest]
+                            [--vrdeauthlibrary default|<name>
+                            [--vrdemulticon on|off]
+                            [--vrdereusecon on|off]
+                            [--vrdevideochannel on|off]
+                            [--vrdevideochannelquality <percent>]
+                            [--usb on|off]
+                            [--usbehci on|off]
+                            [--snapshotfolder default|<path>]
+                            [--teleporter on|off]
+                            [--teleporterport <port>]
+                            [--teleporteraddress <address|empty>
+                            [--teleporterpassword <password>]
+                            [--teleporterpasswordfile  <file>|stdin]
+                            [--tracing-enabled on|off]
+                            [--tracing-config <config-string>]
+                            [--tracing-allow-vm-access on|off]
+                            [--usbcardreader on|off]
+                            [--autostart-enabled on|off]
+                            [--autostart-delay <seconds>]
+
+VBoxManage: error: Unknown option: --add
+Oracle VM VirtualBox Command Line Management Interface Version 4.2.6
+(C) 2005-2012 Oracle Corporation
+All rights reserved.
+
+Usage:
+
+VBoxManage modifyvm         <uuid|name>
+                            [--name <name>]
+                            [--groups <group>, ...]
+                            [--ostype <ostype>]
+                            [--memory <memorysize in MB>]
+                            [--pagefusion on|off]
+                            [--vram <vramsize in MB>]
+                            [--acpi on|off]
+                            [--pciattach 03:04.0]
+                            [--pciattach 03:04.0@02:01.0]
+                            [--pcidetach 03:04.0]
+                            [--ioapic on|off]
+                            [--pae on|off]
+                            [--hpet on|off]
+                            [--hwvirtex on|off]
+                            [--hwvirtexexcl on|off]
+                            [--nestedpaging on|off]
+                            [--largepages on|off]
+                            [--vtxvpid on|off]
+                            [--synthcpu on|off]
+                            [--cpuidset <leaf> <eax> <ebx> <ecx> <edx>]
+                            [--cpuidremove <leaf>]
+                            [--cpuidremoveall]
+                            [--hardwareuuid <uuid>]
+                            [--cpus <number>]
+                            [--cpuhotplug on|off]
+                            [--plugcpu <id>]
+                            [--unplugcpu <id>]
+                            [--cpuexecutioncap <1-100>]
+                            [--rtcuseutc on|off]
+                            [--monitorcount <number>]
+                            [--accelerate3d on|off]
+                            [--accelerate2dvideo on|off]
+                            [--firmware bios|efi|efi32|efi64]
+                            [--chipset ich9|piix3]
+                            [--bioslogofadein on|off]
+                            [--bioslogofadeout on|off]
+                            [--bioslogodisplaytime <msec>]
+                            [--bioslogoimagepath <imagepath>]
+                            [--biosbootmenu disabled|menuonly|messageandmenu]
+                            [--biossystemtimeoffset <msec>]
+                            [--biospxedebug on|off]
+                            [--boot<1-4> none|floppy|dvd|disk|net>]
+                            [--nic<1-N> none|null|nat|bridged|intnet|hostonly|
+                                        generic]
+                            [--nictype<1-N> Am79C970A|Am79C973|
+                                            82540EM|82543GC|82545EM|
+                                            virtio]
+                            [--cableconnected<1-N> on|off]
+                            [--nictrace<1-N> on|off]
+                            [--nictracefile<1-N> <filename>]
+                            [--nicproperty<1-N> name=[value]]
+                            [--nicspeed<1-N> <kbps>]
+                            [--nicbootprio<1-N> <priority>]
+                            [--nicpromisc<1-N> deny|allow-vms|allow-all]
+                            [--nicbandwidthgroup<1-N> none|<name>]
+                            [--bridgeadapter<1-N> none|<devicename>]
+                            [--hostonlyadapter<1-N> none|<devicename>]
+                            [--intnet<1-N> <network name>]
+                            [--natnet<1-N> <network>|default]
+                            [--nicgenericdrv<1-N> <driver>
+                            [--natsettings<1-N> [<mtu>],[<socksnd>],
+                                                [<sockrcv>],[<tcpsnd>],
+                                                [<tcprcv>]]
+                            [--natpf<1-N> [<rulename>],tcp|udp,[<hostip>],
+                                          <hostport>,[<guestip>],<guestport>]
+                            [--natpf<1-N> delete <rulename>]
+                            [--nattftpprefix<1-N> <prefix>]
+                            [--nattftpfile<1-N> <file>]
+                            [--nattftpserver<1-N> <ip>]
+                            [--natbindip<1-N> <ip>
+                            [--natdnspassdomain<1-N> on|off]
+                            [--natdnsproxy<1-N> on|off]
+                            [--natdnshostresolver<1-N> on|off]
+                            [--nataliasmode<1-N> default|[log],[proxyonly],
+                                                         [sameports]]
+                            [--macaddress<1-N> auto|<mac>]
+                            [--mouse ps2|usb|usbtablet
+                            [--keyboard ps2|usb
+                            [--uart<1-N> off|<I/O base> <IRQ>]
+                            [--uartmode<1-N> disconnected|
+                                             server <pipe>|
+                                             client <pipe>|
+                                             file <file>|
+                                             <devicename>]
+                            [--lpt<1-N> off|<I/O base> <IRQ>]
+                            [--lptmode<1-N> <devicename>]
+                            [--guestmemoryballoon <balloonsize in MB>]
+                            [--gueststatisticsinterval <seconds>]
+                            [--audio none|null|oss|alsa|pulse]
+                            [--audiocontroller ac97|hda|sb16]
+                            [--clipboard disabled|hosttoguest|guesttohost|
+                                         bidirectional]
+                            [--draganddrop disabled|hosttoguest
+                            [--vrde on|off]
+                            [--vrdeextpack default|<name>
+                            [--vrdeproperty <name=[value]>]
+                            [--vrdeport <hostport>]
+                            [--vrdeaddress <hostip>]
+                            [--vrdeauthtype null|external|guest]
+                            [--vrdeauthlibrary default|<name>
+                            [--vrdemulticon on|off]
+                            [--vrdereusecon on|off]
+                            [--vrdevideochannel on|off]
+                            [--vrdevideochannelquality <percent>]
+                            [--usb on|off]
+                            [--usbehci on|off]
+                            [--snapshotfolder default|<path>]
+                            [--teleporter on|off]
+                            [--teleporterport <port>]
+                            [--teleporteraddress <address|empty>
+                            [--teleporterpassword <password>]
+                            [--teleporterpasswordfile  <file>|stdin]
+                            [--tracing-enabled on|off]
+                            [--tracing-config <config-string>]
+                            [--tracing-allow-vm-access on|off]
+                            [--usbcardreader on|off]
+                            [--autostart-enabled on|off]
+                            [--autostart-delay <seconds>]
+
+VBoxManage: error: Unknown option: --storagectl
+Oracle VM VirtualBox Command Line Management Interface Version 4.2.6
+(C) 2005-2012 Oracle Corporation
+All rights reserved.
+
+Usage:
+
+VBoxManage modifyvm         <uuid|name>
+                            [--name <name>]
+                            [--groups <group>, ...]
+                            [--ostype <ostype>]
+                            [--memory <memorysize in MB>]
+                            [--pagefusion on|off]
+                            [--vram <vramsize in MB>]
+                            [--acpi on|off]
+                            [--pciattach 03:04.0]
+                            [--pciattach 03:04.0@02:01.0]
+                            [--pcidetach 03:04.0]
+                            [--ioapic on|off]
+                            [--pae on|off]
+                            [--hpet on|off]
+                            [--hwvirtex on|off]
+                            [--hwvirtexexcl on|off]
+                            [--nestedpaging on|off]
+                            [--largepages on|off]
+                            [--vtxvpid on|off]
+                            [--synthcpu on|off]
+                            [--cpuidset <leaf> <eax> <ebx> <ecx> <edx>]
+                            [--cpuidremove <leaf>]
+                            [--cpuidremoveall]
+                            [--hardwareuuid <uuid>]
+                            [--cpus <number>]
+                            [--cpuhotplug on|off]
+                            [--plugcpu <id>]
+                            [--unplugcpu <id>]
+                            [--cpuexecutioncap <1-100>]
+                            [--rtcuseutc on|off]
+                            [--monitorcount <number>]
+                            [--accelerate3d on|off]
+                            [--accelerate2dvideo on|off]
+                            [--firmware bios|efi|efi32|efi64]
+                            [--chipset ich9|piix3]
+                            [--bioslogofadein on|off]
+                            [--bioslogofadeout on|off]
+                            [--bioslogodisplaytime <msec>]
+                            [--bioslogoimagepath <imagepath>]
+                            [--biosbootmenu disabled|menuonly|messageandmenu]
+                            [--biossystemtimeoffset <msec>]
+                            [--biospxedebug on|off]
+                            [--boot<1-4> none|floppy|dvd|disk|net>]
+                            [--nic<1-N> none|null|nat|bridged|intnet|hostonly|
+                                        generic]
+                            [--nictype<1-N> Am79C970A|Am79C973|
+                                            82540EM|82543GC|82545EM|
+                                            virtio]
+                            [--cableconnected<1-N> on|off]
+                            [--nictrace<1-N> on|off]
+                            [--nictracefile<1-N> <filename>]
+                            [--nicproperty<1-N> name=[value]]
+                            [--nicspeed<1-N> <kbps>]
+                            [--nicbootprio<1-N> <priority>]
+                            [--nicpromisc<1-N> deny|allow-vms|allow-all]
+                            [--nicbandwidthgroup<1-N> none|<name>]
+                            [--bridgeadapter<1-N> none|<devicename>]
+                            [--hostonlyadapter<1-N> none|<devicename>]
+                            [--intnet<1-N> <network name>]
+                            [--natnet<1-N> <network>|default]
+                            [--nicgenericdrv<1-N> <driver>
+                            [--natsettings<1-N> [<mtu>],[<socksnd>],
+                                                [<sockrcv>],[<tcpsnd>],
+                                                [<tcprcv>]]
+                            [--natpf<1-N> [<rulename>],tcp|udp,[<hostip>],
+                                          <hostport>,[<guestip>],<guestport>]
+                            [--natpf<1-N> delete <rulename>]
+                            [--nattftpprefix<1-N> <prefix>]
+                            [--nattftpfile<1-N> <file>]
+                            [--nattftpserver<1-N> <ip>]
+                            [--natbindip<1-N> <ip>
+                            [--natdnspassdomain<1-N> on|off]
+                            [--natdnsproxy<1-N> on|off]
+                            [--natdnshostresolver<1-N> on|off]
+                            [--nataliasmode<1-N> default|[log],[proxyonly],
+                                                         [sameports]]
+                            [--macaddress<1-N> auto|<mac>]
+                            [--mouse ps2|usb|usbtablet
+                            [--keyboard ps2|usb
+                            [--uart<1-N> off|<I/O base> <IRQ>]
+                            [--uartmode<1-N> disconnected|
+                                             server <pipe>|
+                                             client <pipe>|
+                                             file <file>|
+                                             <devicename>]
+                            [--lpt<1-N> off|<I/O base> <IRQ>]
+                            [--lptmode<1-N> <devicename>]
+                            [--guestmemoryballoon <balloonsize in MB>]
+                            [--gueststatisticsinterval <seconds>]
+                            [--audio none|null|oss|alsa|pulse]
+                            [--audiocontroller ac97|hda|sb16]
+                            [--clipboard disabled|hosttoguest|guesttohost|
+                                         bidirectional]
+                            [--draganddrop disabled|hosttoguest
+                            [--vrde on|off]
+                            [--vrdeextpack default|<name>
+                            [--vrdeproperty <name=[value]>]
+                            [--vrdeport <hostport>]
+                            [--vrdeaddress <hostip>]
+                            [--vrdeauthtype null|external|guest]
+                            [--vrdeauthlibrary default|<name>
+                            [--vrdemulticon on|off]
+                            [--vrdereusecon on|off]
+                            [--vrdevideochannel on|off]
+                            [--vrdevideochannelquality <percent>]
+                            [--usb on|off]
+                            [--usbehci on|off]
+                            [--snapshotfolder default|<path>]
+                            [--teleporter on|off]
+                            [--teleporterport <port>]
+                            [--teleporteraddress <address|empty>
+                            [--teleporterpassword <password>]
+                            [--teleporterpasswordfile  <file>|stdin]
+                            [--tracing-enabled on|off]
+                            [--tracing-config <config-string>]
+                            [--tracing-allow-vm-access on|off]
+                            [--usbcardreader on|off]
+                            [--autostart-enabled on|off]
+                            [--autostart-delay <seconds>]
+
+VBoxManage: error: Unknown option: --storagectl
+      name :: 5 sdc-320.1GB-33890.sdc
+  name err :: 5
+ selection :: 5 7 DIAG SystemRescueCD Data/ISO.Linux/systemrescuecd/systemrescuecd-x86-3.7.0.iso 512
+select err :: 5
+      path :: 
+       mem :: 512
+      name :: sdc-320.1GB-33890.sdc
+add sdc
