@@ -797,3 +797,15 @@ select err :: 5
        mem :: 512
       name :: test-33890.sdc
 add sdc
+LINE ::      5	Diag	"Hirens BootCD"	Data/ISO.Windows/Hirens.BootCD.15.2.iso				512
+stdin: is not a tty
+
+RAW host disk access VMDK file /home/localcosadmin/.VirtualBox/udev.sdc.sdc-320.1GB-33890.sdc.vmdk created successfully.
+      name :: 5 sdc-320.1GB-33890.sdc
+  name err :: 5
+ selection :: 5 5 Diag Hirens BootCD Data/ISO.Windows/Hirens.BootCD.15.2.iso 512
+select err :: 5
+      path :: /home/localcosadmin//Data/ISO.Windows/Hirens.BootCD.15.2.iso
+       mem :: 512
+      name :: sdc-320.1GB-33890.sdc
+add sdc
