@@ -11,11 +11,22 @@ TOOL_INSTRUCTIONS   = Task Selection Instructions
 NAMING_INSTRUCTIONS = Naming Instructions
 TOOL_COLUMN_HEADERS = "Task List Column Headers"
 TOOL_SELECTIONS     = Task List Selections
+GLOBAL_DEFAULTS     = Global Defaults
 
 # MAC address base: must have the first 5 octets
 MAC = 080027ABCD
 
 # VRDE base port number for RDP connections
 VRDEPORT = 33890
+
+# Dialog timeouts in seconds: DEFAULT = 25 seconds
+DIALOG_TIMEOUT = 5
+
+# DEBUG; true or false: DEFAULT = false
+DEBUG = false
+
+# POPUP_LOG; open terminator and tail log, auto close 60 seconds after 
+POPUP_LOG = false
+POPUP_LOG_AUTOCLOSE_DELAY = 10
 
 # LOG

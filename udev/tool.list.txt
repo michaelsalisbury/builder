@@ -1,3 +1,10 @@
+[ Global Defaults ]
+	DIALOG_TIMEOUT = 2000
+		   MAC = 080027ABCD
+	      VRDEPORT = 33890
+		 DEBUG = false
+	     POPUP_LOG = true
+
 [ Task Selection Instructions ]
 	Please choose a tool:
 	PXE boot is the default.

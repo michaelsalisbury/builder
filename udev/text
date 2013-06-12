@@ -1,0 +1,30 @@
+#!/bin/bash
+
+function test(){
+
+	sed -n "$1" -f <(cat <<-SED
+		/^t/p
+	SED
+	)
+	echo
+	cat $1
+}
+
+cat <<-EOE | test <(cat)
+one
+two
+three
+EOE
+
+
+
+exit
+
+date
+cat <<-EOE
+    Trouble?
+    Call Dr. Richardson
+    (407) 823.2961
+    Do Not REBOOT!!!
+EOE
+sleep 5
