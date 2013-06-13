@@ -93,4 +93,6 @@ hevea
 libtiff-tools
 chktex
 doxygen
+gsfonts
+gsfonts-x11
 
