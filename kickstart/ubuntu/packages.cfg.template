@@ -95,4 +95,6 @@ chktex
 doxygen
 gsfonts
 gsfonts-x11
+xfonts-base        xfonts-100dpi        xfonts-75dpi
+xfonts-biznet-base xfonts-biznet-100dpi xfonts-biznet-75dp
 
