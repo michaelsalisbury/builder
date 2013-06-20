@@ -211,7 +211,7 @@ function setup_Prep_Add_Repos(){
 	local deb=""
 
 	# Disable upgrades
-	sed -i '/^Prompt=/c\never' /etc/update-manager/release-upgrades
+	sed -i '/^Prompt=/c\Prompt=never' /etc/update-manager/release-upgrades
 
 	# Add Neuro Debian Repo; was to pulldown tigervnc-server
 	if false; then
