@@ -199,27 +199,18 @@ function include(){
 		declare -A includes
 
 		# Include functions and global variables recursivelly if...
-		`switch_set_default r X`
 		local OPTIND=
 		local OPTARG=
 		local OPTION=
 		local OPTERR=0
 		# only include source recursivelly if eval_function requested
-		while getopts "cei:nr:" OPTION; do
+		while getopts "cei:n" OPTION; do
                 	case $OPTION in
-				c|i|n)	include_file         "${scriptFQFN}";;
-				r)	[[ "${OPTARG}" =~ r|c ]]		\
-					&& include_file      "${scriptFQFN}"	\
-					|| include_functions "${scriptFQFN}";;
+				c|i|n)	include_file      "${scriptFQFN}";;
 				e)	;;
-				?)	include_functions    "${scriptFQFN}";;
+				?)	include_functions "${scriptFQFN}";;
 			esac
 		done
-		# if no options were passwd include source recursivelly
-		#echo OPTIND :: $OPTIND
-		#echo OPTARG :: $OPTARG
-		#echo OPTION :: $OPTION
-		(( OPTIND > 1 )) || include_file "${scriptFQFN}"
 		return 0
 	else
 		return 1

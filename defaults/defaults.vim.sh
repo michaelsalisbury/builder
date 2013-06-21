@@ -22,7 +22,8 @@ function setup_Create_Systemwide_Defaults(){
 	cat <<-END-OF-VIMRC > /etc/vim/vimrc.local
 		" Change comment highlighting from dark blue to dark green
 		highlight Comment ctermfg=DarkGreen
-
+		" enable highlight searching
+		:set hlsearch
 		" Do not wrap text
 		:set nowrap!
 		" Toggle word wrap by pressing F2

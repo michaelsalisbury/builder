@@ -26,7 +26,7 @@ function show_help(){
   -tl  tail main log                     |   -s#  toggle function # to set/unset skip
   -t#  tail function # log               |   -sa  toggle enable/disable of function skippin
                                        --|--
-  -wl  write main log to stout           |   -jb  jump  up |  back  one step (also -ju)
+  -wl  write main log to stout           |   -jb  jump   up|back one step    (also -ju)
   -w#  write function # log to stout     |   -jf  jump down|forward one step (also -jd,-j)
   -bk  make backup                       |   -mu  move function   up|back    (also -mb)
   -u   update from source                |   -md  move function down|forward (also -mf)
@@ -42,21 +42,19 @@ function switches_verifier(){
 	echo @ :: ..."$@"...
 }
 function switch_set_default(){
-	local ARG=-${1//-/}	# switch/arg
-	local VALUE=$2		# default value for switch/arg
-	# echo command for eval with calling function
-	cat <<-EVAL
-		eval [[ "\$*" =~ ${ARG}[[:space:]]- ]]	\
-		|| [ "\${@: -1}" == "${ARG}" ]		\
-		&& set -- "\${@/${ARG}/${ARG}${VALUE}}"
-	EVAL
+	local X=$1
+	local D=$2
+	local Q=\"
+	local S=\$
+	echo eval [[ $Q$S*$Q =~ $Q-$X -$Q ]] \|\| [ $Q$S{@: -1}$Q == $Q-$X$Q ] \&\& set -- $Q$S{@/-$X/-$X$D}$Q
+	return 0
+	          [[ "$*"    =~ "-$X -"    ]] ||   [ "${@: -1}"    == "-$X"    ] &&   set -- "${@/-$X/-$X$D}"
 }
 function switches(){
 	[ $# = 0 ] && set -- -h
 	include "$@" && shift
 	[ -z "$*" ] && return 1
 
-	# set switch/arg defaults
 	`switch_set_default b k`
 	`switch_set_default d a`
 	`switch_set_default e s`
@@ -68,56 +66,40 @@ function switches(){
 	local OPTIND=
 	local OPTARG=
 	local OPTION=
-	local OPTERR=1
-	while getopts "b:cd:e:ghj:i:lm:nr:s:t:uw:" OPTION; do
+	while getopts "b:cd:e:ghj:i:lm:nr:s:t:uw:" OPTION
+               do
 		local switches_last_option=$OPTION
 		local switches_last_optarg=$OPTARG
                 case $OPTION in
-			# make backup
-			b)	[ "${OPTARG}" == k ] && make_backup || make_backup "$OPTARG";;
-			# run current step and stop 
-			c)	skip || eval_function $step; disp_functions; echo;;
-			# dump function code to screen
-			d)	[ $OPTARG == a ] && dump_functions || show_function $OPTARG;;
-			# edit script with vim
-			e)	[ $OPTARG == s ] && vim "$scriptFQFN" && return 0;
-				[ $OPTARG == l ] && vim "$scrLogFQFN" && return 0;
-				vim "`log_get_name $OPTARG`";;
-			# get current step, error if done
-			g)	(( $step > `last_function` )) && exit 1 || echo $step; exit 0;; 
-			# display help
-                        h)	show_help; disp_functions; echo;;
-			# jump up or down (back or forward) a step
-			j)	[[ $OPTARG =~ (b|u) ]] && back || next;
-				wrap; disp_functions; echo;;
-			# execute function by index or name (unique match)
-			i)	local index=`find_function $OPTARG`
-				(( index )) && eval_function $index || disp_functions 
-				(( index )) && log_is_empty  $index && disp_functions;;
-			# display function list
-                        l)	disp_functions; echo;;
-			# reorganize functions (modify script, experimental)
-			m)	[[ $OPTARG =~ (b|u) ]] && move_up $step   && back
-				[[ $OPTARG =~ (f|d) ]] && move_down $step && next
-				disp_functions; echo;;
-			# run current step and increment
-			n)	skip || eval_function $step; next; wrap; disp_functions; echo;;
-			# toggle function skip on/off; toggle skip feature on/off
-			s)	skip_function $OPTARG || show_help
-				disp_functions; echo;;
-			# reset step back to 1
-			r)	rset;
-				[ $OPTARG == r ] && return 1;
-				[ $OPTARG == l ] && log_clear;
-				[ $OPTARG == c ] && log_clear && return 1;
-				disp_functions; echo;;
-			# tail the main log or function log
-			t)	[ $OPTARG == l ] && log_tail_main || log_tail_func $OPTARG;;
-			# update from source after backup
-			u)	make_backup; sync_source;;
-			# cat the main log of function log
-			w)	[ $OPTARG == l ] && cat "$scrLogFQFN" || log_to_stout $OPTARG;;
-			?)	show_help; disp_functions; echo;;
+			b)		[ "${OPTARG}" == k ] && make_backup || make_backup "$OPTARG";;
+			c)		skip || eval_function $step; disp_functions; echo;;
+			d)		[ $OPTARG == a ] && dump_functions || show_function $OPTARG;;
+			e)		[ $OPTARG == s ] && vim "$scriptFQFN" && return 0;
+					[ $OPTARG == l ] && vim "$scrLogFQFN" && return 0;
+							    vim "`log_get_name $OPTARG`";;
+			g)		(( $step > `last_function` )) && exit 1 || echo $step; exit 0;; 
+                        h)              show_help; disp_functions; echo;;
+			j)		[[ $OPTARG =~ (b|u) ]] && back || next;
+					wrap; disp_functions; echo;;
+			i)		local index=`find_function $OPTARG`
+					(( index )) && eval_function $index || disp_functions 
+					(( index )) && log_is_empty  $index && disp_functions;;
+                        l)              disp_functions; echo;;
+			m)		[[ $OPTARG =~ (b|u) ]] && move_up $step   && back
+					[[ $OPTARG =~ (f|d) ]] && move_down $step && next
+					disp_functions; echo;;
+			n)		skip || eval_function $step; next; wrap; disp_functions; echo;;
+                        s)              skip_function $OPTARG || show_help
+					disp_functions; echo;;
+                        r)              rset;
+					[ $OPTARG == r ] && return 1;
+					[ $OPTARG == l ] && log_clear;
+					[ $OPTARG == c ] && log_clear && return 1;
+					disp_functions; echo;;
+			t)		[ $OPTARG == l ] && log_tail_main || log_tail_func $OPTARG;;
+			u)		make_backup; sync_source;;
+                        w)              [ $OPTARG == l ] && cat "$scrLogFQFN" || log_to_stout $OPTARG;;
+                        ?)              show_help; disp_functions; echo;;
                 esac
         done
 	
@@ -146,10 +128,9 @@ function switches(){
 ###########################################################################################
 function include(){
 	if [ -f "$1" ]; then
-		scriptFQFN=$(readlink -fn "$1")
-		scriptName=$(basename "${scriptFQFN}")
-		scriptPath=$(dirname  "${scriptFQFN}")
-		shift
+		scriptFQFN="$(readlink -fn $1)"
+		scriptName="$(basename $scriptFQFN)"
+		scriptPath="$(dirname  $scriptFQFN)"
 		# Install builder script to /bin via hard link		
 		if [ ! -f "/bin/$buildScriptName" ]; then
 			ln "$buildScriptFQFN" "/bin/$buildScriptName"
@@ -195,31 +176,11 @@ function include(){
 			fixs		
 		fi
 
-		# Setup GLOBAL array to track sourced script
+		# Setup array to track sourced script
 		declare -A includes
 
-		# Include functions and global variables recursivelly if...
-		`switch_set_default r X`
-		local OPTIND=
-		local OPTARG=
-		local OPTION=
-		local OPTERR=0
-		# only include source recursivelly if eval_function requested
-		while getopts "cei:nr:" OPTION; do
-                	case $OPTION in
-				c|i|n)	include_file         "${scriptFQFN}";;
-				r)	[[ "${OPTARG}" =~ r|c ]]		\
-					&& include_file      "${scriptFQFN}"	\
-					|| include_functions "${scriptFQFN}";;
-				e)	;;
-				?)	include_functions    "${scriptFQFN}";;
-			esac
-		done
-		# if no options were passwd include source recursivelly
-		#echo OPTIND :: $OPTIND
-		#echo OPTARG :: $OPTARG
-		#echo OPTION :: $OPTION
-		(( OPTIND > 1 )) || include_file "${scriptFQFN}"
+		# Include functions and global variables recursivelly
+		include_file "${scriptFQFN}"
 		return 0
 	else
 		return 1

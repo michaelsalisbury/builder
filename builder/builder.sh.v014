@@ -68,8 +68,8 @@ function switches(){
 	local OPTIND=
 	local OPTARG=
 	local OPTION=
-	local OPTERR=1
-	while getopts "b:cd:e:ghj:i:lm:nr:s:t:uw:" OPTION; do
+	while getopts "b:cd:e:ghj:i:lm:nr:s:t:uw:" OPTION
+               do
 		local switches_last_option=$OPTION
 		local switches_last_optarg=$OPTARG
                 case $OPTION in
@@ -146,10 +146,9 @@ function switches(){
 ###########################################################################################
 function include(){
 	if [ -f "$1" ]; then
-		scriptFQFN=$(readlink -fn "$1")
-		scriptName=$(basename "${scriptFQFN}")
-		scriptPath=$(dirname  "${scriptFQFN}")
-		shift
+		scriptFQFN="$(readlink -fn $1)"
+		scriptName="$(basename $scriptFQFN)"
+		scriptPath="$(dirname  $scriptFQFN)"
 		# Install builder script to /bin via hard link		
 		if [ ! -f "/bin/$buildScriptName" ]; then
 			ln "$buildScriptFQFN" "/bin/$buildScriptName"
@@ -195,31 +194,11 @@ function include(){
 			fixs		
 		fi
 
-		# Setup GLOBAL array to track sourced script
+		# Setup array to track sourced script
 		declare -A includes
 
-		# Include functions and global variables recursivelly if...
-		`switch_set_default r X`
-		local OPTIND=
-		local OPTARG=
-		local OPTION=
-		local OPTERR=0
-		# only include source recursivelly if eval_function requested
-		while getopts "cei:nr:" OPTION; do
-                	case $OPTION in
-				c|i|n)	include_file         "${scriptFQFN}";;
-				r)	[[ "${OPTARG}" =~ r|c ]]		\
-					&& include_file      "${scriptFQFN}"	\
-					|| include_functions "${scriptFQFN}";;
-				e)	;;
-				?)	include_functions    "${scriptFQFN}";;
-			esac
-		done
-		# if no options were passwd include source recursivelly
-		#echo OPTIND :: $OPTIND
-		#echo OPTARG :: $OPTARG
-		#echo OPTION :: $OPTION
-		(( OPTIND > 1 )) || include_file "${scriptFQFN}"
+		# Include functions and global variables recursivelly
+		#include_file "${scriptFQFN}"
 		return 0
 	else
 		return 1
