@@ -1,7 +1,6 @@
-#!/bin/builder.sh
 #!/bin/env /bin/builder.sh
 skip=( true true false true true false )
-step=1
+step=5
 prefix="run"
 source="https://raw.github.com/michaelsalisbury/builder/master/reports/${scriptName}"
 

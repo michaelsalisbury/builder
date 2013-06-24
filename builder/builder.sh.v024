@@ -1,31 +1,29 @@
 #!/bin/bash
 ###########################################################################################
 #################################################################### GLOBAL VARS DEFINED ##
-# step skip prefix source
-#
-# buildScriptFQFN buildScriptName buildScriptPath
+# step
+# skip
+# prefix
+# source
 #      scriptFQFN      scriptName      scriptPath 
+# buildScriptFQFN buildScriptName buildScriptPath
 #      srcLogFQFN                      srcLogPath
-#
-#   MAX_WIDTH   MAX_WIDTH_DEFAULT
-# SPLIT_DELIM SPLIT_DELIM_DEFAULT
-#
+
 ###########################################################################################
 ###########################################################################################
 function builder_main(){
-	#SET_MAX_WIDTH_BY_COLS 80
-
 	garbage_collection
 
 	verify_wrapper			|| EXIT 1 # verify and or fix builder install (wrapper)
 	verify_script "$1"		|| EXIT 1 # verify script and set scriptFQFN global vars.
 	verify_shebang			|| EXIT 1 # verify and or fix script and shebang line
 	verify_logs			|| EXIT 1
-	source_global_control_vars	&& shift\
-					|| EXIT 1 # source; step, skip, prefix, source.
-	process_switches "$@"		|| EXIT 1 # process all command line and piped args
+	source_global_control_vars	|| EXIT 1 # source; step, skip, prefix, source.
+	shift
+	process_switches "$@"		|| EXIT 1
 
-	# main execution loop
+        #switches "$@" && exit 1
+
 	while ! is_finished && ! is_rebooting; do
         	skip || sleep 1
 		skip && nogo || eval_function ${step} || { stopping && return 1; }
@@ -134,9 +132,12 @@ function verify_logs(){
 	fi
 	scrLogFQFN="$scrLogPath/${scriptName%.*}"
 }
+function EXIT(){
+	exit ${1:- 0}
+}
 function show_help(){
 	cat << END_OF_HELP
-  $(REPC 89 _)
+  $(repc 89 _)
   -l   List all functions                |   -r   reset step to 1
   -i#  run function #                    |   -rr  reset step to 1 and run
   -da  dump all function code to stout   |   -rl  reset step to 1 and clear logs
@@ -153,7 +154,7 @@ function show_help(){
   -w#  write function # log to stout     |   -jf  jump down|forward one step (also -jd,-j)
   -bk  make backup                       |   -mu  move function   up|back    (also -mb)
   -u   update from source                |   -md  move function down|forward (also -mf)
-  $(REPC 89 `printf "\257"`)
+  $(repc 89 `printf "\257"`)
 END_OF_HELP
 }
 ###########################################################################################
@@ -278,10 +279,10 @@ function process_switches(){
 				# splits lines at commas and double quotes
 				# removes leading and trailing spaces 
 				done < <(cat | tr "," "\n" | sed -f <(cat <<-SED
-					s/^[[:space:]\"]*//
-					s/[[:space:]\"]*$//
-					s/[\"][[:space:]]\+[\"]/\n/
-					s/[[:space:]]*[\"][[:space:]]/\n/
+					s/^[[:space:]"]*//
+					s/[[:space:]"]*$//
+					s/["][[:space:]]\+["]/\n/
+					s/[[:space:]]*["][[:space:]]/\n/
 				SED
 				));;
 		esac
@@ -536,8 +537,7 @@ function sync_source(){
 	if [ "${source:-UNSET}" != "UNSET" ] && test_source "${source}"; then
 		cd "$scriptPath"
 		mesg 80 Syncing :: $source
-		wget -q --no-check-certificate \
-			-O "${scriptName}.new"   "${source}"
+		wget -q -O "${scriptName}.new"   "${source}"
 		cat        "${scriptName}.new" > "${scriptName}"
 	else
 		mesg 80 ERROR :: Script source \for $scriptName broken or unset\!
@@ -550,8 +550,7 @@ function sync_source(){
 	   then
 		cd "$scriptPath"
 		mesg 80 Syncing :: $buildScriptSrc
-		wget -q --no-check-certificate \
-			-O "${buildScriptName}.new"   "$buildScriptSrc"
+		wget -q -O "${buildScriptName}.new"   "$buildScriptSrc"
 		cat        "${buildScriptName}.new" > "$buildScriptFQFN"
 	else
 		mesg 80 ERROR :: Build source \for $buildScriptName broken or unset\!
@@ -690,52 +689,27 @@ function list_functions(){
 }
 
 function disp_functions(){
-	SET_MAX_WIDTH_BY_COLS
-	# setup printf format
-	local printf_format="%-3s %-3s %-3s %-30s %-$(( ${MAX_WIDTH} - 43 ))s"
+	disp_func_tabs="%-3s %-3s %-3s %-30s %-$(( `cols` - 43 ))s"
 	echo
-	# print header
-	PAD_ANCHOR_R \<\> Version `retr_version` of \"$scriptName\" \<\>\<\>\<\>\<\>
-	# print column headers
-	printf "${printf_format}" Cur $'#' Skp "Function Name" "Description"
+	padl `cols` \<\> Version `retr_version` of \"$scriptName\" \<\>\<\>\<\>\<\>
+	#echo \<\> Version `retr_version` of \"$scriptName\" \<\>
+	printf "$disp_func_tabs" Cur \# Skp "Function Name" "Description"
 	echo
-	# print dashed line
-	REPC -
-	# parse functions
-	local name index desc toggle marker
-	while read name; do
-		name=${name#${prefix}_}
-		name=${name//_/ }
-		index=$(find_function "${name}")
-		# get function discription
-		desc=$(retr_function_mesg_opts ${index} | sed 's/^[0-9[:space:]]*//')
-		# set skip toggle
-		if ${skip[0]}; then
-			${skip[${index}]}	\
-				&& toggle=S	\
-				|| toggle=-
-		else
-			unset toggle
-		fi
-		# set step marker
-		(( step == index ))	\
-			&& marker='>>'	\
-			|| unset marker
-		# print
-		printf "${printf_format}" "${marker}" "${index}" "${toggle}" "${name}" "${desc}"
-	done < <(list_functions)
-	# print dashed line
-	REPC -
-	# setup FINISHED
-	is_finished		\
-		&& marker='>>'	\
-		|| unset marker
-	# clear unused vars
-	unset index toggle desc
-	name='Reset to run again'
-	# print FINISHED
-	printf "${printf_format}" "${marker}" "${index}" "${toggle}" "${name}" "${desc}"
+	echo $(repc `cols` -)
+
+	list_functions | sed '$aFINISHED; Reset to run again.' | tr _ \ | cat -n | \
+        while read disp_func_index disp_func_prefix disp_func_name; do
+		disp_func_o=( `retr_function_mesg_opts $disp_func_index` )
+		[[ ${disp_func_o[0]} =~ ^[0-9]+ ]] && disp_func_o=( ${disp_func_o[*]:1} )
+		${skip[0]} && { ${skip[$disp_func_index]} && disp_func_toggle=S || disp_func_toggle=-; } || unset disp_func_toggle
+		(( $step == $disp_func_index )) && disp_func_marker='>>' || unset disp_func_marker
+		(( $disp_func_index > `last_function` )) && unset disp_func_index disp_func_toggle && echo $(repc `cols` -)
+		printf "$disp_func_tabs" "${disp_func_marker}"  "${disp_func_index}" "${disp_func_toggle}" "${disp_func_name}" "${disp_func_o[*]}"
+		echo
+	done
+	unset ${!disp_func_*}
 }
+
 function skip_function(){
 	case "$*" in
 		a)	${skip[0]} && skip[0]=false || skip[0]=true
@@ -776,236 +750,70 @@ function fixs(){ sed -i -e "/^step=/cstep=${step}" -e "/^skip=/cskip=\( ${skip[*
 function time_stamp(){ date +%m.%d\ %T.$(m=`date +%N`; echo ${m:0:2}); }
 function stall(){ for s in `seq $1 -1 1`; do echo -n "$s "; sleep 1; done; echo; }
 ###########################################################################################
-##################################################################### functions.format.sh #
-function SET_MAX_WIDTH_BY_COLS(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	# set GLOBAL vars; COLUMNS, LINES
-	resize > /dev/shm/$$$FUNCNAME
-	source   /dev/shm/$$$FUNCNAME
-	rm  -f   /dev/shm/$$$FUNCNAME
-	MAX_WIDTH=`tput cols 2>/dev/null`
-	MAX_WIDTH=${MAX_WIDTH:-${width}}
-}
-function REPC(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	# manditory pad character
-	local pad_chr=$(PAD_CHR_TR "$1")
-	# return
-	cat <<-SED | sed -n -f <(cat) <(seq ${width})
-		s/.*/${pad_chr}/			# swap count for pad_chr 
-		H					# append pad_chr to hold buffer
-		\${					# at last line do
-			x				# swap hold buffer to pattern space
-			s/\n//g				# remove all new-line chars
-			s/\(.\{${width}\}\).*/\1/	# capture the correct num od chars
-			p				# print
-		}
-	SED
-}
-function PAD_CHR_TR(){
-	case "$1" in
-		-u)     	echo $'_';;
-		-s)     	echo $' ';;
-		-E)		echo $'!';;
-		-e)     	echo $'=';;
-		-P)     	echo $'|';;
-		-p)     	echo $'#';;
-		-t)     	echo $'~';;
-		-[0-9]*)	eval printf \"\\${1:1}\";;
-		*)      	echo "$1";;
-	esac
-}
-function PAD_ANCHOR_R(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	# manditory pad character
-	local pad_chr=$(PAD_CHR_TR "$1")
-	shift
-	# text to anchor right
-	local line="$@"
-	# add buffer space between text and pad chars if first text char is diff
-	[ "${pad_chr}" != "${line:0:1}" ] && line=" ${line}"
-	# setup pad_char string
-	pad_chr=$(REPC ${width} "${pad_chr}")
-	# pre-pend pad chars
-	line="${pad_chr}${line}"
-	# return
-	echo "${line: -${width}}"
-}
-function PAD_ANCHOR_L(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	# manditory pad character
-	local pad_chr=$(PAD_CHR_TR "$1")
-	shift
-	# text to anchor right
-	local line="$@"
-	# add buffer space between text and pad chars if last text char is diff
-	[ "${pad_chr}" != "${line: -1}" ] && line="${line} "
-	# setup pad_char string
-	pad_chr=$(REPC ${width} "${pad_chr}")
-	# apend pad chars
-	line="${line}${pad_chr}"
-	# return
-	echo "${line:0:${width}}"
-}
-function PAD_CNTR(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	# manditory pad character
-	local pad_chr=$(PAD_CHR_TR "$1")
-	shift
-	# text to center
-	local line="$@"
-
-	# add leading or trailing spaces
-	[ "${pad_chr}" != "${line: -1}" ] && (( width > ${#line} )) && line="${line} "
-	[ "${pad_chr}" != "${line:0:1}" ] && (( width > ${#line} )) && line=" ${line}"
-
-	# determine if integers are even or odd
-	local width_is_odd=$(( width == width / 2 * 2 ))
-	local line_is_odd=$(( ${#line} == ${#line} / 2 * 2 ))
-
-	# add trailing fillchar if nessisary
-	(( width_is_odd != line_is_odd )) && (( width > ${#line} )) && line+=${pad_chr}
-
-	# calculate pad_chr wing length
-	width=$(( ( width - ${#line} ) / 2 ))
-
-	# fill with repeating chars
-	pad_chr=$(REPC ${width} "${pad_chr}")
-
-	# return
-	echo "${pad_chr}${line}${pad_chr}"
-}
-function PAD_SPLIT(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	# manditory pad character
-	local pad_chr=$(PAD_CHR_TR "$1")
-	shift
-	
-	# set split_chr; optional
-	local split_delim="${1}"
-	(( ${#split_delim} == 2 )) && [ "${split_delim:0:1}" == "${SPLIT_DELIM_DEFAULT:--}" ] \
-		&& split_delim=${split_delim:1:1} && shift\
-		|| split_delim=${SPLIT_DELIM_DEFAULT:--}
-
-	# set right and left text entries
-	local  left=$(echo "$@" | sed "s/\(.*\)[[:space:]]${split_delim}[[:space:]].*/\1/")
-	local right=$(echo "$@" | sed "s/.*[[:space:]]${split_delim}[[:space:]]\(.*\)/\1/")
-
-	# add leading or trailing spaces
-	[ "${pad_chr}" != "${right:0:1}" ] && right=" ${right}"
-	[ "${pad_chr}" != "${left: -1}" ] && left="${left} "
-	
-	# fill with repeating chars
-	pad_chr=$(REPC $(( width - ${#left} - ${#right} )) "${pad_chr}")
-
-	# prep return
-	local line="${left}${pad_chr}${right}"
-
-	# return
-	echo "${line:0:${width}}"
-}
 ###########################################################################################
-###########################################################################################
-function mesg_base(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	local desc=$1				# 1st  argument
-	local title_left=$2$2$2$2		# 2nd  argument 
-	local title_left=$'#'${title_left:0:3}	# only display the first four chars
-	local title_right=${@:$#}		# last argument
-	local title=${@:3:$#}			# 3rd-2nd_to_last argument
-	# assemble mesg
-	REPC         ${width} -u
-	PAD_ANCHOR_L ${width} "${title_right}" "${title_left} ${title}"	| sed 's/./#/'
-	PAD_ANCHOR_R ${width} -s "${desc}"				| sed 's/./#/'
-	REPC         ${width} -257					| sed 's/./#/'
+function cols(){ tput cols; }
+function repc(){ local a=(`seq $1`);shift;a=${a[*]/*/#};a=${a// /};a=${a//#/"$@"};echo "$a"; }
+function padl(){ [[ $1 =~ ^[0-9]+ ]] && { padl_width=$1 && shift; } || padl_width=100
+		 padl_pattern="$1"
+		 shift
+		 padl_line=`repc $padl_width "$padl_pattern"`
+		 padl_line+=" $@"
+		 echo "${padl_line: -$padl_width}"
+		 unset padl_line
+		 unset padl_width
+		 unset padl_pattern
 }
-function desc(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	mesg_base		\
-		${width}	\
-		"$*"		\
-		`printf "\273"` \
-		Step[$step]\(`name_function $step`\):./$scriptName \{`time_stamp`\} \
-		`printf "\253"`
+function padr(){ [[ $1 =~ ^[0-9]+ ]] && { padr_width=$1 && shift; } || padr_width=100
+		 padr_pattern="$1"
+		 shift
+		 padr_line="$@ "
+		 padr_line+=`repc $padr_width "$padr_pattern"`
+		 echo "${padr_line:0:$padr_width}"
+		 unset padr_line
+		 unset padr_width
+		 unset padr_pattern
 }
-function derr(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	local funcname=$(name_function $step | sed "s/^${prefix}_//;s/_/ /g")
-	mesg_base		\
-		${width}	\
-		"$*"		\
-		$'!'		\
-		ERROR Step[$step]\(${funcname}\):./$scriptName \{`time_stamp`\} \
-		$'!'
+function mesg_base(){	[[ $1 =~ ^[0-9]+ ]] && { mesg_base_width=$1; shift; } || mesg_base_width=100
+			mesg_base_desc=$1
+			mesg_base_title_first=$2$2$2
+			mesg_base_title_first=${mesg_base_title_first:0:3}
+			mesg_base_title=${*:3:$#-3}
+			mesg_base_title_last=${*:$#}
+			let mesg_base_width-=1
+			echo -n \#; repc $mesg_base_width _
+			echo -n \#; padr $mesg_base_width "$mesg_base_title_last" "$mesg_base_title_first" "$mesg_base_title" 
+			echo -n \#; padl $mesg_base_width " " "$mesg_base_desc"
+			echo -n \#; repc $mesg_base_width `printf "\257"`
+			unset ${!mesg_base*}
 }
-function mesg(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	mesg_base		\
-		${width}	\
-		"$*"		\
-		`printf "\253"`	\
-		Message [$buildScriptName \<\< $scriptName] \
-		`printf "\273"`
+function desc(){ desc_o=( `retr_function_mesg_opts` )
+                 [[ ${desc_o[0]} =~ ^[0-9]+ ]] && { desc_width=${desc_o[0]} && desc_o=( ${desc_o[*]:1} ); } || desc_width=100
+                 [[ $1 =~ ^[0-9]+ ]] && shift 
+		 mesg_base $desc_width "$*" `printf "\273"` Step[$step]\(`name_function $step`\):$scriptFQFN \{`time_stamp`\} `printf "\253"`
+		 unset ${!desc_*}
 }
-function nogo(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	local funcname=$(name_function $step | sed "s/^${prefix}_//;s/_/ /g")
-	mesg_base				\
-		${width}			\
-		"`retr_function_mesg_opts`"	\
-		`printf "\277?"`		\
-		SKIPPING! Step[$step]\(${funcname}\):./$scriptName \{`time_stamp`\} \
-		`printf "\277?"`
-		#show_function $step
-		echo
+function derr(){ derr_o=( `retr_function_mesg_opts` )
+		 [[ ${derr_o[0]} =~ ^[0-9]+ ]] && { derr_width=${derr_o[0]} && derr_o=( ${derr_o[*]:1} ); } || derr_width=100
+		 mesg_base $derr_width "$* {`time_stamp`}" \! Error Step[$step]\(`name_function $step`\):$scriptFQFN \"${derr_o[*]}\" \!		
+		 unset ${!derr_*}
 }
-function dump(){
-	# is first arg a positive integer
-	[[ $1 =~ ^[0-9]+ ]] \
-		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
-	local funcname=$(name_function $step | sed "s/^${prefix}_//;s/_/ /g")
-	mesg_base				\
-		${width}			\
-		"`retr_function_mesg_opts`"	\
-		' '				\
-		Step[$step]\(${funcname}\)	\
-		' '
-		show_function $step
-		echo
+function mesg(){ [[ $1 =~ ^[0-9]+ ]] && { mesg_width=$1; shift; } || mesg_width=100
+		 mesg_base $mesg_width "$*" `printf "\253"` Message [$buildScriptName \<\< $scriptName] `printf "\273"`
+                 unset ${!mesg_*}
+}
+function nogo(){ nogo_o=( `retr_function_mesg_opts` )
+		 [[ ${nogo_o[0]} =~ ^[0-9]+ ]] && { nogo_width=${nogo_o[0]} && nogo_o=( ${nogo_o[*]:1} ); } || nogo_width=100
+		 mesg_base $nogo_width "${nogo_o[*]}" `printf "\277?"` SKIPPING! Step[$step]\(`name_function $step`\):$scriptFQFN \{`time_stamp`\}  `printf "\277?"`
+		 #show_function $step
+		 echo
+		 unset ${!nogo_*}
+}
+function dump(){ dump_o=( `retr_function_mesg_opts` )
+		 [[ ${dump_o[0]} =~ ^[0-9]+ ]] && { dump_width=${dump_o[0]} && dump_o=( ${dump_o[*]:1} ); } || dump_width=100
+		 mesg_base $dump_width "${dump_o[*]}" ' ' Step[$step]\(`name_function $step`\) ' '
+		 show_function $step
+		 echo
+		 unset ${!dump_*}
 }
 ###########################################################################################
 ###########################################################################################
@@ -1095,10 +903,8 @@ function garbage_collection(){ (
 	while [ -n "`ps -p $$ --no-heading`" ]; do sleep 3; done
 	rm -f "$buildScriptPipe"
 ) & }
-function EXIT(){
-	exit ${1:- 0}
-}
 ###########################################################################################
 ###########################################################################################
 builder_main "$@"
+
 # nothing

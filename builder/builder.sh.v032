@@ -536,8 +536,7 @@ function sync_source(){
 	if [ "${source:-UNSET}" != "UNSET" ] && test_source "${source}"; then
 		cd "$scriptPath"
 		mesg 80 Syncing :: $source
-		wget -q --no-check-certificate \
-			-O "${scriptName}.new"   "${source}"
+		wget -q -O "${scriptName}.new"   "${source}"
 		cat        "${scriptName}.new" > "${scriptName}"
 	else
 		mesg 80 ERROR :: Script source \for $scriptName broken or unset\!
@@ -550,8 +549,7 @@ function sync_source(){
 	   then
 		cd "$scriptPath"
 		mesg 80 Syncing :: $buildScriptSrc
-		wget -q --no-check-certificate \
-			-O "${buildScriptName}.new"   "$buildScriptSrc"
+		wget -q -O "${buildScriptName}.new"   "$buildScriptSrc"
 		cat        "${buildScriptName}.new" > "$buildScriptFQFN"
 	else
 		mesg 80 ERROR :: Build source \for $buildScriptName broken or unset\!
@@ -691,51 +689,27 @@ function list_functions(){
 
 function disp_functions(){
 	SET_MAX_WIDTH_BY_COLS
-	# setup printf format
-	local printf_format="%-3s %-3s %-3s %-30s %-$(( ${MAX_WIDTH} - 43 ))s"
+	disp_func_tabs="%-3s %-3s %-3s %-30s %-$(( ${MAX_WIDTH} - 43 ))s"
 	echo
-	# print header
 	PAD_ANCHOR_R \<\> Version `retr_version` of \"$scriptName\" \<\>\<\>\<\>\<\>
-	# print column headers
-	printf "${printf_format}" Cur $'#' Skp "Function Name" "Description"
+
+	printf "$disp_func_tabs" Cur $'#' Skp "Function Name" "Description"
 	echo
-	# print dashed line
 	REPC -
-	# parse functions
-	local name index desc toggle marker
-	while read name; do
-		name=${name#${prefix}_}
-		name=${name//_/ }
-		index=$(find_function "${name}")
-		# get function discription
-		desc=$(retr_function_mesg_opts ${index} | sed 's/^[0-9[:space:]]*//')
-		# set skip toggle
-		if ${skip[0]}; then
-			${skip[${index}]}	\
-				&& toggle=S	\
-				|| toggle=-
-		else
-			unset toggle
-		fi
-		# set step marker
-		(( step == index ))	\
-			&& marker='>>'	\
-			|| unset marker
-		# print
-		printf "${printf_format}" "${marker}" "${index}" "${toggle}" "${name}" "${desc}"
-	done < <(list_functions)
-	# print dashed line
-	REPC -
-	# setup FINISHED
-	is_finished		\
-		&& marker='>>'	\
-		|| unset marker
-	# clear unused vars
-	unset index toggle desc
-	name='Reset to run again'
-	# print FINISHED
-	printf "${printf_format}" "${marker}" "${index}" "${toggle}" "${name}" "${desc}"
+
+	list_functions | sed '$aFINISHED; Reset to run again.' | tr _ \ | cat -n | \
+        while read disp_func_index disp_func_prefix disp_func_name; do
+		disp_func_o=( `retr_function_mesg_opts $disp_func_index` )
+		[[ ${disp_func_o[0]} =~ ^[0-9]+ ]] && disp_func_o=( ${disp_func_o[*]:1} )
+		${skip[0]} && { ${skip[$disp_func_index]} && disp_func_toggle=S || disp_func_toggle=-; } || unset disp_func_toggle
+		(( $step == $disp_func_index )) && disp_func_marker='>>' || unset disp_func_marker
+		(( $disp_func_index > `last_function` )) && unset disp_func_index disp_func_toggle && echo $(REPC -)
+		printf "$disp_func_tabs" "${disp_func_marker}"  "${disp_func_index}" "${disp_func_toggle}" "${disp_func_name}" "${disp_func_o[*]}"
+		echo
+	done
+	unset ${!disp_func_*}
 }
+
 function skip_function(){
 	case "$*" in
 		a)	${skip[0]} && skip[0]=false || skip[0]=true

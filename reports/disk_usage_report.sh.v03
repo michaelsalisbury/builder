@@ -1,9 +1,8 @@
 #!/bin/builder.sh
-#!/bin/env /bin/builder.sh
-skip=( true true false true true false )
-step=1
+skip=( true false false false false )
+step=4
 prefix="run"
-source="https://raw.github.com/michaelsalisbury/builder/master/reports/${scriptName}"
+#source="https://raw.github.com/michaelsalisbury/builder/master/reports/${scriptName}"
 
 function includes(){
 	#functions.*.sh
@@ -13,13 +12,14 @@ function includes(){
 
 # GLOBAL VARIABLES
 function global_variables(){
-	#TITLE_LENGTH=80
-	#TITLE_OFFSET=0
+	TITLE_LENGTH=80
+	TITLE_OFFSET=0
 	MAX_WIDTH=80
 	SEP_WIDTH=50
+#	echo
 }
 function run_File_System_Usage_Report(){
-	SET_MAX_WIDTH_BY_COLS
+	SET_MAX_WIDTH_BY_COLS	
 	REPC     \#
 	PAD_CNTR \# Overall File System Usage
 	echo
@@ -36,8 +36,8 @@ function run_Home_Directory_Usage_Report(){
 	REPC     \#
 	PAD_CNTR \# Home Directory Usage
 
-	#du -cksh /home/* |\
-	du -cksh /export/home/* |\
+	#du -cksh /export/home/* |\
+	du -cksh /home/* |\
 	sed -f <(cat <<-SED
 			s/^\([0-9.]*\)\([[:space:]]\)/\1\tbytes\t/
 			s/^\([0-9.]*\)\([MKGT]\)/\1\t\2B/
@@ -88,7 +88,7 @@ function run_Software_RAID_Device_Status(){
 	while read DEV; do
 		cat <<-SED | sed -n -f <(cat) <(mdadm --detail "${DEV}")
 		1{
-			i$(REPC 63 -u)
+			i$(REPC 63 _)
 			p
 		}
 		/Raid Level :/p
@@ -108,48 +108,14 @@ function run_Hard_Disk_Smart_Reports(){
 	REPC     \#
 	PAD_CNTR \# Hard Disk Smart Reports
 	echo
-	/bin/bash <(smart_report_script)
+	ls /dev/sd[a-z] |\
+	while read DEV; do
+		DETAIL=$(lshw -class disk -short |\
+			grep "${DEV}" |\
+			awk '$1="";$3="";{print}')
+		echo 'DEVICE ::' "${DETAIL}"
+		echo
+		smartctl -H ${DEV} | tail -n +5 | sed 's/^/\t/'
+		echo
+	done
 }
-function run_Node_Hard_Disk_Smart_Reports(){
-	SET_MAX_WIDTH_BY_COLS	
-	REPC     \#
-	PAD_CNTR \# Node Hard Disk Smart Reports
-
-	local hostname
-	rocks list host 			|\
-		awk -F: '{print $1}'		|\
-		tail -n +3			|\
-		while read hostname; do
-			smart_report_script	|\
-			ssh ${hostname} "/bin/bash <(cat)"
-		done
-
-}
-function smart_report_script(){
-	cat <<-CMDS
-		hostname
-		ls /dev/sd[a-z] |\
-		while read DEV; do
-			fdisk -l \${DEV}	|\
-				grep ^Disk	|\
-				sed 's/,.*\$//' |\
-				sed 's/^/\t/'
-
-			hdparm -i \${DEV}	|\
-				grep Model	|\
-				tr , '\n'	|\
-				tr -d ' '	|\
-				sed 's/^/\t\t/'
-
-			smartctl -H \${DEV}	|\
-				grep '^SMART'	|\
-				sed 's/^/\t\t/'
-			
-			smartctl -H \${DEV}	|\
-				sed -n '/Please.note.*marginal/,/:\$/p'		 |\
-				awk '/^[0-9]/{print "SMART marginall event: "\$2}'|\
-				sed 's/^/\t\t/'
-		done
-	CMDS
-}
-

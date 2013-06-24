@@ -18,7 +18,9 @@ function SET_MAX_WIDTH_BY_COLS(){
 		&& { local width=$1 && shift; } \
 		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
 	# set GLOBAL vars; COLUMNS, LINES
-	source <(resize)
+	resize > /dev/shm/$$$FUNCNAME
+	source   /dev/shm/$$$FUNCNAME
+	rm  -f   /dev/shm/$$$FUNCNAME
 	MAX_WIDTH=`tput cols 2>/dev/null`
 	MAX_WIDTH=${MAX_WIDTH:-${width}}
 }
@@ -36,7 +38,7 @@ function REPC(){
 		\${					# at last line do
 			x				# swap hold buffer to pattern space
 			s/\n//g				# remove all new-line chars
-			s/\(.\{${width}\}\).*/\1/	# capture the correct num od chars
+			s/\(.\{${width}\}\).*/\1/	# capture the correct num of chars
 			p				# print
 		}
 	SED
@@ -197,11 +199,15 @@ function PAD_ANCHOR_CNTR_L(){
 }
 function PAD_CHR_TR(){
 	case "$1" in
-		-s)	echo \ ;;	
-		-e)	echo \=;;
-		-p)	echo \|;;		
-		-t)	echo \~;;
-		*)	echo "$1";;
+		-u)		echo $'_';;
+		-s)		echo $' ';;
+		-E)		echo $'!';;
+		-e)		echo $'=';;
+		-P)		echo $'|';;
+		-p)		echo $'#';;		
+		-t)		echo $'~';;
+		-[0-9]*)	eval printf \"\\${1:1}\";;
+		*)		echo "$1";;
 	esac
 }
 function PAD_CNTR(){

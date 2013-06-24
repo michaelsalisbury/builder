@@ -1,7 +1,6 @@
-#!/bin/builder.sh
 #!/bin/env /bin/builder.sh
 skip=( true true false true true false )
-step=1
+step=5
 prefix="run"
 source="https://raw.github.com/michaelsalisbury/builder/master/reports/${scriptName}"
 
@@ -87,15 +86,16 @@ function run_Software_RAID_Device_Status(){
 	ls /dev/md[0-9] 2>/dev/null |\
 	while read DEV; do
 		cat <<-SED | sed -n -f <(cat) <(mdadm --detail "${DEV}")
+		#1s/\$/ _____________________________________________________/p
 		1{
-			i$(REPC 63 -u)
+			i\_______________________________________________________________
 			p
 		}
 		/Raid Level :/p
 		/State :/p
 		/Persistence :/p
 		/Number/,\${
-			/Number/i\    $(REPC 41 -)
+			/Number/i\    -----------------------------------------
 			p
 		}
 		SED
