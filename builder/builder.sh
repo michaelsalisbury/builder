@@ -178,7 +178,7 @@ function include(){
 				-e '/^step=/p'\
 				-e '/^prefix=/p'\
 				-e '/^source=/p'\
-				-e 'd')
+				-n)
 
 		# Verify control variables exist and fix script if nessisary
 		is_unset prefix	&& { prefix="setup"; sed -i "1aprefix=\"setup\""      "$scriptFQFN"; }
@@ -437,7 +437,7 @@ function make_backup(){
 	cp "$scriptFQFN" "$scriptBackup"
 }
 
-function test_source(){ wget -T 2 -t 2 --spider -v $1 |& egrep '^Remote file exists.$' &> /dev/null && return 0 || return 1; }
+function test_source(){ wget -T 2 -t 2 --spider -v $1 2>&1 | egrep '^Remote file exists.$' &> /dev/null && return 0 || return 1; }
 function sync_source(){
 	# get source URL from script that called the update request
 	eval `sed '/^source=/p;d' "${scriptFQFN}"`
@@ -590,10 +590,11 @@ function dump_functions(){ step=1
 				let step++
 			   done
 }
-
-#function list_functions(){ sed "/^function $prefix/!d;s|.*\($prefix.*\)(.*|\1|" "$scriptFQFN"; }
-function list_functions(){ sed "${scriptFQFN}" -n -e "s/^[[:space:]]*function[[:space:]]\+\(${prefix}[^()[:space:]]\+\).*/\1/p"; }
-
+function list_functions(){
+	cat <<-SED | sed -n -f <(cat) "${scriptFQFN}"
+		s/^[[:space:]]*function[[:space:]]\+\(${prefix}[^()[:space:]]\+\).*/\1/p
+	SED
+}
 function disp_functions(){
 	disp_func_tabs="%-3s %-3s %-3s %-30s %-$(( `cols` - 43 ))s"
 	echo
@@ -768,7 +769,7 @@ function waitForNetwork(){
 	while (( `date "+%s"` < $timeout )); do
 		# Loop threw listed domains testing to see if they resolv
 		while read dom; do
-			if ${cmd[1]} -W 3 $dom |& grep "has address" &> /dev/null; then
+			if ${cmd[1]} -W 3 $dom 2>&1 | grep "has address" &> /dev/null; then
 				let cnt++
 				echo -n .
 			else

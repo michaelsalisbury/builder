@@ -16,7 +16,7 @@ function SET_MAX_WIDTH_BY_COLS(){
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
+		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT}}
 	# set GLOBAL vars; COLUMNS, LINES
 	source <(resize)
 	MAX_WIDTH=`tput cols 2>/dev/null`
@@ -26,7 +26,7 @@ function REPC(){
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
+		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT}}
 	# manditory pad character
 	local pad_chr=$(PAD_CHR_TR "$1")
 	# return
@@ -40,21 +40,26 @@ function REPC(){
 			p				# print
 		}
 	SED
+	####################################################### alternate
+	# fill pad_chr to width
+	#pad_chr=$(seq ${width} | sed "s/.*/${pad_chr}/" | tr -d "\n")
+	# return
+	#echo "${pad_chr:0:${width}}"
 }
 function PAD_SPLIT(){
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
+		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT}}
 	# manditory pad character
 	local pad_chr=$(PAD_CHR_TR "$1")
 	shift
 	
 	# set split_chr; optional
 	local split_delim="${1}"
-	(( ${#split_delim} == 2 )) && [ "${split_delim:0:1}" == "${SPLIT_DELIM_DEFAULT:--}" ] \
+	(( ${#split_delim} == 2 )) && [ "${split_delim:0:1}" == "${SPLIT_DELIM_DEFAULT}" ] \
 		&& split_delim=${split_delim:1:1} && shift\
-		|| split_delim=${SPLIT_DELIM_DEFAULT:--}
+		|| split_delim=${SPLIT_DELIM_DEFAULT}
 
 	# set right and left text entries
 	local  left=$(echo "$@" | sed "s/\(.*\)[[:space:]]${split_delim}[[:space:]].*/\1/")
@@ -77,7 +82,7 @@ function PAD_ANCHOR_CNTR_SPLIT(){
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
+		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT}}
 	# manditory pad character; split chr is optional and values are comma sperated
 	local   pad_chr=( ${1//,/ } )
 	local split_chr=${pad_chr[1]:-  ${pad_chr}}
@@ -108,9 +113,9 @@ function PAD_ANCHOR_CNTR_SPLIT(){
 
 	# set split_chr; optional
 	local split_delim="${1}"
-	(( ${#split_delim} == 2 )) && [ "${split_delim:0:1}" == "${SPLIT_DELIM_DEFAULT:--}" ] \
+	(( ${#split_delim} == 2 )) && [ "${split_delim:0:1}" == "${SPLIT_DELIM_DEFAULT}" ] \
 		&& split_delim=${split_delim:1:1} && shift\
-		|| split_delim=${SPLIT_DELIM_DEFAULT:--}
+		|| split_delim=${SPLIT_DELIM_DEFAULT}
 
 	echo split_delim :: $split_delim
 
@@ -142,7 +147,7 @@ function PAD_ANCHOR_CNTR_R(){
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
+		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT}}
 	# manditory pad character
 	local pad_chr=$(PAD_CHR_TR "$1")
 	shift
@@ -169,7 +174,7 @@ function PAD_ANCHOR_CNTR_L(){
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
+		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT}}
 	# manditory pad character
 	local pad_chr=$(PAD_CHR_TR "$1")
 	shift
@@ -208,7 +213,7 @@ function PAD_CNTR(){
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
+		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT}}
 	# manditory pad character
 	local pad_chr=$(PAD_CHR_TR "$1")
 	shift
@@ -239,7 +244,7 @@ function PAD_ANCHOR_R(){
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
+		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT}}
 	# manditory pad character
 	local pad_chr=$(PAD_CHR_TR "$1")
 	shift
@@ -258,7 +263,7 @@ function PAD_ANCHOR_L(){
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
-		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
+		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT}}
 	# manditory pad character
 	local pad_chr=$(PAD_CHR_TR "$1")
 	shift

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function switch_set_default(){
+function switch_set_default2(){
 	local ARG=-${1//-/}	# switch/arg
 	local VALUE=$2		# default value for switch/arg
 	# echo command for eval with calling function
@@ -10,6 +10,14 @@ function switch_set_default(){
 		&& set -- "\${@/${ARG}/${ARG}${VALUE}}"
 	EVAL
 }
+function switch_set_default(){
+	local ARG=
+	cat <<-CODE
+		eval [ "${ARG}" == "-r" ] && echo hello
+	CODE
+}
+
+
 
 echo -1 :: "${@: -1}"
 echo BEFORE :: "$@"
