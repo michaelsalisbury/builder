@@ -255,7 +255,8 @@ function process_switches(){
 			# update from source after backup
 			u)	make_backup; sync_source;;
 			# cat the main log of function log
-			w)	[ $OPTARG == l ] && cat "$scrLogFQFN" || log_to_stout $OPTARG;;
+			w)	[ ${OPTARG:0:1} == l ] && cat "$scrLogFQFN" \
+				|| log_to_stout `find_function $OPTARG`;;
 			?)	show_help; disp_functions; echo;;
                 esac
         done
@@ -266,14 +267,14 @@ function process_switches(){
 	# If there are any extra cmd line arguments apply the last command switch
 	(( ${#@} )) && for args in "$@"; do
 		case ${switches_last_option:- null} in
-			i|s)	$FUNCNAME -$switches_last_option "$args";;
+			i|s|w)	$FUNCNAME -$switches_last_option "$args";;
 		esac
 	done
 
 	# Test for piped extra cmd line arguments and apply to last cmd line switch
 	if readlink /proc/$$/fd/0 | egrep -q "^pipe:"; then
 		case ${switches_last_option:- null} in	
-			i|s)	while read args; do
+			i|s|w)	while read args; do
 					$FUNCNAME -$switches_last_option "${args}"
 				# splits lines at commas and double quotes
 				# removes leading and trailing spaces 
@@ -310,7 +311,7 @@ function include_log(){
 	fi
 }
 function include_file(){
-	include=${include:- $'\n'}
+	includes=${includes:- $'\n'}
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	# Verify that include file has not already been processed
@@ -322,6 +323,7 @@ function include_file(){
 	else
 		includes+="${include_file}"$'\n'
 	fi
+
 	if sed "${include_file}" -n -e '1p' | grep -q '^#!.*'${buildScriptFQFN}; then
 		echo INCLUDE_BLDR :: ${include_file}
 		# Parse functions to be sourced to ensure no duplicates
@@ -773,7 +775,7 @@ function rset(){ step=1; fixs; }
 function fixs(){ sed -i -e "/^step=/cstep=${step}" -e "/^skip=/cskip=\( ${skip[*]} \)" "$scriptFQFN"; }
 ###########################################################################################
 ###########################################################################################
-function time_stamp(){ date +%m.%d\ %T.$(m=`date +%N`; echo ${m:0:2}); }
+function bldr_time_stamp(){ date +%m.%d\ %T.$(m=`date +%N`; echo ${m:0:2}); }
 function stall(){ for s in `seq $1 -1 1`; do echo -n "$s "; sleep 1; done; echo; }
 ###########################################################################################
 ##################################################################### functions.format.sh #
@@ -949,7 +951,7 @@ function desc(){
 		${width}	\
 		"$*"		\
 		`printf "\273"` \
-		Step[$step]\(`name_function $step`\):./$scriptName \{`time_stamp`\} \
+		Step[$step]\(`name_function $step`\):./$scriptName \{`bldr_time_stamp`\} \
 		`printf "\253"`
 }
 function derr(){
@@ -962,7 +964,7 @@ function derr(){
 		${width}	\
 		"$*"		\
 		$'!'		\
-		ERROR Step[$step]\(${funcname}\):./$scriptName \{`time_stamp`\} \
+		ERROR Step[$step]\(${funcname}\):./$scriptName \{`bldr_time_stamp`\} \
 		$'!'
 }
 function mesg(){
@@ -987,7 +989,7 @@ function nogo(){
 		${width}			\
 		"`retr_function_mesg_opts`"	\
 		`printf "\277?"`		\
-		SKIPPING! Step[$step]\(${funcname}\):./$scriptName \{`time_stamp`\} \
+		SKIPPING! Step[$step]\(${funcname}\):./$scriptName \{`bldr_time_stamp`\} \
 		`printf "\277?"`
 		#show_function $step
 		echo

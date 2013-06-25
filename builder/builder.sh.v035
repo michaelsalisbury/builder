@@ -775,7 +775,7 @@ function rset(){ step=1; fixs; }
 function fixs(){ sed -i -e "/^step=/cstep=${step}" -e "/^skip=/cskip=\( ${skip[*]} \)" "$scriptFQFN"; }
 ###########################################################################################
 ###########################################################################################
-function bldr_time_stamp(){ date +%m.%d\ %T.$(m=`date +%N`; echo ${m:0:2}); }
+function time_stamp(){ date +%m.%d\ %T.$(m=`date +%N`; echo ${m:0:2}); }
 function stall(){ for s in `seq $1 -1 1`; do echo -n "$s "; sleep 1; done; echo; }
 ###########################################################################################
 ##################################################################### functions.format.sh #
@@ -951,7 +951,7 @@ function desc(){
 		${width}	\
 		"$*"		\
 		`printf "\273"` \
-		Step[$step]\(`name_function $step`\):./$scriptName \{`bldr_time_stamp`\} \
+		Step[$step]\(`name_function $step`\):./$scriptName \{`time_stamp`\} \
 		`printf "\253"`
 }
 function derr(){
@@ -964,7 +964,7 @@ function derr(){
 		${width}	\
 		"$*"		\
 		$'!'		\
-		ERROR Step[$step]\(${funcname}\):./$scriptName \{`bldr_time_stamp`\} \
+		ERROR Step[$step]\(${funcname}\):./$scriptName \{`time_stamp`\} \
 		$'!'
 }
 function mesg(){
@@ -989,7 +989,7 @@ function nogo(){
 		${width}			\
 		"`retr_function_mesg_opts`"	\
 		`printf "\277?"`		\
-		SKIPPING! Step[$step]\(${funcname}\):./$scriptName \{`bldr_time_stamp`\} \
+		SKIPPING! Step[$step]\(${funcname}\):./$scriptName \{`time_stamp`\} \
 		`printf "\277?"`
 		#show_function $step
 		echo
