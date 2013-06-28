@@ -85,6 +85,7 @@ function ACTION_ADD(){
 	done
 
 	# cleanup old primary vmdk files
+	local TARGET_VM_MASK=""
 	for DEV in ${DEVICE[*]}; do
 		DETACH_VMDK_HDD ${DEV}
 	done
@@ -138,21 +139,7 @@ function ACTION_ADD(){
 }
 function ACTION_REMOVE(){
 	unset POPUP_LOG
-	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
-	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
-	DEVICE=$(GET_DEVICE_LIST | head -1)
-	DEVICE=${1:-${DEVICE}}
 
-	# filter out root; system drive
-	IS_DEVICE_ROOT # function exits if positive
-
-	# LOG
-	echo REMOVING :: ${DEVICE}
-	# detach and delete vmdk 
-	DETACH_VMDK_HDD ${DEVICE}
-
-	# delete vm
-	DELETE_VM ${DEVICE}
 
 }
 function ACTION_TRIGGER(){
@@ -278,7 +265,7 @@ function DELETE_VM(){
 		while read line; do
 			eval words=( "\${line}" )
 			vm_uuid=\${words[1]}
-			# echo MACHINE :: \${words[*]}
+			echo MACHINE :: \${words[*]}
 			if [[ "\${words[0]}" =~ ${TARGET_VM_MASK}\$ ]]; then
 				echo REMOVED :: \${words[*]}
 				VBoxManage controlvm    \${vm_uuid} poweroff

@@ -76,34 +76,40 @@ function ACTION_ADD(){
 
 
 	# amend VRDEPORT and DEVICE to NAME[1]
-	NAME[1]="${NAME[1]}-$(GET_VRDEPORT).${DEVICE}"
+	NAME[1]="${NAME[1]}-${VRDEPORT}.${DEVICE}"
 
 	# set path for vmdk files
 	declare -A VMDK
 	for DEV in ${DEVICE[*]}; do
 		VMDK[${DEV}]="${DISPLAY_0_HOME}/.VirtualBox/udev.${DEV}.${NAME[1]}.vmdk"
 	done
-
+	
 	# cleanup old primary vmdk files
 	for DEV in ${DEVICE[*]}; do
-		DETACH_VMDK_HDD ${DEV}
+		rm -f "${DISPLAY_0_HOME}/.VirtualBox/udev.${DEV}."*.vmdk
 	done
 
 	# cleanup conflicting stale virtual machines
 	for DEV in ${DEVICE[*]}; do
-		DELETE_VM ${DEV}
+		# unregister vm
+		cat <<-SU | su - $username -s /bin/bash
+			which VBoxManage &>/dev/null &&\
+			VBoxManage list vms |\
+			while read line; do
+				eval words=( "\${line}" )
+				[[ "\${words[0]}" =~ $(GET_VRDEPORT ${DEV})$ ]] &&\
+				VBoxManage unregistervm \${words[1]} --delete
+			done
+		SU
+		# remove rm folder
+		rm -rf "${DISPLAY_0_HOME}/.VirtualBox"/*.${DEV}
 	done
 
 	# unmount devices
-	local TRIES=""
-	local PART=""
 	for DEV in ${DEVICE[*]}; do
-		for PART in `ls /dev/${DEV}[0-9]`; do
-			for TRIES in {1..2}; do
-				umount ${PART} &>/dev/null
-			done
-			umount -v ${PART}
-		done
+		echo
+		umount -v /dev/${DEV}*
+		umount -v /dev/${DEV}*
 	done
 
 	# create virtualbox raw vmdk files
@@ -121,10 +127,6 @@ function ACTION_ADD(){
 	# create virtual machine
 	SET_VM	
 
-	# start virtual machine
-	START_VM
-
-	# dump var status to LOG
 	echo	
 	echo "      name :: "${NAME[*]}
 	echo "  name err :: "${NAME[0]}
@@ -138,21 +140,7 @@ function ACTION_ADD(){
 }
 function ACTION_REMOVE(){
 	unset POPUP_LOG
-	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
-	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
-	DEVICE=$(GET_DEVICE_LIST | head -1)
-	DEVICE=${1:-${DEVICE}}
 
-	# filter out root; system drive
-	IS_DEVICE_ROOT # function exits if positive
-
-	# LOG
-	echo REMOVING :: ${DEVICE}
-	# detach and delete vmdk 
-	DETACH_VMDK_HDD ${DEVICE}
-
-	# delete vm
-	DELETE_VM ${DEVICE}
 
 }
 function ACTION_TRIGGER(){
@@ -206,92 +194,6 @@ function GET_DEVICE_LIST(){
 		echo ERROR :: ${FUNCNAME} :: No attached non-root devices. Exiting\!
 		EXIT 1
 	fi
-}
-function START_VM(){
-	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
-
-	local VB=$(which VirtualBox 2>/dev/null)
-	if [ -z "${VB}" ]; then
-		echo ERROR :: ${FUNCNAME} :: VirtualBox not found. Skipping\! >> "${LOG}"
-		return
-	fi
-
-	# start vm
-	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
-		export DISPLAY=:0
-		${VB} --startvm ${NAME[1]} &
-	SU
-}
-function DETACH_VMDK_HDD(){
-	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
-	local DEV=${1:-${DEVICE}}
-	local TARGET_VM_MASK="$(GET_VRDEPORT ${DEV}).${DEV}.vmdk"
-	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
-		# Only run command if VBoxManage exists and is in PATH
-		which VBoxManage &>/dev/null &&\
-		VBoxManage list hdds |\
-		while read VAR DATA; do
-			(( \${#VAR} )) || continue
-			# create variables
-			eval \${VAR%:}=\"\${DATA}\"
-			# If the following are true...
-			# Usage is the current VAR (also the last hdd detail)
-			# Format equals VMDK
-			# The Location name matches my mask
-			if [ "\${VAR%:}" == "Usage" ] \
-			&& [ "\${Format}" == "VMDK" ] \
-			&& [[ "\${Location}" =~ ${TARGET_VM_MASK}\$ ]]; then
-				echo DEL_DISK :: UUID = \${UUID}
-				echo DEL_DISK :: PATH = \${Location}
-				VBoxManage controlvm     "\${Usage% (*}" poweroff
-				(( \$? )) || sleep 3
-				VBoxManage storageattach "\${Usage% (*}"\
-					--storagectl ${SCTL}		\
-					--type hdd --port 0 --device 0	\
-					--medium none
-				(( \$? )) || sleep 2
-				VBoxManage storageattach "\${Usage% (*}"\
-					--storagectl ${SCTL}		\
-					--type hdd --port 1 --device 0	\
-					--medium none
-				(( \$? )) || sleep 2
-				VBoxManage closemedium disk "\${UUID}"
-				(( \$? )) || sleep 2
-				VBoxManage unregistervm "\${Usage% (*}" --delete
-				(( \$? )) || sleep 2 
-				VBoxManage unregistervm "\${Usage% (*}"
-				(( \$? )) || sleep 2 
-			fi
-		done		
-	SU
-	# now remove the actual vmdk file
-	rm -f "${DISPLAY_0_HOME}/.VirtualBox/udev.${DEV}."*.vmdk
-}
-function DELETE_VM(){
-	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
-	local DEV=${1:-${DEVICE}}
-	local TARGET_VM_MASK="$(GET_VRDEPORT ${DEV}).${DEV}"
-	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
-		# Only run command if VBoxManage exists and is in PATH
-		which VBoxManage &>/dev/null &&\
-		VBoxManage list vms |\
-		while read line; do
-			eval words=( "\${line}" )
-			vm_uuid=\${words[1]}
-			# echo MACHINE :: \${words[*]}
-			if [[ "\${words[0]}" =~ ${TARGET_VM_MASK}\$ ]]; then
-				echo REMOVED :: \${words[*]}
-				VBoxManage controlvm    \${vm_uuid} poweroff
-				(( \$? )) || sleep 3
-				VBoxManage unregistervm \${vm_uuid} --delete
-				(( \$? )) || sleep 3
-				VBoxManage unregistervm \${vm_uuid}
-				(( \$? )) || sleep 3
-			fi
-		done
-	SU
-	# remove vm folder
-	rm -rf "${DISPLAY_0_HOME}/VirtualBox VMs"/*${TARGET_VM_MASK}
 }
 function SET_VM(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
@@ -439,7 +341,7 @@ function SET_DEFAULT_SELECTION(){
 function SET_DEFAULT_NAME(){
 	# dependant on global variables; NAME
 	IFS=$DIFS NAME=( ${NAME[0]} $(GET_DEVICE_DETAIL) )
-	IFS=$DIFS NAME=( ${NAME[0]} "${NAME[3]}${NAME[4]}" )
+	IFS=$DIFS NAME=( ${NAME[0]} "${DEVICE}-${NAME[3]}${NAME[4]}" )
 }
 function zenity_choose_tool(){
 	# dependant on global variables; DEVICE

@@ -105,7 +105,7 @@ function main(){
 	# start x11vnc socket on localhost
 	/usr/bin/x11vnc				\
 		-bg				\
-		-o "${LOG}"			\
+		-o "${LOG}.d"			\
 		-accept /bin/true		\
 		-gone /bin/true			\
 		-noxdamage			\
