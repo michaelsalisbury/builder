@@ -1,5 +1,21 @@
 #!/bin/bash
 function main(){
+	echo DEV DEV DEV
+	DEV=sda
+	cat <<-SED | sed -n -f <(cat) <(fdisk -l /dev/${DEV})
+		\|^Disk[[:space:]]\+/dev/${DEV}[:]|{
+			s/^[^:]\+[:][[:space:]]\+\([^,]\+\).*/\1/p
+		}
+	SED
+		#\|^Disk[[:space:]]\+/dev/${DEV}:[[:space:]]|{
+	
+	return
+	echo hi
+	GET_DEVICE_USB_ATTRIBUTE  1 13 iSerial
+	GET_DEVICE_USB_BUS_ID sdb
+	GET_DEVICE_INTERFACE sdb
+	return
+
 	case "${1}" in
 		a*|A*)		shift; ACTION_ADD     "$@";;
 		r*|R*)		shift; ACTION_REMOVE  "$@";;
@@ -155,6 +171,30 @@ function ACTION_REMOVE(){
 	DELETE_VM ${DEVICE}
 
 }
+function SETUP_CONFIG_UDEV_RULE(){
+	# Dependant on GLOBAL var; UDEV_RULE_CONFIG_FILE_NAME_DEFAULT
+	local PROG_NAME=$(basename "${BASH_SRCNAME}" .sh)
+	local RULE_FILE="/etc/udev/rules.d/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}"
+	# LOG Info
+	LOG INFO :: ${FUNCNAME} :: UDEV_RULE_CONFIG_FILE_NAME_DEFAULT[${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}]
+	# Find the most relavant udev rule config file template
+	if [ -f "${BASH_SRCDIR}/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}" ]; then
+		local SOURCE_CONFIG="${BASH_SRCDIR}/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}"
+	elif [ -f "${BASH_SRCDIR}/../etc/${PROG_NAME}/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}" ]; then
+		local SOURCE_CONFIG="${BASH_SRCDIR}/../etc/${PROG_NAME}/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}"
+	else
+		LOG ERROR :: ${FUNCNAME} :: Source udev rule template not found. UDEV_RULE_CONFIG_FILE_NAME_DEFAULT[${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}]
+		EXIT 1
+	fi
+	# fix template file; ensure rules execute this script
+	cat <<-SED | sed -i -f <(cat) "${SOURCE_CONFIG}"
+		s|\(.*[[:space:]]RUN+="\)\([^[:space:]]\+\)\(.*\)|\1${BASH_SRCFQFN}\3|
+	SED
+	# test if template differs from install udev rule
+	diff --suppress-common-lines "${SOURCE_CONFIG}" "${RULE_FILE}" | LOG INFO :: ${FUNCNAME} ::
+	#
+	(( ${PIPESTATUS[0]} )) && cat "${SOURCE_CONFIG}" > "${RULE_FILE}"
+}
 function ACTION_TRIGGER(){
 	#udevadm trigger --action=add    --sysname-match="sdb"
 	local DEV=$(GET_DEVICE_LIST | head -1)
@@ -165,47 +205,15 @@ function ACTION_TRIGGER(){
 	
 	IS_DEVICE_REAL ${DEV}
 
+	SETUP_CONFIG_IF_EMPTY "${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}" "/etc/udev/rules.d/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}"
+
+	SETUP_CONFIG_UDEV_RULE
+
 	case "$1" in
 		a*|A*)	udevadm trigger --action=add    --sysname-match="${DEV}";;
 		r*|R*)	udevadm trigger --action=remove --sysname-match="${DEV}";;
 		*)	ACTION_TRIGGER add "$@";;
 	esac
-}
-function IS_DEVICE_ROOT(){
-	local DEV=${1:-${DEVICE}}
-	if GET_ROOT_DEVICE | grep -q "^${DEV}$"; then
-		echo ERROR :: ${FUNCNAME} :: Device \"${DEV}\" is host system ROOT disk.  Exiting\!
-		EXIT 1
-	fi
-}
-function IS_DEVICE_REAL(){
-	local DEV=${DEVICE:-$1}
-	local DEV=${1:-${DEV}}
-	if ! GET_DEVICE_LIST | grep -q "^${DEV}$"; then
-		echo ERROR :: ${FUNCNAME} :: Device \"${DEV}\" is not real or not attached. Exiting\!
-		EXIT 1
-	fi
-}
-function GET_ROOT_DEVICE(){
-	#awk '/[[:space:]]\/[[:space:]]/{print $1}' /etc/mtab |\
-	awk '/ \/ /{print $1}' /etc/mtab |\
-	xargs basename |\
-	tr -d '0-9' |\
-	grep ""
-	if (( $? > 0 )); then
-		echo ERROR :: ${FUNCNAME} :: Could not determine host system ROOT disk. Exiting\!
-		EXIT 1
-	fi
-}
-function GET_DEVICE_LIST(){
-	local ROOT=$(GET_ROOT_DEVICE)
-	ls -1 /dev/sd[a-z] |\
-	awk -F/ -v ROOT=${ROOT} '$3!=ROOT{print $3}' |\
-	grep ""
-	if (( $? > 0 )); then
-		echo ERROR :: ${FUNCNAME} :: No attached non-root devices. Exiting\!
-		EXIT 1
-	fi
 }
 function START_VM(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
@@ -384,11 +392,11 @@ function zenity_name_task(){
 	# get drive size
 	local zenityTitle=$(GET_DEVICE_DETAIL)
 	# naming instructions
-	local zenityText=$(GET_CONFIG_SECTION "${NAMING_INSTRUCTIONS}")
+	local zenityText=$(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_NAMING_INSTRUCTIONS})
 
 	(
 	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
-		DISPLAY=${DISPLAY} zenity		\
+		DISPLAY=:${TARGET_DISPLAY} zenity	\
 			--timeout=${DIALOG_TIMEOUT:-25}	\
 			--ok-label="START VM"		\
 			--cancel-label="CANCEL"		\
@@ -420,6 +428,67 @@ function GET_DEVICE_DETAIL(){
 	grep ""
 	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; EXIT 1; }
 }
+####################################################################################################
+################################################################################# ASSOCIATIVE ARRAYS
+function GET_DEVICE_SIZE_(){
+	# set arg :: declare associative array :: fill if empty :: return value
+	local DEV=${1:-${DEVICE}}
+	declare -A DEVICE_SIZE
+	(( ${#DEVICE_SIZE[${DEV}]} > 0 )) || DEVICE_SIZE[${DEV}]=$(GET_DEVICE_SIZE ${DEV})
+	echo ${DEVICE_SIZE[${DEV}]}
+}
+function GET_DEVICE_INTERFACE_(){
+	# set arg :: declare associative array :: fill if empty :: return value
+	local DEV=${1:-${DEVICE}}
+	declare -A DEVICE_INTERFACE
+	(( ${#DEVICE_INTERFACE[${DEV}]} > 0 )) || DEVICE_INTERFACE[${DEV}]=$(GET_DEVICE_INTERFACE ${DEV})
+	echo ${DEVICE_INTERFACE[${DEV}]}
+}
+function GET_DEVICE_USB_ID_(){
+	# set arg :: declare associative array :: fill if empty :: return value
+	local DEV=${1:-${DEVICE}}
+	declare -A DEVICE_USB_ID
+	(( ${#DEVICE_USB_ID[${DEV}]} > 0 )) || DEVICE_USB_ID[${DEV}]=$(GET_DEVICE_USB_ID ${DEV})
+	echo ${DEVICE_USB_ID[${DEV}]}
+}
+function GET_DEVICE_SERIAL_(){
+	# set arg :: declare associative array :: fill if empty :: return value
+	local DEV=${1:-${DEVICE}}
+	declare -A DEVICE_SERIAL
+	if ! (( ${#DEVICE_SERIAL[${DEV}]} > 0 )); then
+ 		case "${DEVICE_INTERFACE[${DEV}]}" in
+			ata|scsi)	DEVICE_SERIAL[${DEV}]=$(GET_DEVICE_HDD_SERIAL ${DEV});;
+			usb)		DEVICE_SERIAL[${DEV}]=$(GET_DEVICE_USB_SERIAL ${DEVICE_USB_ID[${DEV}]});;
+		esac
+	fi
+	echo ${DEVICE_SERIAL[${DEV}]}
+}
+function GET_DEVICE_MAN_(){
+	# set arg :: declare associative array :: fill if empty :: return value
+	local DEV=${1:-${DEVICE}}
+	declare -A DEVICE_MAN
+	if ! (( ${#DEVICE_MAN[${DEV}]} > 0 )); then
+ 		case "${DEVICE_INTERFACE[${DEV}]}" in
+			ata|scsi)	DEVICE_MAN[${DEV}]=$(GET_DEVICE_HDD_MAN ${DEV});;
+			usb)		DEVICE_MAN[${DEV}]=$(GET_DEVICE_USB_MAN ${DEVICE_USB_ID[${DEV}]});;
+		esac
+	fi
+	echo ${DEVICE_MAN[${DEV}]}
+}
+function GET_DEVICE_PRODUCT_(){
+	# set arg :: declare associative array :: fill if empty :: return value
+	local DEV=${1:-${DEVICE}}
+	declare -A DEVICE_PRODUCT
+	if ! (( ${#DEVICE_PRODUCT[${DEV}]} > 0 )); then
+ 		case "${DEVICE_INTERFACE[${DEV}]}" in
+			ata|scsi)	DEVICE_PRODUCT[${DEV}]=$(GET_DEVICE_HDD_PRODUCT ${DEV});;
+			usb)		DEVICE_PRODUCT[${DEV}]=$(GET_DEVICE_USB_PRODUCT ${DEVICE_USB_ID[${DEV}]});;
+		esac
+	fi
+	echo ${DEVICE_PRODUCT[${DEV}]}
+}
+####################################################################################################
+####################################################################################################
 function GET_SELECTION_DETAILS(){
 	# dependant on global variables; SELECTION
 	local LINE=""
@@ -449,14 +518,14 @@ function zenity_choose_tool(){
 	local zenityTitle=$(GET_DEVICE_DETAIL)
 
 	# get selection instructions
-	local zenityText=$(GET_CONFIG_SECTION "${TOOL_INSTRUCTIONS}")
+	local zenityText=$(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_TOOL_INSTRUCTIONS})
 
 	# get column headers
-	eval local column=( $(GET_CONFIG_SECTION "${CONFIG_COLUMN_HEADERS}") )
+	eval local column=( $(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_CONFIG_COLUMN_HEADERS}) )
 
 	(
 	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
-		DISPLAY=${DISPLAY} zenity		\
+		DISPLAY=:${TARGET_DISPLAY} zenity	\
 			--width=250			\
 			--height=400			\
 			--timeout=${DIALOG_TIMEOUT:-25}	\
@@ -485,7 +554,8 @@ function zenity_selection_list(){
 function GET_SELECTIONS(){
 	# dependant on global variables; CONFIG_TOOL_SELECTIONS
 	GET_DEFAULT_SELECTION
-	GET_CONFIG_SECTION "${TOOL_SELECTIONS}" | cat -n
+	GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_TOOL_SELECTIONS} |\
+	cat -n
 }
 function GET_CONFIG_SECTION(){
 	# dependant on global variables; USER_TOOL_LIST_PATH
@@ -505,12 +575,12 @@ function GET_CONFIG_SECTION(){
 function GET_SELECTION_PATH(){
 	# dependant on global variables; SELECTION
 	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
-	local DISPLAY_0_TOOL_DIR="${DISPLAY_0_HOME}/${TOOL_DIR}"
+	local DISPLAY_0_CONFIG_DIR=$(GET_DISPLAY_0_CONFIG_DIR)
 	local ISO=${SELECTION[4]}
 	if [[ "${ISO}" =~ ^\/ ]]; then
 		if [ ! -f "${ISO}" ]; then
-			if [ -f "${DISPLAY_0_TOOL_DIR}${ISO}" ]; then
-				local ISO="${DISPLAY_0_TOOL_DIR}${ISO}"
+			if [ -f "${DISPLAY_0_CONFIG_DIR}${ISO}" ]; then
+				local ISO="${DISPLAY_0_CONFIG_DIR}${ISO}"
 			elif [ -f "${DISPLAY_0_HOME}${ISO}" ]; then
 				local ISO="${DISPLAY_0_HOME}${ISO}"
 			else
@@ -518,8 +588,8 @@ function GET_SELECTION_PATH(){
 			fi
 		fi
 	else
-		if [ -f "${DISPLAY_0_TOOL_DIR}/${ISO}" ]; then
-			local ISO="${DISPLAY_0_TOOL_DIR}/${ISO}"
+		if [ -f "${DISPLAY_0_CONFIG_DIR}/${ISO}" ]; then
+			local ISO="${DISPLAY_0_CONFIG_DIR}/${ISO}"
 		elif [ -f "${DISPLAY_0_HOME}/${ISO}" ]; then
 			local ISO="${DISPLAY_0_HOME}/${ISO}"
 		else
@@ -532,52 +602,37 @@ function GET_SELECTION_MEM(){
 	# dependant on global variables; SELECTION
 	echo ${SELECTION[5]} | sed 's/^$/128/'
 }
+function GET_DISPLAY_0_CONFIG_DIR(){
+	# Dependant on GLOBAL vars; TARGET_DISPLAY
+	# Deplendant on functions; GET_DISPLAY_USER, GET_USER_HOME_DIR
+	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
+	local DISPLAY_0_HOME=$(GET_USER_HOME_DIR ${DISPLAY_0_USER})
+	local DISPLAY_0_CONFIG_DIR="${DISPLAY_0_HOME}/${USER_CONFIG_DIR_RELATIVE}"
+	[ -d "${DISPLAY_0_CONFIG_DIR}" ] \
+		&& echo "${DISPLAY_0_CONFIG_DIR}" \
+		|| echo "/dev/zreo"
+}
+function GET_DISPLAY_0_CONFIG_FQFN(){
+	# Dependant on GLOBAL vars; TARGET_DISPLAY
+	# Deplendant on functions; GET_DISPLAY_USER, GET_USER_HOME_DIR
+	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
+	local DISPLAY_0_HOME=$(GET_USER_HOME_DIR ${DISPLAY_0_USER})
+	local DISPLAY_0_CONFIG="${DISPLAY_0_HOME}/${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+	[ -f "${DISPLAY_0_CONFIG}" ] \
+		&& echo "${DISPLAY_0_CONFIG}" \
+		|| echo "/dev/zero"
+}
+function GET_DISPLAY_0_USER(){
+	GET_DISPLAY_USER ${TARGET_DISPLAY:-0}
+}
 function GET_DISPLAY_0_HOME(){
-	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
-	awk -F: -v USER=${DISPLAY_0_USER} '$1~"^"USER"$"{print $6}' /etc/passwd |\
-	tee -a >(${DEBUG} && xargs echo ${FUNCNAME} :: >> "${LOG}") |\
-	grep ""
-	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; EXIT 1; }
-}
-function SOURCE_CONFIG_GLOBAL_VARS(){
-	if [ -f "${BASH_SRCDIR}/${1}" ]; then
-		local config="${BASH_SRCDIR}/${1}"
-	elif [ -f "${1}" ]; then
-		local config=$1
-	elif [ "${1}" == "/dev/fd/63" ]; then
-		local config=$1
-	else
-		echo ERROR :: ${FUNCNAME} :: File \"$1\" not found. >> "${LOG}"
-		return
-	fi
-	#cat "${config}" >> "${LOG}"
-	source <(sed -n "${config}" -f <(cat <<-SED
-		/^[[:space:]]*$/d				# delete blank lines
-		/^[[:space:]]*#/d				# delete comment lines
-		/^[[:space:][:alnum:]\"\'=_]*$/{		# ensure no command execution
-			s/[\"\']//g				# remove punctuation
-			s/[[:space:]]*=[[:space:]]*/=\"/	# ammend quotes to =
-			s/[[:space:]]*$/\"/			# ammend quotes to $
-			s/[[:space:]]\+/ /g			# remove tabs, reduce spaces
-			p					# print
-		}
-	SED
-	))
-}
-function LOG(){
-	local LOG_="${BASH_SRCDIR}"/$(basename "${BASH_SRCNAME}" .sh).log
-	local LOG_=${LOG:-${LOG_}}
-	(( ${#@} > 0 )) && echo "$@" >> "${LOG_}"
-	read -t 0 -N 0 && cat >> "${LOG_}" 2>&1
-	echo ${FUNCNAME} >> "${LOG_}"
+	GET_USER_HOME_DIR $(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
 }
 function OPEN_POPUP_LOG(){
 	${POPUP_LOG:-false} || return
-	local LOG_="${BASH_SRCDIR}"/$(basename "${BASH_SRCNAME}" .sh).log
-	local LOG_=${LOG:-${LOG_}}
-	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
 	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash &
-		DISPLAY=${DISPLAY} terminator		\
+		DISPLAY=:${TARGET_DISPLAY} terminator	\
 			-m -b				\
 			-T "$(GET_DEVICE_DETAIL)"	\
 			-e "tail -f \"${LOG_}\""
@@ -585,7 +640,7 @@ function OPEN_POPUP_LOG(){
 	POPUP_LOG_PID=$!
 	sleep 2
 	POPUP_LOG_PID=$(FIND_PID ${POPUP_LOG_PID} tail)
-	echo INFO :: ${FUNCNAME} :: PID = ${POPUP_LOG_PID} >> "${LOG}"
+	LOG INFO :: ${FUNCNAME} :: PID = ${POPUP_LOG_PID}
 }
 function EXIT(){
 	# cleanup
@@ -599,38 +654,58 @@ function EXIT(){
 }
 # SOURCE Dependant Functions
 source "$(dirname "${BASH_SOURCE}")/../functions/functions.general.sh"
+source "$(dirname "${BASH_SOURCE}")/../functions/functions.test.sh"
 
 # GLOBAL vars; fully qualified script paths and names
 BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
 BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
 BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 
+#
+#LOG="/var/log/udev.vbox_launcher.log"
+#DEBUG=true
+
 # GLOBAL vars; source config file
 SOURCE_CONFIG_GLOBAL_VARS "config"
 
-# GLOBAL vars; Config file section headers
-TOOL_COLUMN_HEADERS=${TOOL_COLUMN_HEADERS:-Task List Column Headers}
-TOOL_SELECTIONS=${TOOL_SELECTIONS:-Task List Selections}
-TOOL_INSTRUCTIONS=${TOOL_INSTRUCTIONS:-Task Selection Instructions}
-NAMING_INSTRUCTIONS=${NAMING_INSTRUCTIONS:-Naming Instructions}
-GLOBAL_DEFAULTS=${GLOBAL_DEFAULTS:-Global Defaults}
-
-# User Task Managment Folder
-USER_TOOL_DIR=${USER_TOOL_DIR:-ISO}
-TOOl_LIST_FILE_NAME=${TOOl_LIST_FILE_NAME:-tool.list.txt}
-USER_TOOL_LIST_PATH=${USER_TOOL_DIR}/${TOOl_LIST_FILE_NAME}
-cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
-	mkdir -p ~/"${USER_TOOL_DIR}"
-	touch ~/"${USER_TOOL_LIST_PATH}" 2>/dev/null
-SU
-
 # GLOBAL vars; LOG
-LOG="${BASH_SRCDIR}"/$(basename "${BASH_SRCNAME}" .sh).log
+if (( ${#LOG} > 0 )); then
+	LOG=$(basename "${BASH_SRCNAME}" .sh)
+	LOG="/var/log/${LOG}.log"
+fi
+touch     "${LOG}"
 chmod 777 "${LOG}"
 
+# Target DISPLAY to popup dialogs and create VM's
+TARGET_DISPLAY=${TARGET_DISPLAY:-0}
+TARGET_DISPLAY=${TARGET_DISPLAY//[^0-9.]/}
+
+# udev rule file name
+UDEV_RULE_CONFIG_FILE_NAME_DEFAULT=${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT:-99-customUDEV.rules}
+
+# GLOBAL vars; User Config Section Titles (UCST_) 
+UCST_TOOL_COLUMN_HEADERS=${UCST_TOOL_COLUMN_HEADERS:-Task List Column Headers}
+UCST_TOOL_SELECTIONS=${UCST_TOOL_SELECTIONS:-Task List Selections}
+UCST_TOOL_INSTRUCTIONS=${UCST_TOOL_INSTRUCTIONS:-Task Selection Instructions}
+UCST_NAMING_INSTRUCTIONS=${UCST_NAMING_INSTRUCTIONS:-Naming Instructions}
+UCST_GLOBAL_VAR_DEFAULTS=${UCST_GLOBAL_VAR_DEFAULTS:-Global Defaults}
+
+# User Task Managment Folder
+USER_CONFIG_DIR_RELATIVE=${USER_CONFIG_DIR_RELATIVE:-ISO}
+USER_CONFIG_FILE_NAME=${USER_CONFIG_FILE_NAME:-${USER_CONFIG_FILE_NAME_DEFAULT:-tool.list.txt}}
+#USER_TOOL_DIR=${USER_TOOL_DIR:-ISO}				# OLD, REMOVE ASAP
+#TOOl_LIST_FILE_NAME=${TOOl_LIST_FILE_NAME:-tool.list.txt} 	# OLD, REMOVE ASAP
+#USER_TOOL_LIST_PATH=${USER_TOOL_DIR}/${TOOl_LIST_FILE_NAME}	# OLD, REMOVE ASAP
+# Setup User Task Managment Folder
+cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
+	mkdir -p ~/"${USER_CONFIG_DIR_RELATIVE}"
+	rm    -f ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+	touch    ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+SU
+SETUP_CONFIG_IF_EMPTY "${USER_CONFIG_FILE_NAME_DEFAULT}" "$(GET_DISPLAY_0_CONFIG_FQFN)"
+
 # GLOBAL vars; source user config file
-SOURCE_CONFIG_GLOBAL_VARS <(GET_CONFIG_SECTION "${GLOBAL_DEFAULTS}")
-#GET_CONFIG_SECTION "${GLOBAL_DEFAULTS}" >> "${LOG}" 2>&1
+SOURCE_CONFIG_GLOBAL_VARS <(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_GLOBAL_VAR_DEFAULTS})
 
 # GLOBAL vars; mac address base, vrdeport base, DIALOG_TIMEOUT
 MAC=${MAC:-080027ABCD}
@@ -657,10 +732,6 @@ DIFS=${IFS}
 # GLOBAL vars; DEBUG
 DEBUG=${DEBUG:-false}
 
-# GLOBAL vars; DISPLAY
-DISPLAY=:0
-#DISPLAY=:12
-
 # Source git repo sudirectory
 #http='https://raw.github.com/michaelsalisbury/builder/master/udev'
 
@@ -677,6 +748,13 @@ POPUP_LOG_AUTOCLOSE_DELAY=${POPUP_LOG_AUTOCLOSE_DELAY:-60}
 # Display Help
 [[ "$1" =~ ^(-h|--help)$ ]] && HELP
 
+eval ATTRIB=( $(GET_DEVICE_HWINFO_ATTRIBUTE sda Serial ID:) )
+echo ${ATTRIB[*]: -1}
+eval ATTRIB=( $(GET_DEVICE_HWINFO_ATTRIBUTE sdb Device:) )
+echo ${ATTRIB[*]: -1}
+eval ATTRIB=( $(GET_DEVICE_HWINFO_ATTRIBUTE sdc Model:) )
+echo ${ATTRIB[*]: -1}
+EXIT 1
 # main
 main "$@" >> "${LOG}" 2>&1
 

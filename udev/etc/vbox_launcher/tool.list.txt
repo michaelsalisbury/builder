@@ -2,12 +2,14 @@
 	DIALOG_TIMEOUT = 2000
 		   MAC = 080027ABCD
 	      VRDEPORT = 33890
+	   BRIDGED_ETH = eth0
 		 DEBUG = false
 	     POPUP_LOG = true
+	     POPUP_LOG = false
 
 [ Task Selection Instructions ]
-	Please choose a tool:
-	PXE boot is the default.
+	<b><big>Please</big></b> choose a tool:
+	<span color=\"red\">PXE boot is the default.</span>
 
 [ Seconday Drive Selection Instructions ]
 
