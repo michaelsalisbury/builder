@@ -2,21 +2,26 @@
 	DIALOG_TIMEOUT = 2000
 		   MAC = 080027ABCD
 	      VRDEPORT = 33890
-	   BRIDGED_ETH = eth0
+	   BRIDGED_ETH = eth2
 		 DEBUG = false
 	     POPUP_LOG = true
 	     POPUP_LOG = false
+
+[ Naming Instructions ]
+	<b><big>Please</big></b> enter a unique name to detail this task:
+	  Dashes and underscores are OK.
+	  <span color=\"red\"><big><b>NO</b></big> spaces OR special characters</span>, thank-you.
 
 [ Task Selection Instructions ]
 	<b><big>Please</big></b> choose a tool:
 	<span color=\"red\">PXE boot is the default.</span>
 
-[ Seconday Drive Selection Instructions ]
+[ Disk Selection Instructions ]
+	<b><big>Choose</big></b> a secondary disk:
+	  Disks that are in use will prompt for confirmation.
 
-[ Naming Instructions ]
-	Please enter a unique name to detail this task:
-	  Dashes and underscores are OK.
-	  NO spaces OR special characters, thank-you.
+[ Disk List Column Headers ]
+Disk	Int	Size	Mounted	   Location	Model	Serial
 
 [ Task List Column Headers ]
 Tool	Selections	Locations							Memory
@@ -33,7 +38,7 @@ Tool	Selections	Locations							Memory
 #Diag	Clone-Zilla	clonezilla.iso							256
 
 Task	SpinRite	Data/ISO.Misc/SpinRite.iso
-Task	DBAN		Data/ISO.Misc/dban-2.2.6_i586.iso
+Task	DBAN		"Data/ISO.Misc/dban-2.2.6_i586.iso hello"
 Task	Ghost		Data/ISO.Misc/ghost.iso						512
 #Deploy	Unity
 #Deploy	Kubuntu

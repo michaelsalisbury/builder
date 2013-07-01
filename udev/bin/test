@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cat << SED | sed -n -f <(cat) <(su - localcosadmin -c "which vboxmanage && vboxmanage list hdds")
+	/^UUID:/,/^$/{
+		/^UUID:/{h;d}
+		/^$/d
+		G
+		s/\(.*\)\nUUID:[[:space:]]\+\(.*\)/\2\t\1/p
+	}
+SED
+

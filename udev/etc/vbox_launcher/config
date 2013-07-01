@@ -12,10 +12,12 @@ USER_CONFIG_FILE_NAME = tool.list.txt
 USER_CONFIG_FILE_NAME_DEFAULT = tool.list.txt
 
 # User Config Section Titles (UCST_) (DEFAULTS)
-UCST_TOOL_INSTRUCTIONS   = Task Selection Instructions
 UCST_NAMING_INSTRUCTIONS = Naming Instructions
-UCST_TOOL_COLUMN_HEADERS = "Task List Column Headers"
+UCST_TOOL_INSTRUCTIONS   = Task Selection Instructions
+UCST_TOOL_COLUMN_HEADERS = Task List Column Headers
 UCST_TOOL_SELECTIONS     = Task List Selections
+UCST_DISK_INSTRUCTIONS   = Disk Selection Instructions
+UCST_DISK_COLUMN_HEADERS = Disk List Column Headers
 UCST_GLOBAL_VAR_DEFAULTS = Global Defaults
 
 # MAC address base: must have the first 5 octets
@@ -28,7 +30,7 @@ VRDEPORT = 33890
 TARGET_DISPLAY = 0
 
 # Dialog timeouts in seconds: DEFAULT = 25 seconds
-DIALOG_TIMEOUT = 5
+DIALOG_TIMEOUT = 60
 
 # DEBUG; true or false: DEFAULT = false
 DEBUG = false

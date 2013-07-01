@@ -1,11 +1,4 @@
 #!/bin/bash
-function LOG_OLD(){
-	local LOG_="${BASH_SRCDIR}"/$(basename "${BASH_SRCNAME}" .sh).log
-	local LOG_=${LOG:-${LOG_}}
-	(( ${#@} > 0 )) && echo "$@" >> "${LOG_}"
-	read -t 0 -N 0 && cat >> "${LOG_}" 2>&1
-	echo ${FUNCNAME} >> "${LOG_}"
-}
 function LOG(){
 	# Dependant on GLOBAL var LOG
 	# test first arg for true|false
@@ -33,31 +26,6 @@ function LOG(){
 		# LOG command line args
 		(( ${#ARGS} > 0 )) && echo "${ARGS}" >> "${LOG}"
 	fi
-}
-function SOURCE_CONFIG_GLOBAL_VARS_OLD(){
-	if [ -f "${BASH_SRCDIR}/${1}" ]; then
-		local config="${BASH_SRCDIR}/${1}"
-	elif [ -f "${1}" ]; then
-		local config=$1
-	elif [ "${1}" == "/dev/fd/63" ]; then
-		local config=$1
-	else
-		echo ERROR :: ${FUNCNAME} :: File \"$1\" not found. >> "${LOG}"
-		return
-	fi
-	#cat "${config}" >> "${LOG}"
-	source <(sed -n "${config}" -f <(cat <<-SED
-		/^[[:space:]]*$/d				# delete blank lines
-		/^[[:space:]]*#/d				# delete comment lines
-		/^[[:space:][:alnum:]\"\'=_]*$/{		# ensure no command execution
-			s/[\"\']//g				# remove punctuation
-			s/[[:space:]]*=[[:space:]]*/=\"/	# ammend quotes to =
-			s/[[:space:]]*$/\"/			# ammend quotes to $
-			s/[[:space:]]\+/ /g			# remove tabs, reduce spaces
-			p					# print
-		}
-	SED
-	))
 }
 function SOURCE_CONFIG_GLOBAL_VARS(){
 	# Dependant on GLOBAL vars; BASH_SRCDIR, BASH_SRCNAME
@@ -173,107 +141,9 @@ function GET_DEVICE_INTERFACE(){
 	echo none
 	return 1
 }
-function GET_DEVICE_SIZE(){
-	local DEV=$(basename "${1}")
-	# verify that block device exists
-	if ! file "/dev/${DEV}" | grep -q "block special"; then
-		LOG ERROR :: ${FUNCNAME} :: DEV[$DEV}] is not a blocl device.
-		echo none
-		return 1
-	fi
-	cat <<-SED | sed -n -f <(cat) <(fdisk -l /dev/${DEV})
-		\|^Disk[[:space:]]\+/dev/${DEV}[:]|{
-			s/^[^:]\+[:][[:space:]]\+\([^,]\+\).*/\1/p
-		}
-	SED
-}
-function GET_DEVICE_HDD_SERIAL(){
-	echo
-}
-function GET_DEVICE_HDD_MAN(){
-	echo
-}
-function GET_DEVICE_HDD_PRODUCT(){
-	echo
-}
-function GET_DEVICE_USB_BUS_ID(){
-	local DEV=$(basename "${1}")
-	# verify that block device exists
-	if ! file "/dev/${DEV}" | grep -q "block special"; then
-		LOG ERROR :: ${FUNCNAME} :: DEV[$DEV}] is not a blocl device.
-		echo none
-		return 1
-	fi
-	# parse /dev/disk/by-id to find link to DEV
-	local path x BUS DEVICE SERIAL
-	while read path; do
-		if readlink "${path}" | grep -q ${DEV}$; then
-			path=$(basename "${path}")
-			if [ "${path%%-*}" == "usb" ]; then
-				while read x BUS x DEVICE x; do
-					SERIAL=( $(GET_DEVICE_USB_ATTRIBUTE ${BUS} ${DEVICE} iSerial) )
-					if (( ${#SERIAL[1]} > 0 )) \
-					&& echo "${path}" | grep -q "${SERIAL[1]}"; then
-						echo ${BUS//[^0-9]/} ${DEVICE//[^0-9]/}
-						return 0
-					fi
-				done < <(lsusb)
-			fi
-			echo ""
-			return 1
-		fi
-	done < <(ls -1 /dev/disk/by-id/*)
-}
-function GET_DEVICE_USB_ATTRIBUTE(){
-	# supply USB device BUS #, DEVICE #, ATTRIBUTE name
-	local BUS=${1//[^0-9]/}
-	local DEVICE=${2//[^0-9]/}
-	local ATTRIBUTE=$3
-	lsusb -s ${BUS}:${DEVICE} &>/dev/null || { echo ""; return 1; }
-	cat <<-SED | sed -n -f <(cat) <(lsusb -v -s ${BUS}:${DEVICE})
-		h							# copy pattern to hold buffer
-		s/^[[:space:]]*\([^[:space:]]\+\).*/\1/			# isolate first element
-		/${ATTRIBUTE}/{						# match first element
-			x						# swap hold buffer back to pattern space
-			s/^[[:space:]]*[^[:space:]]\+[[:space:]]\+//	# strip out first element
-			p						# print
-		}
-	SED
-}
-function GET_DEVICE_USB_MAN(){
-	local ATTRIB=( $(GET_DEVICE_USB_ATTRIBUTE $1 $2 iManufacturer) )
-	echo ${ATTRIB[*]:1}
-}
-function GET_DEVICE_USB_SERIAL(){
-	local ATTRIB=( $(GET_DEVICE_USB_ATTRIBUTE $1 $2 iSerial) )
-	echo ${ATTRIB[*]:1}
-}
-function GET_DEVICE_USB_PRODUCT(){
-	local ATTRIB=( $(GET_DEVICE_USB_ATTRIBUTE $1 $2 idProduct) )
-	(( ${#ATTRIB[1]} > 0 )) && echo ${ATTRIB[*]:1} && return 0
-	local ATTRIB=( $(GET_DEVICE_USB_ATTRIBUTE $1 $2 iProduct) )
-	echo ${ATTRIB[*]:1}
-}
-function GET_DEVICE_HWINFO_ATTRIBUTE(){
-	local DEV=$(basename "${1}")
-	shift
-	local ATTRIB=$*
-	# verify that block device exists
-	if ! file "/dev/${DEV}" | grep -q "block special"; then
-		LOG ERROR :: ${FUNCNAME} :: DEV[$DEV}] is not a blocl device.
-		echo none
-		return 1
-	fi
-	[ -f "/dev/shm/$$${FUNCNAME}" ] || SET_DEVICE_HWINFO_ATTRIBUTES_SHMF "/dev/shm/$$${FUNCNAME}"
-
-	cat <<-SED | sed -n -f <(cat) "/dev/shm/$$${FUNCNAME}"
-		/^${DEV}:[[:space:]]\+${ATTRIB}[[:space:]]/p
-		#/^${DEV}:/p
-	SED
-}
-function SET_DEVICE_HWINFO_ATTRIBUTES_SHMF(){
+function SET_DEVICE_HWI_ATTRIBUTES_SHMF(){
 	local SHMF="$1"
-	cat <<-SED | sed -n -f <(cat) <(hwinfo --block 2>/dev/null) > /dev/shm/$$${FUNCNAME}
+	cat <<-SED | sed -n -f <(cat) <(hwinfo --block 2>/dev/null) > "${SHMF}"
 		/ Disk$/,/^\$/{
 			/ Disk$/{h;d}
 			/^$/d
@@ -281,13 +151,74 @@ function SET_DEVICE_HWINFO_ATTRIBUTES_SHMF(){
 			s/\(.*\)\n\([0-9:]*\).*/\2\1/p
 		}
 	SED
-	cat <<-SED | sed -n -f <(cat) /dev/shm/$$${FUNCNAME} \
-		   | sed    -f <(cat) /dev/shm/$$${FUNCNAME} > "${SHMF}"
+	cat <<-SED | sed -n -f <(cat) "${SHMF}" \
+		   | sed -i -f <(cat) "${SHMF}"
 		/ SysFS ID: /{
-			s|^\([0-9:]\+\)[[:space:]].*/\([a-z]\+$\)|s/^\1/\2:/|p
+			s|^\([0-9:]\+\)[[:space:]].*/\(sd[a-z]\)$|s/^\1/\2:/|p
 		}
 	SED
 }
+function GET_DEVICE_HWI_ATTRIBUTES(){
+	local DEV=$(basename "${1}")
+	# verify that block device exists
+	if ! file "/dev/${DEV}" | grep -q "block special"; then
+		LOG ERROR :: ${FUNCNAME} :: DEV[$DEV}] is not a blocl device.
+		echo none
+		return 1
+	fi
+	# populate hwinfo shared memory file
+	[ -f "/dev/shm/$$${FUNCNAME}" ] || SET_DEVICE_HWI_ATTRIBUTES_SHMF "/dev/shm/$$${FUNCNAME}"
+	# return list
+	sed -n "s|^${DEV}:[[:space:]]\+||p" "/dev/shm/$$${FUNCNAME}"
+	
+}
+function GET_DEVICE_HWI_ATTRIBUTE(){
+	local DEV=$1
+	shift
+	local ATTRIB=$*
+	GET_DEVICE_HWI_ATTRIBUTES ${DEV} |\
+	sed -n "/^${ATTRIB}[[:space:]]/p"
+}
+function GET_DEVICE_HWI_MODEL(){
+	eval local ATTRIB=( $(GET_DEVICE_HWI_ATTRIBUTE $1 Model:) )
+	echo ${ATTRIB[*]: -1}
+}
+function GET_DEVICE_HWI_SERIAL(){
+	eval local ATTRIB=( $(GET_DEVICE_HWI_ATTRIBUTE $1 Serial ID:) )
+	echo ${ATTRIB[*]: -1}
+}
+function GET_DEVICE_HWI_DEVICE(){
+	eval local ATTRIB=( $(GET_DEVICE_HWI_ATTRIBUTE $1 Device:) )
+	echo ${ATTRIB[*]: -1}
+}
+function GET_DEVICE_HWI_SIZE(){
+cat <<-SED | sed -n -f <(cat) <(GET_DEVICE_HWI_ATTRIBUTE $1 Size:) | bc
+	s/^[^0-9]*//
+	s/[^0-9]*$//
+	s/[^0-9]\+/ * /gp
+SED
+}
+function FORMAT_TO_TB(){
+	local bytes=${1//[^0-9\.]/}
+	bytes=$(echo $bytes / 1000^3 | bc)
+	echo ${bytes:0: -3}.${bytes: -3} TB
+}
+function FORMAT_TO_GB(){
+	local bytes=${1//[^0-9\.]/}
+	bytes=$(echo $bytes / 1000^2 | bc)
+	echo ${bytes:0: -3}.${bytes: -3} GB
+}
+function FORMAT_TO_MB(){
+	local bytes=${1//[^0-9\.]/}
+	bytes=$(echo $bytes / 1000^1 | bc)
+	echo ${bytes:0: -3}.${bytes: -3} MB
+}
+function FORMAT_TO_KB(){
+	local bytes=${1//[^0-9\.]/}
+	bytes=$(echo $bytes / 1000^0 | bc)
+	echo ${bytes:0: -3}.${bytes: -3} KB
+}
+
 
 
 
