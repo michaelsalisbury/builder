@@ -72,7 +72,7 @@ function ACTION_ADD(){
 	# set default name if start vm was selected without entering a name
 	(( ${#NAME[*]} > 1 )) || SET_DEFAULT_NAME
 
-######### if selection wat PXE then verify bridged ethernet default is OK
+######### if selection is PXE then verify bridged ethernet default is OK
 
 
 	# amend VRDEPORT and DEVICE to NAME[1]
@@ -532,16 +532,6 @@ function GET_SELECTION_MEM(){
 	# dependant on global variables; SELECTION
 	echo ${SELECTION[5]} | sed 's/^$/128/'
 }
-function GET_DISPLAY_0_USER(){
-	# get user logged into disaply ${DISPLAY}, DEFAULTS to :0
-	echo localcosadmin
-	return
-	who -u |\
-	awk '/ tty[0-9].* \(:0\)/{print $1}' |\
-	tee -a >(${DEBUG} && xargs echo ${FUNCNAME} :: >> "${LOG}") |\
-	grep ""
-	(( $? > 0 )) && { echo ERROR \"${FUNCNAME}\" >> "${LOG}"; EXIT 1; }
-}
 function GET_DISPLAY_0_HOME(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
 	awk -F: -v USER=${DISPLAY_0_USER} '$1~"^"USER"$"{print $6}' /etc/passwd |\
@@ -597,24 +587,6 @@ function OPEN_POPUP_LOG(){
 	POPUP_LOG_PID=$(FIND_PID ${POPUP_LOG_PID} tail)
 	echo INFO :: ${FUNCNAME} :: PID = ${POPUP_LOG_PID} >> "${LOG}"
 }
-function FIND_PID(){
-	local ppid=$1
-	local cmd=$2
-	local pid=""
-	ps --no-heading -o pid --ppid ${ppid} &>/dev/null || return 0
-	# test child pids for command match
-	# ps --no-heading -fp ${ppid} >> "${LOG}"
-	while read pid; do
-		if ps --no-heading -o cmd -p ${pid} | grep -q "^${cmd}"; then
-			echo ${pid}
-			return 0
-		fi
-	done < <(ps --no-heading -o pid --ppid ${ppid})
-	# if no command match found then process children 
-	while read pid; do
-		${FUNCNAME} ${pid} ${cmd}
-	done < <(ps --no-heading -o pid --ppid ${ppid})
-}
 function EXIT(){
 	# cleanup
 	rm -rf "${TMP}"
@@ -625,19 +597,9 @@ function EXIT(){
 	fi
 	exit ${1:- 0}
 }
+# SOURCE Dependant Functions
+source "$(dirname "${BASH_SOURCE}")/../functions/functions.general.sh"
 
-function canonicalpath(){
-	if [ -d $1 ]; then
-		pushd $1 > /dev/null 2>&1
-		echo $PWD
-	elif [ -f $1 ]; then
-		pushd $(dirname $1) > /dev/null 2>&1
-		echo $PWD/$(basename $1)
-	else
-		echo "Invalid path $1"
-	fi
-	popd > /dev/null 2>&1
-}
 # GLOBAL vars; fully qualified script paths and names
 BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
 BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
