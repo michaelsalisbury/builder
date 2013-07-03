@@ -1,11 +1,17 @@
 [ Global Defaults ]
-	DIALOG_TIMEOUT = 2000
+	#DIALOG_TIMEOUT = 500
 		   MAC = 080027ABCD
 	      VRDEPORT = 33890
 	   BRIDGED_ETH = eth2
 		 DEBUG = false
 	     POPUP_LOG = true
 	     POPUP_LOG = false
+
+[ Warning Instructions ]
+	<b><u><big><span color=\"red\">WARNING</span></big></u>
+	You are about to force un-mount a disk.</b>
+	<span color=\"purple\">Are you sure the following disk is not in use?</span>
+	\n
 
 [ Naming Instructions ]
 	<b><big>Please</big></b> enter a unique name to detail this task:
@@ -21,7 +27,7 @@
 	  Disks that are in use will prompt for confirmation.
 
 [ Disk List Column Headers ]
-Disk	Int	Size	Mounted	   Location	Model	Serial
+Disk	Int	Size	Mounted	   Status   Location	Model	Serial
 
 [ Task List Column Headers ]
 Tool	Selections	Locations							Memory

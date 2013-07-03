@@ -1,24 +1,23 @@
 # Working dir for tool list and ISO's
 # ISO's can have a relative path to this dir or a full path anywhere
 # DEFAULT = ISO
-USER_TOOL_DIR = ISO
 USER_CONFIG_DIR_RELATIVE = ISO
 
 # tool list config file name: DEFAULT = tool.list.iso
-TOOl_LIST_FILE_NAME = tool.list.txt
 USER_CONFIG_FILE_NAME = tool.list.txt
 
 # default user config file name
 USER_CONFIG_FILE_NAME_DEFAULT = tool.list.txt
 
 # User Config Section Titles (UCST_) (DEFAULTS)
-UCST_NAMING_INSTRUCTIONS = Naming Instructions
-UCST_TOOL_INSTRUCTIONS   = Task Selection Instructions
-UCST_TOOL_COLUMN_HEADERS = Task List Column Headers
-UCST_TOOL_SELECTIONS     = Task List Selections
-UCST_DISK_INSTRUCTIONS   = Disk Selection Instructions
-UCST_DISK_COLUMN_HEADERS = Disk List Column Headers
-UCST_GLOBAL_VAR_DEFAULTS = Global Defaults
+UCST_WARNING_INSTRUCTIONS = Warning Instructions
+UCST_NAMING_INSTRUCTIONS  = Naming Instructions
+UCST_TOOL_INSTRUCTIONS    = Task Selection Instructions
+UCST_TOOL_COLUMN_HEADERS  = Task List Column Headers
+UCST_TOOL_SELECTIONS      = Task List Selections
+UCST_DISK_INSTRUCTIONS    = Disk Selection Instructions
+UCST_DISK_COLUMN_HEADERS  = Disk List Column Headers
+UCST_GLOBAL_VAR_DEFAULTS  = Global Defaults
 
 # MAC address base: must have the first 5 octets
 MAC = 080027ABCD
@@ -28,13 +27,14 @@ VRDEPORT = 33890
 
 # Target Display Number
 TARGET_DISPLAY = 0
+#TARGET_DISPLAY = 10.0
 
 # Dialog timeouts in seconds: DEFAULT = 25 seconds
-DIALOG_TIMEOUT = 60
+DIALOG_TIMEOUT = 20
 
 # DEBUG; true or false: DEFAULT = false
-DEBUG = false
 DEBUG = true
+DEBUG = false
 
 # udev rule file
 UDEV_RULE_CONFIG_FILE_NAME_DEFAULT = 99-customUDEV.rules
@@ -42,6 +42,9 @@ UDEV_RULE_CONFIG_FILE_NAME_DEFAULT = 99-customUDEV.rules
 # POPUP_LOG; open terminator and tail log, auto close 60 seconds after 
 POPUP_LOG = false
 POPUP_LOG_AUTOCLOSE_DELAY = 10
+
+# Enable wmctrl; this control window placement, doesn't work on vnc connections
+ENABLE_WMCTRL = true
 
 # LOG
 LOG = /var/log/udev.vbox_launcher.log

@@ -52,39 +52,12 @@ function ACTION_ADD(){
 	(( ${#SELECTION[*]} > 1 )) && GET_SELECTION_DETAILS || SET_DEFAULT_SELECTION
 
 	# prompt user to add seconadary device 
-	while echo ${SELECTION[2]} | grep -qi "^\(diag\|PXE\|DISK\)"; do
-		IFS=: SELECTION2=( $(zenity_choose_second) )
-
-		case "${SELECTION2[0]}" in
-			0)	echo dblCLICK :: Disk selection \#${SELECTION2[1]}.;;
-			1)	echo CANCELED :: Disk selection dialog for disk \"${DEVICE}\". Skipping\!
-				break;;
-			5)	if (( ${#SELECTION2[*]} > 1 )); then
-					echo clk_NEXT :: Disk selection \#${SELECTION2[1]}.
-				else
-					echo TIME_OUT :: Or no selection\! SELECTION=${SELECTION[*]}. Skipping
-					break
-				fi;;	
-			*)	echo NEWSTATE :: Disk selection dialog returned ${SELECTION[*]}. Exiting\!
-				EXIT 1;;
-		esac
-		# if the user made a selection but the device is inuse, WARN
-		if (( ${#SELECTION2[*]} > 1 )) && [[ "${SELECTION2[4]}" =~ ^(local|VBOX)$ ]]; then
-			#if (( $(zenity_warning_inuse "${SELECTION2[*]}") == 5 )); then
-			if (( $(zenity_warning_inuse "${SELECTION2[1]}") == 5 )); then
-				DEVICE[1]=${SELECTION2[1]}
-				break
-			fi
-		# if the user made a selection and the device is free, MOVE ON
-		elif (( ${#SELECTION2[*]} > 1 )); then
-			DEVICE[1]=${SELECTION2[1]}
-			break
-		# this logic brack should never occcur because the previos case block break null selections
-		else
-			unset DEVICE[1]
-			break
-		fi
-	done
+	if echo ${SELECTION[2]} | grep -qi "^diag"; then
+		echo ZENITY CHOOSE SECOND
+		DEVICE[1]=$(zenity_choose_second)
+		echo 2ND_DISK :: SELECTION=${DEVICE[1]}
+		unset DEVICE[1]
+	fi
 
 	# prompt user to label task/vm
 	IFS=: NAME=( $(zenity_name_task) )
@@ -146,7 +119,7 @@ function ACTION_ADD(){
 			VBoxManage internalcommands createrawvmdk	\
 				-filename "${VMDK[${DEV}]}"		\
 				-rawdisk /dev/${DEV}
-			#VBoxManage list hdds
+			VBoxManage list hdds
 		SU
 	done
 
@@ -442,93 +415,17 @@ function SET_DEFAULT_NAME(){
 }
 ###########################################################################################
 #################################################################################### zenity
-function zenity_device_info(){
-	local IFS=${DIFS}
-	local DEV=$(basename "${1:-${DEVICE}}")
-
-	# retrieve into an array the field names returned from the Disk Selection Dialog
-	eval local field=( $(GET_CONFIG_SECTION \
-			   "$(GET_DISPLAY_0_CONFIG_FQFN)" \
-			    ${UCST_DISK_COLUMN_HEADERS}) )
-
-	# retieve into an array the values returned from the Disk Selection Dialog
-	eval local value=( $(GET_DEVICE_INFO_ARRAY ${DEV}) )
-
-	# prep vars
-	local index=0
-	local space=10
-	local spaces=$(seq ${space} | sed 's/.*/ /g' | tr -d '\n')
-
-	# write device info
-	echo '<span color=\"blue\" face=\"courier new\">'
-	while (( index < ${#field[*]} )); do
-		field[${index}]="${spaces}${field[${index}]}"
-		field[${index}]=${field[${index}]: -${space}}
-		echo "${field[${index}]} <big>::</big> ${value[$(( index++ ))]}"
-	done
-	echo '</span>'
-}
-
-function zenity_warning_inuse(){
-	local IFS=${DIFS}
-	local DEV=$(basename "${1:-${DEVICE}}")
-	# https://developer.gnome.org/pygtk/stable/pango-markup-language.html
-	# dependant on global variables; DEVICE
-	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
-	# get drive size
-	local zenityTitle=$(zenity_default_title)
-	# warning instructions
-	local zenityText=$(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_WARNING_INSTRUCTIONS})
-
-	# device info to assist confirmation
-	      zenityText+="$(zenity_device_info ${DEV})"
-
-	# retrieve into an array the field names returned from the Disk Selection Dialog
-	eval local field=( $(GET_CONFIG_SECTION \
-			   "$(GET_DISPLAY_0_CONFIG_FQFN)" \
-			    ${UCST_DISK_COLUMN_HEADERS}) )
-
-	# retieve into an array the values returned from the Disk Selection Dialog
-	eval local value=( $(GET_DEVICE_INFO_ARRAY ${DEV}) )
-
-	# Set zenity window position
-	${ENABLE_WMCTRL} && MOV_WINDOW "${zenityTitle}" 100 50 &
-	# launch zenity dialog
-	#(
-			#--cancel-label="GO BACK"	\
-	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
-		DISPLAY=:${TARGET_DISPLAY} zenity	\
-			--timeout=${DIALOG_TIMEOUT:-25}	\
-			--title="${zenityTitle// /   }"	\
-			--text="${zenityText}"		\
-			--ok-label="Confirm"		\
-			--cancel-label="GO BACK"	\
-			--question
-		ZENITY
-	echo $?
-	#) | tac | tr -d '\n'
-}
 function zenity_name_task(){
-	local IFS=${DIFS}
 	# dependant on global variables; DEVICE
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
 	# get drive size
 	local zenityTitle=$(zenity_default_title)
-
-	local DEV=""
-	local DISK_NUM=""
-	local zenityText=""
-	for DEV in ${DEVICE[*]}; do
-		zenityText+="<b><big><span color='purple'>-DISK $(( DISK_NUM++ ))-</span></big></b>\n"
-		zenityText+="$(zenity_device_info ${DEV})\n"
-	done
-	
 	# naming instructions
-	    zenityText+=$(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_NAMING_INSTRUCTIONS})
+	local zenityText=$(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_NAMING_INSTRUCTIONS})
 
 
 	# Set zenity window position
-	${ENABLE_WMCTRL} && MOV_WINDOW "${zenityTitle}" 100 50 &
+	MOV_WINDOW "${zenityTitle}" 100 50 &
 	# launch zenity dialog
 	(
 	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
@@ -567,7 +464,7 @@ function zenity_choose_tool(){
 			    ${UCST_TOOL_COLUMN_HEADERS}) )
 
 	# Set zenity window position
-	${ENABLE_WMCTRL} && MOV_WINDOW "${zenityTitle}" 100 50 &
+	MOV_WINDOW "${zenityTitle}" 100 50 &
 	# launch zenity dialog
 	(
 	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
@@ -591,7 +488,6 @@ function zenity_choose_tool(){
 	) | tac | tr -d '\n'
 }
 function zenity_choose_second(){
-	local IFS=${DIFS}
 	# dependant on global variables; DEVICE
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
 
@@ -609,7 +505,7 @@ function zenity_choose_second(){
 			    ${UCST_DISK_COLUMN_HEADERS}) )
 
 	# Set zenity window position
-	${ENABLE_WMCTRL} && MOV_WINDOW "${zenityTitle}" 12 50 &
+	MOV_WINDOW "${zenityTitle}" 12 50 &
 	# launch zenity dialog
 	(
 	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
@@ -640,11 +536,22 @@ function zenity_choose_second(){
 function zenity_disk_list(){
 	local DEV=""
 	while read DEV; do
-		GET_DEVICE_INFO_ARRAY ${DEV}
+		#	Disk	Int	Size	Mounted	   Location	Model	Serial
+		echo -n ${DEV}							\ 
+		echo -n $(GET_DEVICE_INTERFACE    ${DEV} | tr a-z A-Z)		\ 
+		echo -n \"$(FORMAT_TO_GB $(GET_DEVICE_HWI_SIZE ${DEV}))\"	\ 
+		echo -n \"$(GET_DEVICE_MOUNT      ${DEV})\"			\ 
+		echo -n \"$(GET_DEVICE_STATUS     ${DEV})\"			\ 
+		echo -n \"$(GET_DEVICE_MOUNT_LOCATION ${DEV})\"			\ 
+		echo -n \"$(GET_DEVICE_HWI_MODEL  ${DEV})\"			\ 
+		echo -n \"$(GET_DEVICE_HWI_SERIAL ${DEV})\"			\ 
+#	USB	\"100 MB\"  VM	   Win7		SuperFast 0123456789
 	done < <(GET_DEVICE_LIST)
+
 }
+
+
 function zenity_selection_list(){
-	local IFS=${DIFS}
 	GET_SELECTIONS |\
 	while read LINE; do
 		eval ARGS=( ${LINE} )
@@ -653,22 +560,6 @@ function zenity_selection_list(){
 }
 ###########################################################################################
 ###########################################################################################
-function GET_DEVICE_INFO_ARRAY(){
-	local DEV=$(basename "${1:-${DEVICE}}")
-	if [ ! -f "/dev/shm/$$${FUNCNAME}_${DEV}" ]; then
-		cat <<-SHMF > "/dev/shm/$$${FUNCNAME}_${DEV}"
-			"${DEV}"
-			"$(GET_DEVICE_INTERFACE			${DEV} | tr a-z A-Z)"
-			"$(FORMAT_TO_GB $(GET_DEVICE_HWI_SIZE	${DEV}))"
-			"$(GET_DEVICE_MOUNT			${DEV})"
-			"$(GET_DEVICE_STATUS			${DEV})"
-			"$(GET_DEVICE_MOUNT_LOCATION		${DEV})"
-			"$(GET_DEVICE_HWI_MODEL			${DEV})"
-			"$(GET_DEVICE_HWI_SERIAL		${DEV})"
-		SHMF
-	fi
-	echo -n $(cat "/dev/shm/$$${FUNCNAME}_${DEV}" | tr '\n' \ ) \ 
-}
 function GET_DEVICE_MOUNT(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
 	local DEV=$(basename "${1:-${DEVICE}}")
@@ -687,7 +578,7 @@ function GET_DEVICE_MOUNT(){
 		grep -q "^Location:[[:space:]].*${TARGET_VM_MASK}\$"
 	SU
 	if (( $? )); then
-		echo ...
+		echo NOT mounted
 		return 1
 	else
 		echo VBOX
@@ -929,7 +820,6 @@ UCST_TOOL_COLUMN_HEADERS=${UCST_TOOL_COLUMN_HEADERS:-Task List Column Headers}
 UCST_DISK_INSTRUCTIONS=${UCST_DISK_INSTRUCTIONS:-Disk Selection Instructions}
 UCST_DISK_COLUMN_HEADERS=${UCST_DISK_COLUMN_HEADERS:-Disk List Column Headers}
 UCST_NAMING_INSTRUCTIONS=${UCST_NAMING_INSTRUCTIONS:-Naming Instructions}
-UCST_WARNING_INSTRUCTIONS=${UCST_WARNING_INSTRUCTIONS:-Warning Instructions}
 UCST_GLOBAL_VAR_DEFAULTS=${UCST_GLOBAL_VAR_DEFAULTS:-Global Defaults}
 
 # User Task Managment Folder
@@ -941,7 +831,7 @@ USER_CONFIG_FILE_NAME=${USER_CONFIG_FILE_NAME:-${USER_CONFIG_FILE_NAME_DEFAULT:-
 # Setup User Task Managment Folder
 cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
 	mkdir -p ~/"${USER_CONFIG_DIR_RELATIVE}"
-#	rm    -f ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+	rm    -f ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
 	touch    ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
 SU
 SETUP_CONFIG_IF_EMPTY "${USER_CONFIG_FILE_NAME_DEFAULT}" "$(GET_DISPLAY_0_CONFIG_FQFN)"
@@ -973,9 +863,6 @@ DIFS=${IFS}
 
 # GLOBAL vars; DEBUG
 DEBUG=${DEBUG:-false}
-
-# Disable wmctrl; this controls cosistent window placement, doesn't work through X11 or VNC
-ENABLE_WMCTRL=${ENABLE_WMCTRL:-true}
 
 # Source git repo sudirectory
 #http='https://raw.github.com/michaelsalisbury/builder/master/udev'

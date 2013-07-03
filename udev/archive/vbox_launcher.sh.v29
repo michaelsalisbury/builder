@@ -72,12 +72,12 @@ function ACTION_ADD(){
 		if (( ${#SELECTION2[*]} > 1 )) && [[ "${SELECTION2[4]}" =~ ^(local|VBOX)$ ]]; then
 			#if (( $(zenity_warning_inuse "${SELECTION2[*]}") == 5 )); then
 			if (( $(zenity_warning_inuse "${SELECTION2[1]}") == 5 )); then
-				DEVICE[1]=${SELECTION2[1]}
+				DEVICE[1]=${SELECTION[1]}
 				break
 			fi
 		# if the user made a selection and the device is free, MOVE ON
 		elif (( ${#SELECTION2[*]} > 1 )); then
-			DEVICE[1]=${SELECTION2[1]}
+			DEVICE[1]=${SELECTION[1]}
 			break
 		# this logic brack should never occcur because the previos case block break null selections
 		else
@@ -146,7 +146,7 @@ function ACTION_ADD(){
 			VBoxManage internalcommands createrawvmdk	\
 				-filename "${VMDK[${DEV}]}"		\
 				-rawdisk /dev/${DEV}
-			#VBoxManage list hdds
+			VBoxManage list hdds
 		SU
 	done
 
@@ -514,17 +514,8 @@ function zenity_name_task(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
 	# get drive size
 	local zenityTitle=$(zenity_default_title)
-
-	local DEV=""
-	local DISK_NUM=""
-	local zenityText=""
-	for DEV in ${DEVICE[*]}; do
-		zenityText+="<b><big><span color='purple'>-DISK $(( DISK_NUM++ ))-</span></big></b>\n"
-		zenityText+="$(zenity_device_info ${DEV})\n"
-	done
-	
 	# naming instructions
-	    zenityText+=$(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_NAMING_INSTRUCTIONS})
+	local zenityText=$(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_NAMING_INSTRUCTIONS})
 
 
 	# Set zenity window position
@@ -941,7 +932,7 @@ USER_CONFIG_FILE_NAME=${USER_CONFIG_FILE_NAME:-${USER_CONFIG_FILE_NAME_DEFAULT:-
 # Setup User Task Managment Folder
 cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
 	mkdir -p ~/"${USER_CONFIG_DIR_RELATIVE}"
-#	rm    -f ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+	rm    -f ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
 	touch    ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
 SU
 SETUP_CONFIG_IF_EMPTY "${USER_CONFIG_FILE_NAME_DEFAULT}" "$(GET_DISPLAY_0_CONFIG_FQFN)"

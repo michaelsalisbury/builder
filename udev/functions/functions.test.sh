@@ -218,8 +218,31 @@ function FORMAT_TO_KB(){
 	bytes=$(echo $bytes / 1000^0 | bc)
 	echo ${bytes:0: -3}.${bytes: -3} KB
 }
-
-
+function MOV_WINDOW(){
+	local title=$1
+	local newX=$2
+	local newY=$3
+	local tries=100
+	local IFS=${DIFS} ID="" G="" X="" Y="" W="" H=""
+	while ((tries--)) && ! wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H &>/dev/null
+	do
+		read ID        < <(GET_WINDOW_ID       "${title}")
+		read G X Y W H < <(GET_WINDOW_LOCATION "${title}")
+	done
+}
+function GET_WINDOW_LOCATION(){
+	local title=$1
+	local ID=$(GET_WINDOW_ID "${title}")
+	awk '{print $2,$3,$4,$5,$6}' <(grep "^${ID}[[:space:]]" <(wmctrl -lG))
+}
+function GET_WINDOW_ID(){
+	local title=$1
+	cat <<-SED | sed -n -f <(cat) <(wmctrl -l)
+		/[[:space:]]${title//[[:space:]]/[[:space:]]\+}\$/{
+			s/[[:space:]]\+.*//p
+		}
+	SED
+}
 
 
 

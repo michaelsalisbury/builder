@@ -30,6 +30,8 @@ function FIND_PID(){
 	done < <(ps --no-heading -o pid --ppid ${ppid})
 }
 function GET_DISPLAY_USER(){
+	echo localcosadmin
+	return 0
 	# Dependant on function LOG and GLOBAL var DEBUG
 	local DISPLAY_NUM=${1:-0}
 	local DISPLAY_NUM=${DISPLAY_NUM//[^0-9.]/}
@@ -41,6 +43,8 @@ function GET_DISPLAY_USER(){
 	# this last line returns false to the calling function if no user found
 }
 function GET_USER_HOME_DIR(){
+	echo /home/localcosadmin
+	return 0
 	if (( ${#1} > 0 )); then
 		local USERNAME=$1
 	else
