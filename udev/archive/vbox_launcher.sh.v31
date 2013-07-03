@@ -2,12 +2,14 @@
 function main(){
 	case "${1}" in
 		a*|A*)		shift; ACTION_ADD     "$@";;
-		d*|D*)		shift; ACTION_DISOWN  "$@";;
-		i*|I*)		       ACTION_INSTALL;;
 		r*|R*)		shift; ACTION_REMOVE  "$@";;
 		s*|S*)		       ACTION_SELECT;;
 		t*|T*)		shift; ACTION_TRIGGER "$@";;
+		sd*)		       ACTION_ADD     "$@";;
 		*)		       ACTION_SELECT;;
+		#*)      	UMOUNT=false
+		#		STARTVM=false
+		#		ACTION_ADD;;
 	esac
 }
 function HELP(){
@@ -21,17 +23,12 @@ function HELP(){
 	HELP
 	EXIT 1
 }
-function ACTION_DISOWN(){
-	/usr/bin/setsid "${BASH_SRCFQFN}" "$@" &
-	EXIT 0
-}
 function ACTION_SELECT(){
 	# select a disk manually
-	ENABLE_WMCTRL=false
 	zenity_choose_disk
 	# verify user selected disk otherwise exit
 	if (( ${#DEVICE[*]} )) && IS_DEVICE_REAL ${DEVICE[0]}; then
-		ACTION_TRIGGER ${DEVICE[0]}
+		ACTION_ADD ${DEVICE[0]}
 	else
 		EXIT 1
 	fi
@@ -146,7 +143,16 @@ function ACTION_ADD(){
 	done
 
 	# unmount devices
-	UNMOUNT_DEVICES
+	local TRIES=""
+	local PART=""
+	for DEV in ${DEVICE[*]}; do
+		for PART in `ls /dev/${DEV}[0-9]`; do
+			for TRIES in {1..2}; do
+				umount ${PART} &>/dev/null
+			done
+			umount -v ${PART}
+		done
+	done
 
 	# create virtualbox raw vmdk files; user must be part of "disk" group
 	for DEV in ${DEVICE[*]}; do
@@ -162,9 +168,6 @@ function ACTION_ADD(){
 
 	# create virtual machine
 	SET_VM	
-
-	# one more time just to be safe
-	UNMOUNT_DEVICES
 
 	# start virtual machine
 	START_VM
@@ -243,26 +246,21 @@ function ACTION_TRIGGER(){
 		r*|R*)	udevadm trigger --action=remove --sysname-match="${DEV}";;
 		*)	ACTION_TRIGGER add "$@";;
 	esac
-	EXIT 0
 }
 function START_VM(){
-	/usr/bin/setsid su - $(GET_DISPLAY_0_USER) -s /bin/bash <<-SU
-		export DISPLAY=:${TARGET_DISPLAY:-0}
-		which VirtualBox && VirtualBox --startvm "${NAME[1]}"
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+
+	local VB=$(which VirtualBox 2>/dev/null)
+	if [ -z "${VB}" ]; then
+		echo ERROR :: ${FUNCNAME} :: VirtualBox not found. Skipping\! >> "${LOG}"
+		return
+	fi
+
+	# start vm
+	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash
+		export DISPLAY=:0
+		${VB} --startvm ${NAME[1]} &
 	SU
-}
-function UNMOUNT_DEVICES(){
-	local TRIES=""
-	local PART=""
-	local DEV=""
-	for DEV in ${DEVICE[*]}; do
-		for PART in `ls /dev/${DEV}[0-9]`; do
-			for TRIES in {1..2}; do
-				umount ${PART} &>/dev/null
-			done
-			umount -v ${PART}
-		done
-	done
 }
 function DETACH_VMDK_HDD(){
 	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
@@ -273,7 +271,6 @@ function DETACH_VMDK_HDD(){
 		which VBoxManage &>/dev/null &&\
 		VBoxManage list hdds |\
 		while read VAR DATA; do
-
 			(( \${#VAR} )) || continue
 			# create variables
 			eval \${VAR%:}=\"\${DATA}\"
@@ -668,15 +665,10 @@ function zenity_choose_second(){
 
 	# Set zenity window position
 	${ENABLE_WMCTRL} && MOV_WINDOW "${zenityTitle}" 12 50 &
-
-	# determine su
-	whoami | grep -q ^root$ && local SU="su - ${DISPLAY_0_USER} -s"
-
 	# launch zenity dialog
 	(
-	#su - ${DISPLAY_0_USER} -s /bin/bash <<-SU 2> "${LOG}"
-	${SU} /bin/bash <<-SU 2> "${LOG}"
-		DISPLAY=:${TARGET_DISPLAY:-0} zenity	\
+	cat <<-ZENITY | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
+		DISPLAY=:${TARGET_DISPLAY} zenity	\
 			--width=1000			\
 			--height=700			\
 			--timeout=${DIALOG_TIMEOUT:-25}	\
@@ -696,7 +688,7 @@ function zenity_choose_second(){
 			--column "${column[6]}"		\
 			--column "${column[7]}"		\
 			$(zenity_disk_list)
-	SU
+		ZENITY
 	echo $?:
 	) | tac | tr -d '\n'
 }
@@ -955,23 +947,6 @@ function EXIT(){
 	fi
 	exit ${1:- 0}
 }
-function ACTION_INSTALL(){
-	# verify root access
-	# setup log
-		touch     "${LOG}"
-		chmod 777 "${LOG}"
-	# setup etc
-	# setup udev
-	# setup User Task Managment Folder
-		su - $(GET_DISPLAY_0_USER) -s /bin/bash <<-SU
-			mkdir -p ~/"${USER_CONFIG_DIR_RELATIVE}"
-		#	rm    -f ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
-			touch    ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
-		SU
-		SETUP_CONFIG_IF_EMPTY "${USER_CONFIG_FILE_NAME_DEFAULT}"\
-				      "$(GET_DISPLAY_0_CONFIG_FQFN)"
-
-}
 # SOURCE Dependant Functions
 source "$(dirname "${BASH_SOURCE}")/../functions/functions.general.sh"
 source "$(dirname "${BASH_SOURCE}")/../functions/functions.test.sh"
@@ -988,11 +963,13 @@ BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
 # GLOBAL vars; source config file
 SOURCE_CONFIG_GLOBAL_VARS "config"
 
-# GLOBAL vars; LOG file must exist 
-if (( ${#LOG} == 0 )) || [ ! -f "${LOG}" ]; then
+# GLOBAL vars; LOG
+if (( ${#LOG} > 0 )); then
 	LOG=$(basename "${BASH_SRCNAME}" .sh)
 	LOG="/var/log/${LOG}.log"
 fi
+touch     "${LOG}"
+chmod 777 "${LOG}"
 
 # Target DISPLAY to popup dialogs and create VM's
 TARGET_DISPLAY=${TARGET_DISPLAY:-0}
@@ -1014,7 +991,16 @@ UCST_GLOBAL_VAR_DEFAULTS=${UCST_GLOBAL_VAR_DEFAULTS:-Global Defaults}
 # User Task Managment Folder
 USER_CONFIG_DIR_RELATIVE=${USER_CONFIG_DIR_RELATIVE:-ISO}
 USER_CONFIG_FILE_NAME=${USER_CONFIG_FILE_NAME:-${USER_CONFIG_FILE_NAME_DEFAULT:-tool.list.txt}}
-
+#USER_TOOL_DIR=${USER_TOOL_DIR:-ISO}				# OLD, REMOVE ASAP
+#TOOl_LIST_FILE_NAME=${TOOl_LIST_FILE_NAME:-tool.list.txt} 	# OLD, REMOVE ASAP
+#USER_TOOL_LIST_PATH=${USER_TOOL_DIR}/${TOOl_LIST_FILE_NAME}	# OLD, REMOVE ASAP
+# Setup User Task Managment Folder
+cat <<-SU | su - $(GET_DISPLAY_0_USER) -s /bin/bash
+	mkdir -p ~/"${USER_CONFIG_DIR_RELATIVE}"
+#	rm    -f ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+	touch    ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+SU
+SETUP_CONFIG_IF_EMPTY "${USER_CONFIG_FILE_NAME_DEFAULT}" "$(GET_DISPLAY_0_CONFIG_FQFN)"
 
 # GLOBAL vars; source user config file
 SOURCE_CONFIG_GLOBAL_VARS <(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_GLOBAL_VAR_DEFAULTS})
@@ -1032,15 +1018,14 @@ SCTL='ide'
 
 # GLOBAL vars; TMP
 TMP="/tmp/$$_${BASH_SRCNAME}_$$"
-mkdir    "${TMP}"
-chmod +t "${TMP}"
+mkdir "${TMP}"
 SHM="/dev/shm/$$_${BASH_SRCNAME}_$$"
 mkdir    "${SHM}"
 chmod +t "${SHM}"
 
+
 # GLOBAL vars; DIFS = default array delimiter
-#DIFS=${IFS}
-DIFS=' '
+DIFS=${IFS}
 
 # GLOBAL vars; DEBUG
 DEBUG=${DEBUG:-false}

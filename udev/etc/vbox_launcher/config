@@ -30,7 +30,7 @@ TARGET_DISPLAY = 0
 #TARGET_DISPLAY = 10.0
 
 # Dialog timeouts in seconds: DEFAULT = 25 seconds
-DIALOG_TIMEOUT = 20
+DIALOG_TIMEOUT = 60
 
 # DEBUG; true or false: DEFAULT = false
 DEBUG = true
@@ -45,6 +45,7 @@ POPUP_LOG_AUTOCLOSE_DELAY = 10
 
 # Enable wmctrl; this control window placement, doesn't work on vnc connections
 ENABLE_WMCTRL = true
+#ENABLE_WMCTRL = false
 
 # LOG
-LOG = /var/log/udev.vbox_launcher.log
+LOG = /var/log/vbox_launcher.log

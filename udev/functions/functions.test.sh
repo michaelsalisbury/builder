@@ -219,25 +219,51 @@ function FORMAT_TO_KB(){
 	echo ${bytes:0: -3}.${bytes: -3} KB
 }
 function MOV_WINDOW(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
 	local title=$1
 	local newX=$2
 	local newY=$3
 	local tries=100
 	local IFS=${DIFS} ID="" G="" X="" Y="" W="" H=""
-	while ((tries--)) && ! wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H &>/dev/null
+	#while ((tries--)) && ! wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H &>/dev/null
+	#while ((tries--)) && ! su - ${DISPLAY_0_USER} -s /bin/bash <<-BASH
+	#	wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H &>/dev/null
+	#BASH
+	local WMCTRL_RESULT=false
+	while (( tries-- )) && ! ${WMCTRL_RESULT}
 	do
 		read ID        < <(GET_WINDOW_ID       "${title}")
 		read G X Y W H < <(GET_WINDOW_LOCATION "${title}")
+		#echo wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H >> "${LOG}"
+		su - ${DISPLAY_0_USER} -s /bin/bash <<-SU >> "${LOG}"
+			export DISPLAY=:${TARGET_DISPLAY:-0}
+			wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H
+		SU
+		(( $? )) && WMCTRL_RESULT=false || WMCTRL_RESULT=true
 	done
 }
+function GET_WINDOW_LIST(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
+	su - ${DISPLAY_0_USER} -s /bin/bash <<-SU	
+		export DISPLAY=:${TARGET_DISPLAY:-0}
+		wmctrl -l
+	SU
+}
 function GET_WINDOW_LOCATION(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
 	local title=$1
 	local ID=$(GET_WINDOW_ID "${title}")
-	awk '{print $2,$3,$4,$5,$6}' <(grep "^${ID}[[:space:]]" <(wmctrl -lG))
+	su - ${DISPLAY_0_USER} -s /bin/bash <<-SU
+		export DISPLAY=:${TARGET_DISPLAY:-0}
+		wmctrl -lG			|\
+		grep "^${ID}[[:space:]]"	|\
+		awk '{print \$2,\$3,\$4,\$5,\$6}'
+	SU
 }
 function GET_WINDOW_ID(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
 	local title=$1
-	cat <<-SED | sed -n -f <(cat) <(wmctrl -l)
+	cat <<-SED | sed -n -f <(cat) <(GET_WINDOW_LIST)
 		/[[:space:]]${title//[[:space:]]/[[:space:]]\+}\$/{
 			s/[[:space:]]\+.*//p
 		}

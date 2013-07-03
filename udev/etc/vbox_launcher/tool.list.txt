@@ -44,7 +44,7 @@ Tool	Selections	Locations							Memory
 #Diag	Clone-Zilla	clonezilla.iso							256
 
 Task	SpinRite	Data/ISO.Misc/SpinRite.iso
-Task	DBAN		"Data/ISO.Misc/dban-2.2.6_i586.iso hello"
+Task	DBAN		Data/ISO.Misc/dban-2.2.6_i586.iso
 Task	Ghost		Data/ISO.Misc/ghost.iso						512
 #Deploy	Unity
 #Deploy	Kubuntu
