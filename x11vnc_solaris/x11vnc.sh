@@ -186,4 +186,4 @@ chmod 777 ${LOG}
 DEBUG=true
 DEBUG=false
 
-main "$@" 2>&1 >> "${LOG}"
+main "$@" 1>> "${LOG}" 2>> "${LOG}.e"
