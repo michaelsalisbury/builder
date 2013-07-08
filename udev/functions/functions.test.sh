@@ -2,14 +2,27 @@
 function LOG(){
 	# Dependant on GLOBAL var LOG
 	# test first arg for true|false
-	if (( ${#1} > 0 )) && [[ "$1" =~ ^(true|false)$ ]]; then
-		$1 && shift || return
-	fi
+	while case "${1}" in
+		true)	;;						# do nothing, continue processing LOG entry
+		false)	return;;					# don't process LOG entry
+		ERR)	local ARGS+="   ERROR ";;			# common prefix ::    ERROR
+		DIS)	local ARGS+="DISABLED ";;			# common prefix :: DISABLED
+		INF)	local ARGS+="    INFO ";;			# common prefix ::     INFO
+		DBG)	local ARGS+="   DEBUG ";;			# common prefic ::    DEBUG
+		STS)	local ARGS+="  STATUS ";;			# common prefix ::   STATUS
+		DEF)	local ARGS+=" DEFAULT ";;			# common prefix ::  DEFAULT
+		CAN)	local ARGS+="CANCELED ";;			# common prefix :: CANCELED
+		BRO)	local ARGS+="  BROKEN ";;			# common prefix ::   BROKEN
+		-)	local log_pipe_only=true;;			# don't create a LOG entry unless data was piped
+		*)	local log_pipe_only=${log_pipe_only:-false}	# set default values for local vars
+			break;;						# done processing function switches
+	esac; do shift; done
 	# test GLOBAL var LOG; comment these out for speed
 	(( ${#LOG} > 0 )) || { echo ERROR :: ${FUNCNAME} :: Log file not defined \(var LOG\). Log entry cancelled. 1>&2; return; }
 	[ -f "${LOG}" ]   || { echo ERROR :: ${FUNCNAME} :: Log file doesn\'t exist.  LOG = ${LOG}.  Log entry cancelled. 1>&2; return; }
 	# get args
-	local ARGS="$@"
+	local IFS=' '
+	local ARGS+="$@"
 	# LOG piped data
 	if readlink /proc/$$/fd/0 | egrep -q "^pipe:" \
 	|| read -t 0 -N 0; then
@@ -17,14 +30,14 @@ function LOG(){
 		echo -n
 		if (( ${#ARGS} > 0 )); then
 			# prepend args
-			cat 2>&1 | sed "s|^|${ARGS} |" >> "${LOG}"
+			sed "s|^|${ARGS} |" <(cat 2>&1) >> "${LOG}"
 		else
 			# no prepend just log pipe
 			cat >> "${LOG}" 2>&1
 		fi
-	else
+	elif ! ${log_pipe_only}; then
 		# LOG command line args
-		(( ${#ARGS} > 0 )) && echo "${ARGS}" >> "${LOG}"
+		(( ${#ARGS} > 0 )) && echo "${ARGS}" \!NP\! >> "${LOG}"
 	fi
 }
 function SOURCE_CONFIG_GLOBAL_VARS(){
@@ -49,10 +62,10 @@ function SOURCE_CONFIG_GLOBAL_VARS(){
 		local config="${BASH_SRCDIR}/../etc/${PROG_NAME}/$1"
 
 	else	
-		echo ERROR :: ${FUNCNAME} :: File \"$1\" not found. 2>&1
+		echo ERROR :: $(GET_FUNC_CHAIN) :: File \"$1\" not found. 2>&1
 		return
 	fi
-	LOG ${DEBUG:-false} DEBUG :: ${FUNCNAME} :: config = ${config}
+	LOG ${DEBUG:-false} DEBUG :: $(GET_FUNC_CHAIN) :: config = ${config}
 	source <(sed -n "${config}" -f <(cat <<-SED
 		/^[[:space:]]*$/d				# delete blank lines
 		/^[[:space:]]*#/d				# delete comment lines
@@ -64,7 +77,7 @@ function SOURCE_CONFIG_GLOBAL_VARS(){
 			p					# print
 		}
 	SED
-	) | tee >(LOG ${DEBUG:-false} DEBUG :: ${FUNCNAME} ::)
+	) | tee >(LOG ${DEBUG:-false} DEBUG :: $(GET_FUNC_CHAIN) ::)
 	)
 }
 function GET_CONFIG_SECTION(){
@@ -73,18 +86,18 @@ function GET_CONFIG_SECTION(){
 		local CONFIG_FILE=$1
 		shift
 	else
-		echo ERROR :: ${FUNCNAME} :: Config file \"${1}\" is not accesable. No section returned. 1>&2
+		echo ERROR :: $(GET_FUNC_CHAIN) :: Config file \"${1}\" is not accesable. No section returned. 1>&2
 		return 1
 	fi
 	# set SECTION title
 	local SECTION=$*
 	# test that SECTION title was supplied
 	if ! (( ${#SECTION} > 0 )); then
-		echo ERROR :: ${FUNCNAME} :: Section name not supplied.  No section returned. 1>&2
+		echo ERROR :: $(GET_FUNC_CHAIN) :: Section name not supplied.  No section returned. 1>&2
 		return 1
 	fi
 	# DEBUG
-	LOG ${DEBUG:-false} DEBUG :: ${FUNCNAME} :: SECTION[${SECTION}] CONFIG_FILE[${CONFIG_FILE}]
+	LOG ${DEBUG:-false} DEBUG :: $(GET_FUNC_CHAIN) :: SECTION[${SECTION}] CONFIG_FILE[${CONFIG_FILE}]
 	# return config section data
 	cat <<-SED | sed -n -f <(cat) "${CONFIG_FILE}" | tee >(LOG ${DEBUG:-false} DEBUG :: ${FUNCNAME} ::)
 		/[[:space:]]*\[ ${SECTION} \]/,/[[:space:]]*\[/{
@@ -219,11 +232,11 @@ function FORMAT_TO_KB(){
 	echo ${bytes:0: -3}.${bytes: -3} KB
 }
 function MOV_WINDOW(){
-	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
+	RUN_WINDOW_TEST || return 1
 	local title=$1
 	local newX=$2
 	local newY=$3
-	local tries=100
+	local tries=20
 	local IFS=${DIFS} ID="" G="" X="" Y="" W="" H=""
 	#while ((tries--)) && ! wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H &>/dev/null
 	#while ((tries--)) && ! su - ${DISPLAY_0_USER} -s /bin/bash <<-BASH
@@ -235,35 +248,85 @@ function MOV_WINDOW(){
 		read ID        < <(GET_WINDOW_ID       "${title}")
 		read G X Y W H < <(GET_WINDOW_LOCATION "${title}")
 		#echo wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H >> "${LOG}"
-		su - ${DISPLAY_0_USER} -s /bin/bash <<-SU >> "${LOG}"
-			export DISPLAY=:${TARGET_DISPLAY:-0}
-			wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H
-		SU
-		(( $? )) && WMCTRL_RESULT=false || WMCTRL_RESULT=true
+		(
+			# if user is root then impersinate user
+			if whoami | grep -q ^root$; then
+				su - $(GET_DISPLAY_USER ${DISPLAY}) -s /bin/bash <<-SU
+					export DISPLAY=${DISPLAY}
+					wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H
+				SU
+			else
+				# on error send message to LOG
+				wmctrl -ir "${ID}" -e $G,${newX},${newY},$W,$H
+			fi
+		) 2> >(LOG - BRO :: $(GET_FUNC_CHAIN) ::) \
+			&& WMCTRL_RESULT=true \
+			|| WMCTRL_RESULT=false
 	done
 }
+function GET_FUNC_CHAIN(){
+	local index=${1:- 1}
+	echo -n ${FUNCNAME[*]:${index}} | tr ' ' , 
+}
+function RUN_WINDOW_TEST(){
+	# test if wmctrl is installed
+	if ! which wmctrl &>/dev/null; then
+		LOG BRO :: $(GET_FUNC_CHAIN 2) :: wmctrl in not installed.
+		return 1
+	fi
+	# display test
+	if [ ${TARGET_DISPLAY:-0} != ${DISPLAY//[^0-9.]/} ]; then
+ 		LOG DIS :: $(GET_FUNC_CHAIN 2) :: Target Displays don\'t match.
+		return 1
+	fi
+	return 0
+}
+function GET_WINDOW_LISTG(){
+	RUN_WINDOW_TEST || return 1
+	(
+		# if user is root then impersinate user
+		if whoami | grep -q ^root$; then
+			su - $(GET_DISPLAY_USER ${DISPLAY}) -s /bin/bash <<-SU
+				export DISPLAY=${DISPLAY}
+				wmctrl -lG
+			SU
+		else
+			# on error send message to LOG
+			wmctrl -lG
+		fi
+	# log error message
+	) 2> >(LOG - BRO :: $(GET_FUNC_CHAIN) ::) || return 1
+}
 function GET_WINDOW_LIST(){
-	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
-	su - ${DISPLAY_0_USER} -s /bin/bash <<-SU	
-		export DISPLAY=:${TARGET_DISPLAY:-0}
-		wmctrl -l
-	SU
+	RUN_WINDOW_TEST || return 1
+	(
+		# if user is root then impersinate user
+		if whoami | grep -q ^root$; then
+			su - $(GET_DISPLAY_USER ${DISPLAY}) -s /bin/bash <<-SU
+				export DISPLAY=${DISPLAY}
+				wmctrl -l
+			SU
+		else
+			# on error send message to LOG
+			wmctrl -l
+		fi
+	# log error message
+	) 2> >(LOG - BRO :: $(GET_FUNC_CHAIN) ::) || return 1
 }
 function GET_WINDOW_LOCATION(){
-	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
 	local title=$1
 	local ID=$(GET_WINDOW_ID "${title}")
-	su - ${DISPLAY_0_USER} -s /bin/bash <<-SU
-		export DISPLAY=:${TARGET_DISPLAY:-0}
-		wmctrl -lG			|\
-		grep "^${ID}[[:space:]]"	|\
-		awk '{print \$2,\$3,\$4,\$5,\$6}'
-	SU
+	GET_WINDOW_LISTG		|\
+	grep "^${ID}[[:space:]]"	|\
+	awk '{print $2,$3,$4,$5,$6}'	\
+	2> >(LOG - ERR :: $(GET_FUNC_CHAIN) ::)
 }
+
+
+
 function GET_WINDOW_ID(){
-	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
 	local title=$1
-	cat <<-SED | sed -n -f <(cat) <(GET_WINDOW_LIST)
+	cat <<-SED | sed -n -f <(cat) <(GET_WINDOW_LIST) 2> >(LOG - ERR :: $(GET_FUNC_CHAIN) ::)
 		/[[:space:]]${title//[[:space:]]/[[:space:]]\+}\$/{
 			s/[[:space:]]\+.*//p
 		}

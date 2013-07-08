@@ -6,6 +6,11 @@
 		 DEBUG = false
 	     POPUP_LOG = true
 	     POPUP_LOG = false
+#DEVICE2PROMPT_DEFAULT; when false FILTER determines single disk VM,
+#			when true  FILTER determines dual disk optional
+#DEVICE2PROMPT_FILTERS; comma delimited
+ DEVICE2PROMPT_DEFAULT = false
+ DEVICE2PROMPT_FILTERS = task
 
 [ Warning Instructions ]
 	<b><u><big><span color=\"red\">WARNING</span></big></u>

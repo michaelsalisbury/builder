@@ -1,7 +1,7 @@
 #!/bin/bash
 ###########################################################################################
 ############################################################################### GLOBAL VARS
-# ARRAYS :: DEVICES, SELECTION, NAME, VMDK
+# ARRAYS :: DEVICES, SELECTION
 # 
 #
 #
@@ -63,52 +63,102 @@ function ACTION_ADD(){
 	# prompt user to add seconadary device 
 	IS_2ND_DEVICE_OPTIONAL && zenity_choose_device
 
+	#if grep -qi "^\(diag\|PXE\|DISK\)" <(echo ${SELECTION[2]}); then
+	#	zenity_choose_device
+	#fi
+
 	# prompt user to label task/vm
-	zenity_name_task
+	local IFS=:
+	NAME=( $(zenity_name_task) )
+
+	# exit if user chose cancel or closed dialog
+	local IFS=,
+	case "${NAME[0]}.${#NAME[*]}" in
+		1.*)	LOG CAN :: clk_X/CAN :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}]. Exiting\!
+			EXIT 1;;
+		5.1)	LOG STS :: TIMED_OUT :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}].;;
+		5.*)	LOG STS :: _LAUNCHED :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}].;;
+		*)	LOG ERR :: NEW_STATE :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}]. Exiting\!
+			EXIT 1;;
+	esac
+
+	# set default name if start vm was selected without entering a name
+	(( ${#NAME[*]} > 1 )) || SET_DEFAULT_NAME
 
 ######### if selection is PXE then verify bridged ethernet default is OK
 
+	# amend VRDEPORT and DEVICE to NAME[1]
+	local IFS=' '
+	NAME[1]="${NAME[1]}-$(GET_VRDEPORT).${DEVICE}"
+	LOG INF :: NAME["${NAME[*]}"]
+
+	# set path for vmdk files
+	declare -A VMDK
+	for DEV in ${DEVICE[*]}; do
+		VMDK[${DEV}]="$(GET_HOME_DIR)/.VirtualBox/$(GET_DEVICE_VMDK_FILE_NAME ${DEV})"
+	done
+
 	# cleanup old primary vmdk files
-	for DEV in ${DEVICE[*]};	do DETACH_VMDK_HDD ${DEV};	done
+	for DEV in ${DEVICE[*]}; do
+		DETACH_VMDK_HDD ${DEV}
+	done
 
 	# cleanup conflicting stale virtual machines
-	for DEV in ${DEVICE[*]};	do DELETE_VM ${DEV};		done
+	for DEV in ${DEVICE[*]}; do
+		DELETE_VM ${DEV}
+	done
 
 	# unmount devices
 	UNMOUNT_DEVICES
 
-	# create VMDK
-	for DEV in ${DEVICE[*]};	do CREATE_VMDK ${DEV};		done
+	# create virtualbox raw vmdk files; user must be part of "disk" group
+	for DEV in ${DEVICE[*]}; do
+		IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
+			# Only run command if VBoxManage exists and is in PATH
+			which VBoxManage &>/dev/null &&\
+			VBoxManage internalcommands createrawvmdk	\
+				-filename "${VMDK[${DEV}]}"		\
+				-rawdisk /dev/${DEV}
+		SU
+	done
 
 	# create virtual machine
-	CREATE_VM	
+	SET_VM	
 
 	# one more time just to be safe
 	UNMOUNT_DEVICES
 
+EXIT 1
 	# start virtual machine
 	START_VM
 
-	# LOG VM start
-	LOG INF :: VM started, NAME[${NAME[1]}] DEV0[${DEVICE[0]}] DEV1[${DEVICE[1]}]
+	# dump var status to LOG
+	echo	
+	echo "      name :: "${NAME[*]}
+	echo "  name err :: "${NAME[0]}
+	echo " selection :: "${SELECTION[*]}
+	echo "select err :: "${SELECTION[0]}
+	echo "      path :: "$(GET_SELECTION_PATH)
+	echo "       mem :: "$(GET_SELECTION_MEM)
+	echo "      name :: "${NAME[1]}
+	echo '        $@ :: '$@
+	echo
 }
 function ACTION_REMOVE(){
 	unset POPUP_LOG
-	local DEV=${1:-${DEVICE}}
+	DEVICE=$(GET_DEVICE_LIST | head -1)
+	DEVICE=${1:-${DEVICE}}
 
 	# filter out root; system drive
-	IS_DEVICE_ROOT ${DEV} # function exits if positive
-
-	IS_DEVICE_REAL ${DEV}
+	IS_DEVICE_ROOT # function exits if positive
 
 	# LOG
-	LOG INF :: REMOVING DEV[${DEV}]
-
+	echo REMOVING :: ${DEVICE}
 	# detach and delete vmdk 
-	DETACH_VMDK_HDD ${DEV}
+	DETACH_VMDK_HDD ${DEVICE}
 
 	# delete vm
-	DELETE_VM ${DEV}
+	DELETE_VM ${DEVICE}
 
 }
 function ACTION_TRIGGER(){
@@ -134,7 +184,6 @@ function ACTION_TRIGGER(){
 }
 function ACTION_INSTALL(){
 	# verify root access
-	# setup user groups vbox and disk
 	# setup log
 		touch     "${LOG}"
 		chmod 777 "${LOG}"
@@ -153,36 +202,14 @@ function ACTION_INSTALL(){
 ###########################################################################################
 ###########################################################################################
 function START_VM(){
-	if whoami | grep -q ^root$; then
-		local DISPLAY=${DISPLAY:-${TARGET_DISPLAY:-0}}
-		local USERNAME=$(GET_DISPLAY_USER ${DISPLAY})
-		/usr/bin/setsid su - ${USERNAME} -s /bin/bash <<-SU
-			export DISPLAY=:${DISPLAY}
-			which VirtualBox && VirtualBox --startvm "${NAME[1]}"
-		SU
-	else
-		
+	/usr/bin/setsid su - $(GET_DISPLAY_0_USER) -s /bin/bash <<-SU
+		export DISPLAY=:${TARGET_DISPLAY:-0}
 		which VirtualBox && VirtualBox --startvm "${NAME[1]}"
-	fi
-}
-function CREATE_VMDK(){
-	local DEV=${1:-${DEVICE}}
-	# setup assocciative array
-	(( ${#VMDK[*]} > 0 )) || declare -A VMDK
-	# set path for vmdk files, used by function CREATE_VM
-	VMDK[${DEV}]="$(GET_DEVICE_VMDK_FILE_FQFN ${DEV})"
-
-	# create virtualbox raw vmdk files; user must be part of "disk" group
-	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} :: DEV[${DEV}] ::)
-		# Only run command if VBoxManage exists and is in PATH
-		which VBoxManage &>/dev/null &&\
-		VBoxManage internalcommands createrawvmdk	\
-			-filename "${VMDK[${DEV}]}"		\
-			-rawdisk /dev/${DEV}
 	SU
 }
 function DETACH_VMDK_HDD(){
 	local DEV=${1:-${DEVICE}}
+	local DEVICE_VMDK_FILE_NAME="$(GET_DEVICE_VMDK_FILE_NAME ${DEV})"
 
 	local GET_DEVICE_VBOX_UUID=$(GET_DEVICE_VBOX_UUID ${DEV})
 	local GET_DEVICE_VBOX_MACHINE_UUID=$(GET_DEVICE_VBOX_MACHINE_UUID ${DEV})
@@ -234,7 +261,7 @@ function DETACH_VMDK_HDD(){
 	fi
 
 	# now remove the actual vmdk file
-	rm -vf "$(GET_DEVICE_VMDK_FILE_FQFN ${DEV})" \
+	rm -vf "$(GET_HOME_DIR)/.VirtualBox/${DEVICE_VMDK_FILE_NAME}" \
 		1> >(LOG - STS :: ${FUNCNAME}[${DEV}] ::) \
 		2> >(LOG - ERR :: ${FUNCNAME}[${DEV}] ::)
 }
@@ -261,7 +288,7 @@ function DELETE_VM(){
 		1> >(LOG - INF :: ${FUNCNAME}[${DEV}] ::) \
 		2> >(LOG - ERR :: ${FUNCNAME}[${DEV}] ::)
 }
-function CREATE_VM(){
+function SET_VM(){
 	local VBM=$(which VBoxManage 2>/dev/null)
 	if [ -z "${VBM}" ]; then
 		echo ERROR :: ${FUNCNAME} :: VBoxManage not found. Skipping\! >> "${LOG}"
@@ -420,7 +447,7 @@ function GET_SELECTION_DETAILS(){
 }
 function GET_DEFAULT_SELECTION(){
 	echo - PXE  DEFAULT      none 512
-	echo 0 DISK EXPERIMENTAL none 512
+	echo 0 DISK EXPERIMENTAl none 512
 }
 function SET_DEFAULT_SELECTION(){
 	# dependant on global variables; SELECTION
@@ -450,12 +477,6 @@ function IS_2ND_DEVICE_OPTIONAL(){
 }
 ###########################################################################################
 #################################################################################### zenity
-function zenity_cmd(){
-	echo $(IF_ROOT_ECHO "DISPLAY=:${TARGET_DISPLAY:-0}") zenity
-	#whoami | grep -q ^root$ \
-	#	&& echo DISPLAY=:${TARGET_DISPLAY:-0} zenity \
-	#	|| echo zenity
-}
 function zenity_default_title(){
 	echo VBOX Auto Launcher
 	return 0
@@ -497,6 +518,17 @@ function zenity_device_info_list(){
 		echo "$(zenity_device_info ${DEV})\n"
 	done
 }
+function zenity_cmd(){
+	echo $(IF_ROOT_ECHO "DISPLAY=:${TARGET_DISPLAY:-0}") zenity
+	#whoami | grep -q ^root$ \
+	#	&& echo DISPLAY=:${TARGET_DISPLAY:-0} zenity \
+	#	|| echo zenity
+}
+function IF_ROOT_ECHO(){
+	local IFS=${DIFS}
+	whoami | grep -q ^root$ && echo "$@"
+}
+
 function zenity_warning_inuse(){
 	# https://developer.gnome.org/pygtk/stable/pango-markup-language.html
 	local IFS=${DIFS}
@@ -529,30 +561,6 @@ function zenity_warning_inuse(){
 	#) | tac | tr -d '\n'
 }
 function zenity_name_task(){
-	# prompt user to label task/vm
-	local IFS=:
-	NAME=( $(zenity_name_task_dialog) )
-
-	# exit if user choose cancel or closed dialog
-	local IFS=,
-	case "${NAME[0]}.${#NAME[*]}" in
-		1.*)	LOG CAN :: clk_X/CAN :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}]. Exiting\!
-			EXIT 1;;
-		5.1)	LOG STS :: TIMED_OUT :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}].;;
-		5.*)	LOG STS :: _LAUNCHED :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}].;;
-		*)	LOG ERR :: NEW_STATE :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}]. Exiting\!
-			EXIT 1;;
-	esac
-
-	# set default name if start vm was selected without entering a name
-	(( ${#NAME[*]} > 1 )) || SET_DEFAULT_NAME
-
-	# amend VRDEPORT and DEVICE to NAME[1]
-	local IFS=' '
-	NAME[1]="${NAME[1]}-$(GET_VRDEPORT ${DEVICE[0]}).${DEVICE[0]}"
-	LOG INF :: NAME["${NAME[*]}"]
-}
-function zenity_name_task_dialog(){
 	# https://developer.gnome.org/pygtk/stable/pango-markup-language.html
 	local IFS=${DIFS}
 	# dependant on global variables; DEVICE
@@ -583,6 +591,11 @@ function zenity_name_task_dialog(){
 	echo $?:
 	) | tac | tr -d '\n'
 }
+
+
+
+
+
 function zenity_choose_device(){
 	local MAX_TRIES=20
 	while (( MAX_TRIES-- )); do
@@ -925,10 +938,6 @@ function GET_DEVICE_VBOX_MACHINE(){
 }
 ###########################################################################################
 ########################################################## user-names, file-names and paths
-function IF_ROOT_ECHO(){
-	local IFS=${DIFS}
-	whoami | grep -q ^root$ && echo "$@"
-}
 function IF_ROOT_SU(){
 	whoami | grep -q ^root$ \
 		&& su - $(GET_DISPLAY_USER ${DISPLAY:-${TARGET_DISPLAY:-0}}) -s /bin/bash <(cat)\
@@ -945,60 +954,20 @@ function GET_HOME_DIR(){
 function GET_DEVICE_VMDK_FILE_NAME(){
 	echo udev.$(basename "${1:-${DEVICE}}").vmdk
 }
-function GET_DEVICE_VMDK_FILE_FQFN(){
-	local DEVICE_VMDK_FILE_NAME=$(GET_DEVICE_VMDK_FILE_NAME "$1")
-	echo "$(GET_HOME_DIR)/.VirtualBox/${DEVICE_VMDK_FILE_NAME}"
-}
-function GET_PROGRAM_NAME(){
-	if (( ${#PROGRAM_NAME} > 0 )); then
-		echo "${PROGRAM_NAME}"
-	else
-		PROGRAM_NAME=$(basename "${BASH_SOURCE}" .sh)
-		GET_PROGRAM_NAME
-	fi
-}
-function GET_ETC_CONFIG_DIR(){
-	local PROGRAM_NAME=$(GET_PROGRAM_NAME)
-	echo "/etc/${PROGRAM_NAME// /_}"
-}
-function GET_INSTALL_CONFIG_DIR(){
-	local PROGRAM_NAME=$(GET_PROGRAM_NAME)
-	if [      -d "${BASH_SRCDIR}/..$(GET_ETC_CONFIG_DIR)" ]; then
-		echo "${BASH_SRCDIR}/..$(GET_ETC_CONFIG_DIR)"
-	elif [    -d "${BASH_SRCDIR}/../etc/${PROGRAM_NAME// /_}" ]; then
-		echo "${BASH_SRCDIR}/../etc/${PROGRAM_NAME// /_}"
-	elif [    -d "${BASH_SRCDIR}/${PROGRAM_NAME// /_}" ]; then
-		echo "${BASH_SRCDIR}/${PROGRAM_NAME// /_}"
-	elif [    -d "${BASH_SRCDIR}/../${PROGRAM_NAME// /_}" ]; then
-		echo "${BASH_SRCDIR}/../${PROGRAM_NAME// /_}"
-	else
-		echo "${BASH_SRCDIR}"
-	fi
-}
 function GET_USER_CONFIG_DIR(){
 	local USER_CONFIG_DIR="$(GET_HOME_DIR)/${USER_CONFIG_DIR_RELATIVE}"
 	[ -d "${USER_CONFIG_DIR}" ] \
 		&& echo "${USER_CONFIG_DIR}" \
-		|| echo "/tmp/$$"
+		|| echo "/dev/zreo"
 }
 function GET_USER_CONFIG_FQFN(){
-	local USER_CONFIG_FQFN="$(GET_USER_CONFIG_DIR)/${USER_CONFIG_FILE_NAME}"
-	local ETC_CONFIG_FQFN="$(GET_ETC_CONFIG_DIR)/${USER_CONFIG_FILE_NAME}"
-	local INSTALL_CONFIG_FQFN="$(GET_INSTALL_CONFIG_DIR)/${USER_CONFIG_FILE_NAME}"
+	local USER_CONFIG_FQFN="$(GET_HOME_DIR)/${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
 	if [ -f "${USER_CONFIG_FQFN}" ]; then
 		echo "${USER_CONFIG_FQFN}"
-		return 0
-	elif [ -f "${ETC_CONFIG_FQFN}" ]; then
-		LOG ERR :: $(GET_FUNC_CHAIN) :: File \"${USER_CONFIG_FQFN}\" not found.  Using \"${ETC_CONFIG_FQFN}\".
-		echo "${ETC_CONFIG_FQFN}"
-		return 1
-	elif [ -f "${INSTALL_CONFIG_FQFN}" ]; then
-		LOG ERR :: $(GET_FUNC_CHAIN) :: File \"${USER_CONFIG_FQFN}\" not found.  Using \"${INSTALL_CONFIG_FQFN}\".
-		echo "${INSTALL_CONFIG_FQFN}"
-		return 1
 	else
-		LOG ERR :: $(GET_FUNC_CHAIN) :: All alternate config files missing\!  Exiting.
-		EXIT 1
+		LOG ERR :: $(GET_FUNC_CHAIN) :: File \"${USER_CONFIG_FQFN}\" not found.
+		echo "/dev/zero"
+		return 1
 	fi
 }
 ###########################################################################################

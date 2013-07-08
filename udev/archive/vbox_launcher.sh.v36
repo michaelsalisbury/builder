@@ -1,0 +1,1098 @@
+#!/bin/bash
+function main(){
+	case "${1}" in
+		a*|A*)		shift; ACTION_ADD     "$@";;
+		d*|D*)		shift; ACTION_DISOWN  "$@";;
+		i*|I*)		       ACTION_INSTALL;;
+		r*|R*)		shift; ACTION_REMOVE  "$@";;
+		s*|S*)		       ACTION_SELECT;;
+		t*|T*)		shift; ACTION_TRIGGER "$@";;
+		*)		       ACTION_SELECT;;
+	esac
+}
+function HELP(){
+	cat <<-HELP
+		Usage...
+		 a [dev] run device add
+		 r [dev] run device remove
+		 t [dev] trigger udev device add action
+
+		 LOG :: ${LOG}
+	HELP
+	EXIT 1
+}
+function ACTION_DISOWN(){
+	/usr/bin/setsid "${BASH_SRCFQFN}" "$@" &
+	EXIT 0
+}
+function ACTION_SELECT(){
+	# select a disk manually
+	ENABLE_WMCTRL=false
+	zenity_choose_device
+	# verify user selected disk otherwise exit
+	if (( ${#DEVICE[*]} )) && IS_DEVICE_REAL ${DEVICE[0]}; then
+		#ACTION_TRIGGER ${DEVICE[0]}
+		ACTION_ADD     ${DEVICE[0]}
+	else
+		EXIT 1
+	fi
+}
+function ACTION_ADD(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
+	DEVICE=$(GET_DEVICE_LIST | head -1)
+	DEVICE=${1:-${DEVICE}}
+
+	# filter out root; system drive
+	IS_DEVICE_ROOT # function exits if positive
+
+	# popup log
+	OPEN_POPUP_LOG
+
+	# prompt user to choose tool or disregard
+	local IFS=:
+	SELECTION=( $(zenity_choose_tool) )
+
+	# exit if user chose cancel or closed dialog
+	local IFS=,
+	case "${SELECTION[0]}.${#SELECTION[*]}" in
+		0.*)	LOG STS :: dbl_CLICK :: Task selection dialog\; EC[${SELECTION[0]}] SEL["${SELECTION[*]:1}"}].;;
+		1.*)	LOG CAN :: clk_X/CAN :: Task selection dialog\; EC[${SELECTION[0]}] DEVICE[${DEVICE}].        Exiting\!
+			EXIT 1;;
+		5.1)	LOG STS :: TIMED_OUT :: Task selection dialog\; EC[${SELECTION[0]}] SEL["${SELECTION[*]:1}"}].;;
+		5.*)	LOG STS :: clk_NEXT_ :: Task selection dialog\; EC[${SELECTION[0]}] SEL["${SELECTION[*]:1}"}].;;
+		*)	LOG ERR :: NEW_STATE :: Task selection dialog\; EC[${SELECTION[0]}] SEL["${SELECTION[*]:1}"}]. Exiting\!
+			EXIT 1;;
+	esac
+
+	# set default if next was selected without chooseing a tool
+	(( ${#SELECTION[*]} > 1 )) && GET_SELECTION_DETAILS || SET_DEFAULT_SELECTION
+
+	# prompt user to add seconadary device 
+	if grep -qi "^\(diag\|PXE\|DISK\)" <(echo ${SELECTION[2]}); then
+		zenity_choose_device
+	fi
+
+	# prompt user to label task/vm
+	local IFS=:
+	NAME=( $(zenity_name_task) )
+
+	# exit if user chose cancel or closed dialog
+	local IFS=,
+	case "${NAME[0]}.${#NAME[*]}" in
+		1.*)	LOG CAN :: clk_X/CAN :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}]. Exiting\!
+			EXIT 1;;
+		5.1)	LOG STS :: TIMED_OUT :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}].;;
+		5.*)	LOG STS :: _LAUNCHED :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}].;;
+		*)	LOG ERR :: NEW_STATE :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}]. Exiting\!
+			EXIT 1;;
+	esac
+
+	# set default name if start vm was selected without entering a name
+	(( ${#NAME[*]} > 1 )) || SET_DEFAULT_NAME
+
+######### if selection is PXE then verify bridged ethernet default is OK
+
+	# amend VRDEPORT and DEVICE to NAME[1]
+	NAME[1]="${NAME[1]}-$(GET_VRDEPORT).${DEVICE}"
+	echo NAME :: ${NAME[*]}
+
+	# set path for vmdk files
+	declare -A VMDK
+	for DEV in ${DEVICE[*]}; do
+		VMDK[${DEV}]="${DISPLAY_0_HOME}/.VirtualBox/udev.${DEV}.vmdk"
+	done
+
+	# cleanup old primary vmdk files
+	for DEV in ${DEVICE[*]}; do
+		DETACH_VMDK_HDD ${DEV}
+	done
+
+	# cleanup conflicting stale virtual machines
+	for DEV in ${DEVICE[*]}; do
+		DELETE_VM ${DEV}
+	done
+
+	# unmount devices
+	UNMOUNT_DEVICES
+
+	# create virtualbox raw vmdk files; user must be part of "disk" group
+	for DEV in ${DEVICE[*]}; do
+		IF_ROOT_SU <<-SU
+			# Only run command if VBoxManage exists and is in PATH
+			which VBoxManage &>/dev/null &&\
+			VBoxManage internalcommands createrawvmdk	\
+				-filename "${VMDK[${DEV}]}"		\
+				-rawdisk /dev/${DEV}
+			#VBoxManage list hdds
+		SU
+	done
+
+	# create virtual machine
+	SET_VM	
+
+	# one more time just to be safe
+	UNMOUNT_DEVICES
+
+EXIT 1
+	# start virtual machine
+	START_VM
+
+	# dump var status to LOG
+	echo	
+	echo "      name :: "${NAME[*]}
+	echo "  name err :: "${NAME[0]}
+	echo " selection :: "${SELECTION[*]}
+	echo "select err :: "${SELECTION[0]}
+	echo "      path :: "$(GET_SELECTION_PATH)
+	echo "       mem :: "$(GET_SELECTION_MEM)
+	echo "      name :: "${NAME[1]}
+	echo '        $@ :: '$@
+	echo
+}
+function ACTION_REMOVE(){
+	unset POPUP_LOG
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
+	DEVICE=$(GET_DEVICE_LIST | head -1)
+	DEVICE=${1:-${DEVICE}}
+
+	# filter out root; system drive
+	IS_DEVICE_ROOT # function exits if positive
+
+	# LOG
+	echo REMOVING :: ${DEVICE}
+	# detach and delete vmdk 
+	DETACH_VMDK_HDD ${DEVICE}
+
+	# delete vm
+	DELETE_VM ${DEVICE}
+
+}
+function SETUP_CONFIG_UDEV_RULE(){
+	# Dependant on GLOBAL var; UDEV_RULE_CONFIG_FILE_NAME_DEFAULT
+	local PROG_NAME=$(basename "${BASH_SRCNAME}" .sh)
+	local RULE_FILE="/etc/udev/rules.d/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}"
+	# LOG Info
+	LOG INFO :: ${FUNCNAME} :: UDEV_RULE_CONFIG_FILE_NAME_DEFAULT[${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}]
+	# Find the most relavant udev rule config file template
+	if [ -f "${BASH_SRCDIR}/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}" ]; then
+		local SOURCE_CONFIG="${BASH_SRCDIR}/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}"
+	elif [ -f "${BASH_SRCDIR}/../etc/${PROG_NAME}/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}" ]; then
+		local SOURCE_CONFIG="${BASH_SRCDIR}/../etc/${PROG_NAME}/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}"
+	else
+		LOG ERROR :: ${FUNCNAME} :: Source udev rule template not found. UDEV_RULE_CONFIG_FILE_NAME_DEFAULT[${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}]
+		EXIT 1
+	fi
+	# fix template file; ensure rules execute this script
+	cat <<-SED | sed -i -f <(cat) "${SOURCE_CONFIG}"
+		s|\(.*[[:space:]]RUN+="\)\([^[:space:]]\+\)\(.*\)|\1${BASH_SRCFQFN}\3|
+	SED
+	# test if template differs from install udev rule
+	diff --suppress-common-lines "${SOURCE_CONFIG}" "${RULE_FILE}" | LOG INFO :: ${FUNCNAME} ::
+	#
+	(( ${PIPESTATUS[0]} )) && cat "${SOURCE_CONFIG}" > "${RULE_FILE}"
+}
+function ACTION_TRIGGER(){
+	#udevadm trigger --action=add    --sysname-match="sdb"
+	local DEV=$(GET_DEVICE_LIST | head -1)
+	local DEV=${2:-${DEV}}
+	unset POPUP_LOG
+
+	IS_DEVICE_ROOT ${DEV}
+	
+	IS_DEVICE_REAL ${DEV}
+
+	SETUP_CONFIG_IF_EMPTY "${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}" "/etc/udev/rules.d/${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT}"
+
+	SETUP_CONFIG_UDEV_RULE
+
+	case "$1" in
+		a*|A*)	udevadm trigger --action=add    --sysname-match="${DEV}";;
+		r*|R*)	udevadm trigger --action=remove --sysname-match="${DEV}";;
+		*)	ACTION_TRIGGER add "$@";;
+	esac
+	EXIT 0
+}
+function START_VM(){
+	/usr/bin/setsid su - $(GET_DISPLAY_0_USER) -s /bin/bash <<-SU
+		export DISPLAY=:${TARGET_DISPLAY:-0}
+		which VirtualBox && VirtualBox --startvm "${NAME[1]}"
+	SU
+}
+function UNMOUNT_DEVICES(){
+	local TRIES=""
+	local PART=""
+	local DEV=""
+	for DEV in ${DEVICE[*]}; do
+		for PART in `ls /dev/${DEV}[0-9]`; do
+			for TRIES in {1..2}; do
+				umount ${PART} &>/dev/null
+			done
+			umount -v ${PART} \
+				1> >(LOG - STS :: ${FUNCNAME} ::) \
+				2> >(LOG - ERR :: ${FUNCNAME} ::)
+		done
+	done
+}
+function DETACH_VMDK_HDD(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DEV=${1:-${DEVICE}}
+	local TARGET_VM_MASK="$(GET_VRDEPORT ${DEV}).${DEV}.vmdk"
+	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME}[${DEV}] ::)
+		# Only run command if VBoxManage exists and is in PATH
+		which VBoxManage &>/dev/null &&\
+		VBoxManage list hdds |\
+		while read VAR DATA; do
+
+			(( \${#VAR} )) || continue
+			# create variables
+			eval \${VAR%:}=\"\${DATA}\"
+			# If the following are true...
+			# Usage is the current VAR (also the last hdd detail)
+			# Format equals VMDK
+			# The Location name matches my mask
+			if [ "\${VAR%:}" == "Usage" ] \
+			&& [ "\${Format}" == "VMDK" ] \
+			&& [[ "\${Location}" =~ ${TARGET_VM_MASK}\$ ]]; then
+				echo DEL_DISK :: UUID = \${UUID}
+				echo DEL_DISK :: PATH = \${Location}
+				VBoxManage controlvm     "\${Usage% (*}" poweroff
+				(( \$? )) || sleep 3
+				VBoxManage storageattach "\${Usage% (*}"\
+					--storagectl ${SCTL}		\
+					--type hdd --port 0 --device 0	\
+					--medium none
+				(( \$? )) || sleep 2
+				VBoxManage storageattach "\${Usage% (*}"\
+					--storagectl ${SCTL}		\
+					--type hdd --port 1 --device 0	\
+					--medium none
+				(( \$? )) || sleep 2
+				VBoxManage closemedium disk "\${UUID}"
+				(( \$? )) || sleep 2
+				VBoxManage unregistervm "\${Usage% (*}" --delete
+				(( \$? )) || sleep 2 
+				VBoxManage unregistervm "\${Usage% (*}"
+				(( \$? )) || sleep 2 
+			fi
+		done		
+	SU
+	# now remove the actual vmdk file
+	rm -vf "${DISPLAY_0_HOME}/.VirtualBox/udev.${DEV}."*.vmdk \
+		1> >(LOG - STS :: ${FUNCNAME}[${DEV}] ::) \
+		2> >(LOG - ERR :: ${FUNCNAME}[${DEV}] ::)
+}
+function DELETE_VM(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DEV=${1:-${DEVICE}}
+	local TARGET_VM_MASK="$(GET_VRDEPORT ${DEV}).${DEV}"
+	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME}[${DEV}] ::)
+		# Only run command if VBoxManage exists and is in PATH
+		which VBoxManage &>/dev/null &&\
+		VBoxManage list vms |\
+		while read line; do
+			eval words=( "\${line}" )
+			vm_uuid=\${words[1]}
+			# echo MACHINE :: \${words[*]}
+			if [[ "\${words[0]}" =~ ${TARGET_VM_MASK}\$ ]]; then
+				echo REMOVED :: \${words[*]}
+				VBoxManage controlvm    \${vm_uuid} poweroff
+				(( \$? )) || sleep 3
+				VBoxManage unregistervm \${vm_uuid} --delete
+				(( \$? )) || sleep 3
+				VBoxManage unregistervm \${vm_uuid}
+				(( \$? )) || sleep 3
+			fi
+		done
+	SU
+	# remove vm folder
+	rm -rvf "${DISPLAY_0_HOME}/VirtualBox VMs"/*${TARGET_VM_MASK} \
+		1> >(LOG - INF :: ${FUNCNAME}[${DEV}] ::) \
+		2> >(LOG - ERR :: ${FUNCNAME}[${DEV}] ::)
+}
+function SET_VM(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
+	local DISPLAY_0_TOOL_DIR="${DISPLAY_0_HOME}/${TOOL_DIR}"
+	
+	local VBM=$(which VBoxManage 2>/dev/null)
+	if [ -z "${VBM}" ]; then
+		echo ERROR :: ${FUNCNAME} :: VBoxManage not found. Skipping\! >> "${LOG}"
+		return
+	fi
+	# prep
+	case ${SELECTION[1]} in
+		-)	local boot1='net';;
+		0)	local boot1='disk';;
+		*)	local boot1='dvd'
+			local DVD=$(GET_SELECTION_PATH);;
+	esac
+	# create vm
+	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
+		${VBM} createvm --name ${NAME[1]}	\
+				--ostype Other		\
+				--register
+	SU
+	# memory
+	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
+		${VBM} modifyvm ${NAME[1]} --memory $(GET_SELECTION_MEM)
+	SU
+	# set boot device
+	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
+		${VBM} modifyvm ${NAME[1]} --boot1 ${boot1} \
+					   --boot2 none     \
+					   --boot3 none     \
+					   --boot4 none
+	SU
+	# set nic
+	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
+		${VBM} modifyvm ${NAME[1]} --nic1 bridged        \
+					   --cableconnected1 on  \
+					   --bridgeadapter1 ${BRIDGED_ETH} \
+					   --nictype1 82540EM    \
+					   --macaddress1 $(GET_MAC)
+	SU
+	# set VRDE
+	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
+		${VBM} modifyvm ${NAME[1]} --vrde on                  \
+					   --vrdeport $(GET_VRDEPORT) \
+					   --vrdeauthtype null        \
+					   --vrdemulticon on
+	SU
+	# set ide controler and dvd
+	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
+		${VBM} storagectl ${NAME[1]} --name ${SCTL}	\
+					   --add ${SCTL}	\
+					   --bootable on
+		${VBM} storageattach ${NAME[1]} --storagectl ${SCTL} \
+					   --port 0		\
+					   --device 1		\
+					   --type dvddrive	\
+					   --medium "${DVD:-emptydrive}"
+	SU
+	# set disks
+	local DEV="" PORT_NUM=0
+	for DEV in ${DEVICE[*]}; do
+		LOG DEV[${DEV}] :: ${PORT_NUM} :: ${VMDK[${DEV}]}
+		IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
+			${VBM} storageattach ${NAME[1]} --storagectl ${SCTL}	\
+						   --port ${PORT_NUM}		\
+						   --device 0			\
+						   --type hdd			\
+						   --medium "${VMDK[${DEV}]}"
+		SU
+		let PORT_NUM++
+	done
+}
+###########################################################################################
+###########################################################################################
+function GET_VRDEPORT(){
+	# dependant on global variables; VRDEPORT, DEVICE
+	local DEV=${1:-${DEVICE}}
+	# get vrdeport; convert the sd disk letter to a number and add to port base
+	# sdb = 33890, sdc = 33891, sdd = 33892,,,
+	echo $(( VRDEPORT + $(printf "%d\n" \'${DEV:2}) - 98 ))
+}
+function GET_MAC(){
+	# dependant on global variables; MAC
+	local DEV=${1:-${DEVICE}}
+	# get mac; convert the sd disk letter to a number and add to mac base
+	# sdb = 99, sdc = 98, sdd = 97,,,
+	echo ${MAC}$(( 197 - $(printf "%d\n" \'${DEV:2}) ))
+}
+function GET_SELECTION_MEM(){
+	# dependant on global variables; SELECTION
+	echo ${SELECTION[5]} | sed 's/^$/128/'
+}
+
+###########################################################################################
+########################################################################### SELECTION TASKS
+function GET_SELECTIONS(){
+	# dependant on global variables; CONFIG_TOOL_SELECTIONS
+	GET_DEFAULT_SELECTION
+	cat -n <(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_TOOL_SELECTIONS})
+}
+function GET_SELECTION_DETAILS(){
+	# dependant on global variables; SELECTION
+	local LINE=""
+	eval IFS=${DIFS} SELECTION=(
+		${SELECTION[0]}
+		$(grep "^[[:space:]]*${SELECTION[1]}[[:space:]]" <(GET_SELECTIONS))
+	)
+}
+function GET_DEFAULT_SELECTION(){
+	echo - PXE  DEFAULT      none 512
+	echo 0 DISK EXPERIMENTAl none 512
+}
+function SET_DEFAULT_SELECTION(){
+	# dependant on global variables; SELECTION
+	IFS=$DIFS SELECTION=( ${SELECTION[0]} $(GET_DEFAULT_SELECTION) )
+	IFS=$DIFS SELECTION=( ${SELECTION[*]:0:6} )
+}
+function SET_DEFAULT_NAME(){
+	# dependant on global variables; NAME
+	local DEVICE_SIZE=$(FORMAT_TO_GB $(GET_DEVICE_HWI_SIZE ${DEVICE}) | tr -d ' ')
+	IFS=$DIFS NAME=( ${NAME[0]} ${DEVICE_SIZE} )
+	#IFS=$DIFS NAME=( ${NAME[0]} $(GET_DEVICE_DETAIL) )
+	#IFS=$DIFS NAME=( ${NAME[0]} "${NAME[3]}${NAME[4]}" )
+}
+###########################################################################################
+#################################################################################### zenity
+function zenity_device_info(){
+	local IFS=${DIFS}
+	local DEV=$(basename "${1:-${DEVICE}}")
+
+	# retrieve into an array the field names returned from the Disk Selection Dialog
+	eval local field=( $(GET_CONFIG_SECTION \
+			   "$(GET_DISPLAY_0_CONFIG_FQFN)" \
+			    ${UCST_DISK_COLUMN_HEADERS}) )
+
+	# retieve into an array the values returned from the Disk Selection Dialog
+	eval local value=( $(GET_DEVICE_INFO_ARRAY ${DEV}) )
+
+	# prep vars
+	local index=0
+	local space=10
+	local spaces=$(seq ${space} | sed 's/.*/ /g' | tr -d '\n')
+
+	# write device info
+	echo '<span color=\"blue\" face=\"courier new\">'
+	while (( index < ${#field[*]} )); do
+		field[${index}]="${spaces}${field[${index}]}"
+		field[${index}]=${field[${index}]: -${space}}
+		echo "${field[${index}]} <big>::</big> ${value[$(( index++ ))]}"
+	done
+	echo '</span>'
+}
+function zenity_device_info_list(){
+	local DEV=""
+	local DISK_NUM=""
+	for DEV in ${DEVICE[*]}; do
+		echo "<b><big><span color='purple'>-VM DISK $(( DISK_NUM++ ))-</span></big></b>\n"
+		echo "$(zenity_device_info ${DEV})\n"
+	done
+}
+function IF_ROOT_SU(){
+	whoami | grep -q ^root$ \
+		&& su - $(GET_DISPLAY_USER ${DISPLAY:-${TARGET_DISPLAY:-0}}) -s /bin/bash <(cat)\
+		|| /bin/bash <(cat)
+}
+function zenity_cmd(){
+	whoami | grep -q ^root$ \
+		&& echo DISPLAY=:${TARGET_DISPLAY:-0} zenity \
+		|| echo zenity
+}
+
+function zenity_warning_inuse(){
+	# https://developer.gnome.org/pygtk/stable/pango-markup-language.html
+	local IFS=${DIFS}
+	local DEV=$(basename "${1:-${DEVICE}}")
+	# dependant on global variables; DEVICE
+
+	# set window title
+	local zenityTitle=$(zenity_default_title)
+	# warning instructions
+	local zenityText=$(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_WARNING_INSTRUCTIONS})
+
+	# device info to assist confirmation
+	zenityText+="$(zenity_device_info ${DEV})"
+
+	# Set zenity window position
+	MOV_WINDOW "${zenityTitle}" 100 50 &
+
+	# launch zenity dialog
+	#(
+		IF_ROOT_SU <<-SU 2> >(LOG - ERR :: $(GET_FUNC_CHAIN) ::)
+		$(zenity_cmd)				\
+			--timeout=${DIALOG_TIMEOUT:-25}	\
+			--title="${zenityTitle// /   }"	\
+			--text="${zenityText}"		\
+			--ok-label="Confirm"		\
+			--cancel-label="GO BACK"	\
+			--question
+		SU
+	echo $?
+	#) | tac | tr -d '\n'
+}
+function zenity_name_task(){
+	# https://developer.gnome.org/pygtk/stable/pango-markup-language.html
+	local IFS=${DIFS}
+	# dependant on global variables; DEVICE
+
+	# set window title
+	local zenityTitle=$(zenity_default_title)
+
+	# inform user which disks have been choosen
+	local zenityText="$(zenity_device_info_list)"
+	
+	# naming instructions
+	zenityText+=$(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_NAMING_INSTRUCTIONS})
+
+	# Set zenity window position
+	MOV_WINDOW "${zenityTitle}" 100 50 &
+	# launch zenity dialog
+	(
+		IF_ROOT_SU <<-SU 2> >(LOG - ERR :: $(GET_FUNC_CHAIN) ::)
+		$(zenity_cmd)				\
+			--timeout=${DIALOG_TIMEOUT:-25}	\
+			--ok-label="START VM"		\
+			--cancel-label="CANCEL"		\
+			--title="${zenityTitle// /   }"	\
+			--text="${zenityText}"		\
+			--add-entry="Name"		\
+			--forms
+		SU
+	echo $?:
+	) | tac | tr -d '\n'
+}
+function zenity_default_title(){
+	echo VBOX Auto Launcher
+	return 0
+	echo	$(GET_DEVICE_INTERFACE ${DEVICE} | tr a-z A-Z) :: \
+		${DEVICE} :: \
+		$(FORMAT_TO_GB $(GET_DEVICE_HWI_SIZE ${DEVICE}))
+}
+function zenity_choose_tool(){
+	# https://developer.gnome.org/pygtk/stable/pango-markup-language.html
+	local IFS=${DIFS}
+	# dependant on global variables; DEVICE
+	
+	# set window title
+	local zenityTitle=$(zenity_default_title)
+
+	# inform user which disks have been choosen
+	local zenityText="$(zenity_device_info_list)"
+
+	# get selection instructions
+	zenityText+=$(GET_CONFIG_SECTION \
+		   "$(GET_DISPLAY_0_CONFIG_FQFN)" \
+		    ${UCST_TOOL_INSTRUCTIONS})
+
+	# get column headers
+	eval local column=( $(GET_CONFIG_SECTION \
+			   "$(GET_DISPLAY_0_CONFIG_FQFN)" \
+			    ${UCST_TOOL_COLUMN_HEADERS}) )
+
+	# Set zenity window position
+	MOV_WINDOW "${zenityTitle}" 100 50 &
+	# launch zenity dialog
+	(
+		IF_ROOT_SU <<-SU 2> >(LOG - ERR :: $(GET_FUNC_CHAIN) ::)
+		$(zenity_cmd)				\
+			--width=300			\
+			--height=700			\
+			--timeout=${DIALOG_TIMEOUT:-25}	\
+			--ok-label="NEXT"		\
+			--cancel-label="CANCEL"		\
+			--title="${zenityTitle// /   }"	\
+			--text="${zenityText}"		\
+			--list				\
+			--print-column=ALL		\
+			--separator=:			\
+			--column "#"			\
+			--column "${column[0]}"		\
+			--column "${column[1]}"		\
+			$(zenity_selection_list)
+		SU
+	echo $?:
+	) | tac | tr -d '\n'
+}
+function zenity_choose_device(){
+	local MAX_TRIES=20
+	while (( MAX_TRIES-- )); do
+		# present device selection dialog
+		local IFS=:
+		local SELECTION=( $(zenity_device_selector) )
+		# process device selection results; first field is error code
+		local IFS=,
+		case "${SELECTION[0]}.${#SELECTION[*]}" in
+			0.*)	LOG STS :: dbl_CLICK :: Disk selection dialog\; EC[${SELECTION[0]}] SEL["${SELECTION[*]:1}"].;;
+			1.*)	LOG CAN :: clk_X/CAN :: Disk selection dialog\; EC[${SELECTION[0]}].                          Skipping\!
+				break;;
+			5.1)	LOG STS :: TIMED_OUT :: Or no selection\!       EC[${SELECTION[0]}] SEL["${SELECTION[*]:1}"]. Skipping\!
+				break;;
+			5.*)	LOG STS :: clk_NEXT_ :: Disk selection dialog\; EC[${SELECTION[0]}] SEL["${SELECTION[*]:1}"].;;
+			*)	LOG ERR :: NEW_STATE :: Disk selection dialog\; EC[${SELECTION[0]}] SEL["${SELECTION[*]:1}"]. Exiting\!
+				EXIT 1;;
+		esac
+
+		# if the user made a selection but the device is inuse, WARN
+		if (( ${#SELECTION[*]} > 1 )) && [[ "${SELECTION[4]}" =~ ^(local|VBOX)$ ]]; then
+			if (( $(zenity_warning_inuse "${SELECTION[1]}") == 5 )); then
+				LOG STS :: clk_CNFRM :: DEVICE[${SELECTION[1]}].
+				DEVICE[${#DEVICE[*]}]=${SELECTION[1]}
+				break
+			else
+				LOG CAN :: clk_GOBAK :: DEV=${SELECTION[1]}
+			fi
+		# if the user made a selection and the device is free, MOVE ON
+		elif (( ${#SELECTION[*]} > 1 )); then
+			DEVICE[${#DEVICE[*]}]=${SELECTION[1]}
+			break
+		fi
+	done
+}
+
+function zenity_device_selector(){
+	local IFS=${DIFS}
+	# dependant on global variables; DEVICE
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+
+	# set window title
+	local zenityTitle=$(zenity_default_title)
+
+	# inform user which disks have been choosen
+	local zenityText="$(zenity_device_info_list)"
+
+	# get selection instructions
+		zenityText+=$(GET_CONFIG_SECTION \
+			   "$(GET_DISPLAY_0_CONFIG_FQFN)" \
+			    ${UCST_DISK_INSTRUCTIONS})
+
+	# get column headers
+	eval local column=( $(GET_CONFIG_SECTION \
+			   "$(GET_DISPLAY_0_CONFIG_FQFN)" \
+			    ${UCST_DISK_COLUMN_HEADERS}) )
+
+	# Set zenity window position
+	MOV_WINDOW "${zenityTitle}" 12 50 &
+
+	# determine su
+	whoami | grep -q ^root$ && local SU="su - ${DISPLAY_0_USER} -s"
+
+	# launch zenity dialog
+	(
+		IF_ROOT_SU <<-SU 2> >(LOG - ERR :: $(GET_FUNC_CHAIN) ::)
+		$(zenity_cmd)				\
+			--width=1000			\
+			--height=700			\
+			--timeout=${DIALOG_TIMEOUT:-25}	\
+			--ok-label="NEXT"		\
+			--cancel-label="CANCEL"		\
+			--title="${zenityTitle// /   }"	\
+			--text="${zenityText}"		\
+			--list				\
+			--print-column=ALL		\
+			--separator=:			\
+			--column "${column[0]}"		\
+			--column "${column[1]}"		\
+			--column "${column[2]}"		\
+			--column "${column[3]}"		\
+			--column "${column[4]}"		\
+			--column "${column[5]}"		\
+			--column "${column[6]}"		\
+			--column "${column[7]}"		\
+			$(zenity_disk_list)
+	SU
+	echo $?:
+	) | tac | tr -d '\n'
+}
+function zenity_disk_list(){
+	local DEV=""
+	while read DEV; do
+		GET_DEVICE_INFO_ARRAY ${DEV}
+	done < <(GET_DEVICE_LIST)
+}
+function zenity_selection_list(){
+	local IFS=${DIFS}
+	GET_SELECTIONS |\
+	while read LINE; do
+		eval ARGS=( ${LINE} )
+		echo -n ${ARGS[0]} \"${ARGS[1]}\" \"${ARGS[2]}\" ""
+	done
+}
+###########################################################################################
+###########################################################################################
+function GET_DEVICE_INFO_ARRAY(){
+	local DEV=$(basename "${1:-${DEVICE}}")
+	if [ ! -f "/dev/shm/$$${FUNCNAME}_${DEV}" ]; then
+		cat <<-SHMF > "/dev/shm/$$${FUNCNAME}_${DEV}"
+			"${DEV}"
+			"$(GET_DEVICE_INTERFACE			${DEV} | tr a-z A-Z)"
+			"$(FORMAT_TO_GB $(GET_DEVICE_HWI_SIZE	${DEV}))"
+			"$(GET_DEVICE_MOUNT			${DEV})"
+			"$(GET_DEVICE_STATUS			${DEV})"
+			"$(GET_DEVICE_MOUNT_LOCATION		${DEV})"
+			"$(GET_DEVICE_HWI_MODEL			${DEV})"
+			"$(GET_DEVICE_HWI_SERIAL		${DEV})"
+		SHMF
+	fi
+	echo -n $(cat "/dev/shm/$$${FUNCNAME}_${DEV}" | tr '\n' \ ) \ 
+}
+function GET_DEVICE_MOUNT(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DEV=$(basename "${1:-${DEVICE}}")
+	local TARGET_VM_MASK="$(GET_VRDEPORT ${DEV}).${DEV}.vmdk"
+
+	# test mtab
+	if grep -q "^/dev/${DEV}[0-9]*[[:space:]]" /etc/mtab; then
+		echo local
+		return 0
+	fi
+
+	# test vboxmanager list hdds
+	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash 2>/dev/null
+		which VBoxManage &>/dev/null &&\
+		VBoxManage list hdds |\
+		grep -q "^Location:[[:space:]].*${TARGET_VM_MASK}\$"
+	SU
+	if (( $? )); then
+		echo ...
+		return 1
+	else
+		echo VBOX
+		return 0
+	fi
+}
+function SET_VBOX_HDDS_LIST_SHMF(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local SHMF=$1
+
+	cat <<-SED | sed -n -f <(cat) \
+	<(su - localcosadmin -c "which vboxmanage && vboxmanage list hdds") > "${SHMF}"
+		/^UUID:/,/^$/{
+			/^UUID:/{h;d}
+			/^$/d
+			G
+			s/\(.*\)\nUUID:[[:space:]]\+\(.*\)/\2\t\1/p
+		}
+	SED
+}
+function GET_VBOX_HDD_ATTRIBUTE(){
+	local rEGEX=$1
+	shift
+	local ATTRIB=$*
+
+	[ -f "/dev/shm/$$${FUNCNAME}" ] || SET_VBOX_HDDS_LIST_SHMF "/dev/shm/$$${FUNCNAME}"
+
+	cat <<-SED | sed -n -f <(cat) "/dev/shm/$$${FUNCNAME}"
+		/[[:space:]]${ATTRIB}[[:space:]]/{
+			/${rEGEX}/p
+		}
+	SED
+}
+function GET_DEVICE_VBOX_UUID(){
+	local DEV=$(basename "${1:-${DEVICE}}")
+	local TARGET_VM_MASK="$(GET_VRDEPORT ${DEV}).${DEV}.vmdk"
+	#local TARGET_VM_MASK="disk1.vdi"
+	
+	local IFS=${DIFS}
+	local DATA=( $(GET_VBOX_HDD_ATTRIBUTE "${TARGET_VM_MASK}\$" Location:) )
+	echo ${DATA[0]}
+}
+function GET_DEVICE_VBOX_LOCATION(){
+	local DEV=$(basename "${1:-${DEVICE}}")
+	local TARGET_VM_MASK="$(GET_VRDEPORT ${DEV}).${DEV}.vmdk"
+
+	local IFS=${DIFS}
+	local DATA=( $(GET_VBOX_HDD_ATTRIBUTE "${TARGET_VM_MASK}\$" Location:) )
+	echo ${DATA[*]:2}
+}
+function GET_DEVICE_VBOX_MACHINE_UUID(){
+	local DEV=$(basename "${1:-${DEVICE}}")
+	local VBOX_UUID=$(GET_DEVICE_VBOX_UUID ${DEV})
+
+	local IFS=${DIFS}
+	local DATA=( $(GET_VBOX_HDD_ATTRIBUTE "^${VBOX_UUID}" Usage:) )
+	echo ${DATA[*]: -1} | sed 's/)$//'
+}
+function GET_DEVICE_VBOX_MACHINE(){
+	local DEV=$(basename "${1:-${DEVICE}}")
+	local VBOX_UUID=$(GET_DEVICE_VBOX_UUID ${DEV})
+
+	local IFS=${DIFS}
+	local DATA=( $(GET_VBOX_HDD_ATTRIBUTE "^${VBOX_UUID}" Usage:) )
+	echo ${DATA[*]:2:${#DATA[*]}-4}
+}
+function IS_VBOX_MACHINE_RUNNING(){
+	local DISPLAY_0_USER=$(GET_DISPLAY_0_USER)
+	local DEVICE_VBOX_MACHINE_UUID=$1
+	
+	su - ${DISPLAY_0_USER} -s /bin/bash \
+	-c "which VBoxManage && VBoxManage list runningvms" |\
+	grep -q "[[:space:]]{${DEVICE_VBOX_MACHINE_UUID}}\$"
+}
+function GET_DEVICE_STATUS(){
+	local DEV=$(basename "${1:-${DEVICE}}")
+	local DEVICE_MOUNT=$(GET_DEVICE_MOUNT ${DEV})
+
+	case "${DEVICE_MOUNT}" in
+		local)	echo browsable
+			;;
+		VBOX)	local DEVICE_VBOX_MACHINE_UUID=$(GET_DEVICE_VBOX_MACHINE_UUID ${DEV})
+			IS_VBOX_MACHINE_RUNNING ${DEVICE_VBOX_MACHINE_UUID} \
+				&& echo RUNNING \
+				|| echo off-line
+			;;
+		*)	echo ...
+			;;
+	esac
+}
+function GET_DEVICE_MOUNT_LOCATION(){
+	local DEV=$(basename "${1:-${DEVICE}}")
+	local DEVICE_MOUNT=$(GET_DEVICE_MOUNT ${DEV})
+	local TARGET_VM_MASK="$(GET_VRDEPORT ${DEV}).${DEV}.vmdk"
+
+	case "${DEVICE_MOUNT}" in
+		local)	local _DEV="" MOUNT="" x="" CNT=1 IFS=${DIFS}
+			while read _DEV MOUNT x; do
+				echo [$(( CNT++ ))] ${_DEV##*/}..${MOUNT}
+			done < <(grep "^/dev/${DEV}[0-9]*[[:space:]]" /etc/mtab)
+			;;
+		VBOX)	echo $(GET_DEVICE_VBOX_MACHINE ${DEV})
+			;;
+		*)	echo ...
+			return 1
+			;;
+	esac
+}
+
+
+###########################################################################################
+###########################################################################################
+function GET_CONFIG_SECTION(){
+	# dependant on global variables; USER_TOOL_LIST_PATH
+	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
+	local SECTION=$1
+	#echo ${DISPLAY_0_HOME} ${SECTION} | LOG
+	cat <<-SED | sed -n -f <(cat) "${DISPLAY_0_HOME}/${USER_TOOL_LIST_PATH}"
+		/[[:space:]]*\[ ${SECTION} \]/,/[[:space:]]*\[/{
+			/[[:space:]]*\[/d	# delete first and last line
+			/^$/d			# delete empty lines
+			/^[[:space:]]*#/d	# delete comment lines
+			s/^\t//			# remove single leading tab char
+			p			# print
+		}
+	SED
+}
+function GET_SELECTION_PATH(){
+	# dependant on global variables; SELECTION
+	local DISPLAY_0_HOME=$(GET_DISPLAY_0_HOME)
+	local DISPLAY_0_CONFIG_DIR=$(GET_DISPLAY_0_CONFIG_DIR)
+	local ISO=${SELECTION[4]}
+	if [[ "${ISO}" =~ ^\/ ]]; then
+		if [ ! -f "${ISO}" ]; then
+			if [ -f "${DISPLAY_0_CONFIG_DIR}${ISO}" ]; then
+				local ISO="${DISPLAY_0_CONFIG_DIR}${ISO}"
+			elif [ -f "${DISPLAY_0_HOME}${ISO}" ]; then
+				local ISO="${DISPLAY_0_HOME}${ISO}"
+			else
+				unset ISO
+			fi
+		fi
+	else
+		if [ -f "${DISPLAY_0_CONFIG_DIR}/${ISO}" ]; then
+			local ISO="${DISPLAY_0_CONFIG_DIR}/${ISO}"
+		elif [ -f "${DISPLAY_0_HOME}/${ISO}" ]; then
+			local ISO="${DISPLAY_0_HOME}/${ISO}"
+		else
+			unset ISO
+		fi
+	fi
+	echo ${ISO}
+}
+function GET_DISPLAY_0_CONFIG_DIR(){
+	# Dependant on GLOBAL vars; TARGET_DISPLAY
+	# Deplendant on functions; GET_DISPLAY_USER, GET_USER_HOME_DIR
+	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
+	local DISPLAY_0_HOME=$(GET_USER_HOME_DIR ${DISPLAY_0_USER})
+	local DISPLAY_0_CONFIG_DIR="${DISPLAY_0_HOME}/${USER_CONFIG_DIR_RELATIVE}"
+	[ -d "${DISPLAY_0_CONFIG_DIR}" ] \
+		&& echo "${DISPLAY_0_CONFIG_DIR}" \
+		|| echo "/dev/zreo"
+}
+#function GET_USER_CONFIG_FQFN(){
+function GET_DISPLAY_0_CONFIG_FQFN(){
+	# Dependant on GLOBAL vars; TARGET_DISPLAY, USER_CONFIG_DIR_RELATIVE, USER_CONFIG_FILE_NAME
+	# Deplendant on functions; GET_DISPLAY_USER, GET_USER_HOME_DIR
+	whoami | grep -q ^root$ \
+		&& local DISPLAY_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0}) \
+		|| local DISPLAY_USER=$(whoami)
+	local HOME_DIR=$(GET_USER_HOME_DIR ${DISPLAY_USER})
+	local CONFIG_FQFN="${HOME_DIR}/${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+	if [ -f "${CONFIG_FQFN}" ]; then
+		echo "${CONFIG_FQFN}"
+	else
+		LOG __ERROR_ :: $(GET_FUNC_CHAIN) :: File \"${CONFIG_FQFN}\" not found.
+		echo "/dev/zero"
+		return 1
+	fi
+
+}
+function GET_DISPLAY_0_CONFIG_FQFN_OLD(){
+	# Dependant on GLOBAL vars; TARGET_DISPLAY
+	# Deplendant on functions; GET_DISPLAY_USER, GET_USER_HOME_DIR
+	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
+	local DISPLAY_0_HOME=$(GET_USER_HOME_DIR ${DISPLAY_0_USER})
+	local DISPLAY_0_CONFIG="${DISPLAY_0_HOME}/${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+	[ -f "${DISPLAY_0_CONFIG}" ] \
+		&& echo "${DISPLAY_0_CONFIG}" \
+		|| echo "/dev/zero"
+}
+function GET_DISPLAY_0_USER(){
+	GET_DISPLAY_USER ${TARGET_DISPLAY:-0}
+}
+function GET_DISPLAY_0_HOME(){
+	GET_USER_HOME_DIR $(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
+}
+function OPEN_POPUP_LOG(){
+	${POPUP_LOG:-false} || return
+	local DISPLAY_0_USER=$(GET_DISPLAY_USER ${TARGET_DISPLAY:-0})
+	cat <<-SU | su - ${DISPLAY_0_USER} -s /bin/bash &
+		DISPLAY=:${TARGET_DISPLAY} terminator	\
+			-m -b				\
+			-T "$(zenity_default_title)"	\
+			-e "tail -f \"${LOG_}\""
+	SU
+	POPUP_LOG_PID=$!
+	sleep 2
+	POPUP_LOG_PID=$(FIND_PID ${POPUP_LOG_PID} tail)
+	LOG INFO :: ${FUNCNAME} :: PID = ${POPUP_LOG_PID}
+}
+function EXIT(){
+	# cleanup
+	rm -rf "${TMP}"
+	rm -rf "${SHM}"
+	rm -rf "/dev/shm/$$"*
+	if ${POPUP_LOG:-false}; then
+		echo INFO :: ${FUNCNAME} :: POPUP_LOG_PID = ${POPUP_LOG_PID} >> "${LOG}"
+		eval "sleep ${POPUP_LOG_AUTOCLOSE_DELAY}; kill ${POPUP_LOG_PID};"
+	fi
+	exit ${1:- 0}
+}
+function ACTION_INSTALL(){
+	# verify root access
+	# setup log
+		touch     "${LOG}"
+		chmod 777 "${LOG}"
+	# setup etc
+	# setup udev
+	# setup User Task Managment Folder
+		su - $(GET_DISPLAY_0_USER) -s /bin/bash <<-SU
+			mkdir -p ~/"${USER_CONFIG_DIR_RELATIVE}"
+		#	rm    -f ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+			touch    ~/"${USER_CONFIG_DIR_RELATIVE}/${USER_CONFIG_FILE_NAME}"
+		SU
+		SETUP_CONFIG_IF_EMPTY "${USER_CONFIG_FILE_NAME_DEFAULT}"\
+				      "$(GET_DISPLAY_0_CONFIG_FQFN)"
+
+}
+# SOURCE Dependant Functions
+source "$(dirname "${BASH_SOURCE}")/../functions/functions.general.sh"
+source "$(dirname "${BASH_SOURCE}")/../functions/functions.test.sh"
+
+# GLOBAL vars; fully qualified script paths and names
+BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
+BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
+BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
+
+#
+#LOG="/var/log/udev.vbox_launcher.log"
+#DEBUG=true
+
+# GLOBAL vars; source config file
+SOURCE_CONFIG_GLOBAL_VARS "config"
+
+# GLOBAL vars; LOG file must exist 
+if (( ${#LOG} == 0 )) || [ ! -f "${LOG}" ]; then
+	LOG=$(basename "${BASH_SRCNAME}" .sh)
+	LOG="/var/log/${LOG}.log"
+fi
+
+# Target DISPLAY to popup dialogs and create VM's
+TARGET_DISPLAY=${TARGET_DISPLAY:-0}
+TARGET_DISPLAY=${TARGET_DISPLAY//[^0-9.]/}
+
+# udev rule file name
+UDEV_RULE_CONFIG_FILE_NAME_DEFAULT=${UDEV_RULE_CONFIG_FILE_NAME_DEFAULT:-99-customUDEV.rules}
+
+# GLOBAL vars; User Config Section Titles (UCST_) 
+UCST_TOOL_SELECTIONS=${UCST_TOOL_SELECTIONS:-Task List Selections}
+UCST_TOOL_INSTRUCTIONS=${UCST_TOOL_INSTRUCTIONS:-Task Selection Instructions}
+UCST_TOOL_COLUMN_HEADERS=${UCST_TOOL_COLUMN_HEADERS:-Task List Column Headers}
+UCST_DISK_INSTRUCTIONS=${UCST_DISK_INSTRUCTIONS:-Disk Selection Instructions}
+UCST_DISK_COLUMN_HEADERS=${UCST_DISK_COLUMN_HEADERS:-Disk List Column Headers}
+UCST_NAMING_INSTRUCTIONS=${UCST_NAMING_INSTRUCTIONS:-Naming Instructions}
+UCST_WARNING_INSTRUCTIONS=${UCST_WARNING_INSTRUCTIONS:-Warning Instructions}
+UCST_GLOBAL_VAR_DEFAULTS=${UCST_GLOBAL_VAR_DEFAULTS:-Global Defaults}
+
+# User Task Managment Folder
+USER_CONFIG_DIR_RELATIVE=${USER_CONFIG_DIR_RELATIVE:-ISO}
+USER_CONFIG_FILE_NAME=${USER_CONFIG_FILE_NAME:-${USER_CONFIG_FILE_NAME_DEFAULT:-tool.list.txt}}
+
+
+# GLOBAL vars; source user config file
+if whoami | grep -q ^root$; then
+	SOURCE_CONFIG_GLOBAL_VARS <(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_GLOBAL_VAR_DEFAULTS})
+else
+	SOURCE_CONFIG_GLOBAL_VARS <(GET_CONFIG_SECTION "$(GET_DISPLAY_0_CONFIG_FQFN)" ${UCST_GLOBAL_VAR_DEFAULTS})
+fi
+
+# GLOBAL vars; mac address base, vrdeport base, DIALOG_TIMEOUT
+MAC=${MAC:-080027ABCD}
+MAC=${MAC//:/}
+MAC=${MAC:0:10}
+VRDEPORT=${VRDEPORT:-33890}
+DIALOG_TIMEOUT=${DIALOG_TIMEOUT:-25}
+BRIDGED_ETH=${BRIDGED_ETH:-eth0}
+
+# GLOBAL vars; VirtualBox
+SCTL='ide'
+
+# GLOBAL vars; TMP
+TMP="/tmp/$$_${BASH_SRCNAME}_$$"
+mkdir    "${TMP}"
+chmod +t "${TMP}"
+SHM="/dev/shm/$$_${BASH_SRCNAME}_$$"
+mkdir    "${SHM}"
+chmod +t "${SHM}"
+
+# GLOBAL vars; DIFS = default array delimiter
+#DIFS=${IFS}
+DIFS=' '
+
+# GLOBAL vars; DEBUG
+DEBUG=${DEBUG:-false}
+
+# Disable wmctrl; this controls cosistent window placement, doesn't work through X11 or VNC
+ENABLE_WMCTRL=${ENABLE_WMCTRL:-true}
+
+# Source git repo sudirectory
+#http='https://raw.github.com/michaelsalisbury/builder/master/udev'
+
+# Project NAME
+#NAME='x11vnc'
+
+# Get details of the latest version
+#latest=`wget -O - -o /dev/null "${http}/LATEST.TXT"`
+
+# GLOGAL vars; POPUP_LOG, POPUP_LOG_AUTOCLOSE_DELAY
+POPUP_LOG=${POPUP_LOG:-false}
+POPUP_LOG_AUTOCLOSE_DELAY=${POPUP_LOG_AUTOCLOSE_DELAY:-60}
+
+# Display Help
+[[ "$1" =~ ^(-h|--help)$ ]] && HELP
+
+#for DEV in `GET_DEVICE_LIST`; do
+#	echo $DEV	:: `GET_DEVICE_HWI_MODEL  ${DEV}`\
+#			:: `GET_DEVICE_HWI_SERIAL ${DEV}`\
+#			:: `FORMAT_TO_GB $(GET_DEVICE_HWI_SIZE ${DEV})`
+#done
+
+# main
+main "$@" >> "${LOG}" 2>&1
+
+EXIT
+
+# simulation control
+#
+# trigger add and remove
+#   udevadm trigger --action=remove --sysname-match="sdb"
+#   udevadm trigger --action=add    --sysname-match="sdb"
+#
+# force re-read of linked udev rules
+#   stop udev; sleep 1; start udev
+
+
+

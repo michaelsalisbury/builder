@@ -32,6 +32,12 @@ TARGET_DISPLAY = 0
 # Dialog timeouts in seconds: DEFAULT = 25 seconds
 DIALOG_TIMEOUT = 60
 
+#DEVICE2PROMPT_DEFAULT; when false FILTER determines single disk VM,
+#			when true  FILTER determines dual disk optional
+#DEVICE2PROMPT_FILTERS; comma delimited
+DEVICE2PROMPT_DEFAULT = false
+DEVICE2PROMPT_FILTERS = task
+
 # DEBUG; true or false: DEFAULT = false
 DEBUG = true
 DEBUG = false
@@ -42,10 +48,6 @@ UDEV_RULE_CONFIG_FILE_NAME_DEFAULT = 99-customUDEV.rules
 # POPUP_LOG; open terminator and tail log, auto close 60 seconds after 
 POPUP_LOG = false
 POPUP_LOG_AUTOCLOSE_DELAY = 10
-
-# Enable wmctrl; this control window placement, doesn't work on vnc connections
-ENABLE_WMCTRL = true
-#ENABLE_WMCTRL = false
 
 # LOG
 LOG = /var/log/vbox_launcher.log

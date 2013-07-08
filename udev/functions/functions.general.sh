@@ -30,6 +30,8 @@ function FIND_PID(){
 	done < <(ps --no-heading -o pid --ppid ${ppid})
 }
 function GET_DISPLAY_USER(){
+	echo localcosadmin
+	return 0
 	# Dependant on function LOG and GLOBAL var DEBUG
 	local DISPLAY_NUM=${1:-0}
 	local DISPLAY_NUM=${DISPLAY_NUM//[^0-9.]/}
@@ -58,7 +60,7 @@ function IS_DEVICE_REAL(){
 	local DEV=${DEVICE:-$1}
 	local DEV=${1:-${DEV}}
 	if ! GET_DEVICE_LIST | grep -q "^${DEV}$"; then
-		echo ERROR :: ${FUNCNAME} :: Device \"${DEV}\" is not real or not attached. Exiting\!
+		echo ERROR :: ${FUNCNAME} :: Device \"${DEV}\" is not real or not attached. Exiting\! 1>&2
 		EXIT 1
 	fi
 }
@@ -69,7 +71,7 @@ function GET_ROOT_DEVICE(){
 	tr -d '0-9' |\
 	grep ""
 	if (( $? > 0 )); then
-		echo ERROR :: ${FUNCNAME} :: Could not determine host system ROOT disk. Exiting\!
+		echo ERROR :: ${FUNCNAME} :: Could not determine host system ROOT disk. Exiting\! 1>&2
 		EXIT 1
 	fi
 }
@@ -79,14 +81,14 @@ function GET_DEVICE_LIST(){
 	awk -F/ -v ROOT=${ROOT} '$3!=ROOT{print $3}' |\
 	grep ""
 	if (( $? > 0 )); then
-		echo ERROR :: ${FUNCNAME} :: No attached non-root devices. Exiting\!
+		echo ERROR :: ${FUNCNAME} :: No attached non-root devices. Exiting\! 1>&2
 		EXIT 1
 	fi
 }
 function IS_DEVICE_ROOT(){
 	local DEV=${1:-${DEVICE}}
 	if GET_ROOT_DEVICE | grep -q "^${DEV}$"; then
-		echo ERROR :: ${FUNCNAME} :: Device \"${DEV}\" is host system ROOT disk.  Exiting\!
+		echo ERROR :: ${FUNCNAME} :: Device \"${DEV}\" is host system ROOT disk.  Exiting\! 1>&2
 		EXIT 1
 	fi
 }
