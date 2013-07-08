@@ -20,7 +20,7 @@ function main(){
 
 	# Install dependencies
 	echo Installing Depndencies...
-	apt-get ${aptopt} install x11vnc xinetd \
+	apt-get ${aptopt} install x11vnc xinetd netcat \
 				  xfonts-base xfonts-100dpi xfonts-75dpi \
 				  xfonts-biznet-base xfonts-biznet-100dpi xfonts-biznet-75dpi
 
