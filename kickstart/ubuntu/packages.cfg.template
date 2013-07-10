@@ -34,7 +34,7 @@ samba cifs-utils winbind
 # sshfs
 fuse-utils sshfs
 # vnc
-x11vnc xinit netcat
+x11vnc xinit netcat-openbsd
 
 # VPN
 openconnect
