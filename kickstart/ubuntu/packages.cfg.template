@@ -12,7 +12,7 @@ terminator multitail
 screen byobu
 incron
 # hardware diagnostics and detection
-hwinfo ethtool ipcalc smartmontools
+hwinfo ethtool ipcalc smartmontools jockey-common
 # kernel
 linux-firmware linux-firmware-nonfree
 
