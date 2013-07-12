@@ -55,21 +55,25 @@ function setup_make_Config(){
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
-	chmod +r /etc/skel/.scripts
-	chmod +r /etc/skel/.vpn.cred
+	#chmod +r /etc/skel/.scripts
+	#chmod +r /etc/skel/.vpn.cred
 	#local scriptBase=$(basename "${scriptName}" .sh)
 	get_user_details all | while read user uid gid home; do
+		echo Setting up openconnect for user[${user}]
 		usermod -a -G openconnect ${user}
-		cat <<-END-OF-CMDS | su - ${user} -s /bin/bash
+		su - ${user} -s /bin/bash <<-SU
 			mkdir -p  "\${HOME}/.scripts"
 			chmod 700 "\${HOME}/.scripts"
 			mkdir -p  "\${HOME}/.logs"
 			chmod 700 "\${HOME}/.logs"
-			cp "/etc/skel/.scripts/openconnect.exp" "\${HOME}/.scripts/".
-			chmod 700                               "\${HOME}/.scripts/openconnect.exp"
-			cp "/etc/skel/.vpn.cred"                "\${HOME}/".
-			chmod 600                               "\${HOME}/.vpn.cred"
-		END-OF-CMDS
+			touch     "\${HOME}/.scripts/openconnect.exp"
+			chmod 700 "\${HOME}/.scripts/openconnect.exp"
+			touch     "\${HOME}/.vpn.cred"
+			chmod 600 "\${HOME}/.vpn.cred"
+		SU
+		[ -f "${home}/.scripts/openconnect.exp" ] &&\
+		cat /etc/skel/.scripts/openconnect.exp > "${home}/.scripts/openconnect.exp"
+		[ -f "${home}/.vpn.cred"
 	done
 	chmod 700 /etc/skel/.scripts
 	chmod 600 /etc/skel/.vpn.cred
