@@ -180,12 +180,12 @@ analyze () {
 	if ! has_free_space $dev $(to_G 10); then
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
 		debconf-set-selections /tmp/preseed/preseed.hd.partman_prompt.cfg
-		msg_basic_layout 7 ERROR\! :: Not enough free space\!
+		msg_basic_layout 3 ERROR\! :: Not enough free space\!
 		cmd 
 	elif has_primary_parts $dev 4; then
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
 		debconf-set-selections /tmp/preseed/preseed.hd.partman_prompt.cfg
-		msg_basic_layout 7 ERROR\! :: No free primary partitions\!
+		msg_basic_layout 3 ERROR\! :: No free primary partitions\!
 		cmd
 	elif has_primary_part_free $dev 4; then
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
@@ -193,7 +193,7 @@ analyze () {
 		msg 20 Drive empty\; Basic layout will be used on hard drive \"${dev}\".
 	elif has_primary_part_free $dev 3; then
 		debconf-set-selections /tmp/preseed/preseed.hd.free_extended.cfg
-		msg 30 3 Free Primary Partitions\; Extended partition layout will be used on hard drive \"${dev}\".
+		msg 20 3 Free Primary Partitions\; Extended partition layout will be used on hard drive \"${dev}\".
 	elif has_primary_part_free $dev 2; then
 		if has_extended_part $dev; then
 			debconf-set-selections /tmp/preseed/preseed.hd.free_wo-extended.cfg
