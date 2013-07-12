@@ -107,11 +107,20 @@ function setup_distribute_Config(){
 	desc setting up default config \for existing users
 	get_user_details all | while read user uid gid home; do
 		cat <<-END-OF-CMDS | su - ${user} -s /bin/bash
-			mkdir -p  "${home}/.config/terminator"
-			chmod 700 "${home}/.config/"
-			chmod 700 "${home}/.config/terminator"
-			cp "/etc/skel/.config/terminator/config" "${home}/.config/terminator/."
+			mkdir -p  "\${HOME}/.config/terminator"
+			chmod 700 "\${HOME}/.config/"
+			chmod 700 "\${HOME}/.config/terminator"
+			touch     "\${HOME}/.config/terminator/config"
+			chmod 700 "\${HOME}/.config/terminator/config"
 		END-OF-CMDS
+		while read file; do
+			[      -f "${home}/${file}" ]		&&\
+			! (( `cat "${home}/${file}" | wc -c` ))	&&\
+			cat "/etc/skel/${file}" > "${home}/${file}"
+		done <<-WHILE
+			.config/terminator/config
+		WHILE
+
 	done
 }
 
