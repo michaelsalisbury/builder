@@ -198,7 +198,7 @@ analyze () {
 		if has_extended_part $dev; then
 			debconf-set-selections /tmp/preseed/preseed.hd.free_wo-extended.cfg
 			debconf-set-selections /tmp/preseed/preseed.hd.partman_no-prompt.cfg
-			msg 7 2 Free Primary Partitions\; Layout without /boot or extended partition will be used on hard drive \"${dev}\".
+			msg 3 2 Free Primary Partitions\; Layout without /boot or extended partition will be used on hard drive \"${dev}\".
 			cmd
 		else
 			debconf-set-selections /tmp/preseed/preseed.hd.free_extended.cfg
