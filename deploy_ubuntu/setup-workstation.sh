@@ -104,8 +104,8 @@ function setup_Prep_Add_SSH_Keys(){
 }
 function setup_Prep_Disable_Apport_Whoopsie(){
 	desc disable apport crash reporting and whoopsie
-	sed -i '/^enabled=/c\enabled=0'				/etc/defaults/apport
-	sed -i '/^report_crashes=/c\report_crashes=false'	/etc/defaults/whoopsie
+	sed -i '/^enabled=/c\enabled=0'				/etc/default/apport
+	sed -i '/^report_crashes=/c\report_crashes=false'	/etc/default/whoopsie
 }
 function setup_Prep_Disable_Guest(){
 	desc disable guest login
