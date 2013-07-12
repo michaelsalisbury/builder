@@ -105,9 +105,6 @@ END-OF-CONFIG
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
-	chmod +r /etc/skel/.config
-	chmod +r /etc/skel/.config/terminator
-	chmod +r /etc/skel/.config/terminator/config
 	get_user_details all | while read user uid gid home; do
 		cat <<-END-OF-CMDS | su - ${user} -s /bin/bash
 			mkdir -p  "${home}/.config/terminator"
@@ -116,8 +113,5 @@ function setup_distribute_Config(){
 			cp "/etc/skel/.config/terminator/config" "${home}/.config/terminator/."
 		END-OF-CMDS
 	done
-	chmod 700 /etc/skel/.config
-	chmod 700 /etc/skel/.config/terminator
-	chmod 600 /etc/skel/.config/terminator/config
 }
 
