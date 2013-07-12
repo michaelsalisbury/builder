@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( true false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( true false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source="https://raw.github.com/michaelsalisbury/builder/master/deploy_ubuntu/${scriptName}"
@@ -101,6 +101,11 @@ EOL
 function setup_Prep_Add_SSH_Keys(){
 	desc Prep: Add SSH Keys to root \& users: uid \>= 1000
 	set_ssh_authorized_keys	all
+}
+function setup_Prep_Disable_Apport_Whoopsie(){
+	desc disable apport crash reporting and whoopsie
+	sed -i '/^enabled=/c\enabled=0'				/etc/defaults/apport
+	sed -i '/^report_crashes=/c\report_crashes=false'	/etc/defaults/whoopsie
 }
 function setup_Prep_Disable_Guest(){
 	desc disable guest login
