@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( true false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( true false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source="https://raw.github.com/michaelsalisbury/builder/master/deploy_ubuntu/${scriptName}"
