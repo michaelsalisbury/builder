@@ -41,6 +41,7 @@ END-OF-CONFIG
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
+	##############################################################
 	get_user_details all | while read user uid gid home; do
 		cat <<-END-OF-CMDS | su - ${user} -s /bin/bash
 			touch     "\${HOME}/.toprc"
