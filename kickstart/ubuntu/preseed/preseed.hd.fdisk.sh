@@ -157,14 +157,17 @@ END-OF-MSG
 msg_basic_layout () {
 	local message=$@
 		cat << END-OF-MESSAGE >> /tmp/preseed/preseed.txt
-$(fdisk -lu $dev)
+$(fdisk -lu $dev | sed -n '\|[Dd]ev|p;\|^$|p')
 
+_________________________________________________________________________
+The BASIC layout has been selected for hard drive partitioning scheme.
+This will wipe out all data on hard drive "${dev}".
+_________________________________________________________________________
+We are dumping to an interactive command line so you can effect changes.
 
-Basic layout has been selected for hard drive partitioning scheme.
-This will wipe out all data on hard drive "${dev}" if you proceed.
-Switching to interactive command to effect changes; fdisk etc.
-Type "exit" when done and deploy will proceed.
-Type "reboot" to start over and re-detect appropriate layout.
+- Type   "exit"   when done and deploy will proceed.
+- Type  "reboot"  to start.
+- Type "poweroff" to shutdown.
 END-OF-MESSAGE
 	msg ${message}
 }
