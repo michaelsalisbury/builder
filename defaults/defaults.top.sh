@@ -46,6 +46,13 @@ function setup_distribute_Config(){
 			touch     "\${HOME}/.toprc"
 			chmod 700 "\${HOME}/.toprc"
 		END-OF-CMDS
+		while read file; do
+			[      -f "${home}/${file}" ]		&&\
+			! (( `cat "${home}/${file}" | wc -c` ))	&&\
+			cat "/etc/skel/${file}" > "${home}/${file}"
+		done <<-WHILE
+			.toprc
+		WHILE
 
 	done
 }
