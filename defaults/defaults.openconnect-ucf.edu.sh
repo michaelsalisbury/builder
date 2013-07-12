@@ -71,7 +71,7 @@ function setup_distribute_Config(){
 			touch     "\${HOME}/.vpn.cred"
 			chmod 600 "\${HOME}/.vpn.cred"
 		SU
-		[ -f "${home}/.scripts/openconnect.exp" ] &&\
+		[ -f "${home}/.scripts/openconnect.exp" ] && ! (( 
 		cat /etc/skel/.scripts/openconnect.exp > "${home}/.scripts/openconnect.exp"
 		[ -f "${home}/.vpn.cred"
 	done
