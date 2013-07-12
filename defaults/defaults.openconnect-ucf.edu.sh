@@ -55,9 +55,6 @@ function setup_make_Config(){
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
-	#chmod +r /etc/skel/.scripts
-	#chmod +r /etc/skel/.vpn.cred
-	#local scriptBase=$(basename "${scriptName}" .sh)
 	get_user_details all | while read user uid gid home; do
 		echo Setting up openconnect for user[${user}]
 		usermod -a -G openconnect ${user}
@@ -71,11 +68,14 @@ function setup_distribute_Config(){
 			touch     "\${HOME}/.vpn.cred"
 			chmod 600 "\${HOME}/.vpn.cred"
 		SU
-		[ -f "${home}/.scripts/openconnect.exp" ] && ! (( 
-		cat /etc/skel/.scripts/openconnect.exp > "${home}/.scripts/openconnect.exp"
-		[ -f "${home}/.vpn.cred"
+		while read file; do
+			[      -f "${home}/${file}" ]		&&\
+			! (( `cat "${home}/${file}" | wc -c` ))	&&\
+			cat "/etc/skel/${file}" > "${home}/${file}"
+		done <<-WHILE
+			.scripts/openconnect.exp
+			.vpn.cred
+		WHILE
 	done
-	chmod 700 /etc/skel/.scripts
-	chmod 600 /etc/skel/.vpn.cred
 }
 
