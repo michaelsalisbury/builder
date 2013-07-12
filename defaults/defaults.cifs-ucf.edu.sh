@@ -82,9 +82,7 @@ function setup_make_Config(){
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
-	chmod +r /etc/skel/.scripts
-	chmod +r /etc/skel/.cifs-*
-	#local scriptBase=$(basename "${scriptName}" .sh)
+	##############################################################
 	get_user_details all | while read user uid gid home; do
 		usermod -a -G cifs ${user}
 		cat <<-END-OF-CMDS | su - ${user} -s /bin/bash
@@ -92,13 +90,33 @@ function setup_distribute_Config(){
 			chmod 750 "\${HOME}/.scripts"
 			mkdir -p  "\${HOME}/.logs"
 			chmod 750 "\${HOME}/.logs"
-			cp "/etc/skel/.scripts/mount.domain_cifs.sh" "\${HOME}/.scripts/".
-			chmod 750                                    "\${HOME}/.scripts/mount.domain_cifs.sh"
-			cp "/etc/skel/.cifs-"*                       "\${HOME}/".
-			chmod 600                                    "\${HOME}/.cifs-"*
+			touch     "\${HOME}/.scripts/mount.domain_cifs.sh"
+			chmod 550 "\${HOME}/.scripts/mount.domain_cifs.sh"
 		END-OF-CMDS
+		while read file; do
+			[      -f "${home}/${file}" ]		&&\
+			! (( `cat "${home}/${file}" | wc -c` ))	&&\
+			cat "/etc/skel/${file}" > "${home}/${file}"
+		done <<-WHILE
+			.scripts/mount.domain_cifs.sh
+		WHILE
+
+		for domain in $g_domains; do
+			cat <<-END-OF-CMDS | su - ${user} -s /bin/bash
+		                touch     "\${HOME}/.cifs-${domain}-cred"
+				chmod 600 "\${HOME}/.cifs-${domain}-cred"
+				touch     "\${HOME}/.cifs-${domain}-shares"
+				chmod 600 "\${HOME}/.cifs-${domain}-shares"
+			END-OF-CMDS
+			while read file; do
+				[      -f "${home}/${file}" ]		&&\
+				! (( `cat "${home}/${file}" | wc -c` ))	&&\
+				cat "/etc/skel/${file}" > "${home}/${file}"
+			done <<-WHILE
+				.cifs-${domain}-cred
+				.cifs-${domain}-shares
+			WHILE
+		done
 	done
-	chmod 700 /etc/skel/.scripts
-	chmod 600 /etc/skel/.cifs-*
 }
 
