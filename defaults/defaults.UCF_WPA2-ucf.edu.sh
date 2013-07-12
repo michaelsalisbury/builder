@@ -30,8 +30,8 @@ function setup_make_Config(){
 
 	# test for wireless adapter
 	if ! nm-tool | egrep -q "Type:[[:space:]]*802.11"; then
-		echo ERROR\! No Wireless Adapter Found.
-		return 1
+		echo ERROR\! No Wireless Adapter Found.  Not setting up NetworkManager wireless profile for UCF_WPA2.
+		return 0
 	fi
 	
 	# get local wifi apater mac address
