@@ -34,7 +34,7 @@ samba cifs-utils winbind
 # sshfs
 fuse-utils sshfs
 # vnc
-x11vnc xinit netcat-openbsd
+x11vnc xinetd netcat-openbsd
 
 # VPN
 openconnect
@@ -101,4 +101,5 @@ gsfonts
 gsfonts-x11
 xfonts-base        xfonts-100dpi        xfonts-75dpi
 xfonts-biznet-base xfonts-biznet-100dpi xfonts-biznet-75dp
+didjvu djvulibre-bin djvulibre-desktop djvulibre-plugin djvusmooth
 
