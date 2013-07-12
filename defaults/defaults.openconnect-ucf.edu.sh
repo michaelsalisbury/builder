@@ -55,6 +55,7 @@ function setup_make_Config(){
 }
 function setup_distribute_Config(){
 	desc setting up default config \for existing users
+	##############################################################
 	get_user_details all | while read user uid gid home; do
 		echo Setting up openconnect for user[${user}]
 		usermod -a -G openconnect ${user}
