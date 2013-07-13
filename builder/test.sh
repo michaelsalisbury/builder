@@ -1,4 +1,6 @@
 #!/bin/builder.sh
+#!/bin/env /bin/builder.sh
+#!/bin/builder.sh
 echo start
 skip=( true true true false false true false )
 step=7

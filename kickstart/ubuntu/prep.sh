@@ -23,7 +23,6 @@ for cfg in $cfgs; do [ ! -e ${cfg} ] && cp ../${cfg}.template ${cfg}; done
 echo Copying kickstart post scripts
 read -d $'' cfgs << END-OF-LIST
 	post.chroot.setup_workstation_wo-Proxy.cfg
-	post.chroot.setup_workstation_w-ProxyC.cfg
 	post.chroot.setup_workstation_w-Proxy.cfg
 	post.chroot.setup_runonce.cfg
 END-OF-LIST

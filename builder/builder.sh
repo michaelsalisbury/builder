@@ -11,6 +11,10 @@
 # SPLIT_DELIM SPLIT_DELIM_DEFAULT
 #
 ###########################################################################################
+################################################################### PROGRAM DEPENDANCIES ##
+#
+# bc xterm sed grep awk
+###########################################################################################
 ###########################################################################################
 function builder_main(){
 	#SET_MAX_WIDTH_BY_COLS 80
@@ -37,16 +41,17 @@ function builder_main(){
 }
 function source_global_control_vars(){
 	# Include control GLOBAL variables skip, step & prefix
+	local SHM="${buildScriptSHMD}"
 	for exit_counter in {10..1}; do
 		# source control vars
-		cat <<-SED | sed -n -f <(cat) "${scriptFQFN}" > /dev/shm/$$$FUNCNAME
+		cat <<-SED | sed -n -f <(cat) "${scriptFQFN}" > "${SHM}"/$$$FUNCNAME
 			/^skip=/p
 			/^step=/p
 			/^prefix=/p
 			/^source=/p
 		SED
-		source /dev/shm/$$$FUNCNAME
-		rm  -f /dev/shm/$$$FUNCNAME
+		source "${SHM}"/$$$FUNCNAME
+		rm  -f "${SHM}"/$$$FUNCNAME
 		# verify GLOBAL var: prefix
 		if (( ${#prefix} == 0 )); then
 			cat <<-SED | sed -i -f <(cat) "${scriptFQFN}"
@@ -344,6 +349,7 @@ function include_file(){
 	fi
 }
 function include_variables_bash(){
+	local SHM="${buildScriptSHMD}"
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	local variable_name=""
@@ -371,9 +377,9 @@ function include_variables_bash(){
 	if ${source_variables}; then
 		local IFS_DEFAULT=${IFS}
 		include_function "${include_file}" global_variables |\
-		sed '1d;$d' > /dev/shm/$$$FUNCNAME
-		source        /dev/shm/$$$FUNCNAME
-		rm  -f        /dev/shm/$$$FUNCNAME
+		sed '1d;$d' > "${SHM}"/$$$FUNCNAME
+		source        "${SHM}"/$$$FUNCNAME
+		rm  -f        "${SHM}"/$$$FUNCNAME
 		#source <(include_function "${include_file}" global_variables | sed '1d;$d')
 		IFS=${IFS_DEFAULT}
 	else
@@ -383,6 +389,7 @@ function include_variables_bash(){
 	fi
 }
 function include_variables(){
+	local SHM="${buildScriptSHMD}"
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	local variable_name=""
@@ -412,9 +419,9 @@ function include_variables(){
 	if ${source_variables}; then
 		local IFS_DEFAULT=${IFS}
 		include_function "${include_file}" global_variables |\
-		sed '1d;$d' > /dev/shm/$$$FUNCNAME
-		source        /dev/shm/$$$FUNCNAME
-		rm  -f        /dev/shm/$$$FUNCNAME
+		sed '1d;$d' > "${SHM}"/$$$FUNCNAME
+		source        "${SHM}"/$$$FUNCNAME
+		rm  -f        "${SHM}"/$$$FUNCNAME
 		#source <(include_function "${include_file}" global_variables | sed '1d;$d')
 		IFS=${IFS_DEFAULT}
 	else
@@ -429,6 +436,7 @@ function include_function(){
 	sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p" | grep ""
 }
 function include_functions(){
+	local SHM="${buildScriptSHMD}"
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	local function_name=""
@@ -444,9 +452,9 @@ function include_functions(){
 			continue
 		fi
 		# source function
-		include_function "${include_file}" ${function_name} > /dev/shm/$$$FUNCNAME
-		source /dev/shm/$$$FUNCNAME
-		rm  -f /dev/shm/$$$FUNCNAME
+		include_function "${include_file}" ${function_name} > "${SHM}"/$$$FUNCNAME
+		source "${SHM}"/$$$FUNCNAME
+		rm  -f "${SHM}"/$$$FUNCNAME
 		#source <(include_function "${include_file}" ${function_name})
 		# verify function has been sourced
 		if typeset -f | sed -e "/^{/,/^}/d" -e "s/[[:space:]].*//" | grep -q "^${function_name}$"; then
@@ -780,16 +788,18 @@ function stall(){ for s in `seq $1 -1 1`; do echo -n "$s "; sleep 1; done; echo;
 ###########################################################################################
 ##################################################################### functions.format.sh #
 function SET_MAX_WIDTH_BY_COLS(){
+	local SHM="${buildScriptSHMD}"
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
 		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
 	# set GLOBAL vars; COLUMNS, LINES
-	resize > /dev/shm/$$$FUNCNAME
-	source   /dev/shm/$$$FUNCNAME
-	rm  -f   /dev/shm/$$$FUNCNAME
+	touch    "${SHM}"/$$$FUNCNAME
+	resize > "${SHM}"/$$$FUNCNAME 2>/dev/null
+	source   "${SHM}"/$$$FUNCNAME
+	rm  -f   "${SHM}"/$$$FUNCNAME
 	MAX_WIDTH=`tput cols 2>/dev/null`
-	MAX_WIDTH=${MAX_WIDTH:-${width}}
+	MAX_WIDTH=${MAX_WIDTH:-${COLUMNS:-${width}}}
 }
 function REPC(){
 	# is first arg a positive integer
@@ -1082,6 +1092,19 @@ buildScriptName=$(basename "${buildScriptFQFN}")
 buildScriptPath=$(dirname  "${buildScriptFQFN}")
 buildScriptPipe="/tmp/$$${buildScriptName}_Pipe"
 mkfifo                 "${buildScriptPipe}"
+
+# Setup shared memory working dir
+if   [ -d "/dev/shm" ]; then
+	buildScriptSHMD="/dev/shm/$$${buildScriptName}"
+elif [ -d "/tmp" ]; then
+	buildScriptSHMD="/tmp/$$${buildScriptName}"
+elif (( ${#HOME} )) && [ -d "${HOME}" ]; then
+	buildScriptSHMD="${HOME}/tmp-$$${buildScriptName}"
+else
+	echo ERROR\!  Major problem setting up \"buildScriptSHMD\". Exiting.
+	exit 1
+fi
+mkdir -p "${buildScriptSHMD}"
 
 buildScriptExpectedFQFN="/bin/${buildScriptName}"
 

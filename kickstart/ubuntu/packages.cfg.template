@@ -11,6 +11,8 @@ expect expect-dev
 terminator multitail
 screen byobu
 incron
+bc
+xterm
 # hardware diagnostics and detection
 hwinfo ethtool ipcalc smartmontools jockey-common
 # kernel
