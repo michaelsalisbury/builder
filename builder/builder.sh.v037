@@ -41,7 +41,7 @@ function builder_main(){
 }
 function source_global_control_vars(){
 	# Include control GLOBAL variables skip, step & prefix
-	local SHM && get_buildScriptSHMD SHM
+	local SHM=$(get_buildScriptSHMD)
 	for exit_counter in {10..1}; do
 		# source control vars
 		cat <<-SED | sed -n -f <(cat) "${scriptFQFN}" > "${SHM}"/$$$FUNCNAME
@@ -316,21 +316,17 @@ function include_log(){
 	fi
 }
 function include_file(){
-	local _INCLUDES_=GLOBAL_${FUNCNAME}_INCLUDES
-	eval ${_INCLUDES_}=${!_INCLUDES_:- $'\n'}
-	#includes=${includes:- $'\n'}
+	includes=${includes:- $'\n'}
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	# Verify that include file has not already been processed
 	#if ${includes[${include_file}]:-false}; then
 	#includes[${include_file}]=true
-	#if [[ "${includes}" =~ $'\n'"${include_file}"$'\n' ]]; then
-	if [[ "${!_INCLUDES_}" =~ $'\n'"${include_file}"$'\n' ]]; then
+	if [[ "${includes}" =~ $'\n'"${include_file}"$'\n' ]]; then
 		echo Include file \"${include_file}\" has already been processed. | include_log
 		return 0
 	else
-		#includes+="${include_file}"$'\n'
-		eval ${_INCLUDES_}+="${include_file}"$'\n'
+		includes+="${include_file}"$'\n'
 	fi
 
 	if sed "${include_file}" -n -e '1p' | grep -q '^#!.*'${buildScriptFQFN}; then
@@ -353,7 +349,7 @@ function include_file(){
 	fi
 }
 function include_variables_bash(){
-	local SHM && get_buildScriptSHMD SHM
+	local SHM=$(get_buildScriptSHMD)
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	local variable_name=""
@@ -393,7 +389,7 @@ function include_variables_bash(){
 	fi
 }
 function include_variables(){
-	local SHM && get_buildScriptSHMD SHM
+	local SHM=$(get_buildScriptSHMD)
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	local variable_name=""
@@ -440,7 +436,7 @@ function include_function(){
 	sed "${include_file}" -n -e "/^[[:space:]]*function[[:space:]]\+${function_name}[[:space:]]*()/,/^}/p" | grep ""
 }
 function include_functions(){
-	local SHM && get_buildScriptSHMD SHM
+	local SHM=$(get_buildScriptSHMD)
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	local function_name=""
@@ -638,7 +634,12 @@ function log_to_stout(){ cat "`log_get_name $1`"; }
 function log_output(){ tee -a "$scrLogFQFN" | tee -a "`log_get_name $1`"; }
 
 function log_buildScriptOutput(){ tee -a "$scrLogFQFN" >> "`log_get_name $1`"; }
-function log_buildScriptError(){  tee >(log_buildScriptOutput $1) | sed "s|^|$1 :: $(name_function $1) :: |" >> "${scrLogFQFN}-error"; }
+function log_buildScriptError(){
+	local IFS=':'
+	tee >(log_buildScriptOutput $1) | sed "s|^|$1 :: ${FUNCNAME[*]:1} :: |" >> "${scrLogFQFN}-error"
+	#tee >(log_buildScriptOutput $1) | sed "s|^|$1 :: $(name_function $1) :: |" >> "${scrLogFQFN}-error"
+}
+
 function log_get_name(){
 	log_step="00$1"
 	#log_step="${log_step:$(( ${#log_step} - 3 ))}"
@@ -656,9 +657,6 @@ function reboot_isset(){ [ -f "/tmp/$$REBOOT" ] && return 0 || return 1; }
 function reboot_start(){ reboot_isset && /sbin/reboot || return 1; }
 ###########################################################################################
 ###########################################################################################
-function name_function(){ list_functions | sed "$1!d"; }
-function last_function(){ list_functions | wc -l; }
-function show_function(){ type -a `name_function $1` | sed '1d;2s/^/function /'; }
 function find_function(){
 	local opts=$*
 	local srch=${opts// /_}
@@ -690,6 +688,10 @@ function eval_function(){
 		1> >(tee >(log_buildScriptOutput $1))	\
 		2> >(tee >(log_buildScriptError  $1))
 }
+function name_function(){ list_functions | sed "$1!d"; }
+function last_function(){ list_functions | wc -l; }
+function show_function(){ type -a `name_function $1` | sed '1d;2s/^/function /'; }
+
 function retr_function_mesg_opts(){ [ -z "$1" ] && index=$step || index=$1
 				    show_function $index | grep "desc " | head -1 | \
 				    while read retr_mesg_cmd retr_mesg_opts; do
@@ -784,10 +786,10 @@ function is_finished(){	(( $step > `last_function` )) && return 0 || return 1; }
 function is_unset(){ compgen -A variable | egrep -q ^$1$ && return 1 || return 0; }
 ###########################################################################################
 ###########################################################################################
+function skip(){ ${skip[0]} && { ${skip[$step]} && return 0 || return 1; } || return 1; }
 function wrap(){ (( $step > `last_function` )) && step=1               && fixs && return 0
 		 (( $step < 1 ))               && step=`last_function` && fixs && return 0
 		 return 1; }
-function skip(){ ${skip[0]} && { ${skip[$step]} && return 0 || return 1; } || return 1; }
 function back(){ let step--; fixs; }
 function next(){ let step++; fixs; }
 function rset(){ step=1; fixs; }
@@ -800,7 +802,7 @@ function stall(){ for s in `seq $1 -1 1`; do echo -n "$s "; sleep 1; done; echo;
 ###########################################################################################
 ##################################################################### functions.format.sh #
 function SET_MAX_WIDTH_BY_COLS(){
-	local SHM && get_buildScriptSHMD SHM
+	local SHM=$(get_buildScriptSHMD)
 	# is first arg a positive integer
 	[[ $1 =~ ^[0-9]+ ]] \
 		&& { local width=$1 && shift; } \
@@ -1099,62 +1101,54 @@ END-OF-DOMAIN-LIST
 }
 ###########################################################################################
 ###########################################################################################
- function get_buildScriptPipe(){
-	local _PIPE_=GLOBAL_${FUNCNAME}_PIPE
+function get_buildScriptPipe(){
+	local PIPE=GLOBAL_${FUNCNAME}_PIPE
 
-	if [ -n "${!_PIPE_}" ] && [ -e "${!_PIPE_}" ]; then
-		(( ${#1} ))			\
-			&& eval $1="${!_PIPE_}"	\
-			|| echo "${!_PIPE_}"
+	if [ -n "${PIPE}" ] && [ -e "${!PIPE}" ]; then
+		echo "${!PIPE}"
 		return 0
 	fi
 	
-	local SHMD && get_buildScriptSHMD SHMD
+	local SHMD=$(get_buildScriptSHMD)
 
 	if [ -d "${SHMD}" ] && [ ! -e "${SHMD}/${buildScriptName}_PIPE" ]; then
-		eval ${_PIPE_}="${SHMD}/${buildScriptName}_PIPE"
+		eval ${PIPE}="${SHMD}/${buildScriptName}_PIPE"
 	elif [ -d "${SHMD}" ] && [ ! -e "${SHMD}/${buildScriptName}_PIPE$$" ]; then
-		eval ${_PIPE_}="${SHMD}/${buildScriptName}_PIPE$$"
+		eval ${PIPE}="${SHMD}/${buildScriptName}_PIPE$$"
 	else
 		echo ERROR\!  Major problem setting up \"buildScriptPipe\". Exiting. 1>&2
 		EXIT 1; exit 1
 	fi
-	mkfifo "${!_PIPE_}" &>/dev/null
+	mkfifo "${!PIPE}" &>/dev/null
 	if (( $? )); then
 		echo ERROR\!  Major problem creating \"buildScriptPipe\". Exiting. 1>&2
 		EXIT 1; exit 1
 	else
-		(( ${#1} ))			\
-			&& eval $1="${!_PIPE_}"	\
-			|| echo "${!_PIPE_}"
+		echo "${!PIPE}"
 	fi
 }
 function get_buildScriptSHMD(){
-	local _SHMD_=GLOBAL_${FUNCNAME}_SHMD
+	local SHMD=GLOBAL_${FUNCNAME}_SHMD
 
-	if [ -n "${!_SHMD_}" ] && [ -d "${!_SHMD_}" ]; then
-		(( ${#1} ))			\
-			&& eval $1="${!_SHMD_}"	\
-			|| echo "${!_SHMD_}"
+	if [ -n "${!SHMD}" ] && [ -d "${!SHMD}" ]; then
+		echo "${!SHMD}"
 		return 0
 	elif [ -d "/dev/shm" ]; then
-		eval ${_SHMD_}="/dev/shm/$$${buildScriptName}"
+		eval ${SHMD}="/dev/shm/$$${buildScriptName}"
 	elif [ -d "/tmp" ]; then
-		eval ${_SHMD_}="/tmp/$$${buildScriptName}"
+		eval ${SHMD}="/tmp/$$${buildScriptName}"
 	elif (( ${#HOME} )) && [ -d "${HOME}" ]; then
-		eval ${_SHMD_}="${HOME}/tmp-$$${buildScriptName}-SHMD"
+		eval ${SHMD}="${HOME}/tmp-$$${buildScriptName}-SHMD"
 	else
 		echo ERROR\!  Major problem setting up \"buildScriptSHMD\". Exiting. 1>&2
 		EXIT 1; exit 1
 	fi
-	mkdir -p "${!_SHMD_}" &>/dev/null
+	mkdir -p "${!SHMD}" &>/dev/null
 	if (( $? )); then
 		echo ERROR\!  Problem creating dir \"buildScriptSHMD\". Exiting. 1>&2
 		EXIT 1; exit 1
 	else
-		(( ${#1} ))			\
-			&& eval $1="${!_SHMD_}"	\
-			|| echo "${!_SHMD_}"
+		echo "${!SHMD}"
 	fi
 }
 ###########################################################################################
@@ -1162,6 +1156,8 @@ function get_buildScriptSHMD(){
 buildScriptFQFN=$(readlink -nf "${BASH_SOURCE}")
 buildScriptName=$(basename "${buildScriptFQFN}")
 buildScriptPath=$(dirname  "${buildScriptFQFN}")
+#buildScriptPipe="/tmp/$$${buildScriptName}_Pipe"
+#mkfifo                 "${buildScriptPipe}"
 
 buildScriptExpectedFQFN="/bin/${buildScriptName}"
 

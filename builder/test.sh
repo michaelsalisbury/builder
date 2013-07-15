@@ -55,6 +55,12 @@ function setup_E(){
 	echo var_1 :: $var_1
 	echo var_2 :: $var_2
 	echo var_3 :: $var_3
+
+	mkdir /alpha/beta/gama
+	echo hello world
+
+	echo log_get_name :: $(log_get_name)
+
 }
 function setup_E_epsilon(){
 	echo $FUNCNAME
