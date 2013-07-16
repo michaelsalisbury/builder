@@ -2,7 +2,6 @@
 #############################################################################
 # Apt-Cache Server
 d-i mirror/http/proxy string http://10.173.119.78:3142/
-#d-i mirror/http/proxy string http://10.173.119.72:3142/
 #d-i mirror/http/proxy string http://192.168.253.3:3142/
 
 # Primary instalation task
@@ -20,10 +19,10 @@ tasksel tasksel/first multiselect Xubuntu desktop
 #d-i pkgsel/upgrade select none
 
 # Network name preseed config
-d-i netcfg/get_hostname string DLPBMM1-ubuntu-test-deploy
+d-i netcfg/get_hostname string Xubuntu-test-deploy
 d-i netcfg/get_domain string   cos.ucf.edu
 
 # download-installer.postinst stage
-#d-i preseed/early_command string \
-#	cat /tmp/preseed/preseed.hd.fdisk.sh \
-#	>> /var/lib/dpkg/info/download-installer.postinst
+d-i preseed/early_command string \
+	cat /tmp/preseed/preseed.hd.fdisk.sh \
+	>> /var/lib/dpkg/info/download-installer.postinst
