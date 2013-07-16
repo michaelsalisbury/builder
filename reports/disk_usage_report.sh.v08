@@ -113,7 +113,7 @@ function run_Node_Hard_Disk_Smart_Reports(){
 	PAD_SPLIT \# \# $(time_stamp) - Node Hard Disk Smart Reports \#
 
 	local hostname
-	rocks list host 				|\
+	/opt/rocks/bin/rocks list host			|\
 		awk -F: '{print $1}'			|\
 		tail -n +3				|\
 		while read hostname; do

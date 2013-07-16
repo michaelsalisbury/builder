@@ -18,9 +18,10 @@ function SET_MAX_WIDTH_BY_COLS(){
 		&& { local width=$1 && shift; } \
 		|| local width=${MAX_WIDTH:-${MAX_WIDTH_DEFAULT:- 90}}
 	# set GLOBAL vars; COLUMNS, LINES
-	resize > /dev/shm/$$$FUNCNAME
-	source   /dev/shm/$$$FUNCNAME
-	rm  -f   /dev/shm/$$$FUNCNAME
+	touch     /dev/shm/$$$FUNCNAME
+	resize 1> /dev/shm/$$$FUNCNAME 2>/dev/null
+	source    /dev/shm/$$$FUNCNAME
+	rm  -f    /dev/shm/$$$FUNCNAME
 	MAX_WIDTH=`tput cols 2>/dev/null`
 	MAX_WIDTH=${MAX_WIDTH:-${width}}
 }
