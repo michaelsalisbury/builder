@@ -3,7 +3,7 @@
 #!/bin/builder.sh
 echo start
 skip=( true true true false false true false )
-step=7
+step=1
 prefix="setup"
 
 function includes(){
@@ -39,6 +39,8 @@ function main(){
 
 }
 function setup_A_alpha(){
+	SET_MAX_WIDTH_BY_COLS
+	desc alpha beta gama, alpha beta gama, alpha beta gama, alpha beta gama, alpha beta gama
 	echo $FUNCNAME
 }
 function setup_B_beta(){

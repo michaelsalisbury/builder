@@ -201,7 +201,7 @@ function process_switches(){
 	local OPTARG=
 	local OPTION=
 	local OPTERR=1
-	while getopts "b:cd:e:ghj:i:lm:nNr:s:t:uw:" OPTION; do
+	while getopts "b:cd:e:ghj:i:lm:nr:s:t:uw:" OPTION; do
 		local switches_last_option=$OPTION
 		local switches_last_optarg=$OPTARG
 
@@ -233,11 +233,11 @@ function process_switches(){
                         h)	show_help; disp_functions; echo;;
 			# jump up or down (back or forward) a step
 			j)	[[ $OPTARG =~ (b|u) ]] && back || next;
-				wrap;;
+				wrap; disp_functions; echo;;
 			# execute function by index or name (unique match)
 			i)	local index=`find_function $OPTARG`
-				(( index )) && eval_function $index
-				(( index )) && log_is_empty  $index;;
+				(( index )) && eval_function $index || disp_functions 
+				(( index )) && log_is_empty  $index && disp_functions;;
 			# display function list
                         l)	disp_functions; echo;;
 			# reorganize functions (modify script, experimental)
@@ -245,11 +245,10 @@ function process_switches(){
 				[[ $OPTARG =~ (f|d) ]] && move_down $step && next
 				disp_functions; echo;;
 			# run current step and increment
-			n)	skip || eval_function $step; next; wrap;;
-			# Do Nothing
-			N)	;;
+			n)	skip || eval_function $step; next; wrap; disp_functions; echo;;
 			# toggle function skip on/off; toggle skip feature on/off
-			s)	skip_function $OPTARG || show_help;;
+			s)	skip_function $OPTARG || show_help
+				disp_functions; echo;;
 			# reset step back to 1
 			r)	rset;
 				[ $OPTARG == r ] && return 0;
@@ -273,7 +272,7 @@ function process_switches(){
 	# If there are any extra cmd line arguments apply the last command switch
 	(( ${#@} )) && for args in "$@"; do
 		case ${switches_last_option:- null} in
-			i|s|w)	$FUNCNAME -$switches_last_option "$args" -N;;
+			i|s|w)	$FUNCNAME -$switches_last_option "$args";;
 		esac
 	done
 
@@ -281,7 +280,7 @@ function process_switches(){
 	if readlink /proc/$$/fd/0 | egrep -q "^pipe:"; then
 		case ${switches_last_option:- null} in	
 			i|s|w)	while read args; do
-					$FUNCNAME -$switches_last_option "${args}" -N
+					$FUNCNAME -$switches_last_option "${args}"
 				# splits lines at commas and double quotes
 				# removes leading and trailing spaces 
 				done < <(cat | tr "," "\n" | sed -f <(cat <<-SED
@@ -293,13 +292,6 @@ function process_switches(){
 				));;
 		esac
 	fi
-
-	# final action after lists
-	case ${switches_last_option:- null} in
-		i|s|n|j)	disp_functions
-				echo;;
-	esac
-
 	return 1
 }
 ###########################################################################################
@@ -324,18 +316,21 @@ function include_log(){
 	fi
 }
 function include_file(){
-	SET_MAX_WIDTH_BY_COLS
 	local _INCLUDES_=GLOBAL_${FUNCNAME}_INCLUDES
-	eval "${_INCLUDES_}=\"${!_INCLUDES_:- $'\n'}\""
-
+	eval ${_INCLUDES_}=${!_INCLUDES_:- $'\n'}
+	#includes=${includes:- $'\n'}
 	local include_file=$(readlink -nf "$1")
 	local include_path=$(dirname "${include_file}")
 	# Verify that include file has not already been processed
+	#if ${includes[${include_file}]:-false}; then
+	#includes[${include_file}]=true
+	#if [[ "${includes}" =~ $'\n'"${include_file}"$'\n' ]]; then
 	if [[ "${!_INCLUDES_}" =~ $'\n'"${include_file}"$'\n' ]]; then
 		echo Include file \"${include_file}\" has already been processed. | include_log
 		return 0
 	else
-		eval "${_INCLUDES_}+=\"${include_file}\"$'\n'"
+		#includes+="${include_file}"$'\n'
+		eval ${_INCLUDES_}+="${include_file}"$'\n'
 	fi
 
 	if sed "${include_file}" -n -e '1p' | grep -q '^#!.*'${buildScriptFQFN}; then
@@ -762,10 +757,8 @@ function disp_functions(){
 	# clear unused vars
 	unset index toggle desc
 	name='Reset to run again'
-	# format line
-	line=`printf "${printf_format}" "${marker}" "${index}" "${toggle}" "${name}" "${desc}"`
-	# print line and clip to screen width
-	echo "${line:0:${MAX_WIDTH}}"
+	# print FINISHED
+	printf "${printf_format}" "${marker}" "${index}" "${toggle}" "${name}" "${desc}"
 }
 function skip_function(){
 	case "$*" in
