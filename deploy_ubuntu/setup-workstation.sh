@@ -94,7 +94,7 @@ EOL
         		ls -1             "${scriptPath}"/defaults.${app}.sh 2> /dev/null
         		ls -1 "${scriptPath}"/../defaults/defaults.${app}.sh 2> /dev/null
 		done | while read script; do
-			"${script:-false}" -rr
+			"${script:-false}" -C -rr
 		done
 
 }
@@ -475,7 +475,7 @@ EOL
         		ls -1             "${scriptPath}"/defaults.${app}.sh 2> /dev/null
         		ls -1 "${scriptPath}"/../defaults/defaults.${app}.sh 2> /dev/null
 		done | while read script; do
-			"${script:-false}" -rr
+			"${script:-false}" -C -rr
 		done
 
 	# setup team viewer

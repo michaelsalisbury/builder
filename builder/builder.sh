@@ -201,7 +201,7 @@ function process_switches(){
 	local OPTARG=
 	local OPTION=
 	local OPTERR=1
-	while getopts "b:cd:e:ghj:i:lm:nNr:s:t:uw:" OPTION; do
+	while getopts "b:cCd:e:ghj:i:lm:nNr:s:t:uw:" OPTION; do
 		local switches_last_option=$OPTION
 		local switches_last_optarg=$OPTARG
 
@@ -221,6 +221,8 @@ function process_switches(){
 			b)	[ "${OPTARG}" == k ] && make_backup || make_backup "$OPTARG";;
 			# run current step and stop 
 			c)	skip || eval_function $step; disp_functions; echo;;
+			# set the MAX_WIDTH column setting automatically
+			C)	SET_MAX_WIDTH_BY_COLS;;
 			# dump function code to screen
 			d)	[ $OPTARG == a ] && dump_functions || show_function $OPTARG;;
 			# edit script with vim
