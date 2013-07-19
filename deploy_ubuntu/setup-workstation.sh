@@ -76,6 +76,7 @@ function setup_Prep_UCF(){
 	desc Prep: openconnect, cifs, hostname
 	# Setup hostname on systems Dell,vbox,other
 	local HOSTNAME=$(system_serial)
+	echo HOSTNAME :: ${HOSTNAME}
 	if cat /etc/hostname | grep -q ^kickseed$; then
 		awk '/kickseed/{print $2}'        /etc/hosts > /etc/hostname
 		sed -i "s/kickseed/${HOSTNAME}/g" /etc/hosts   /etc/hostname
