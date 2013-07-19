@@ -481,7 +481,7 @@ EOL
 	# setup team viewer
 	cd   /tmp
 	local teamviewer_url='http://download.teamviewer.com/download/'
-	[ "x86_64" == $(uname -i)\
+	[ "x86_64" == $(uname -i) ]\
 		&& teamviewer_url+='teamviewer_linux_x64.deb' \
 		|| teamviewer_url+='teamviewer_linux.deb'
 	wget -O teamviewer.deb "${teamviewer_url}"

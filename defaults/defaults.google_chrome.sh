@@ -35,7 +35,9 @@ function setup_skel_Structure(){
 function setup_xfce_defaults(){
 	desc Set Chrome as the default browser
 	###############################################################################
-	cp -f "/usr/share/applications/google-chrome.desktop" \
+	#cp -f "/usr/share/applications/google-chrome.desktop" \
+	#      "/etc/skel/.local/share/xfce4/helpers/".
+	cp -f "/opt/google/chrome/google-chrome.desktop" \
 	      "/etc/skel/.local/share/xfce4/helpers/".
 	local helpers='/etc/skel/.config/xfce4/helpers.rc'
 	touch                    "${helpers}"
