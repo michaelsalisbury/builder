@@ -116,10 +116,9 @@ function run_Node_Hard_Disk_Smart_Reports(){
 	/opt/rocks/bin/rocks list host			|\
 		awk -F: '{print $1}'			|\
 		tail -n +3				|\
-		sort					|\
 		while read hostname; do
 			smart_report_script		|\
-			ssh				\
+			ssh				|\
 			-o passwordauthentication=no	\
 			-o ConnectTimeout=2		\
 			${hostname}			\

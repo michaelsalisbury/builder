@@ -86,8 +86,8 @@ gv
 wv
 lyx
 dvipost
-texlive texlive-full texlive-sciences texlive-xetex texlive-fonts-extra texlive-formats-extra texlive-latex-extra
-texmacs texmacs-extra-fonts
+texlive texlive-full texlive-science texlive-xetex texlive-fonts-extra texlive-formats-extra texlive-latex-extra
+#texmacs texmacs-extra-fonts
 texworks
 latex2html latex2rtf writer2latex
 
@@ -102,6 +102,6 @@ doxygen
 gsfonts
 gsfonts-x11
 xfonts-base        xfonts-100dpi        xfonts-75dpi
-xfonts-biznet-base xfonts-biznet-100dpi xfonts-biznet-75dp
+xfonts-biznet-base xfonts-biznet-100dpi xfonts-biznet-75dpi
 didjvu djvulibre-bin djvulibre-desktop djvulibre-plugin djvusmooth
 
