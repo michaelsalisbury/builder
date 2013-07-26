@@ -105,6 +105,7 @@ function main(){
 	# start x11vnc socket on localhost
 	/usr/bin/x11vnc				\
 		-bg				\
+		-ncache				\
 		-o "${LOG}.d"			\
 		-accept /bin/true		\
 		-gone /bin/true			\
@@ -112,6 +113,9 @@ function main(){
 		-forever			\
 		-inetd				\
 		-localhost			\
+		-noipv4				\
+		-noipv6				\
+		-rfbport 0			\
 		-display :0			\
 		-auth ${auth_array[0]}		\
 		-nopw
