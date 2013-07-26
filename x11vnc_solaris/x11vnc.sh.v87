@@ -106,7 +106,7 @@ function main(){
 	/usr/bin/x11vnc				\
 		-bg				\
 		-ncache				\
-		-o "${LOG}.${vncPORT}"		\
+		-o "${LOG}.d"			\
 		-accept /bin/true		\
 		-gone /bin/true			\
 		-noxdamage			\
