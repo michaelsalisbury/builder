@@ -1,47 +1,36 @@
 #!/bin/builder.sh
 skip=( false false false false false false false false false false )
-step=1
+step=10
 prefix="setup"
 
-function includes(){
-	functions*.sh
-}
-function global_variables(){
+
+	##########################################################################################################
 	owncloud_Downloads_Prep=/root/Downloads
 	owncloud_changelog=$owncloud_Downloads_Prep/owncloud_changelog
 	owncloud_mysql_root_passwd=1qaz@WSX
 	owncloud_mysql_database_name=owncloud
 	owncloud_http_conf=/etc/httpd/conf.d/owncloud.conf
-}
+	##########################################################################################################
+	function repc(){ echo `seq $1` | sed "s/ /$2/g;s/[^$2]//g"; }
+	function desc(){ echo; line="#### $@ `repc 100 '#'`"; echo `repc 101 '#'`; echo ${line:0:100}; echo; }
+	function parse_new_version(){ sed '/^Release/s/[^"]*"\([0-9\.]*\)"$/\1/p;d' "$owncloud_changelog" | head -1; }
+	#function parse_cur_version(){ sed "/version/s/[^']*'\([0-9\.]*\)',$/\1/p;d" /var/www/owncloud_config/config.php; }
+	function parse_cur_version(){
+		local -a docRoot=(`grep DocumentRoot "${owncloud_http_conf}" | sort -u | head -1`)
 
-#function repc(){ echo `seq $1` | sed "s/ /$2/g;s/[^$2]//g"; }
-#function desc(){
-#	echo; line="#### $@ `repc 100 '#'`"; echo `repc 101 '#'`; echo ${line:0:100}; echo;
-#}
-function parse_new_version(){
-	sed '/^Release/s/[^"]*"\([0-9\.]*\)"$/\1/p;d' "$owncloud_changelog" | head -1;
-}
-#function parse_cur_version(){
-#	sed "/version/s/[^']*'\([0-9\.]*\)',$/\1/p;d" /var/www/owncloud_config/config.php;
-#}
-function parse_cur_version(){
-	local -a docRoot=( $(
-		grep DocumentRoot "${owncloud_http_conf}" |\
-		sort -u |\
-		head -1
-	) )
-	cat <<-END-OF-SED | sed -f <(cat) "${docRoot[@]:1}/lib/util.php"
-		/getVersionString() *{/,/}/ {
-			/return/ s/[^0-9]*\([0-9\.]*\).*/\1/p
-		}
-		d
-	END-OF-SED
-}
+		sed "${docRoot[@]:1}/lib/util.php" -f <(cat << "		END-OF-SED"
+			/getVersionString() *{/,/}/ {
+				/return/ s/[^0-9]*\([0-9\.]*\).*/\1/p
+			}
+			d
+		END-OF-SED
+		) 
+	}
 
 function setup_Download(){
-	####################################################################################
-	############################################################### Download new release
-                                                                   desc Download new release
+	##########################################################################################################
+	################################################################ Download new release
+                                                                    desc Download new release
 	mkdir   -p "$owncloud_Downloads_Prep"
 	rm      -f "$owncloud_changelog"
 	wget -q -O "$owncloud_changelog" http://owncloud.org/releases/Changelog
@@ -52,16 +41,13 @@ function setup_Download(){
 	echo Cur version = $cur && echo
 
 	rm      -f "$owncloud_Downloads_Prep/owncloud-${ver}.tar.bz2"
-	wget -q -O "$owncloud_Downloads_Prep/owncloud-${ver}.tar.bz2" \
-		    http://download.owncloud.org/community/owncloud-${ver}.tar.bz2
-		    #http://owncloud.org/releases/owncloud-${ver}.tar.bz2
-	[ -f       "$owncloud_Downloads_Prep/owncloud-${ver}.tar.bz2" ] \
-	&& echo New version [${ver}] retrieved.
+	wget -q -O "$owncloud_Downloads_Prep/owncloud-${ver}.tar.bz2" http://owncloud.org/releases/owncloud-${ver}.tar.bz2
+	[ -f       "$owncloud_Downloads_Prep/owncloud-${ver}.tar.bz2" ] && echo New version [${ver}] retrieved.
 }
 function setup_Backup(){
-	####################################################################################
-	############################################################# Backup current version
-                                                                 desc Backup current version
+	##########################################################################################################
+	################################################################ Backup current version
+                                                                    desc Backup current version
 	cur=`parse_cur_version`
 	if [ ! -d /var/www/owncloud_config_bk${cur} ]; then
 		cp -rvf  /var/www/owncloud_config /var/www/owncloud_config_bk${cur}
@@ -87,9 +73,9 @@ function setup_Backup(){
 	fi
 }
 function setup_Unpack(){
-	####################################################################################
-	################################################# Unpack to /var/www/owncloud-${ver}
-                                                     desc Unpack to /var/www/owncloud-${ver}
+	##########################################################################################################
+	################################################################ Unpack to /var/www/owncloud-${ver}
+        	                                                    desc Unpack to /var/www/owncloud-${ver}
 	
 	ver=`parse_new_version`
 	cur=`parse_cur_version`
@@ -105,7 +91,7 @@ function setup_Unpack(){
 	[ -d /var/www/owncloud-${ver} ] && echo OwnCloud setup in /var/www/owncloud-${ver}
 }
 function setup_Permissions(){
-	####################################################################################
+	##########################################################################################################
 	################################################################ Fix permissions
 	                                                            desc Fix permissions
 	ver=`parse_new_version`
@@ -115,13 +101,13 @@ function setup_Permissions(){
 	echo "Permisions set to own[apache] grp[apache] for /var/www/owncloud-${ver}/apps"
 }
 function setup_Bind(){
-	####################################################################################
-	############################################################# Bind config directory
-	                                                         desc Bind config directory
+	##########################################################################################################
+	################################################################ Bind config directory
+	                                                            desc Bind config directory
 	ver=`parse_new_version`
 	sed -i "/\/var\/www\/owncloud-${ver}\/config/d" /etc/fstab
-	echo "/var/www/owncloud_config	/var/www/owncloud-${ver}/config	bind	defaults,bind	0 0" \
-	>> /etc/fstab
+	echo "/var/www/owncloud_config		/var/www/owncloud-${ver}/config	bind	defaults,bind	0 0" \
+		>> /etc/fstab
 	echo Bind entry to map /var/www/owncloud_config to /var/www/owncloud-${ver}/config made in fstab
 	mount -a
 	[ -n "`grep ${ver} /etc/mtab`" ] && echo /var/www/owncloud_config mounted to /var/www/owncloud-${ver}/config
