@@ -86,7 +86,7 @@ function free_ID_pair(){
 	fi
 } 
 function free_ID(){
-	local file=${1//[^a-Z]/}
+	local file=${1//[^a-zA-Z]/}
 	case ${file} in
 		group|passwd)	local ID=${2:-\1};;
 		g*|G*)		free_ID group ${2//[^0-9]/}
