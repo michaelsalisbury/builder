@@ -370,7 +370,7 @@ function setup_lammps_intel(){
 		cd     /opt/lammps/lib/poems; make -f Makefile.icc   -j &> ~/logs/lammps_intel_mpi-poems
 
 		cd     /opt/lammps/src/MAKE;  cp Makefile.linux Makefile.linux-mpich2
-		sed -i Makefile.linux-mpich2 -f <(cat << END-OF-SED
+		sed -i Makefile.linux-mpich2 -f <(cat <<-END-OF-SED
 			/^CC =/		s|icc|mpic++ |
 			/^CCFLAGS =/	s|-O|-O3 -shared-intel |
 			/^LINK =/	s|icc|mpic++ |
@@ -379,8 +379,8 @@ function setup_lammps_intel(){
 			/^FFT_INC =/	s|FFTW|FFTW3 |
 			/^FFT_PATH =/	s|=|=      -L/usr/local/fftw-3.3/lib -I/usr/local/fftw-3.3/include |
 			/^FFT_LIB =/	s|fftw|fftw3 |
-END-OF-SED
-)
+		END-OF-SED
+		)
 		sed -i 's|^\(...._SYSPATH\).*|\1 = -L/opt/intel/lib/intel64|' \
 							/opt/lammps/lib/{reax,meam}/Makefile.*
 		sed -i 's|lompstub|liompstubs5|'	/opt/lammps/lib/{reax,meam}/Makefile.*
@@ -391,12 +391,12 @@ END-OF-SED
 		ln     /opt/lammps/src/lmp_linux-mpich2 /opt/lammps/bin/.
 		ln     /opt/lammps/src/lmp_linux-mpich2 /opt/lammps/bin/lmp_mpi
 
-                cat << EOF > /etc/profile.d/lammps.csh
-/bin/bash /etc/profile.d/lammps.sh
-EOF
-                cat << EOF > /etc/profile.d/lammps.sh
-export PATH="/opt/lammps/bin"":\$PATH"
-EOF
+                cat <<-EOF > /etc/profile.d/lammps.csh
+			/bin/bash /etc/profile.d/lammps.sh
+		EOF
+                cat <<-EOF > /etc/profile.d/lammps.sh
+			export PATH="/opt/lammps/bin"":\$PATH"
+		EOF
 }
 function setup_lammps_gnu(){
 		#########################################################################
@@ -413,7 +413,7 @@ function setup_lammps_gnu(){
 		cd     /opt/lammps/lib/poems; make -f Makefile.g++      -j &> ~/logs/lammps_GNU_mpi-poems
 
 		cd     /opt/lammps/src/MAKE;  cp Makefile.linux Makefile.linux-mpich2
-		sed -i Makefile.linux-mpich2 -f <(cat << END-OF-SED
+		sed -i Makefile.linux-mpich2 -f <(cat <<-END-OF-SED
 			/^CC =/		s|icc|mpic++ |
 			/^CCFLAGS =/	s|-O|-O3 |
 			/^LINK =/	s|icc|mpic++ |
@@ -422,8 +422,8 @@ function setup_lammps_gnu(){
 			/^FFT_INC =/	s|FFTW|FFTW3 |
 			/^FFT_PATH =/	s|=|=      -L/usr/local/fftw-3.3-gnu/lib -I/usr/local/fftw-3.3-gnu/include |
 			/^FFT_LIB =/	s|fftw|fftw3 |
-END-OF-SED
-)
+		END-OF-SED
+		)
 		sed -i 's|^\(...._SYSPATH = \).*|\1|'		/opt/lammps/lib/{reax,meam}/Makefile.*
 		sed -i 's|^\(...._SYSLIB\).*|\1 = -lgfortran |'	/opt/lammps/lib/{reax,meam}/Makefile.*
 
@@ -433,12 +433,12 @@ END-OF-SED
 		ln     /opt/lammps/src/lmp_linux-mpich2 /opt/lammps/bin/.
 		ln     /opt/lammps/src/lmp_linux-mpich2 /opt/lammps/bin/lmp
 
-                cat << EOF > /etc/profile.d/lammps.csh
-/bin/bash /etc/profile.d/lammps.sh
-EOF
-                cat << EOF > /etc/profile.d/lammps.sh
-export PATH="/opt/lammps/bin"":\$PATH"
-EOF
+                cat <<-EOF > /etc/profile.d/lammps.csh
+			/bin/bash /etc/profile.d/lammps.sh
+		EOF
+                cat <<-EOF > /etc/profile.d/lammps.sh
+			export PATH="/opt/lammps/bin"":\$PATH"
+		EOF
 }
 
 function setup_gromacs_intel(){
@@ -560,12 +560,12 @@ function setup_espresso_intel(){
                 build='qe5.0-xSSE4.2'; make_espresso --prefix=/opt/espresso/prefix-${build}
 		#build='qe-xSSE4.2_openmp'; make_espresso --enable-openmp
                 #########################################################################
-                cat << EOF > /etc/profile.d/espresso.csh
-/bin/bash /etc/profile.d/espresso.sh
-EOF
-                cat << EOF > /etc/profile.d/espresso.sh
-export PATH="/opt/espresso/qe5.0/bin"":\$PATH"
-EOF
+                cat <<-EOF > /etc/profile.d/espresso.csh
+			/bin/bash /etc/profile.d/espresso.sh
+		EOF
+                cat <<-EOF > /etc/profile.d/espresso.sh
+			export PATH="/opt/espresso/qe5.0/bin"":\$PATH"
+		EOF
 }
 
 function setup_gotoblas2_intel(){
@@ -614,22 +614,22 @@ function setup_gotoblas2(){
 }
 function setup_mpich2_gnu_paths(){
                 #########################################################################
-                cat << EOF > /etc/profile.d/mpich2-gnu.csh
-/bin/bash /etc/profile.d/mpich2-gnu.sh
-EOF
-                cat << EOF > /etc/profile.d/mpich2-gnu.sh
-export PATH="/opt/mpich2-gnu/bin"":\$PATH"
-export LD_LIBRARY_PATH="/opt/mpich2-gnu/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
-EOF
+                cat <<-EOF > /etc/profile.d/mpich2-gnu.csh
+			/bin/bash /etc/profile.d/mpich2-gnu.sh
+		EOF
+                cat <<-EOF > /etc/profile.d/mpich2-gnu.sh
+			export PATH="/opt/mpich2-gnu/bin"":\$PATH"
+			export LD_LIBRARY_PATH="/opt/mpich2-gnu/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+		EOF
 }
 function setup_mpich2_intel_paths(){
-                cat << EOF > /etc/profile.d/mpich2.csh
-/bin/bash /etc/profile.d/mpich2.sh
-EOF
-                cat << EOF > /etc/profile.d/mpich2.sh
-export PATH="/opt/mpich2/bin"":\$PATH"
-export LD_LIBRARY_PATH="/opt/mpich2/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
-EOF
+                cat <<-EOF > /etc/profile.d/mpich2.csh
+			/bin/bash /etc/profile.d/mpich2.sh
+		EOF
+                cat <<-EOF > /etc/profile.d/mpich2.sh
+			export PATH="/opt/mpich2/bin"":\$PATH"
+			export LD_LIBRARY_PATH="/opt/mpich2/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+		EOF
 }
 function setup_fftw2_intel(){
         ver='fftw-2.1.5'
@@ -678,9 +678,9 @@ function setup_fftw2(){
         echo "${install_dir}/lib" > /etc/ld.so.conf.d/${ver}.conf
         ldconfig
         echo "/bin/bash /etc/profile.d/${ver}.sh" > /etc/profile.d/${ver}.csh
-        cat << EOF > /etc/profile.d/${ver}.sh
-export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
-EOF
+        cat <<-EOF > /etc/profile.d/${ver}.sh
+		export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+	EOF
 }
 
 function setup_fftw3_gnu(){
@@ -735,9 +735,9 @@ function setup_fftw(){
 	echo "${install_dir}/lib" > /etc/ld.so.conf.d/${ver}.conf
 	ldconfig
 	echo "/bin/bash /etc/profile.d/${ver}.sh" > /etc/profile.d/${ver}.csh
-	cat << EOF > /etc/profile.d/${ver}.sh
-export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
-EOF
+	cat <<-EOF > /etc/profile.d/${ver}.sh
+		export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+	EOF
 }
 function setup_tcl_gnu(){
         #########################################################################
@@ -787,9 +787,9 @@ function setup_tcl(){
         echo "${install_dir}/lib" > /etc/ld.so.conf.d/${ver}.conf
         ldconfig
         echo "/bin/bash /etc/profile.d/${ver}.sh" > /etc/profile.d/${ver}.csh
-        cat << EOF > /etc/profile.d/${ver}.sh
-export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
-EOF
+        cat <<-EOF > /etc/profile.d/${ver}.sh
+		export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+	EOF
 }
 
 function setup_namd_intel(){
@@ -832,30 +832,30 @@ function setup_namd_intel(){
         charmArch=$(ls -d mpi*)
         charmPath=${charmBase}/${charmArch}
 
-	cat << EOF > ${ld_conf}
-${charmPath}/lib
-EOF
+	cat <<-EOF > ${ld_conf}
+		${charmPath}/lib
+	EOF
 
 	ldconfig
-        cat > ${opt}/${dst}/arch/${namdArch}.arch << END-OF-ARCH
-NAMD_ARCH = Linux-x86_64
-CHARMARCH = ${charmArch}
+        cat > ${opt}/${dst}/arch/${namdArch}.arch <<-END-OF-ARCH
+		NAMD_ARCH = Linux-x86_64
+		CHARMARCH = ${charmArch}
 
-FLOATOPTS= -ip -fno-rtti
-CXX = icpc -m64 -fPIC -DSOCKLEN_T=socklen_t -I\$(CHARM_LOC)/include
-CXXOPTS = -O2 \$(FLOATOPTS)
-CXXNOALIASOPTS = -O3 -fno-alias \$(FLOATOPTS)
-CC = icc -m64 -fPIC
-COPTS = -O2 \$(FLOATOPTS)
-END-OF-ARCH
+		FLOATOPTS= -ip -fno-rtti
+		CXX = icpc -m64 -fPIC -DSOCKLEN_T=socklen_t -I\$(CHARM_LOC)/include
+		CXXOPTS = -O2 \$(FLOATOPTS)
+		CXXNOALIASOPTS = -O3 -fno-alias \$(FLOATOPTS)
+		CC = icc -m64 -fPIC
+		COPTS = -O2 \$(FLOATOPTS)
+	END-OF-ARCH
 
-        cat > ${opt}/${dst}/arch/${tclArch}.tcl << END-OF-ARCH
-TCLDIR=/usr/local/tcl8.5.9-src
-TCLINCL=-I\$(TCLDIR)/include
-TCLLIB=-L\$(TCLDIR)/lib -ltcl8.5 -ldl
-TCLFLAGS=-DNAMD_TCL
-TCL=\$(TCLINCL) \$(TCLFLAGS)
-END-OF-ARCH
+        cat > ${opt}/${dst}/arch/${tclArch}.tcl <<-END-OF-ARCH
+		TCLDIR=/usr/local/tcl8.5.9-src
+		TCLINCL=-I\$(TCLDIR)/include
+		TCLLIB=-L\$(TCLDIR)/lib -ltcl8.5 -ldl
+		TCLFLAGS=-DNAMD_TCL
+		TCL=\$(TCLINCL) \$(TCLFLAGS)
+	END-OF-ARCH
 
 
 
@@ -879,9 +879,9 @@ END-OF-ARCH
         ln -s ${charmBase}/doc                  ${charmBase}/${charmArch}/doc
 
         echo "/bin/bash /etc/profile.d/${ver}.sh" > /etc/profile.d/${ver}.csh
-        cat << EOF > /etc/profile.d/${ver}.sh
-export PATH="/opt/charm/bin:/opt/namd/bin\${PATH:+:}\${PATH}"
-EOF
+        cat <<-EOF > /etc/profile.d/${ver}.sh
+		export PATH="/opt/charm/bin:/opt/namd/bin\${PATH:+:}\${PATH}"
+	EOF
 
 
 }
@@ -889,20 +889,20 @@ EOF
 function setup_auto_update(){
 	#########################################################################
 	apt-get -y --force-yes install unattended-upgrades
-	cat << EOF > /etc/apt/apt.conf.d/50unattended-upgrades
-Unattended-Upgrade::Allowed-Origins {
-        "\${distro_id} \${distro_codename}-security";
-        "\${distro_id} \${distro_codename}-updates";
-//      "\${distro_id} \${distro_codename}-proposed";
-//      "\${distro_id} \${distro_codename}-backports";
-};
-EOF
-	cat << EOF > /etc/apt/apt.conf.d/10periodic
-APT::Periodic::Update-Package-Lists "1";
-APT::Periodic::Download-Upgradeable-Packages "1";
-APT::Periodic::AutocleanInterval "7";
-APT::Periodic::Unattended-Upgrade "1";
-EOF
+	cat <<-EOF > /etc/apt/apt.conf.d/50unattended-upgrades
+		Unattended-Upgrade::Allowed-Origins {
+		        "\${distro_id} \${distro_codename}-security";
+		        "\${distro_id} \${distro_codename}-updates";
+		//      "\${distro_id} \${distro_codename}-proposed";
+		//      "\${distro_id} \${distro_codename}-backports";
+		};
+	EOF
+	cat <<-EOF > /etc/apt/apt.conf.d/10periodic
+		APT::Periodic::Update-Package-Lists "1";
+		APT::Periodic::Download-Upgradeable-Packages "1";
+		APT::Periodic::AutocleanInterval "7";
+		APT::Periodic::Unattended-Upgrade "1";
+	EOF
 	sed -i 's|^\(Prompt=\).*|\1never|' /etc/update-manager/release-upgrades
 	#########################################################################
 	echo "DONE: Review changes to the following files"
