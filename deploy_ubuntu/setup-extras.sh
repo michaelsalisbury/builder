@@ -285,14 +285,14 @@ function setup_openmpi_intel(){
 
 function setup_openmpi_intel_paths(){
 		#########################################################################
-		cat << EOF >> /etc/profile.d/openMPI.csh
-/bin/bash /etc/profile.d/openMPI.sh
-EOF
-		cat << EOF >> /etc/profile.d/openMPI.sh
-export PATH="/opt/openmpi-intel2011/bin"":\$PATH"
-[ -n "\$LD_LIBRARY_PATH" ] && LDP=":\$LD_LIBRARY_PATH"
-export LD_LIBRARY_PATH="/opt/openmpi-intel2011/lib""\$LDP"
-EOF
+		cat <<-EOF >> /etc/profile.d/openMPI.csh
+			/bin/bash /etc/profile.d/openMPI.sh
+		EOF
+		cat <<-EOF >> /etc/profile.d/openMPI.sh
+			export PATH="/opt/openmpi-intel2011/bin"":\$PATH"
+			[ -n "\$LD_LIBRARY_PATH" ] && LDP=":\$LD_LIBRARY_PATH"
+			export LD_LIBRARY_PATH="/opt/openmpi-intel2011/lib""\$LDP"
+		EOF
 }
 
 function setup_mpich2_intel(){
