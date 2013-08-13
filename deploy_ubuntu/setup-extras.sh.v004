@@ -1,0 +1,954 @@
+#!/bin/builder.sh
+
+# GLOBAL VARIABLES
+skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+step=1
+prefix="setup"
+source="https://raw.github.com/michaelsalisbury/builder/master/deploy_ubuntu/${scriptName}"
+#source=http://10.173.119.78/scripts/system-setup/$scriptName
+
+#scriptName="$(basename $BASH_SOURCE)"
+#scriptPath="$(cd `dirname  $BASH_SOURCE`; pwd)"
+#username=$(who -u | grep "(:" | head -1 | cut -f1 -d" ")
+#userhome="$(cat /etc/passwd | grep $username | cut -f6 -d:)"
+#CPU_COUNT=$(cat /proc/cpuinfo | grep processor | wc -l)
+
+function includes(){
+	/etc/lsb-release
+	functions*.sh
+	../functions/functions*.sh
+}
+
+# GLOBAL VARIABLES
+function global_variables(){ 
+	localWWW='10.173.119.78/packages/Computation'
+	#subScriptBase="/root/system-setup/`basename ${source}`"
+	#aptopt="-y -q"
+	#autoLoginUser="localcosadmin"
+	#autoLoginShell="ubuntu"
+	#autoLoginShell="gnome-session-fallback"
+	#autoLoginShell="xfce4-session"
+}
+
+
+
+function extras_main () {
+	[ -z "$1" ] && cat ${scriptPath}/${scriptName} | sed "/^[^]]*desc /{s|desc ||;s|'||g;s|\;.*||;p};d" && exit 0
+	step=$1
+
+	echo '###################################################################################################'
+	echo '###################################################################################################'
+	echo "#### Step[$step]"
+	echo
+
+	case $step in
+	1)	desc 'Setup Intel     ::: Parallel Studio XE 2013 update1 for intel64'  ; setup_intel;;
+	2)	desc 'Setup PATHS     ::: for Intel fortran and c++'			; setup_intel_paths
+
+		desc '________________________________________________________________';;
+	20)	desc 'Setup MPICH2    ::: compiled with Intel fortran and C++'		; setup_mpich2_intel;;
+        21)	desc 'Setup PATHS     ::: for MPICH2'					; setup_mpich2_intel_paths;;
+	22)	desc 'Setup openMPI   ::: compiled with Intel fortran and C++'		; setup_openmpi_intel;;
+	23)	desc 'Setup PATHS     ::: for openMPI'					; setup_openmpi_intel_paths
+
+		desc '________________________________________________________________';;
+	30)	desc 'Setup FFTW      ::: compiled w/Intel fortran and C++'		; setup_fftw3_intel; setup_fftw2_intel;;
+	31)	desc 'Setup GotoBlas2 ::: compiled w/Intel & MPICC'			; setup_gotoblas2_intel;;
+	32)	desc 'Setup LAMMPS    ::: compiled w/Intel & MPICH2 & JPEG'		; setup_lammps_intel;;
+	33)	desc 'Setup GROMACS   ::: compiled w/Intel fortan and C++ and MKL'	; setup_gromacs_intel;;
+	34)	desc 'Setup ESPRESO   ::: compiled w/Intel & MPICH2 & GotoBlas2'	; setup_espresso_intel;;
+	35)	desc 'Setup NAMD      ::: compiled w/Intel &MPICH2 & Charm'		; setup_namd_intel;;
+	36)	desc 'Setup tcl       ::: compiled w/Intel fortran and C++'		; setup_tcl_intel;;
+	39)	desc 'Setup All'							; setup_all_intel
+
+		desc '________________________________________________________________';;
+	50)	desc 'Setup MPICH2    ::: compiled with gfortran and gcc'		; setup_mpich2_gnu;;
+        51)     desc 'Setup PATHS     ::: for MPICH2'					; setup_mpich2_gnu_paths
+	
+		desc '________________________________________________________________';;
+	60)	desc 'Setup FFTW      ::: compiled w/gfortran and gcc'			; setup_fftw3_gnu; setup_fftw2_gnu;;
+	62)	desc 'Setup LAMMPS    ::: compiled w/GNU,MPICH2,JPEG,REAX,MEAM,POEMS'	; setup_lammps_gnu;;
+	63)	desc 'Setup GROMACS   ::: compiled w/GNU & FFTW3'			; setup_gromacs_gnu;;
+	66)	desc 'Setup tcl       ::: compiled w/gfortran and gcc'			; setup_tcl_gnu
+
+		desc '________________________________________________________________';;
+	90)	desc 'Setup VBox      ::: VirtualBox for Ubuntu 11.10'			; setup_vbox;;
+	91)	desc 'Setup CrossOver ::: CodeWeavers.com CrossOver Linux for MS Office'; setup_crossover;;
+	92)	desc 'Archive Patch   ::: Office 2010 SP1 AutoArchive Patch'            ; setup_auto_archive_patch;;
+	93)	desc 'Auto Upgrade    ::: Setup auto updates & disable system upgrade'	; setup_auto_update;;
+	94)	desc 'Setup xfce4     ::: Setup xfce desktop & xfwm4 with tiling'       ; setup_xfce;;
+	95)	desc 'Setup QuickL... ::: Setup Quick Launch, Places, Desktops, Apps'   ; setup_QL;;
+
+	esac
+
+}
+
+#function next(){ sed -i".bk" "/^step=/s/$step/$(( step + 1))/" "$scriptPath"/"$scriptName"; }
+#function rset(){ sed -i".bk" "/^step=/s/$step/1/"              "$scriptPath"/"$scriptName"; }
+#function repc(){ echo `seq $1` | sed "s/ /$2/g;s/[^$2]//g"; }
+#function desc(){ echo; line="#### $@ $(repc 100 '#')"; echo ${line:0:100}; echo; }
+
+function setup_all_intel(){
+	desc all intel
+	(	${scriptPath}/${scriptName} 30
+		${scriptPath}/${scriptName} 36
+		${scriptPath}/${scriptName} 31
+		${scriptPath}/${scriptName} 32
+		${scriptPath}/${scriptName} 33
+		${scriptPath}/${scriptName} 34
+		${scriptPath}/${scriptName} 35
+	) &> ~/logs/Setup_All_Packages_Compiled_With_Intel
+}
+function setup_generate_package_diff(){
+	desc Create Package Install List \(must be root\)
+	#########################################################################
+	[[ $(whoami) =~ ^root$ ]] || { echo Your not root, EXITING\!; retun 1; }
+	if [ ! -f "/root/packages.old" ]; then
+		echo Old package list does not exist.
+		echo Generate \"packages.old\" from cmd \(dpkg --get-selections\) on old machine.
+		echo EXITING\!
+		return 1
+	fi
+	# Generate a list of currently installed packages
+	dpkg --get-selections                              > /root/packages.new
+
+	# Generate a list of missing packages
+	echo                                               > /root/packages.diff
+	while read package install; do
+        	if ! egrep -q "^$package[[:space:]]*install" /root/packages.new; then
+        	        echo -n .
+        	        echo $package                     >> /root/packages.diff
+        	fi
+	done < <(cat                                         /root/packages.old)
+	echo
+
+	# Verify which missing packages are available from the currently installed repos
+	while read package; do
+	        while read available; do
+	                # Add the package names to an array
+	                echo -n "$available .. "
+	                packages[cnt++]=$available
+	        # Search for package availability within the installed repos
+	        done < <(apt-cache search ${package} | awk -v PACKAGE=${package} '$1 ~ "^"PACKAGE"$"{print $1}')
+	# Read the list of missing packages
+	done < <(cat packages.diff | sed '/^$/d')
+
+	echo
+	echo
+	echo Writing install list to \"packages.install\"
+	echo
+	# Write the array of installable packages to a file
+	for package in ${packages[*]}; do
+	        echo "$package install"
+	done | column -t | tee packages.install
+}
+
+function setup_vbox(){
+	wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add -
+	apt-get update
+	apt-get -y -q install --reinstall virtualbox virtualbox-guest-additions virtualbox-guest-additions-iso
+}
+function setup_crossover(){
+	#########################################################################
+	cd ~/Downloads
+	wget http://${localWWW}/ia32-crossover_11.2.0-1_amd64.deb
+	wget http://${localWWW}/CrossOverOffice2010.tgz
+	wget http://${localWWW}/CrossOverOffice2010.tie
+	gunzip -c CrossOverOffice2010.tgz | tar -xf -
+	apt-get -y install gdebi
+	gdebi -n ia32-crossover_11.2.0-1_amd64.deb
+	sed '/\[global\]/a\        client ntlmv2 auth = no' /etc/samba/smb.conf
+	service winbind restart
+	tar -xvf CrossOverOffice2010.tgz
+	echo "Now run the following command as a regular user (the user who needs office)"
+	echo /opt/cxoffice/bin/cxtie --open=~/Downloads/CrossOverOffice2010.tie
+}
+function setup_auto_archive_patch(){
+	if [ "$(whoami)" == "root" ]; then
+		while [ ! -d "/home/${UserName:-null}" ]; do
+			echo -n "Please enter the name of the \"USER\" to patch. > "
+			read UserName
+		done
+	else
+		UserName=$(whoami)
+	fi
+	bottle="MicrosoftOffice2010"
+	regfile="/home/${UserName}/Downloads/outlook_archive_fix.reg"
+	cat <<-END-OF-REG > ${regfile}
+		Windows Registry Editor Version 5.00
+
+		[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\14.0\User Settings\UCF Archive Fix]
+		"Count"=dword:00000001
+
+		[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\14.0\User Settings\UCF Archive Fix\Create\Software\Microsoft\Office\14.0\Outlook\Preferences]
+		"ArchiveIgnoreLastModifiedTime"=dword:00000001
+
+		[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Office\14.0\User Settings\UCF Archive Fix]
+		"Count"=dword:00000001
+
+		[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Office\14.0\User Settings\UCF Archive Fix\Create\Software\Microsoft\Office\14.0\Outlook\Preferences]
+		"ArchiveIgnoreLastModifiedTime"=dword:00000001
+	END-OF-REG
+	if [ "$(whoami)" == "root" ]; then
+		su ${UserName} -l -c \
+		"/opt/cxoffice/bin/cxrun --bottle=\"${bottle}\" --command=\"regedit.exe -s ${regfile}\""
+	else
+		/opt/cxoffice/bin/cxrun --bottle="${bottle}" --command="regedit.exe -s ${regfile}"
+	fi
+	echo "If you didn't see any errors than it probably worked... Test it!"
+}		
+
+
+
+
+
+
+
+function setup_intel(){
+		# Parallel Studio XE 2013 w/spi update2 for intel64
+		# Parallel Studio XE 2013 Update1 for intel64
+		local ver='parallel_studio_xe_2011_sp1_update2_intel64'
+		local ver='parallel_studio_xe_2013_update1'
+		PSET_SERIAL_NUMBER=N433-DZFZTG33
+		local ver='parallel_studio_xe_2013_update2'
+		PSET_SERIAL_NUMBER=N433-DZFZTG33 
+		local localWWW='10.173.119.78/packages/Computation'
+		cd ~/Downloads
+		#wget http://registrationcenter-download.intel.com/akdlm/irc_nas/2504/parallel_studio_xe_2011_sp1_update2_intel64.tgz
+
+		rm -rf ~/Downloads/${ver}*
+		wget http://${localWWW}/${ver}.tgz
+		gzip -d ${ver}.tgz
+		tar xvf ${ver}.tar
+		cat <<-EOF >> silent.intel
+			PSET_SERIAL_NUMBER=${PSET_SERIAL_NUMBER}
+			ACTIVATION=serial_number
+			CONTINUE_WITH_INSTALLDIR_OVERWRITE=yes
+			CONTINUE_WITH_OPTIONAL_ERROR=yes
+			PSET_INSTALL_DIR=/opt/intel
+			INSTALL_MODE=NONRPM
+			ACCEPT_EULA=accept
+		EOF
+		cd ${ver}
+		./install.sh -s ../silent.intel
+}
+function setup_intel_paths(){
+		cat <<-EOF > /etc/profile.d/intel.csh
+			/bin/bash /etc/profile.d/intel.sh
+		EOF
+		cat <<-EOF > /etc/profile.d/intel.sh
+			export PATH="/opt/intel/bin"":\$PATH"
+			[ -n "\$LD_LIBRARY_PATH" ] && LDP=":\$LD_LIBRARY_PATH"
+			export LD_LIBRARY_PATH="/opt/intel/lib/intel64:/opt/intel/lib/ia32""\$LDP"
+		EOF
+		cat <<-EOF > /etc/ld.so.conf.d/intel.conf
+			/opt/intel/lib/intel64
+			/opt/intel/lib/ia32
+			/opt/intel/mkl/lib/intel64
+			/opt/intel/mkl/lib/ia32
+		EOF
+		ldconfig
+}
+
+function setup_openmpi_intel(){
+		#########################################################################
+		### Compile OpenMPI for Inetl fortran and C #############################
+		cd ~/Downloads
+		openmpiVer=openmpi-1.4.x.tar.bz2
+		wget -O $openmpiVer http://www.open-mpi.org/software/ompi/v1.4/downloads/openmpi-1.4.4.tar.bz2
+		tar -jxvf ${openmpiVer}
+		cd openmpi*
+		mkdir /opt/openmpi-intel2011
+		export CC=icc
+		export CXX=icpc
+	        export F77=ifort
+	        export FC=ifort
+        	export F90=ifort
+	        export  CCFLAGS='-shared-intel -fPIC'
+        	export   CFLAGS='-shared-intel -fPIC'
+	        export CXXFLAGS='-shared-intel -fPIC'
+	        export   FFLAGS='-shared-intel -fPIC'
+
+		./configure --prefix=/opt/openmpi-intel2011 \
+			CC=icc		\
+			CXX=icpc	\
+			F77=ifort	\
+			FC=ifort
+			
+			#--with-openib=<directory> \
+			#--with-openib-libdir=<directory> \
+		make -j${CPU_COUNT}
+		make -j2
+		make 
+		make all install
+}
+
+function setup_openmpi_intel_paths(){
+		#########################################################################
+		cat <<-EOF >> /etc/profile.d/openMPI.csh
+			/bin/bash /etc/profile.d/openMPI.sh
+		EOF
+		cat <<-EOF >> /etc/profile.d/openMPI.sh
+			export PATH="/opt/openmpi-intel2011/bin"":\$PATH"
+			[ -n "\$LD_LIBRARY_PATH" ] && LDP=":\$LD_LIBRARY_PATH"
+			export LD_LIBRARY_PATH="/opt/openmpi-intel2011/lib""\$LDP"
+		EOF
+}
+
+function setup_mpich2_intel(){
+	#########################################################################
+	### Compile MPICH2 for Inetl fortran and C ##############################
+	ver='mpich2-1.4.1p1'
+	install_dir='/opt/mpich2'
+	export CC=icc
+        export CXX=icpc
+        export F77=ifort
+        export FC=ifort
+	unset  F90
+        export  CCFLAGS='-shared-intel -O3 -fPIC'
+        export   CFLAGS='-shared-intel -O3 -fPIC'
+        export CXXFLAGS='-shared-intel -O3 -fPIC'
+        export   FFLAGS='-shared-intel -O3 -fPIC'
+	setup_mpich2	--enable-mpe		\
+			--enable-f77		\
+			--enable-fc		\
+			--enable-cxx		\
+			--enable-smpcoll	\
+			--with-mpe		\
+			--prefix=${install_dir}
+}
+function setup_mpich2_gnu(){
+	#########################################################################
+	### Compile MPICH2 for gfortran and gcc #################################
+	ver='mpich2-1.4.1p1'
+	install_dir='/opt/mpich2-gnu'
+	export CC=gcc
+        export CXX=g++
+        export F77=gfortran
+        export FC=gfortran
+	unset  F90
+        export  CCFLAGS='-fPIC -O3'
+        export   CFLAGS='-fPIC -O3'
+        export CXXFLAGS='-fPIC -O3'
+        export   FFLAGS='-fPIC -O3'
+	setup_mpich2	--enable-f77		\
+			--enable-fc		\
+			--enable-smpcoll	\
+			--prefix=${install_dir}
+}
+function setup_mpich2(){
+	rm -rf "${install_dir}"
+	mkdir  "${install_dir}"
+	cd        ~/Downloads
+	rm        ~/Downloads/${ver}.tar.gz*
+	wget http://${localWWW}/${ver}.tar.gz
+	gunzip -c ~/Downloads/${ver}.tar.gz | tar xf -
+	cd        ~/Downloads/${ver}
+	rm -f             ~/logs/${ver}
+	make_mpich2 $* &> ~/logs/${ver}
+}
+make_mpich2(){
+	make clean; make distclean
+	./configure $*
+	make; make install
+}
+function setup_lammps_intel(){
+		#########################################################################
+		#apt-get -y install git-all libjpeg8 libjpeg62 libjpeg8-dev libjpeg62-dev
+		apt-get -y install git-all libjpeg8 libjpeg62 libjpeg8-dev --force-yes --fix-missing
+		cd     ~/Downloads
+		wget http://${localWWW}/lammps-2012May3.tar.gz
+		cd     /opt
+		gunzip -c ~/Downloads/lammps-2012May3.tar.gz | tar xf -
+		cd     /opt/lammps/src
+		#########################################################################
+		make clean-all
+		make distclean
+		make yes-reax yes-meam yes-poems
+		cd     /opt/lammps/lib/reax;  make -f Makefile.ifort -j &> ~/logs/lammps_intel_mpi-reax
+		cd     /opt/lammps/lib/meam;  make -f Makefile.ifort    &> ~/logs/lammps_intel_mpi-meam
+		cd     /opt/lammps/lib/poems; make -f Makefile.icc   -j &> ~/logs/lammps_intel_mpi-poems
+
+		cd     /opt/lammps/src/MAKE;  cp Makefile.linux Makefile.linux-mpich2
+		sed -i Makefile.linux-mpich2 -f <(cat <<-END-OF-SED
+			/^CC =/		s|icc|mpic++ |
+			/^CCFLAGS =/	s|-O|-O3 -shared-intel |
+			/^LINK =/	s|icc|mpic++ |
+			/^ARFLAGS =/	s|-rc|-rcsv |
+			/^MPI_PATH =/	s|=|=      -L/opt/mpich2/lib -I/opt/mpich2/include |
+			/^FFT_INC =/	s|FFTW|FFTW3 |
+			/^FFT_PATH =/	s|=|=      -L/usr/local/fftw-3.3/lib -I/usr/local/fftw-3.3/include |
+			/^FFT_LIB =/	s|fftw|fftw3 |
+		END-OF-SED
+		)
+		sed -i 's|^\(...._SYSPATH\).*|\1 = -L/opt/intel/lib/intel64|' \
+							/opt/lammps/lib/{reax,meam}/Makefile.*
+		sed -i 's|lompstub|liompstubs5|'	/opt/lammps/lib/{reax,meam}/Makefile.*
+
+		cd     /opt/lammps/src
+		make linux-mpich2 -j  &> ~/logs/lammps_intel_mpi
+		mkdir  /opt/lammps/bin
+		ln     /opt/lammps/src/lmp_linux-mpich2 /opt/lammps/bin/.
+		ln     /opt/lammps/src/lmp_linux-mpich2 /opt/lammps/bin/lmp_mpi
+
+                cat <<-EOF > /etc/profile.d/lammps.csh
+			/bin/bash /etc/profile.d/lammps.sh
+		EOF
+                cat <<-EOF > /etc/profile.d/lammps.sh
+			export PATH="/opt/lammps/bin"":\$PATH"
+		EOF
+}
+function setup_lammps_gnu(){
+		#########################################################################
+		apt-get -y install git-all libjpeg8 libjpeg62 libjpeg8-dev libjpeg62-dev
+		cd     ~/Downloads
+		wget http://${localWWW}/lammps-2012May3.tar.gz
+		cd     /opt
+		gunzip -c ~/Downloads/lammps-2012May3.tar.gz | tar xf -
+		cd     /opt/lammps/src
+		make clean-all
+		make yes-reax yes-meam yes-poems
+		cd     /opt/lammps/lib/reax;  make -f Makefile.gfortran -j &> ~/logs/lammps_GNU_mpi-reax
+		cd     /opt/lammps/lib/meam;  make -f Makefile.gfortran    &> ~/logs/lammps_GNU_mpi-meam
+		cd     /opt/lammps/lib/poems; make -f Makefile.g++      -j &> ~/logs/lammps_GNU_mpi-poems
+
+		cd     /opt/lammps/src/MAKE;  cp Makefile.linux Makefile.linux-mpich2
+		sed -i Makefile.linux-mpich2 -f <(cat <<-END-OF-SED
+			/^CC =/		s|icc|mpic++ |
+			/^CCFLAGS =/	s|-O|-O3 |
+			/^LINK =/	s|icc|mpic++ |
+			/^ARFLAGS =/	s|-rc|-rcsv |
+			/^MPI_PATH =/	s|=|=      -L/opt/mpich2-gnu/lib -I/opt/mpich2-gnu/include |
+			/^FFT_INC =/	s|FFTW|FFTW3 |
+			/^FFT_PATH =/	s|=|=      -L/usr/local/fftw-3.3-gnu/lib -I/usr/local/fftw-3.3-gnu/include |
+			/^FFT_LIB =/	s|fftw|fftw3 |
+		END-OF-SED
+		)
+		sed -i 's|^\(...._SYSPATH = \).*|\1|'		/opt/lammps/lib/{reax,meam}/Makefile.*
+		sed -i 's|^\(...._SYSLIB\).*|\1 = -lgfortran |'	/opt/lammps/lib/{reax,meam}/Makefile.*
+
+		cd     /opt/lammps/src
+		make linux-mpich2 -j  &> ~/logs/lammps_GNU_mpi
+		mkdir  /opt/lammps/bin
+		ln     /opt/lammps/src/lmp_linux-mpich2 /opt/lammps/bin/.
+		ln     /opt/lammps/src/lmp_linux-mpich2 /opt/lammps/bin/lmp
+
+                cat <<-EOF > /etc/profile.d/lammps.csh
+			/bin/bash /etc/profile.d/lammps.sh
+		EOF
+                cat <<-EOF > /etc/profile.d/lammps.sh
+			export PATH="/opt/lammps/bin"":\$PATH"
+		EOF
+}
+
+function setup_gromacs_intel(){
+		#########################################################################
+		ver='gromacs-4.5.5'
+		install_dir='/opt/gromacs/build-intel'
+                export CC=icc
+                export CXX=icpc
+                export F77=ifort
+                export FC=ifort
+                export  CCFLAGS='-shared-intel -O3 -fPIC'
+                export   CFLAGS='-shared-intel -O3 -fPIC'
+                export CXXFLAGS='-shared-intel -O3 -fPIC'
+                export   FFLAGS='-shared-intel -O3 -fPIC'
+		# Install using Intels math kernel library
+		export  LDFLAGS='-L/opt/intel/mkl/lib/intel64'
+		export CPPFLAGS='-I/opt/intel/mkl/include'
+		export LD_LIBRARY_PATH="/opt/intel/mkl/lib/intel64:$LD_LIBRARY_PATH"
+		opts="--prefix=${install_dir} --with-fft=mkl"
+		setup_gromacs
+}
+function setup_gromacs_gnu(){
+		#########################################################################
+		ver='gromacs-4.5.5'
+		install_dir='/opt/gromacs/build-intel'
+                export CC=gcc
+                export CXX=g++
+                export F77=gfortran
+                export FC=gfortran
+                export  CCFLAGS='-fPIC'
+                export   CFLAGS='-fPIC'
+                export CXXFLAGS='-fPIC'
+                export   FFLAGS='-fPIC'
+		#########################################################################
+		export  LDFLAGS='-L/usr/local/fftw-3.3_gnu/lib'
+		export CPPFLAGS='-I/usr/local/fftw-3.3_gnu/include'
+		export LD_LIBRARY_PATH="/usr/local/fftw-3.3_gnu/lib:$LD_LIBRARY_PATH"
+		opts="--prefix=${install_dir} --with-fft=fftw3"
+		setup_gromacs
+}
+
+make_gromacs(){
+	make clean; make distclean
+	./configure $*
+	make -j${CPU_COUNT}; make install
+}
+function setup_gromacs(){
+		#########################################################################
+		cd     ~/Downloads
+		rm -f ~/Downloads/${ver}.tar.gz*
+		wget http://${localWWW}/${ver}.tar.gz
+		mkdir  /opt/gromacs
+		cd     /opt/gromacs
+		rm -rf /opt/gromacs/${ver}
+		gunzip -c ~/Downloads/${ver}.tar.gz | tar xf -
+		cd     /opt/gromacs/${ver}
+		#########################################################################
+		rm -f ~/logs/${ver}*
+		make_gromacs ${opts}                                                      &> ~/logs/${ver}
+		make_gromacs ${opts}                --enable-mpi --program-suffix=_mpi    &> ~/logs/${ver}-mpi
+		make_gromacs ${opts} --disable-float              --program-suffix=_dd    &> ~/logs/${ver}-dd
+		make_gromacs ${opts} --disable-float --enable-mpi --program-suffix=_ddmpi &> ~/logs/${ver}-ddmpi
+		#########################################################################
+}
+function setup_espresso_intel(){
+		#########################################################################
+		### Compile QUANTUM ESPRESO with MPICH2 and INTEL Fortran ###############
+                rm    ~/logs/espresso*
+		export CC=icc
+        	export CXX=icpc
+        	export F77=ifort
+        	export FC=ifort
+        	export F90=ifort
+		unset MPICC
+		unset MPIF90
+		unset CCFLAGS
+		unset CXXFLAGS
+		export   CFLAGS='-shared-intel -O3'
+		export   FFLAGS='-shared-intel -O3 -assume byterecl -g -traceback -par-report0 -vec-report0'
+		  BLAS_LIBS=(	/opt/gotoblas/libgoto2.a
+				-L/opt/intel/mkl/lib/intel64
+				-lmkl_intel_lp64
+				-lmkl_sequential
+				-lmkl_core						)
+		LAPACK_LIBS=(	/opt/intel/mkl/lib/intel64/libmkl_lapack95_lp64.a	)
+		    LD_LIBS=(	-L/opt/intel/lib/intel64 -lirc -limf                    )
+		#########################################################################
+		make_espresso(){
+			cd      /opt/espresso
+                	rm -rf  /opt/espresso/espresso-5.0
+			rm -rf  /opt/espresso/${build}
+                	gunzip -c ~/Downloads/espresso-5.0.tar.gz | tar xf -
+                	cd      /opt/espresso/espresso-5.0
+                	./configure BLAS_LIBS="${BLAS_LIBS}"\
+				  LAPACK_LIBS="${LAPACK_LIBS}"\
+				      LD_LIBS="${LD_LIBS}" $* &> ~/logs/espresso_${build}-configure
+			#for p in pw1; do
+			for p in pw1 ph2 pp2 pwcond neb cp ld1 upf2 tddfpt; do
+				pkg=${p%[0-9]}; n=${p:${#p}-1}; n=${n%[^0-9]}; n=${n:-0}
+				(		 make ${pkg} -j${CPU_COUNT}
+				[[ $n != 0 ]] && make ${pkg} -j2
+				[[ $n == 1 ]] && make ${pkg}
+						 #make ${pkg} install
+				) &> ~/logs/espresso_${build}-${pkg}
+			done
+			cd /opt/espresso
+                	mv /opt/espresso/espresso-5.0 /opt/espresso/${build}
+		}
+                #########################################################################
+                cd    ~/Downloads
+                rm -f ~/Downloads/espresso-5.0.tar.gz*
+                wget http://${localWWW}/espresso-5.0.tar.gz
+                mkdir  /opt/espresso
+                #########################################################################
+                build='qe5.0';         make_espresso --prefix=/opt/espresso/prefix-${build}
+		#build='qe-openmp';         make_espresso --enable-openmp
+        	export   CFLAGS="${CFLAGS} -xSSE4.2"
+        	export   FFLAGS="${FFLAGS} -xSSE4.2"
+                build='qe5.0-xSSE4.2'; make_espresso --prefix=/opt/espresso/prefix-${build}
+		#build='qe-xSSE4.2_openmp'; make_espresso --enable-openmp
+                #########################################################################
+                cat <<-EOF > /etc/profile.d/espresso.csh
+			/bin/bash /etc/profile.d/espresso.sh
+		EOF
+                cat <<-EOF > /etc/profile.d/espresso.sh
+			export PATH="/opt/espresso/qe5.0/bin"":\$PATH"
+		EOF
+}
+
+function setup_gotoblas2_intel(){
+	#########################################################################
+	### Compile GotoBlas2 with MPICH2 and Intel #############################
+	ver='GotoBLAS2-1.13'
+	export CC=icc
+       	export CXX=icpc
+       	export F77=ifort
+       	export FC=ifort
+       	export F90=ifort
+	export MPICC=mpicc
+       	export  CCFLAGS='-shared-intel -O3 -fPIC'
+       	export   CFLAGS='-shared-intel -O3 -fPIC'
+       	export CXXFLAGS='-shared-intel -O3 -fPIC'
+       	export   FFLAGS='-shared-intel -O3 -fPIC'
+	# For Intel i3 i5 i7 processors
+	export blas_opts='TARGET=NEHALEM'
+	#########################################################################
+	setup_gotoblas2
+}
+function setup_gotoblas2(){
+		opt='/opt/GotoBlas2'
+		rm if                                    /opt/gotoblas
+		ln -s    /opt/GotoBlas2/${ver}-NoThreads /opt/gotoblas
+		cd          ~/Downloads
+		rm -f       ~/Downloads/${ver}.tar.gz*
+		wget http://${localWWW}/${ver}.tar.gz
+		mkdir            ${opt}
+		rm  -rf          ${opt}/${ver}*
+		#########################################################################
+		cd ${opt}
+		gunzip -c       ~/Downloads/${ver}.tar.gz | tar -xf -
+		mv ${opt}/GotoBLAS2  ${opt}/${ver}-NoThreads
+		cd                   ${opt}/${ver}-NoThreads
+		make clean &> /dev/null
+		make ${blas_opts} USE_THREAD=0 &> ~/logs/${ver}-NoThreads
+		#########################################################################
+		cd ${opt}
+		gunzip -c       ~/Downloads/${ver}.tar.gz | tar -xf -
+		mv ${opt}/GotoBLAS2  ${opt}/${ver}-AllThreads
+		cd                   ${opt}/${ver}-AllThreads
+		make clean &> /dev/null
+		make ${blas_opts}              &> ~/logs/${ver}-AllThreads
+		#########################################################################
+}
+function setup_mpich2_gnu_paths(){
+                #########################################################################
+                cat <<-EOF > /etc/profile.d/mpich2-gnu.csh
+			/bin/bash /etc/profile.d/mpich2-gnu.sh
+		EOF
+                cat <<-EOF > /etc/profile.d/mpich2-gnu.sh
+			export PATH="/opt/mpich2-gnu/bin"":\$PATH"
+			export LD_LIBRARY_PATH="/opt/mpich2-gnu/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+		EOF
+}
+function setup_mpich2_intel_paths(){
+                cat <<-EOF > /etc/profile.d/mpich2.csh
+			/bin/bash /etc/profile.d/mpich2.sh
+		EOF
+                cat <<-EOF > /etc/profile.d/mpich2.sh
+			export PATH="/opt/mpich2/bin"":\$PATH"
+			export LD_LIBRARY_PATH="/opt/mpich2/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+		EOF
+}
+function setup_fftw2_intel(){
+        ver='fftw-2.1.5'
+        install_dir="/usr/local/${ver}"
+        export CC=icc
+        export CXX=icpc
+        export F77=ifort
+        export FC=ifort
+        export   CFLAGS='-shared-intel -O3 -fPIC'
+        export  CCFLAGS='-shared-intel -O3 -fPIC'
+        export   FFLAGS='-shared-intel -O3 -fPIC'
+        export CXXFLAGS='-shared-intel -O3 -fPIC'
+        setup_fftw2
+}
+function setup_fftw2_gnu(){
+        #########################################################################
+        ver='fftw-2.1.5'
+        install_dir="/usr/local/${ver}_gnu"
+        export CC=gcc
+        export CXX=g++
+        export F77=gfortran
+        export FC=gfortran
+        export  CCFLAGS='-O3 -fPIC'
+        export   CFLAGS='-O3 -fPIC'
+        export CXXFLAGS='-O3 -fPIC'
+        export   FFLAGS='-O3 -fPIC'
+        setup_fftw2
+}
+function setup_fftw2(){
+        #########################################################################
+        fftw_opts="--prefix=${install_dir} --enable-shared --enable-threads --enable-type-prefix"
+        #########################################################################
+        echo ${install_dir}
+        rm -rf    ${install_dir}
+        rm -f     ~/Downloads/${ver}.tar.gz*
+        cd        ~/Downloads
+        wget http://${localWWW}/${ver}.tar.gz
+        gunzip -c ~/Downloads/${ver}.tar.gz | tar xf -
+        cd        ~/Downloads/${ver}
+        rm -f                                                   ~/logs/${ver}*
+        # Build single precision for GROMACS
+        make_fftw ${fftw_opts} --enable-float			&> ~/logs/${ver}_single
+        # Build double precision for GROMACS (double precision is default)
+        make_fftw ${fftw_opts}                                  &> ~/logs/${ver}_double
+        #########################################################################
+        echo "${install_dir}/lib" > /etc/ld.so.conf.d/${ver}.conf
+        ldconfig
+        echo "/bin/bash /etc/profile.d/${ver}.sh" > /etc/profile.d/${ver}.csh
+        cat <<-EOF > /etc/profile.d/${ver}.sh
+		export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+	EOF
+}
+
+function setup_fftw3_gnu(){
+	#########################################################################
+	ver='fftw-3.3'
+	install_dir="/usr/local/${ver}_gnu"
+	export CC=gcc
+	export CXX=g++
+	export F77=gfortran
+	export FC=gfortran
+	export  CCFLAGS='-O3 -fPIC'
+	export   CFLAGS='-O3 -fPIC'
+	export CXXFLAGS='-O3 -fPIC'
+	export   FFLAGS='-O3 -fPIC'
+	setup_fftw	
+}
+function setup_fftw3_intel(){
+	ver='fftw-3.3'
+	install_dir="/usr/local/${ver}"
+	export CC=icc
+	export CXX=icpc
+	export F77=ifort
+	export FC=ifort
+	export   CFLAGS='-shared-intel -O3 -fPIC'
+	export  CCFLAGS='-shared-intel -O3 -fPIC'
+	export   FFLAGS='-shared-intel -O3 -fPIC'
+	export CXXFLAGS='-shared-intel -O3 -fPIC'
+	setup_fftw	
+}
+make_fftw(){	make clean;		make distclean;		./configure $*
+		make -j${CPU_COUNT};	make install
+}
+function setup_fftw(){
+	#########################################################################
+	fftw_opts="--prefix=${install_dir} --enable-shared --enable-threads"
+	#########################################################################
+	echo ${install_dir}
+	rm -rf    ${install_dir}	
+	rm -f     ~/Downloads/${ver}.tar.gz*
+	cd        ~/Downloads
+	wget http://${localWWW}/${ver}.tar.gz
+	gunzip -c ~/Downloads/${ver}.tar.gz | tar xf -
+	cd        ~/Downloads/${ver}
+	rm -f                                                      ~/logs/${ver}*
+	# Build single precision for GROMACS
+	make_fftw ${fftw_opts} --enable-single --enable-sse	&> ~/logs/${ver}_single
+	# Build double precision for GROMACS (double precision is default)
+	make_fftw ${fftw_opts}					&> ~/logs/${ver}_double
+	# Build long double precision
+	make_fftw ${fftw_opts} --enable-long-double		&> ~/logs/${ver}_double-long
+	#########################################################################
+	echo "${install_dir}/lib" > /etc/ld.so.conf.d/${ver}.conf
+	ldconfig
+	echo "/bin/bash /etc/profile.d/${ver}.sh" > /etc/profile.d/${ver}.csh
+	cat <<-EOF > /etc/profile.d/${ver}.sh
+		export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+	EOF
+}
+function setup_tcl_gnu(){
+        #########################################################################
+        ver='tcl8.5.9-src'
+        install_dir="/usr/local/${ver}_gnu"
+        export CC=gcc
+        export CXX=g++
+        export F77=gfortran
+        export FC=gfortran
+        export  CCFLAGS='-O3 -fPIC'
+        export   CFLAGS='-O3 -fPIC'
+        export CXXFLAGS='-O3 -fPIC'
+        export   FFLAGS='-O3 -fPIC'
+        setup_fftw
+}
+
+function setup_tcl_intel(){
+	ver='tcl8.5.9-src'
+	install_dir="/usr/local/${ver}"
+	export CC=icc
+	export CXX=icpc
+	export F77=ifort
+	export FC=ifort
+	export   CFLAGS='-shared-intel -O3 -fPIC'
+	export  CCFLAGS='-shared-intel -O3 -fPIC'
+	export   FFLAGS='-shared-intel -O3 -fPIC'
+	export CXXFLAGS='-shared-intel -O3 -fPIC'
+	setup_tcl
+}
+make_tcl(){    make clean;             make distclean;         ./configure $*
+                make -j${CPU_COUNT};    make install
+}
+function setup_tcl(){
+        #########################################################################
+        tcl_opts="--prefix=${install_dir} --enable-64bit --enable-shared --enable-threads"
+        #########################################################################
+        echo      ${install_dir}
+        rm -rf    ${install_dir}
+        rm -f     ~/Downloads/${ver}.tar.gz*
+        cd        ~/Downloads
+        wget http://${localWWW}/${ver}.tar.gz
+        gunzip -c ~/Downloads/${ver}.tar.gz | tar xf -
+        cd        ~/Downloads/tcl*/unix
+        rm -f                                                      ~/logs/${ver}*
+        make_tcl ${tcl_opts} 					&> ~/logs/${ver}
+        #########################################################################
+        echo "${install_dir}/lib" > /etc/ld.so.conf.d/${ver}.conf
+        ldconfig
+        echo "/bin/bash /etc/profile.d/${ver}.sh" > /etc/profile.d/${ver}.csh
+        cat <<-EOF > /etc/profile.d/${ver}.sh
+		export LD_LIBRARY_PATH="${install_dir}/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+	EOF
+}
+
+function setup_namd_intel(){
+	#########################################################################
+	export CC=icc
+	export CXX=icpc
+	export F77=ifort
+	export FC=ifort
+	export MPICC=mpicc
+	export CFLAGS='-shared-intel -O3'
+	export FFLAGS='-shared-intel -O3'
+	#########################################################################
+	ld_conf="/etc/ld.so.conf.d/namd.conf"
+	charmArch="mpi-linux-x86_64 mpicxx"
+	namdArch="Linux-x86_64-MPI-icc"
+	tclArch="Linux-x86_64"
+	ver="NAMD_2.8b3_Source"
+	dst="${ver}-${namdArch}${sub:+-}${sub}"
+	opt="/opt/namd"
+	log="$(cd ~ && pwd)/logs/namd-"
+	#########################################################################
+	apt-get -y --force-yes install csh
+	#########################################################################
+	mkdir     ${opt}  
+	cd        ${opt}
+	rm -f     /opt/charm
+	rm -f     ${opt}/bin
+	rm -rf	  ${opt}/${dst}
+	rm -rf    ${opt}/${ver}*
+	wget http://${localWWW}/${ver}.tar.gz
+	gunzip -c ${opt}/${ver}.tar.gz | tar xf -
+	rm -f     ${opt}/${ver}.tar.gz
+	mv        ${opt}/${ver} ${opt}/${dst}
+	cd        ${opt}/${dst}
+	tar -xf   ${opt}/${dst}/charm-*.tar
+	cd        ${opt}/${dst}/charm*
+	./build charm++ ${charmArch} ifort --no-shared -O3 -shared-intel -DCMK_OPTIMIZE=1 &> ${log}charm
+
+        charmBase=$(pwd)
+        charmArch=$(ls -d mpi*)
+        charmPath=${charmBase}/${charmArch}
+
+	cat <<-EOF > ${ld_conf}
+		${charmPath}/lib
+	EOF
+
+	ldconfig
+        cat > ${opt}/${dst}/arch/${namdArch}.arch <<-END-OF-ARCH
+		NAMD_ARCH = Linux-x86_64
+		CHARMARCH = ${charmArch}
+
+		FLOATOPTS= -ip -fno-rtti
+		CXX = icpc -m64 -fPIC -DSOCKLEN_T=socklen_t -I\$(CHARM_LOC)/include
+		CXXOPTS = -O2 \$(FLOATOPTS)
+		CXXNOALIASOPTS = -O3 -fno-alias \$(FLOATOPTS)
+		CC = icc -m64 -fPIC
+		COPTS = -O2 \$(FLOATOPTS)
+	END-OF-ARCH
+
+        cat > ${opt}/${dst}/arch/${tclArch}.tcl <<-END-OF-ARCH
+		TCLDIR=/usr/local/tcl8.5.9-src
+		TCLINCL=-I\$(TCLDIR)/include
+		TCLLIB=-L\$(TCLDIR)/lib -ltcl8.5 -ldl
+		TCLFLAGS=-DNAMD_TCL
+		TCL=\$(TCLINCL) \$(TCLFLAGS)
+	END-OF-ARCH
+
+
+
+	cd        ${opt}/${dst}
+	pwd
+	./config	${namdArch}				\
+			--charm-base ${charmBase}		\
+			--charm-arch ${charmArch}		\
+			--with-tcl				\
+			--tcl-prefix /usr/local/tcl8.5.9-src	\
+			--with-fftw				\
+			--fftw-prefix /usr/local/fftw-2.1.5	\
+			&> ${log}configure
+	cd        ${opt}/${dst}/${namdArch}
+	make -j${CPU_COUNT} &> ${log}make
+
+        ln -s ${opt}/${dst}/${namdArch}         ${opt}/bin
+        ln -s ${opt}/bin/namd2                  ${opt}/bin/namd
+        ln -s ${charmBase}/${charmArch}         /opt/charm
+        rm -f ${charmBase}/${charmArch}/doc
+        ln -s ${charmBase}/doc                  ${charmBase}/${charmArch}/doc
+
+        echo "/bin/bash /etc/profile.d/${ver}.sh" > /etc/profile.d/${ver}.csh
+        cat <<-EOF > /etc/profile.d/${ver}.sh
+		export PATH="/opt/charm/bin:/opt/namd/bin\${PATH:+:}\${PATH}"
+	EOF
+
+
+}
+
+function setup_auto_update(){
+	#########################################################################
+	apt-get -y --force-yes install unattended-upgrades
+	cat <<-EOF > /etc/apt/apt.conf.d/50unattended-upgrades
+		Unattended-Upgrade::Allowed-Origins {
+		        "\${distro_id} \${distro_codename}-security";
+		        "\${distro_id} \${distro_codename}-updates";
+		//      "\${distro_id} \${distro_codename}-proposed";
+		//      "\${distro_id} \${distro_codename}-backports";
+		};
+	EOF
+	cat <<-EOF > /etc/apt/apt.conf.d/10periodic
+		APT::Periodic::Update-Package-Lists "1";
+		APT::Periodic::Download-Upgradeable-Packages "1";
+		APT::Periodic::AutocleanInterval "7";
+		APT::Periodic::Unattended-Upgrade "1";
+	EOF
+	sed -i 's|^\(Prompt=\).*|\1never|' /etc/update-manager/release-upgrades
+	#########################################################################
+	echo "DONE: Review changes to the following files"
+	echo -------------------------------------------
+	echo "/etc/apt/apt.cond.d/50unattended-upgrades"
+	echo "/etc/apt/apt.conf.d/10periodic"
+	echo "/etc/update-manager/release-upgrades"
+}
+function setup_xfce(){
+	cd ~/Downloads
+	apt-get -y install xubuntu-desktop
+	#########################################################################
+	# http://blog.cretin.net/blog/2011/10/18/building-xfwm4-tiling-ubuntu/	
+	# https://launchpad.net/~fossfreedom/+archive/xfwm4
+	#########################################################################
+	# Only for xfwm4 version 3.10 available on Ubuntu 12.04
+	#apt-get -y source xfwm4
+	#apt-get -y build-dep xfwm4
+	#rm -f xfwm4-tiling.tar.gz
+	#wget http://aur.archlinux.org/packages/xfwm4-tiling/xfwm4-tiling.tar.gz
+	#gunzip -c xfwm4-tiling.tar.gz | tar xf -
+	#patch -p0 < xfwm4-tiling/xfwm4-tiling-4.10.0-1.patch
+	#########################################################################
+	# Only for xfwm4 version 3.8 available on Ubuntu 11.10
+	add-apt-repository -y ppa:fossfreedom/xfwm4
+	apt-get -y update
+	apt-get -y upgrade xfwm4
+
+
+
+}
+function setup_QL(){
+	add-apt-repository -y ppa:indicator-multiload/stable-daily
+	apt-get -y update
+	apt-get install indicator-multiload
+
+	cd ~/Downloads	
+	wget http://${localWWW}/classicmenu-indicator_0.07_all.deb
+	dpkg -i classicmenu-indicator_0.07_all.deb
+
+	add-apt-repository -y ppa:alexeftimie/ppa
+	apt-get -y update
+	apt-get -y indicator-sysmonitor
+
+
+}
+#mkdir ~/logs
+#extras_main $*
+#exit 0
