@@ -1,11 +1,5 @@
 #!/bin/builder.sh
 
-# IMPORTANT: Includes must be placed before global variables like "skip" & "step"
-#while read import; do
-#        source <(sed '1,/^function/{/^function/p;d}' "${import}")
-#done < <(ls -1              "${scriptPath}"/functions.*.sh 2> /dev/null
-#	 ls -1 "${scriptPath}"/../functions/functions.*.sh 2> /dev/null)
-
 # GLOBAL VARIABLES
 skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
@@ -17,7 +11,23 @@ source=http://10.173.119.78/scripts/system-setup/$scriptName
 #username=$(who -u | grep "(:" | head -1 | cut -f1 -d" ")
 #userhome="$(cat /etc/passwd | grep $username | cut -f6 -d:)"
 #CPU_COUNT=$(cat /proc/cpuinfo | grep processor | wc -l)
-localWWW='10.173.119.78/packages/Computation'
+
+function includes(){
+	/etc/lsb-release
+	functions*.sh
+	../functions/functions*.sh
+}
+
+# GLOBAL VARIABLES
+function global_variables(){ 
+	localWWW='10.173.119.78/packages/Computation'
+	#subScriptBase="/root/system-setup/`basename ${source}`"
+	#aptopt="-y -q"
+	#autoLoginUser="localcosadmin"
+	#autoLoginShell="ubuntu"
+	#autoLoginShell="gnome-session-fallback"
+	#autoLoginShell="xfce4-session"
+}
 
 
 
