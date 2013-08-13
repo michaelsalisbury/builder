@@ -174,21 +174,21 @@ function setup_auto_archive_patch(){
 	fi
 	bottle="MicrosoftOffice2010"
 	regfile="/home/${UserName}/Downloads/outlook_archive_fix.reg"
-	cat << END-OF-REG > ${regfile}
-Windows Registry Editor Version 5.00
+	cat <<-END-OF-REG > ${regfile}
+		Windows Registry Editor Version 5.00
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\14.0\User Settings\UCF Archive Fix]
-"Count"=dword:00000001
+		[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\14.0\User Settings\UCF Archive Fix]
+		"Count"=dword:00000001
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\14.0\User Settings\UCF Archive Fix\Create\Software\Microsoft\Office\14.0\Outlook\Preferences]
-"ArchiveIgnoreLastModifiedTime"=dword:00000001
+		[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\14.0\User Settings\UCF Archive Fix\Create\Software\Microsoft\Office\14.0\Outlook\Preferences]
+		"ArchiveIgnoreLastModifiedTime"=dword:00000001
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Office\14.0\User Settings\UCF Archive Fix]
-"Count"=dword:00000001
+		[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Office\14.0\User Settings\UCF Archive Fix]
+		"Count"=dword:00000001
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Office\14.0\User Settings\UCF Archive Fix\Create\Software\Microsoft\Office\14.0\Outlook\Preferences]
-"ArchiveIgnoreLastModifiedTime"=dword:00000001
-END-OF-REG
+		[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Office\14.0\User Settings\UCF Archive Fix\Create\Software\Microsoft\Office\14.0\Outlook\Preferences]
+		"ArchiveIgnoreLastModifiedTime"=dword:00000001
+	END-OF-REG
 	if [ "$(whoami)" == "root" ]; then
 		su ${UserName} -l -c \
 		"/opt/cxoffice/bin/cxrun --bottle=\"${bottle}\" --command=\"regedit.exe -s ${regfile}\""
@@ -220,33 +220,33 @@ function setup_intel(){
 		wget http://${localWWW}/${ver}.tgz
 		gzip -d ${ver}.tgz
 		tar xvf ${ver}.tar
-		cat << EOF >> silent.intel
-PSET_SERIAL_NUMBER=${PSET_SERIAL_NUMBER}
-ACTIVATION=serial_number
-CONTINUE_WITH_INSTALLDIR_OVERWRITE=yes
-CONTINUE_WITH_OPTIONAL_ERROR=yes
-PSET_INSTALL_DIR=/opt/intel
-INSTALL_MODE=NONRPM
-ACCEPT_EULA=accept
-EOF
+		cat <<-EOF >> silent.intel
+			PSET_SERIAL_NUMBER=${PSET_SERIAL_NUMBER}
+			ACTIVATION=serial_number
+			CONTINUE_WITH_INSTALLDIR_OVERWRITE=yes
+			CONTINUE_WITH_OPTIONAL_ERROR=yes
+			PSET_INSTALL_DIR=/opt/intel
+			INSTALL_MODE=NONRPM
+			ACCEPT_EULA=accept
+		EOF
 		cd ${ver}
 		./install.sh -s ../silent.intel
 }
 function setup_intel_paths(){
-		cat << EOF > /etc/profile.d/intel.csh
-/bin/bash /etc/profile.d/intel.sh
-EOF
-		cat << EOF > /etc/profile.d/intel.sh
-export PATH="/opt/intel/bin"":\$PATH"
-[ -n "\$LD_LIBRARY_PATH" ] && LDP=":\$LD_LIBRARY_PATH"
-export LD_LIBRARY_PATH="/opt/intel/lib/intel64:/opt/intel/lib/ia32""\$LDP"
-EOF
-		cat << EOF > /etc/ld.so.conf.d/intel.conf
-/opt/intel/lib/intel64
-/opt/intel/lib/ia32
-/opt/intel/mkl/lib/intel64
-/opt/intel/mkl/lib/ia32
-EOF
+		cat <<-EOF > /etc/profile.d/intel.csh
+			/bin/bash /etc/profile.d/intel.sh
+		EOF
+		cat <<-EOF > /etc/profile.d/intel.sh
+			export PATH="/opt/intel/bin"":\$PATH"
+			[ -n "\$LD_LIBRARY_PATH" ] && LDP=":\$LD_LIBRARY_PATH"
+			export LD_LIBRARY_PATH="/opt/intel/lib/intel64:/opt/intel/lib/ia32""\$LDP"
+		EOF
+		cat <<-EOF > /etc/ld.so.conf.d/intel.conf
+			/opt/intel/lib/intel64
+			/opt/intel/lib/ia32
+			/opt/intel/mkl/lib/intel64
+			/opt/intel/mkl/lib/ia32
+		EOF
 		ldconfig
 }
 
