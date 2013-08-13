@@ -4,7 +4,8 @@
 skip=( false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
-source=http://10.173.119.78/scripts/system-setup/$scriptName
+source="https://raw.github.com/michaelsalisbury/builder/master/deploy_ubuntu/${scriptName}"
+#source=http://10.173.119.78/scripts/system-setup/$scriptName
 
 #scriptName="$(basename $BASH_SOURCE)"
 #scriptPath="$(cd `dirname  $BASH_SOURCE`; pwd)"
