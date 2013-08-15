@@ -199,11 +199,6 @@ function setup_auto_archive_patch(){
 }		
 
 
-
-
-
-
-
 function setup_intel(){
 		# Parallel Studio XE 2013 w/spi update2 for intel64
 		# Parallel Studio XE 2013 Update1 for intel64
