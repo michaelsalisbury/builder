@@ -202,10 +202,10 @@ function setup_auto_archive_patch(){
 function setup_intel(){
 		# Parallel Studio XE 2013 w/spi update2 for intel64
 		# Parallel Studio XE 2013 Update1 for intel64
-		local ver='parallel_studio_xe_2011_sp1_update2_intel64'
-		local ver='parallel_studio_xe_2013_update1'
-		PSET_SERIAL_NUMBER=N433-DZFZTG33
-		local ver='parallel_studio_xe_2013_update2'
+		local ver='parallel_studio_xe_2013_update4_intel64'
+		#local ver='parallel_studio_xe_2011_sp1_update2_intel64'
+		#local ver='parallel_studio_xe_2013_update1'
+		#local ver='parallel_studio_xe_2013_update2'
 		PSET_SERIAL_NUMBER=N433-DZFZTG33 
 		local localWWW='10.173.119.78/packages/Computation'
 		cd ~/Downloads
