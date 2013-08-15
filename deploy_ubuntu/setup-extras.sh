@@ -220,7 +220,7 @@ function setup_intel(){
 			ACTIVATION=serial_number
 			CONTINUE_WITH_INSTALLDIR_OVERWRITE=yes
 			CONTINUE_WITH_OPTIONAL_ERROR=yes
-			PSET_INSTALL_DIR=/opt/intel
+			PSET_INSTALL_DIR=/opt/intel.2013-u4
 			INSTALL_MODE=NONRPM
 			ACCEPT_EULA=accept
 		EOF
@@ -228,13 +228,16 @@ function setup_intel(){
 		./install.sh -s ../silent.intel
 }
 function setup_intel_paths(){
+		local iDIR=/opt/intel.2013-u4
 		cat <<-EOF > /etc/profile.d/intel.csh
 			/bin/bash /etc/profile.d/intel.sh
 		EOF
 		cat <<-EOF > /etc/profile.d/intel.sh
-			export PATH="/opt/intel/bin"":\$PATH"
+			iDIR=${iDIR}
+			export PATH="\${iDIR}/bin"":\$PATH"
 			[ -n "\$LD_LIBRARY_PATH" ] && LDP=":\$LD_LIBRARY_PATH"
-			export LD_LIBRARY_PATH="/opt/intel/lib/intel64:/opt/intel/lib/ia32""\$LDP"
+			export LD_LIBRARY_PATH="\${iDIR}/lib/intel64:\${iDIR}/lib/ia32""\$LDP"
+			source \${iDIR}/bin/compilervars.sh
 		EOF
 		cat <<-EOF > /etc/ld.so.conf.d/intel.conf
 			/opt/intel/lib/intel64
