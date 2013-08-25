@@ -167,11 +167,21 @@ We are dumping to an interactive command line so you can effect changes.
 - Type   "exit"   when done and deploy will proceed.
 - Type  "reboot"  to start over.
 - Type "poweroff" to shutdown.
+- Type "ctrl+alt" F1 = installer
+- Type "ctrl+alt" F2 = available terminal with job control
+- Type "ctrl+alt" F3 = available terminal with job control
+- Type "ctrl+alt" F4 = installer log
+- Type "ctrl+alt" F5 = unused
+- Type "ctrl+alt" F6 = interactive command (resume install here)
+
 END-OF-MESSAGE
 	msg ${message}
 }
 analyze () {
+	disk-detect
 	local dev=$(get_primary_disk)
+	list-devices disk | sed 's/^/list-devices disk :: /'
+	echo
 	# Set hard drive to configure
 	msg 5 Free Space on \"${dev}\" :: $(in_M $(get_disk_free $dev))M
 	echo d-i partman-auto/disk string $dev > /tmp/preseed/preseed.hd.disk.cfg
@@ -181,12 +191,12 @@ analyze () {
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
 		debconf-set-selections /tmp/preseed/preseed.hd.partman_prompt.cfg
 		msg_basic_layout 3 ERROR\! :: Not enough free space\!
-		#cmd 
+		cmd 
 	elif has_primary_parts $dev 4; then
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
 		debconf-set-selections /tmp/preseed/preseed.hd.partman_prompt.cfg
 		msg_basic_layout 3 ERROR\! :: No free primary partitions\!
-		#cmd
+		cmd
 	elif has_primary_part_free $dev 4; then
 		debconf-set-selections /tmp/preseed/preseed.hd.basic.cfg
 		debconf-set-selections /tmp/preseed/preseed.hd.partman_no-prompt.cfg
@@ -199,7 +209,7 @@ analyze () {
 			debconf-set-selections /tmp/preseed/preseed.hd.free_wo-extended.cfg
 			debconf-set-selections /tmp/preseed/preseed.hd.partman_no-prompt.cfg
 			msg 3 2 Free Primary Partitions\; Layout without /boot or extended partition will be used on hard drive \"${dev}\".
-			#cmd
+			cmd
 		else
 			debconf-set-selections /tmp/preseed/preseed.hd.free_extended.cfg
 			msg 30 2 Free Primary Partitions\; Extended partition layout will be used on hard drive \"${dev}\".
@@ -208,7 +218,7 @@ analyze () {
 		debconf-set-selections /tmp/preseed/preseed.hd.free_wo-swap.cfg
 		debconf-set-selections /tmp/preseed/preseed.hd.partman_no-prompt.cfg
 		msg 20 1 Free Primary Partition\; Layout without /boot, extended partition or swap will be used on hard drive \"${dev}\".
-		#cmd
+		cmd
 	fi
 }
 analyze $@

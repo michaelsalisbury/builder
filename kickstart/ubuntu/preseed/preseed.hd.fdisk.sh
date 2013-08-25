@@ -167,10 +167,18 @@ We are dumping to an interactive command line so you can effect changes.
 - Type   "exit"   when done and deploy will proceed.
 - Type  "reboot"  to start over.
 - Type "poweroff" to shutdown.
+- Type "ctrl+alt" F1 = installer
+- Type "ctrl+alt" F2 = available terminal with job control
+- Type "ctrl+alt" F3 = available terminal with job control
+- Type "ctrl+alt" F4 = installer log
+- Type "ctrl+alt" F5 = unused
+- Type "ctrl+alt" F6 = interactive command (resume install here)
 END-OF-MESSAGE
 	msg ${message}
 }
 analyze () {
+	# Run "Detecting disks and all other hardware"
+	disk-detect
 	local dev=$(get_primary_disk)
 	# Set hard drive to configure
 	msg 5 Free Space on \"${dev}\" :: $(in_M $(get_disk_free $dev))M
