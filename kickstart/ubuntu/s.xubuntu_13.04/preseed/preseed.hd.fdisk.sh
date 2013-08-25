@@ -178,6 +178,7 @@ END-OF-MESSAGE
 	msg ${message}
 }
 analyze () {
+	# Run "Detecting disks and all other hardware"
 	disk-detect
 	local dev=$(get_primary_disk)
 	list-devices disk | sed 's/^/list-devices disk :: /'
