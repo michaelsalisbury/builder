@@ -39,4 +39,5 @@ MENU INDENT 1
 MENU DEFAULT
      KERNEL images/linuxmint-15-xfce-dvd-64bit/vmlinuz
      INITRD images/linuxmint-15-xfce-dvd-64bit/initrd.lz
-     APPEND boot=casper netboot=nfs nfsroot=10.173.119.72:/Library/NetBoot/NFSserver/linuxmint-15-xfce-dvd-64bit config showmounts
+     APPEND boot=casper netboot=nfs nfsroot=10.173.119.72:/Library/NetBoot/NFSserver/linuxmint-15-xfce-dvd-64bit config showmounts url=http://10.173.119.78/kickstart/mint/mint.seed keyboard-configuration/layoutcode=us noprompt automatic-ubiquity
+  
