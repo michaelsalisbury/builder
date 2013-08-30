@@ -1,0 +1,42 @@
+     LABEL Linux Mint 15 XFCE Live DVD
+MENU LABEL Linux Mint 15 XFCE Live DVD
+MENU INDENT 1
+MENU DEFAULT
+     KERNEL images/linuxmint-15-xfce-dvd-64bit/vmlinuz
+     INITRD images/linuxmint-15-xfce-dvd-64bit/initrd.lz
+     APPEND boot=casper netboot=nfs nfsroot=10.173.119.72:/Library/NetBoot/NFSserver/linuxmint-15-xfce-dvd-64bit config showmounts
+     
+     LABEL Linux Mint 15 Cinnamon Live DVD
+MENU LABEL Linux Mint 15 Cinnamon Live DVD
+MENU INDENT 1
+MENU DEFAULT
+     KERNEL images/linuxmint-15-cinnamon-dvd-64bit/vmlinuz
+     INITRD images/linuxmint-15-cinnamon-dvd-64bit/initrd.lz
+     APPEND boot=casper netboot=nfs nfsroot=10.173.119.72:/Library/NetBoot/NFSserver/linuxmint-15-cinnamon-dvd-64bit config showmounts
+
+     LABEL Linux Mint 15 KDE Live DVD
+MENU LABEL Linux Mint 15 KDE Live DVD
+MENU INDENT 1
+MENU DEFAULT
+     KERNEL images/linuxmint-15-kde-dvd-64bit/vmlinuz
+     INITRD images/linuxmint-15-kde-dvd-64bit/initrd.lz
+     APPEND boot=casper netboot=nfs nfsroot=10.173.119.72:/Library/NetBoot/NFSserver/linuxmint-15-kde-dvd-64bit config showmounts
+
+     LABEL Linux Mint 15 MATE Live DVD
+MENU LABEL Linux Mint 15 MATE Live DVD
+MENU INDENT 1
+MENU DEFAULT
+     KERNEL images/linuxmint-15-mate-dvd-64bit/vmlinuz
+     INITRD images/linuxmint-15-mate-dvd-64bit/initrd.lz
+     APPEND boot=casper netboot=nfs nfsroot=10.173.119.72:/Library/NetBoot/NFSserver/linuxmint-15-mate-dvd-64bit config showmounts
+
+     
+MENU SEPARATOR
+
+     LABEL Linux Mint 15 XFCE Deploy (TESTING: Will wipe hard drive)
+MENU LABEL Linux Mint 15 XFCE Deploy (TESTING: Will wipe hard drive)
+MENU INDENT 1
+MENU DEFAULT
+     KERNEL images/linuxmint-15-xfce-dvd-64bit/vmlinuz
+     INITRD images/linuxmint-15-xfce-dvd-64bit/initrd.lz
+     APPEND boot=casper netboot=nfs nfsroot=10.173.119.72:/Library/NetBoot/NFSserver/linuxmint-15-xfce-dvd-64bit config showmounts
