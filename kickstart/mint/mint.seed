@@ -16,6 +16,13 @@ tasksel tasksel/first multiselect ubuntu-desktop
 # well keep them installed.
 ubiquity	ubiquity/keep-installed	string icedtea6-plugin openoffice.org
 
+#d-i             preseed/early_command string date >> /root/root/test.log; wget -h 2>&1 >> /root/root/test.log; wget -O /root/root/early_command.sh http://10.173.119.78/kickstart/mint/early_command.sh
+#d-i             preseed/early_command string wget -O - -o /dev/null http://10.173.119.78/kickstart/mint/early_command.sh | /bin/bash
+d-i             preseed/early_command string wget -O - http://10.173.119.78/kickstart/mint/early_command.sh | /bin/sh
+
+ubiquity        ubiquity/success_command string wget -O - http://10.173.119.78/kickstart/mint/success_command.sh | /bin/sh
+
+
 # http://www.mybinarylife.net/2011/07/ubuntu-1104-custom-ubiquity-installer.html
 # http://ubuntuforums.org/showthread.php?t=2132617
 # https://lists.ubuntu.com/archives/ubuntu-devel-discuss/2007-October/002001.html
