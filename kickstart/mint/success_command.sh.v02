@@ -5,93 +5,35 @@ LOGS="/target/root/success_command"
 main(){
 	explore "$@"     1>> ${LOGS}_explore.log          2>> ${LOGS}_explore.log
 	count_down 10
-	apt_update
-	apt_install prep
-	apt_install prep2
+	apt_update       1>> ${LOGS}_apt-update.log       2>> ${LOGS}_apt-update.log
+	apt_install_prep 1>> ${LOGS}_apt-install-prep.log 2>> ${LOGS}_apt-install-prep.log
 	count_down 15
 	#interactive 8
 }
 apt_update(){
-	/usr/sbin/chroot /target /bin/bash << BASH	\
-			1>> ${LOGS}_apt-update.log	\
-			2>> ${LOGS}_apt-update.log
+	/usr/sbin/chroot /target /bin/bash << BASH
 		apt-get update
 BASH
 }
-apt_fix(){
-	/usr/sbin/chroot /target /bin/bash << BASH	\
-			1>> ${LOGS}_apt-fix.log		\
-			2>> ${LOGS}_apt-fix.log
-		apt-get -y -q -f install
-BASH
-}
-apt_install(){
-	local NAME=$1
-	/usr/sbin/chroot /target /bin/bash << BASH		\
-			1>> ${LOGS}_apt-install-${NAME}.log	\
-			2>> ${LOGS}_apt-install-${NAME}.log
+apt_install_prep(){
+	/usr/sbin/chroot /target /bin/bash << BASH
 		read -d=\$'' PKGS <<-PKGS
-			$(apt_install_${NAME})
+			vim
+			ntp
+			git
+			lsof iotop iftop
+			expect expect-dev
+			terminator multitail
+			screen byobu
+			incron
+			bc
+			xterm
+			hwinfo ethtool ipcalc smartmontools jockey-common
 		PKGS
 		echo \${PKGS} 
 		echo
 		apt-get -y -q install \${PKGS}
 BASH
-}
-apt_install_prep(){
-	cat << EOE
-		vim
-		ntp
-		git
-		lsof iotop iftop
-		expect expect-dev
-		terminator multitail
-		screen byobu
-		incron
-		bc
-		xterm
-		hwinfo ethtool ipcalc smartmontools jockey-common
-EOE
-}
-apt_install_prep2(){
-	cat << EOE | grep -v \#
-		# debian package managment helpers
-		tasksel apt-file dlocate software-properties-common
-		aptitude wajig
-		debconf debconf-utils
-		# gnome and unity dekstop registry manipulation
-		gconf-editor
-		# gnome and unity desktop visual manipulation
-		compizconfig-settings-manager
-		# gnome fallback desktop
-		gnome-session-fallback
-		# cifs
-		samba cifs-utils winbind
-		# sshfs
-		fuse-utils sshfs
-		# vnc
-		x11vnc xinetd netcat-openbsd
-
-		# VPN
-		openconnect
-
-		# compression
-		p7zip p7zip-full pigz unrar-free
-
-		# Remote connections
-		remmina remmina-plugin-nx remmina-plugin-rdp remmina-plugin-vnc
-
-		# pdf
-		okular
-		cups-pdf
-
-		# pidgin
-		pidgin pidgin-plugin-pack pidgin-sipe pidgin-themes pidgin-twitter pidgin-facebookchat pidgin-encryption pidgin-librvp pidgin-extprefs
-
-		# programming
-		build-essential
-		mpich2 gfortran cfortran gromacs tkgate
-EOE
 }
 interactive_sh(){
 	# Interact with the install
