@@ -1,11 +1,50 @@
 #!/bin/sh
 
+HTTP=${url%/*}
+SEED=${url##*/}
+FUNC=$(ps -w | sed -n "\|sed|d;s|.*${HTTP}\([^ ]\+\).*|\1|p")
+LOGS="/root/root/${FUNC%.*}"
+USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
+
 main(){
-	explore "$@" 1>> /root/root/early_command_explore.log 2>> /root/root/early_command_explore.log
-	#interactive
+	explore "$@"	1>> ${LOGS}_explore.log \
+			2>> ${LOGS}_explore.log
+	parse_test >> ${LOGS}_parse-test.log
+	parse_test | parse_test2
+	wget_tgz ${HTTP}/scripts.cgi /root/scripts
+	#interactive 8
 	#count_down 5
 	#interactive 6
 	count_down 15
+}
+wget_tgz(){
+	local url=$1
+	local dir=$2
+	local dsc=$(basename ${dir})
+	chroot /root /bin/bash << BASH			\
+			1>> ${LOGS}_wget-${dsc}.log	\
+			2>> ${LOGS}_wget-${dsc}.log
+	mkdir ${dir}
+	/usr/bin/wget -O - ${url} |\
+	/bin/tar -xz -C ${dir}
+BASH
+}
+parse_test(){
+	wget -O - ${HTTP}/packages.cfg		|\
+	sed '/%/d;s/.*\(\[.*\)\].*/\1/;s/#.*//'	|\
+	tr \\n ' '				|\
+	tr \[ \\n				|\
+	sed '1d;$a\'
+}
+parse_test2(){
+	local SECTION PKGS
+	while read SECTION PKGS; do
+		[ -z "${SECTION}" ] && continue
+		echo ${PKGS} >> ${LOGS}_apt-install-${SECTION}.log
+	done
+}
+apt_fix(){
+	echo
 }
 interactive_sh(){
 	# Interact with the install
@@ -14,7 +53,6 @@ interactive_sh(){
 	echo Jump to tty2 or tty3 for job control.  Ctrl + Alt + F2'|'F3.
 	/bin/sh
 }
-
 count_down(){
 	count=$1
 	while [ $count -ge 0 ]
@@ -39,7 +77,7 @@ explore(){
 interactive(){
 	tty
 	echo $$
-	count_down 30
+	count_down 10
 	tty_num=$1
 	tty_dev="/dev/tty$tty_num"
 	exec < $tty_dev > $tty_dev 2> $tty_dev

@@ -3,7 +3,8 @@
 LOGS="/target/root/success_command"
 
 main(){
-	explore "$@"     1>> ${LOGS}_explore.log          2>> ${LOGS}_explore.log
+	explore "$@"	1>> ${LOGS}_explore.log \
+			2>> ${LOGS}_explore.log
 	count_down 10
 	apt_update
 	apt_install prep
@@ -54,7 +55,7 @@ apt_install_prep(){
 EOE
 }
 apt_install_prep2(){
-	cat << EOE | grep -v \#
+	cat << EOE | sed 's/#.*//'
 		# debian package managment helpers
 		tasksel apt-file dlocate software-properties-common
 		aptitude wajig
@@ -64,7 +65,7 @@ apt_install_prep2(){
 		# gnome and unity desktop visual manipulation
 		compizconfig-settings-manager
 		# gnome fallback desktop
-		gnome-session-fallback
+		# gnome-session-fallback
 		# cifs
 		samba cifs-utils winbind
 		# sshfs
