@@ -2,7 +2,7 @@
 
 HTTP=${url%/*}
 SEED=${url##*/}
-FUNC=$(ps -w | sed -n "\|sed|d;s|.*${HTTP}\([^ ]\+\).*|\1|p")
+FUNC=$(ps -w | sed -n "\|sed|d;s|.*${HTTP}/\([^ ]\+\).*|\1|p")
 LOGS="/root/root/${FUNC%.*}"
 USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
 
@@ -46,13 +46,6 @@ parse_test2(){
 apt_fix(){
 	echo
 }
-interactive_sh(){
-	# Interact with the install
-	echo Welcome to your kickstart pre instalation interactive shell...
-	echo There is job control hence Ctrl-c will not work.
-	echo Jump to tty2 or tty3 for job control.  Ctrl + Alt + F2'|'F3.
-	/bin/sh
-}
 count_down(){
 	count=$1
 	while [ $count -ge 0 ]
@@ -73,6 +66,14 @@ explore(){
 	wget --version
 	echo
 	wget --help
+}
+interactive2(){
+	echo	
+
+
+
+
+
 }
 interactive(){
 	tty

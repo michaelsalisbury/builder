@@ -1,81 +1,39 @@
 #!/bin/sh
 
-#LOGS="/target/root/success_command"
-url=$(ps -ef | sed -n "\|sed|d;\|log-output|d;s|.*\(http[^ ]\+\).*|\1|p")
-HTTP=${url%/*}
-FUNC=${url##*/}
-LOGS="/target/root/${FUNC%.*}"
+url=$(dmesg | grep "Kernel command line" | tr \  \\n | sed -n 's/^url=//p')
 USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
+HTTP=${url%/*}
+SEED=${url##*/}
+FUNC=$(ps -fC sh | sed -n "s|.*${HTTP}/\([^ ]\+\).*|\1|p")
+LOGS="/target/root/${FUNC%.*}"
 
 main(){
-	explore "$@"	1>> ${LOGS}_explore.log \
-			2>> ${LOGS}_explore.log
-	count_down 10
+	explore "$@"	2>&1 | tee -a ${LOGS}_explore.log 
+	count_down 20
 	apt_update
 	apt_install prep
 	apt_install packages.cfg
+	setup_sudo ${USER}
 	#apt_install prep2
 	count_down 15
 	interactive 8
 }
-apt_update(){
-	/usr/sbin/chroot /target /bin/bash << BASH	\
-			1>> ${LOGS}_apt-update.log	\
-			2>> ${LOGS}_apt-update.log
-		apt-get update
-BASH
+setup_sudo(){
+	local USER=$1
+	local FILE='/target/etc/sudoers.s/admins'
+	echo "${USER} ALL=(ALL) NOPASSWD: ALL" > ${FILE}
+	chmod 440 ${FILE}
 }
-apt_fix(){
-	/usr/sbin/chroot /target /bin/bash << BASH	\
-			1>> ${LOGS}_apt-fix.log		\
-			2>> ${LOGS}_apt-fix.log
-		apt-get -y -q -f install
-BASH
-}
-wget_package_list(){
-	local NAME=$1
-	if wget -q -s ${HTTP}/${NAME} &>/dev/null; then
-		wget -O - ${HTTP}/${NAME}		|\
-		sed '/%/d;s/.*\(\[.*\)\].*/\1/;s/#.*//'	|\
-		tr \\n ' '				|\
-		tr \[ \\n				|\
-		sed '1d;$a\'
-	else
-		echo
-	fi
-}
-apt_install(){
-	local SECTION PKGS NAME=$1
-	if wget -q -s ${HTTP}/${NAME} &>/dev/null; then
-		wget_package_list ${NAME} |\
-		while read SECTION PKGS; do
-			apt_install_chroot ${SECTION} ${PKGS}
-		done
-	else
-		apt_install_chroot ${NAME} $(apt_install_${NAME} | sed 's/#.*//')
-	fi
-}
-apt_install_chroot(){
-	local NAME=$1
-	shift
-	local PKGS=$*
-		/usr/sbin/chroot /target /bin/bash << BASH		\
-				1>> ${LOGS}_apt-install-${NAME}.log	\
-				2>> ${LOGS}_apt-install-${NAME}.log
-			echo ${PKGS} 
-			echo
-			apt-get -y -q install ${PKGS}
-BASH
-}
-
 apt_install_prep(){
 	cat << EOE
+		#[prep]#
 		vim
 		ntp
 		git
 		lsof iotop iftop
 		expect expect-dev
 		terminator multitail
+		#[screen]#
 		screen byobu
 		incron
 		bc
@@ -83,45 +41,57 @@ apt_install_prep(){
 		hwinfo ethtool ipcalc smartmontools jockey-common
 EOE
 }
-apt_install_prep2(){
-	cat << EOE 
-		# debian package managment helpers
-		tasksel apt-file dlocate software-properties-common
-		aptitude wajig
-		debconf debconf-utils
-		# gnome and unity dekstop registry manipulation
-		gconf-editor
-		# gnome and unity desktop visual manipulation
-		compizconfig-settings-manager
-		# gnome fallback desktop
-		# gnome-session-fallback
-		# cifs
-		samba cifs-utils winbind
-		# sshfs
-		fuse-utils sshfs
-		# vnc
-		x11vnc xinetd netcat-openbsd
-
-		# VPN
-		openconnect
-
-		# compression
-		p7zip p7zip-full pigz unrar-free
-
-		# Remote connections
-		remmina remmina-plugin-nx remmina-plugin-rdp remmina-plugin-vnc
-
-		# pdf
-		okular
-		cups-pdf
-
-		# pidgin
-		pidgin pidgin-plugin-pack pidgin-sipe pidgin-themes pidgin-twitter pidgin-facebookchat pidgin-encryption pidgin-librvp pidgin-extprefs
-
-		# programming
-		build-essential
-		mpich2 gfortran cfortran gromacs tkgate
-EOE
+apt_update(){
+	/usr/sbin/chroot /target /bin/bash << BASH 2>&1 |\
+			tee -a ${LOGS}_apt-update.log
+		apt-get update
+BASH
+}
+apt_fix(){
+	/usr/sbin/chroot /target /bin/bash << BASH 2>&1 |\
+			tee -a ${LOGS}_apt-fix.log
+		apt-get -y -q -f install
+BASH
+}
+apt_install(){
+	local SECTION_NAME PKGS NAME=$1
+	get_package_list ${NAME} |\
+	while read SECTION_NAME PKGS; do
+		apt_install_chroot ${SECTION_NAME} ${PKGS}
+	done
+}
+apt_install_chroot(){
+	local NAME=$1
+	shift
+	local PKGS="$*"
+	echo "# ${NAME} ###################################################"
+	echo "# ${PKGS}"
+	echo
+	/usr/sbin/chroot /target /bin/bash << BASH 2>&1 |\
+			tee -a ${LOGS}_apt-install-${NAME}.log
+		echo ${PKGS}
+		echo
+		apt-get -y -q install ${PKGS}
+BASH
+}
+get_package_list(){
+	local NAME=$1
+	if wget_url_is_live ${HTTP}/${NAME}; then
+		wget -O - ${HTTP}/${NAME} 2>/dev/null | format_package_list
+	else
+		apt_install_${NAME} 2>/dev/null	| format_package_list
+	fi
+}
+format_package_list(){
+	sed 's/.*\([[][^]]\+\).*/\1/;s/[#%].*//'|\
+	xargs echo				|\
+	sed 's/[[]/\n/g;s/\n//'			|\
+	grep ""
+}
+wget_url_is_live(){
+	local url=$1
+	wget -q --spider ${url} 2>/dev/null
+	return $?
 }
 interactive_sh(){
 	# Interact with the install
@@ -152,6 +122,13 @@ explore(){
 	wget --help
 	echo
 	env
+	echo
+	echo url ::: ${url}
+	echo USER :: ${USER}
+	echo HTTP :: ${HTTP}
+	echo SEED :: ${SEED}
+	echo FUNC :: ${FUNC}
+	echo LOGS :: ${LOGS}
 }
 interactive(){
 	tty
@@ -166,7 +143,8 @@ interactive(){
 	echo Welcome to your kickstart pre instalation interactive shell...
 	echo There is job control hence Ctrl-c will not work.
 	echo Jump to tty2 or tty3 for job control.  Ctrl + Alt + F2'|'F3.
-	/bin/sh
+	/target/bin/bash
+	#/bin/sh
 
 	# Then switch back to Anaconda on the first console
 	chvt 1
@@ -189,5 +167,4 @@ setup_builder(){
 	env
 }
 
-main "$@"
-
+main "$@" 2>&1 | tee -a ${LOGS}.log
