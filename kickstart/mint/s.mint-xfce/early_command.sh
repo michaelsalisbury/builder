@@ -1,5 +1,6 @@
 #!/bin/sh
 
+IP=$(echo http://$(echo ${url} | cut -d/ -f3)/kickstart/mint/s.mint-xfce/mint.seed)
 HTTP=${url%/*}
 SEED=${url##*/}
 FUNC=$(ps -w | sed -n "\|sed|d;s|.*${HTTP}/\([^ ]\+\).*|\1|p")
@@ -7,10 +8,7 @@ LOGS="/root/root/${FUNC%.*}"
 USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
 
 main(){
-	explore "$@"	1>> ${LOGS}_explore.log \
-			2>> ${LOGS}_explore.log
-	parse_test >> ${LOGS}_parse-test.log
-	parse_test | parse_test2
+	explore "$@" 2>&1 | tee -a ${LOGS}_explore.log
 	wget_tgz ${HTTP}/scripts.cgi /root/scripts
 	#interactive 8
 	#count_down 5
@@ -28,23 +26,6 @@ wget_tgz(){
 	/usr/bin/wget -O - ${url} |\
 	/bin/tar -xz -C ${dir}
 BASH
-}
-parse_test(){
-	wget -O - ${HTTP}/packages.cfg		|\
-	sed '/%/d;s/.*\(\[.*\)\].*/\1/;s/#.*//'	|\
-	tr \\n ' '				|\
-	tr \[ \\n				|\
-	sed '1d;$a\'
-}
-parse_test2(){
-	local SECTION PKGS
-	while read SECTION PKGS; do
-		[ -z "${SECTION}" ] && continue
-		echo ${PKGS} >> ${LOGS}_apt-install-${SECTION}.log
-	done
-}
-apt_fix(){
-	echo
 }
 count_down(){
 	count=$1
@@ -66,14 +47,19 @@ explore(){
 	wget --version
 	echo
 	wget --help
+	echo
+	env
+	echo
+	echo .url :: ${url}
+	echo . IP :: ${IP}
+	echo USER :: ${USER}
+	echo HTTP :: ${HTTP}
+	echo SEED :: ${SEED}
+	echo FUNC :: ${FUNC}
+	echo LOGS :: ${LOGS}
 }
 interactive2(){
 	echo	
-
-
-
-
-
 }
 interactive(){
 	tty

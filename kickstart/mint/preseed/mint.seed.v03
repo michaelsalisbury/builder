@@ -10,11 +10,23 @@ tasksel tasksel/first multiselect ubuntu-desktop
 # well keep them installed.
 ubiquity  ubiquity/keep-installed   string icedtea6-plugin openoffice.org
 
+#d-i       preseed/early_command     string wget -O - http://10.173.119.78/kickstart/mint/s.mint-xfce/early_command.sh | /bin/sh
+
+#d-i       preseed/early_command     string						\
+#	wget -O - http://192.168.253.1/kickstart/mint/s.mint-xfce/early_command.sh	|\
+#	/bin/sh
+
+#d-i       preseed/early_command     string					\
+#	wget -O - http://$(echo ${url} | cut -d/ -f3)/kickstart/mint/s.mint-xfce/early_command.sh	|\
+#	/bin/sh
+
 d-i       preseed/early_command     string					\
 	export ADDR=$(echo ${url} | cut -d/ -f3);				\
 	wget -O - http://${ADDR}/kickstart/mint/s.mint-xfce/early_command.sh	|\
 	/bin/sh
 
+#ubiquity  ubiquity/success_command  string wget -O - http://10.173.119.78/kickstart/mint/s.mint-xfce/success_command.sh | /bin/sh
+#ubiquity  ubiquity/success_command  string wget -O - http://192.168.253.1/kickstart/mint/s.mint-xfce/success_command.sh | /bin/sh
 	#tr [:space:] \\n								|\
 ubiquity  ubiquity/success_command  string						\
 	dmesg										|\

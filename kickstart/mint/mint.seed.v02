@@ -3,26 +3,26 @@ d-i	apt-setup/extras	boolean true
 
 # Install the Ubuntu desktop.
 tasksel tasksel/first multiselect ubuntu-desktop
+#tasksel tasksel/first multiselect Basic Ubuntu Server
+#tasksel tasksel/first multiselect Xubuntu desktop
+#tasksel tasksel/first multiselect Ubuntu desktop
+#tasksel tasksel/first multiselect Kubuntu full
+#tasksel tasksel/first multiselect lamp-server, print-server
 
 # On live DVDs, don't spend huge amounts of time removing substantial
 # application packages pulled in by language packs. Given that we clearly
 # have the space to include them on the DVD, they're useful and we might as
 # well keep them installed.
-ubiquity  ubiquity/keep-installed   string icedtea6-plugin openoffice.org
+ubiquity	ubiquity/keep-installed	string icedtea6-plugin openoffice.org
 
-d-i       preseed/early_command     string					\
-	export ADDR=$(echo ${url} | cut -d/ -f3);				\
-	wget -O - http://${ADDR}/kickstart/mint/s.mint-xfce/early_command.sh	|\
-	/bin/sh
+#d-i             preseed/early_command string date >> /root/root/test.log; wget -h 2>&1 >> /root/root/test.log; wget -O /root/root/early_command.sh http://10.173.119.78/kickstart/mint/early_command.sh
+#d-i             preseed/early_command string wget -O - -o /dev/null http://10.173.119.78/kickstart/mint/early_command.sh | /bin/bash
+#d-i             preseed/early_command string wget -O - http://10.173.119.78/kickstart/mint/early_command.sh | /bin/sh
+d-i             preseed/early_command string wget -O - http://192.168.253.1/kickstart/mint/early_command.sh | /bin/sh
 
-	#tr [:space:] \\n								|\
-ubiquity  ubiquity/success_command  string						\
-	dmesg										|\
-	grep "Kernel command line"							|\
-	tr ' ' \\n									|\
-	awk -F/ '/^url=/{print $3}'							|\
-	xargs -i@ wget -O - http://@/kickstart/mint/s.mint-xfce/success_command.sh	|\
-	/bin/sh
+#ubiquity        ubiquity/success_command string wget -O - http://10.173.119.78/kickstart/mint/success_command.sh | /bin/sh
+ubiquity        ubiquity/success_command string wget -O - http://192.168.253.1/kickstart/mint/success_command.sh | /bin/sh
+
 
 # http://www.mybinarylife.net/2011/07/ubuntu-1104-custom-ubiquity-installer.html
 # http://ubuntuforums.org/showthread.php?t=2132617
@@ -63,6 +63,8 @@ d-i time/zone            string  US/Eastern
 
 #d-i mirror/country string US
 #d-i mirror/http/proxy string
+#d-i pkgsel/install-language-support boolean false
+#tasksel tasksel/first multiselect standard, ubuntu-server
 
 d-i partman-auto/method                string  regular
 d-i partman-auto/purge_lvm_from_device boolean true
@@ -71,6 +73,7 @@ d-i partman-auto/choose_recipe         select  atomic
 d-i partman/confirm_write_new_label    boolean true
 d-i partman/choose_partition           select  finish
 d-i partman/confirm                    boolean true
+
 
 d-i passwd/user-fullname       string   COSIT Admin
 d-i passwd/username            string   localcosadmin

@@ -1,6 +1,7 @@
 #!/bin/sh
 
 url=$(dmesg | grep "Kernel command line" | tr \  \\n | sed -n 's/^url=//p')
+IP=$(dmesg | grep "Kernel command line" | tr [:space:] \\n | awk -F/ '/^url=/{print $3}' | xargs -i@ echo http://@/kickstart)
 USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
 HTTP=${url%/*}
 SEED=${url##*/}
@@ -14,15 +15,59 @@ main(){
 	apt_install prep
 	apt_install packages.cfg
 	setup_sudo ${USER}
+	setup_repos
 	#apt_install prep2
 	count_down 15
-	interactive 8
+	#interactive 8
 }
 setup_sudo(){
 	local USER=$1
-	local FILE='/target/etc/sudoers.s/admins'
+	local FILE='/target/etc/sudoers.d/admins'
 	echo "${USER} ALL=(ALL) NOPASSWD: ALL" > ${FILE}
 	chmod 440 ${FILE}
+}
+setup_repos(){
+	/usr/sbin/chroot /target /bin/bash << BASH 2>&1 |\
+			tee -a ${LOGS}_repos.log
+	# Add Google Chrome Repo
+	echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > \
+	"/etc/apt/sources.list.d/google-chrome.list"
+	wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+
+	# Add Adobe Repo
+	local list='/etc/apt/sources.list.d/canonical_Adobe.list'
+	local http='http://archive.canonical.com/ubuntu'
+	local do_release=`lsb_release -sc`
+	rm -f "${list}"
+	case ${do_release} in
+		saucy)	do_release=quantal;;
+		raring)	for deb in deb deb-src; do
+				echo ${deb} ${http} ${do_release} partner >> "${list}"
+			done
+			do_release=quantal;;
+	esac
+	for repo in "" -updates -security -backports; do
+		for deb in deb deb-src; do
+			echo ${deb} ${http} ${do_release}${repo} partner >> "${list}"
+		done
+	done
+	
+	# Oracle Java
+	add-apt-repository -y ppa:webupd8team/java
+
+	# Add X2GO Repos
+	add-apt-repository -y ppa:x2go/stable
+
+	# Add Grub Customizer Repos
+	add-apt-repository -y ppa:danielrichter2007/grub-customizer
+
+	sleep 5
+	apt-get update
+	sleep 5
+	apt-get -q -y install apt-file dlocate
+	sleep 5
+	apt-file update
+BASH
 }
 apt_install_prep(){
 	cat << EOE
@@ -123,7 +168,8 @@ explore(){
 	echo
 	env
 	echo
-	echo url ::: ${url}
+	echo .url :: ${url}
+	echo . IP :: ${IP}
 	echo USER :: ${USER}
 	echo HTTP :: ${HTTP}
 	echo SEED :: ${SEED}
