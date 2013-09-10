@@ -57,6 +57,7 @@ explore(){
 	echo SEED :: ${SEED}
 	echo FUNC :: ${FUNC}
 	echo LOGS :: ${LOGS}
+	echo .KCL :: $(dmesg | grep "Kernel com" | tr \  \\n | grep ^url)
 }
 interactive2(){
 	echo	

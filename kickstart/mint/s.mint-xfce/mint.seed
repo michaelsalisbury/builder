@@ -10,20 +10,37 @@ tasksel tasksel/first multiselect ubuntu-desktop
 # well keep them installed.
 ubiquity  ubiquity/keep-installed   string icedtea6-plugin openoffice.org
 
-d-i       preseed/early_command     string					\
-	export ADDR=$(echo ${url} | cut -d/ -f3);				\
-	wget -O - http://${ADDR}/kickstart/mint/s.mint-xfce/early_command.sh	|\
-	/bin/sh
+d-i       preseed/early_command     string				\
+	wget -O - ${url%/*}/early_command.sh | /bin/sh
 
-	#tr [:space:] \\n								|\
+#works#	export url2="123"								;\
+#works#	export url2=$(echo 567)								;\
+#broke# lines below broke due to pipe
+#broke#	     export url2=$(dmesg   | grep Kernel)					;\
+#broke#	eval export url2=\$(dmesg \| grep Kernel)					;\
+#works#	export url3="$(grep Kernel /var/log/kern.log)"					;\
+#works#	export url4="$(sed -n '/Kernel/s!.* url=\([^ ]\+\).*!\1!p' /var/log/kern.log)"	;\
+#works#	export url="$(sed -n '/Kernel/s!.* url=\([^ ]\+\).*!\1!p' /var/log/kern.log)"	;\
+#works#	export url2='\!Kernel!s!.*[[:space:]]url=\([^[:space:]]\+\).*!\1!p'		;\
+#works#	export url3="$(sed -n "${url2}" /var/log/kern.log)"				;\
+
+#works#	awk '{system("echo -n `date \"+%b %e %R:%S\"` ${DEPL}\\ "); print $0}'		>>\
+#works#	/var/log/installer/debug
+
+
 ubiquity  ubiquity/success_command  string						\
-	dmesg										|\
-	grep "Kernel command line"							|\
-	tr ' ' \\n									|\
-	awk -F/ '/^url=/{print $3}'							|\
-	xargs -i@ wget -O - http://@/kickstart/mint/s.mint-xfce/success_command.sh	|\
-	/bin/sh
+	export url='\!Kernel!s!.*[[:space:]]url=\([^[:space:]]\+\).*!\1!p'		;\
+	export url="$(sed -n "${url}" /var/log/kern.log)"				;\
+	export DEPL="${url%/*}"								;\
+	export DEPL="${DEPL##*/}"							;\
+	wget -O - ${url%/*}/success_command.sh						|\
+	/bin/sh	2>&1									|\
+	awk '{system("echo -n `date \"+%b %e %R:%S\"` ${DEPL}\\ "); print $0}'		>>\
+	/var/log/installer/debug
 
+	#export url3=$(dmesg | grep Kernel | tr ' ' \\n)					;\
+	#export url4=$(dmesg | grep Kernel | tr ' ' \\n | grep '^url')			;\
+	#export url=`dmesg | grep 'Kernel com' | tr ' ' \\n | sed -n 's/^url=//p'`
 # http://www.mybinarylife.net/2011/07/ubuntu-1104-custom-ubiquity-installer.html
 # http://ubuntuforums.org/showthread.php?t=2132617
 # https://lists.ubuntu.com/archives/ubuntu-devel-discuss/2007-October/002001.html

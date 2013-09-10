@@ -11,6 +11,7 @@ LOGS="/target/root/${FUNC%.*}"
 main(){
 	explore "$@"	2>&1 | tee -a ${LOGS}_explore.log 
 	count_down 20
+	#interactive 8
 	apt_update
 	apt_install prep
 	apt_install packages.cfg
@@ -18,7 +19,6 @@ main(){
 	setup_repos
 	#apt_install prep2
 	count_down 15
-	#interactive 8
 }
 setup_sudo(){
 	local USER=$1

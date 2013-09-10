@@ -26,3 +26,9 @@ d-i netcfg/get_domain string   cos.ucf.edu
 d-i preseed/early_command string \
 	cat /tmp/preseed/preseed.hd.fdisk.sh \
 	>> /var/lib/dpkg/info/download-installer.postinst
+
+#d-i preseed/early_command string				\
+#	export ADDR=$(echo ${url} | cut -d/ -f3)		;\
+#	echo d-i mirror/http/proxy string http://${ADDR}:3142/	>\
+#				/tmp/mirror-proxy.cfg		;\
+#	debconf-set-selections	/tmp/mirror-proxy.cfg		;\
