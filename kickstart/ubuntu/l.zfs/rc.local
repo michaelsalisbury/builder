@@ -1,0 +1,7 @@
+#!/bin/bash
+
+sleep 20
+
+su - ubuntu -c "export DISPLAY=:0; /usr/bin/gnome-terminal --maximize -t \"Run Once\" -e \"/bin/bash /etc/run_once\"" &
+
+exit 0

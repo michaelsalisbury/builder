@@ -1,6 +1,6 @@
 #!/bin/sh
 
-IP=$(echo http://$(echo ${url} | cut -d/ -f3)/kickstart/mint/s.mint-xfce/mint.seed)
+IP=$(echo ${url} | cut -d/ -f3)
 HTTP=${url%/*}
 SEED=${url##*/}
 FUNC=$(ps -w | sed -n "\|sed|d;s|.*${HTTP}/\([^ ]\+\).*|\1|p")
@@ -10,12 +10,40 @@ USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
 main(){
 	explore "$@" 2>&1 | tee -a ${LOGS}_explore.log
 	wget_tgz ${HTTP}/scripts.cgi /root/scripts
-	partman
+	#apt_get -y install vim
+	runonce
+	#partman
 	#dpkg_info
 	#interactive 8
 	#count_down 5
 	#interactive 6
 	count_down 15
+}
+chroot_mount(){
+	mount --bind /dev  /root/dev
+	mount --bind /sys  /root/sys
+	mount --bind /proc /root/proc
+}
+chroot_umount(){
+	umount /root/dev
+	umount /root/sys
+	umount /root/proc
+}
+chroot_enable_dns(){
+	echo nameserver ${IP} > /root/etc/resolv.conf
+}
+apt_get(){
+	chroot_enable_dns
+	chroot_mount
+	#chroot /root /usr/bin/apt-get update
+	chroot /root /usr/bin/apt-get $@
+	chroot_umount
+}
+runonce(){
+	wget  -O /root/etc/run_once ${HTTP}/run_once
+	rm    -f /root/etc/rc.local     
+	wget  -O /root/etc/rc.local ${HTTP}/rc.local
+	chmod +x /root/etc/rc.local
 }
 partman(){
 	local preseed_partman="preseed.hd.atomic.cfg"

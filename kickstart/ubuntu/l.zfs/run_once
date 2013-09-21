@@ -1,0 +1,23 @@
+#!/bin/bash
+
+function main(){
+	count_down 30
+	sudo apt-get update
+	sudo apt-get -y install vim
+	/bin/bash --login
+	ubiquity --automatic --desktop %k gtk_ui
+	#/usr/bin/gnome-terminal
+
+}
+function count_down(){
+	count=$1
+	while [ $count -ge 0 ]
+	do
+		sleep .5
+		echo -n $count.
+		count=$(( count - 1 ))
+	done
+	echo	
+}
+
+main "$@"

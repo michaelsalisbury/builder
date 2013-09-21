@@ -5,12 +5,14 @@ IP=$(dmesg | grep "Kernel command line" | tr [:space:] \\n | awk -F/ '/^url=/{pr
 USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
 HTTP=${url%/*}
 SEED=${url##*/}
-FUNC=$(ps -fC sh | sed -n "s|.*${HTTP}/\([^ ]\+\).*|\1|p")
+FUNC=$(ps -fC sh | sed -n "s!.*${HTTP}/\([^ ]\+\).*!\1!p")
 LOGS="/target/root/${FUNC%.*}"
 
 main(){
 	explore "$@"	2>&1 | tee -a ${LOGS}_explore.log 
 	count_down 20
+	mkdir /target/root/explore
+	cp -vf /root/root/* /target/root/explore/.
 	#interactive 8
 	apt_update
 	apt_install prep
@@ -37,18 +39,18 @@ setup_repos(){
 	# Add Adobe Repo
 	local list='/etc/apt/sources.list.d/canonical_Adobe.list'
 	local http='http://archive.canonical.com/ubuntu'
-	local do_release=`lsb_release -sc`
-	rm -f "${list}"
-	case ${do_release} in
+	local do_release=\${lsb_release -sc}
+	rm -f "\${list}"
+	case \${do_release} in
 		saucy)	do_release=quantal;;
 		raring)	for deb in deb deb-src; do
-				echo ${deb} ${http} ${do_release} partner >> "${list}"
+				echo \${deb} \${http} \${do_release} partner >> "\${list}"
 			done
 			do_release=quantal;;
 	esac
 	for repo in "" -updates -security -backports; do
 		for deb in deb deb-src; do
-			echo ${deb} ${http} ${do_release}${repo} partner >> "${list}"
+			echo \${deb} \${http} \${do_release}\${repo} partner >> "\${list}"
 		done
 	done
 	
