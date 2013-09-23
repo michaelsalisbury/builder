@@ -1,0 +1,76 @@
+#!/bin/bash
+
+apt_cache_server='192.168.253.3'
+
+function main(){
+	count_down 30
+	enable_apt_cache
+	sudo apt-add-repository --yes ppa:zfs-native/stable
+	sudo apt-get update
+	sudo apt-get -y install vim debootstrap ubuntu-zfs
+	sleep 5
+	sudo modprobe zfs
+	/bin/bash --login
+	#ubiquity --automatic --desktop %k gtk_ui
+	#/usr/bin/gnome-terminal
+
+}
+function enable_apt_cache(){
+	cat <<-PROXY | sudo tee /etc/apt/apt.conf.d/01proxy
+		Acquire::http::Timeout "2";
+		Acquire::http::Proxy "http://${apt_cache_server}:3142";
+		Acquire::http::Proxy::download.oracle.com "DIRECT";
+		Acquire::http::Proxy::virtualbox.org "DIRECT";
+	PROXY
+}
+function partition_gpt(){
+	# http://www.gnu.org/software/parted/manual/html_mono/parted.html#SEC28
+
+	local dev=$1
+	umount_all            ${dev}
+	sudo parted      /dev/${dev} --script -- mklabel gpt
+	sudo parted      /dev/${dev} --script -- mkpart  boot ext2 1   256
+	sudo parted      /dev/${dev} --script -- mkpart  root ext4 257 -1
+	sudo parted      /dev/${dev} --script -- set     1    boot on
+}
+function partition_msdos(){
+	# http://www.gnu.org/software/parted/manual/html_mono/parted.html#SEC28
+
+	local dev=$1
+	umount_all            ${dev}
+	sudo parted      /dev/${dev} --script -- mklabel msdos
+	sudo parted      /dev/${dev} --script -- mkpart  primary 1   256
+	sudo parted      /dev/${dev} --script -- mkpart  primary 257 -1
+	sudo parted      /dev/${dev} --script -- set     1    boot on
+	sudo sfdisk --id /dev/${dev} 1 --change-id be
+	sudo sfdisk --id /dev/${dev} 2 --change-id bf
+}
+function umount_all(){
+	local dev=$1
+	local part
+	for part in $(ls -1 /dev/${dev}*); do
+		sudo umount  ${part}
+		sudo umount  ${part}
+		sudo swapoff ${part}    
+		sudo swapoff ${part}    
+	done
+}
+function get_disk_by_id(){
+	local dev=$1
+	local id
+	for id in $(ls -1 /dev/disk/by-id/* | grep \/scsi); do
+		ls -l ${id} | grep -q "\/${dev}$" && echo ${id}
+	done
+}
+function count_down(){
+	count=$1
+	while [ $count -ge 0 ]
+	do
+		sleep .5
+		echo -n $count.
+		count=$(( count - 1 ))
+	done
+	echo	
+}
+
+main "$@"

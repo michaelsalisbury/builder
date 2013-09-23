@@ -1,0 +1,42 @@
+#!/bin/bash
+# https://github.com/zfsonlinux/pkg-zfs/wiki/HOWTO-install-Ubuntu-to-a-Native-ZFS-Root-Filesystem
+
+root_password="1qaz\@WSX"
+
+function main(){
+	# Step 5: System Configuration
+	#      5.5 Base system setup
+	locale-gen en_US.UTF-8
+	apt-get update	
+	#apt-get -y install ubuntu-minimal python-software-properties software-properties-common
+	apt-get -y install ubuntu-minimal software-properties-common
+	#      5.6 Install ZFS
+	apt-add-repository --yes ppa:zfs-native/stable
+	apt-add-repository --yes ppa:zfs-native/grub
+	apt-get update
+	apt-get -y install --no-install-recommends linux-image-generic linux-headers-generic
+	apt-get -y install ubuntu-zfs
+	apt-get -y install grub2-common grub-pc
+	apt-get -y install zfs-initramfs
+	apt-get -y dist-upgrade
+	#      5.7 Setup root password (be sure special characters are escaped)
+	usermod -p $(perl -e "print crypt(\"${root_password}\",\"salt\")") root
+
+	# Step 6: GRUB Instalation
+	#      6.1 Verify that ZFS root filesystem is recognized by GRUB
+	grub-probe /
+	#          And that ZFS modules for GRUB are installed
+	ls /boot/grub/zfs*
+	#          Note that after Ubuntu 13, these are now in /boot/grub/i386/pc/zfs*
+	ls /boot/grub/i386-pc/zfs*
+	#      6.2 Refresh the initrd files
+	update-initramfs -c -k all
+	#      6.3 Update the boot configuration file
+	update-grub
+
+}
+
+
+
+
+main "$@"

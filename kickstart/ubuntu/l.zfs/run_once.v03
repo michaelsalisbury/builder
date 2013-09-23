@@ -11,9 +11,6 @@ function main(){
 	sudo add-apt-repository --yes ppa:indicator-multiload/stable-daily
 	sudo apt-add-repository --yes ppa:zfs-native/stable
 	sudo apt-get update
-	sudo apt-get -y install gdisk vim
-	/bin/bash --login 
-	
 	sudo apt-get -y install indicator-multiload
 	sudo apt-get -y install vim debootstrap ubuntu-zfs
 	sleep 5
@@ -50,6 +47,7 @@ function main(){
 	sudo mkdir -p /mnt/boot/grub
 	sudo mount ${sda1} /mnt/boot/grub
 	#      4.4 Install the minimal system
+	/bin/bash --login 
 	sudo http_proxy="http://${apt_cache_server}:3142"	\
 		sudo debootstrap				\
 			--include=vim,openssh-server		\

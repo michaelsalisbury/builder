@@ -11,13 +11,14 @@ main(){
 	explore "$@" 2>&1 | tee -a ${LOGS}_explore.log
 	wget_tgz ${HTTP}/scripts.cgi /root/scripts
 	#apt_get -y install vim
+	profile
 	runonce
 	#partman
 	#dpkg_info
 	#interactive 8
 	#count_down 5
 	#interactive 6
-	count_down 15
+	count_down 5
 }
 chroot_mount(){
 	mount --bind /dev  /root/dev
@@ -38,6 +39,14 @@ apt_get(){
 	#chroot /root /usr/bin/apt-get update
 	chroot /root /usr/bin/apt-get $@
 	chroot_umount
+}
+profile(){
+	cat << PROFILE >> /root/etc/profile.d/aliases.sh
+export url=${url}
+export IP=${IP}
+export HTTP=${HTTP}
+export SEED=${SEED}
+PROFILE
 }
 runonce(){
 	wget  -O /root/etc/run_once ${HTTP}/run_once
