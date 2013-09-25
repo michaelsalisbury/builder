@@ -1,6 +1,5 @@
 #!/bin/bash
 
-source=""
 
 function main(){
 	local vboxVer=$(GET_VBox_Ver)
@@ -129,6 +128,8 @@ function add_default_group(){
 buildScriptFQFN=$(readlink -nf "${BASH_SOURCE}")
 buildScriptName=$(basename "${buildScriptFQFN}")
 buildScriptPath=$(dirname  "${buildScriptFQFN}")
+
+source="https://raw.github.com/michaelsalisbury/builder/master/functions/${buildScriptName}"
 
 main "$@"
 
