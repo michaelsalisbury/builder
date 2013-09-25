@@ -99,8 +99,6 @@ function main(){
 	sudo zpool export rpool
 	count_down 10
 
-	#      7.3 REBOOT
-	sudo reboot
 	#ubiquity --automatic --desktop %k gtk_ui
 }
 function enable_apt_cache(){

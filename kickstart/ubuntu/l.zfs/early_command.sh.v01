@@ -10,10 +10,9 @@ USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
 main(){
 	explore "$@" 2>&1 | tee -a ${LOGS}_explore.log
 	wget_tgz ${HTTP}/scripts.cgi /root/scripts
-	#chroot_enable_dns
-	#add_apt_repo --yes ppa:indicator-multiload/stable-daily
-	#apt_get -y install indicator-multiload
-	#apt_get -y install vim
+	chroot_enable_dns
+	add_apt_repo --yes ppa:indicator-multiload/stable-daily
+	apt_get -y install vim
 	profile
 	runonce
 	#partman

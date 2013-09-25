@@ -43,8 +43,8 @@ function main(){
 	# Step 7: System tweaks before reboot
 	#      7.1 modify grub; disable quiet and splash
 	cat <<-SED | sed -i -f <(cat) /etc/default/grub
-		/GRUB_TERMINAL/{  s/^[#[:space:]]*// }
-		/GRUB_INIT_TUNE/{ s/^[#[:space:]]*// }
+		/GRUB_TERMINAL/{  s/^[#[:space:]]*/ }
+		/GRUB_INIT_TUNE/{ s/^[#[:space:]]*/ }
 		/GRUB_CMDLINE_LINUX_DEFAULT/{
 			s/^/#/
 			a\GRUB_CMDLINE_LINUX_DEFAULT=""
@@ -67,7 +67,7 @@ function main(){
 		#linux-firmware
 		#linux-firmware-nonfree
 
-	# DONE
+
 	count_down 10
 }
 function get_disk_by_id(){

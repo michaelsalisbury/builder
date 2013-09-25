@@ -2,8 +2,6 @@
 
 apt_cache_server='192.168.253.3'
 system_setup='system_setup'
-boot_grub="sda3"
-root_pool="sda4"
 
 function main(){
 	count_down 30
@@ -16,17 +14,16 @@ function main(){
 	#sudo apt-get -y install gdisk vim
 	#sudo apt-get -y install indicator-multiload
 	sudo apt-get -y install vim gdisk debootstrap ubuntu-zfs
-	sleep 3
+	sleep 5
 	sudo modprobe zfs
 	#/bin/bash --login 
 	
 	# Step 2: Disk Partitioning
 	partition_gpt sda
-	sleep 3
 	
 	# Step 3: Disk Formatting
-	local  grub=$(get_disk_by_id ${boot_grub})
-	local rpool=$(get_disk_by_id ${root_pool})
+	local grub=$(get_disk_by_id sda3)
+	local rpool=$(get_disk_by_id sda4)
 	#      3.1 Format the small partition as a filesystem that has a stage 1 GRUB support
 	sudo mke2fs -m 0 -L /boot/grub -j ${grub}
 	#      3.2 Create the root pool on the larger partition
@@ -56,7 +53,6 @@ function main(){
 			--include=vim,openssh-server		\
 			raring /mnt
 
-
 	# Step 5: System Configuration
 	#      5.1 Copy these files to the new system
 	sudo cp /etc/resolv.conf /mnt/etc/.
@@ -79,29 +75,12 @@ function main(){
 	sudo mount --bind /proc /mnt/proc
 	sudo mount --bind /sys  /mnt/sys
 	
-	sudo wget -O /mnt/root/${system_setup} ${HTTP}/${system_setup}
-	#/bin/bash --login 
-	sudo chroot /mnt /bin/bash /root/${system_setup}
-
-
-	# Step 7: Cleanup and First Reboot
-	#      7.2 umount file systems
-	sudo umount /mnt/boot/grub
-	sleep 1
-	sudo umount /mnt/dev
-	sleep 1
-	sudo umount /mnt/proc
-	sleep 1
-	sudo umount /mnt/sys
-	sleep 1
-	sudo zfs umount -a
-	sleep 2
-	sudo zpool export rpool
-	count_down 10
-
-	#      7.3 REBOOT
-	sudo reboot
+	wget -O /mnt/root/${sstem_setup} ${HTTP}/${system_setup}
+	/bin/bash --login 
+	chroot /mnt /bin/bash /root/${system_setup}
 	#ubiquity --automatic --desktop %k gtk_ui
+	#/usr/bin/gnome-terminal
+
 }
 function enable_apt_cache(){
 	cat <<-PROXY | sudo tee /etc/apt/apt.conf.d/01proxy
