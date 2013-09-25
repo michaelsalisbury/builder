@@ -11,7 +11,7 @@ function main(){
 }
 function GET_Linux_Distrib(){
 	if [ -f "/etc/lsb-release" ]; then
-		awk -F= '/DISTRIB_ID/{print $2}'
+		awk -F= '/DISTRIB_ID/{print $2}' "/etc/lsb-release"
 	elif [ -f "/etc/redhat-release" ]; then
 		echo Redhat
 	else
