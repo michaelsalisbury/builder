@@ -34,7 +34,7 @@ function GET_VBox_Ver(){
 function setup_VBox_Additions(){
 	# Prep for vbox extentions
 	case "$(GET_Linux_Distrib)" in
-		Ubuntu)	apt-get -y install make gcc dkms xserver-xorg xserver-xorg-core linux-headers-generic;;
+		Ubuntu)	apt-get -y install make gcc dkms linux-headers-generic;;
 		Redhat) yum     -y install make gcc dkms kernel-headers;;
 	esac
 
