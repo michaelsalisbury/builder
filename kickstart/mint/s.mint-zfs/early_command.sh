@@ -1,6 +1,8 @@
 #!/bin/sh
 #!/bin/dash
 
+LOGS="/root/root/early_command"
+
 main(){
 	# SOURCE common functions
 	source_funcs common_funcs
@@ -20,14 +22,12 @@ main(){
 	chroot_profile_d /root aliases.sh export       FIRST_USER=\"${USER}\"
 	chroot_profile_d /root aliases.sh export APT_CACHE_SERVER=\"${APT_CACHE_SERVER}\"
 
-	chroot_profile_d /root aliases.sh alias test1=\"wget -O - ${HTTP}/test1 \| /bin/bash\"
-	chroot_profile_d /root aliases.sh alias test2=\"wget -O - ${HTTP}/test2 \| /bin/bash\"
+	chroot_profile_d /root aliases.sh alias test1=\"wget -q -O - ${HTTP}/test1 \| /bin/bash\"
+	chroot_profile_d /root aliases.sh alias test2=\"wget -q -O - ${HTTP}/test2 \| /bin/bash\"
 
-
-
-	#chroot_enable_apt_cache_proxy
-	
-	#partman
+	# tests
+	# chroot_enable_apt_cache_proxy
+	# partman
 
 	# pause the install process ald allow for command line interaction
 	pause_install /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
@@ -87,15 +87,6 @@ partman(){
 	wget -O /root/tmp/${preseed_partman} ${HTTP}/preseed/${preseed_partman}
 	mount --bind /dev /root/dev
 	chroot  /root /usr/bin/debconf-set-selections   /tmp/${preseed_partman}
-}
-dpkg_info(){
-	local file_list="/root/root/file_list"
-	local file
-	ls /root/var/lib/dpkg/info/* > "${file_list}"
-	for file in $(ls /root/var/lib/dpkg/info/*.preinst); do
-		sed -i "1a\echo \$(date) :: ${file} >> /root/root/preinst.alpha" "${file}"
-		sed -i "1a\echo \$(date) :: ${file} >> /root/preinst.beta"       "${file}"
-	done
 }
 explore(){
 	date
