@@ -1,0 +1,92 @@
+# Enable extras.ubuntu.com.
+d-i	apt-setup/extras	boolean true
+
+# Install the Ubuntu desktop.
+tasksel tasksel/first multiselect ubuntu-desktop
+
+# On live DVDs, don't spend huge amounts of time removing substantial
+# application packages pulled in by language packs. Given that we clearly
+# have the space to include them on the DVD, they're useful and we might as
+# well keep them installed.
+ubiquity  ubiquity/keep-installed   string icedtea6-plugin openoffice.org
+
+d-i       preseed/early_command     string				\
+	wget -O - ${url%/*}/early_command.sh | /bin/sh
+
+#works#	export url2="123"								;\
+#works#	export url2=$(echo 567)								;\
+#broke# lines below broke due to pipe
+#broke#	     export url2=$(dmesg   | grep Kernel)					;\
+#broke#	eval export url2=\$(dmesg \| grep Kernel)					;\
+#works#	export url3="$(grep Kernel /var/log/kern.log)"					;\
+#works#	export url4="$(sed -n '/Kernel/s!.* url=\([^ ]\+\).*!\1!p' /var/log/kern.log)"	;\
+#works#	export url="$(sed -n '/Kernel/s!.* url=\([^ ]\+\).*!\1!p' /var/log/kern.log)"	;\
+#works#	export url2='\!Kernel!s!.*[[:space:]]url=\([^[:space:]]\+\).*!\1!p'		;\
+#works#	export url3="$(sed -n "${url2}" /var/log/kern.log)"				;\
+
+#works#	awk '{system("echo -n `date \"+%b %e %R:%S\"` ${DEPL}\\ "); print $0}'		>>\
+#works#	/var/log/installer/debug
+
+ubiquity  ubiquity/success_command  string						\
+	export url='\!Kernel!s!.*[[:space:]]url=\([^[:space:]]\+\).*!\1!p'		;\
+	export url="$(sed -n "${url}" /var/log/kern.log)"				;\
+	export DEPL="${url%/*}"								;\
+	export DEPL="${DEPL##*/}"							;\
+	wget -O - ${url%/*}/success_command.sh						|\
+	/bin/sh	1>/dev/null 2>/dev/null
+	#awk '{system("echo -n `date \"+%b %e %R:%S\"` ${DEPL}\\ "); print $0}'		>>\
+	#/var/log/installer/debug
+
+# http://www.mybinarylife.net/2011/07/ubuntu-1104-custom-ubiquity-installer.html
+# http://ubuntuforums.org/showthread.php?t=2132617
+# https://lists.ubuntu.com/archives/ubuntu-devel-discuss/2007-October/002001.html
+# http://askubuntu.com/questions/29121/guide-to-particulars-in-customizing-ubuntu-installer
+#
+
+ubiquity    languagechooser/language-name     select      English
+ubiquity    countrychooser/shortlist          select      US
+ubiquity    time/zone                         select      America/New_York
+ubiquity    debian-installer/locale           select      en_US.UTF-8
+ubiquity    localechooser/supported-locales   multiselect en_US.UTF-8
+
+ubiquity    console-setup/ask_detect          boolean     false
+ubiquity    console-setup/layoutcode          string      us
+ubiquity    console-setup/modelcode           string      SKIP
+ubiquity    console-setup/modelcode           string      pc105
+ubiquity    keyboard-configuration/variant    select      English (US)
+ubiquity    keyboard-configuration/layout     select      English (US)
+ubiquity    keyboard-configuration/model      select      Generic 105-key (Intl) PC
+ubiquity    console-keymaps-at/keymap         select      us
+ubiquity    keyboard-configuration/xkb-keymap select      us
+
+
+console-setup   console-setup/layoutcode      string      us
+console-setup   console-setup/layout          select      U.S. English
+console-setup   console-setup/variantcode     select      U.S. English
+console-setup   console-setup/codeset         select      . Combined - Latin; Slavic Cyrillic; Hebrew; basic Arabic
+
+ubiquity ubiquity/reboot boolean true
+
+
+d-i clock-setup/ntp      boolean true
+d-i clock-setup/utc-auto boolean true
+d-i clock-setup/utc      boolean true
+d-i time/zone            string  US/Eastern
+
+d-i partman-auto/method                string  regular
+d-i partman-auto/purge_lvm_from_device boolean true
+d-i partman-lvm/confirm                boolean true
+d-i partman-auto/choose_recipe         select  atomic
+d-i partman/confirm_write_new_label    boolean true
+#d-i partman/choose_partition           select  finish
+d-i partman/confirm                    boolean true
+
+d-i partman/confirm_nooverwrite        boolean true
+d-i partman/choose_partition           select  ""
+d-i partman-auto/disk                  string  /dev/sda
+
+d-i passwd/user-fullname       string   COSIT Admin
+d-i passwd/username            string   localcosadmin
+d-i passwd/user-password       password orlando1
+d-i passwd/user-password-again password orlando1
+

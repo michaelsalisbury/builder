@@ -1,0 +1,91 @@
+# Enable extras.ubuntu.com.
+d-i	apt-setup/extras	boolean true
+
+# Install the Ubuntu desktop.
+tasksel tasksel/first multiselect ubuntu-desktop
+
+# On live DVDs, don't spend huge amounts of time removing substantial
+# application packages pulled in by language packs. Given that we clearly
+# have the space to include them on the DVD, they're useful and we might as
+# well keep them installed.
+ubiquity  ubiquity/keep-installed   string icedtea6-plugin openoffice.org
+
+d-i       preseed/early_command     string				\
+	wget -O - ${url%/*}/early_command.sh | /bin/sh
+
+#ubiquity  ubiquity/success_command  string						\
+#	export url=$(dmesg | grep "Kernel com" | tr ' ' \\n | sed -n 's/^url=//p')	;\
+#	wget -O - ${url%/*/success_command.sh | /bin/sh
+	#awk -F/ '/^url=/{print $3}'							|\
+	#xargs -i@ wget -O - http://@/kickstart/mint/s.mint-xfce/success_command.sh	|\
+	#awk -F/ 'NF=""{print $0}'							|\
+	#xargs -i@ wget -O - @success_command.sh	|\
+#ubiquity  ubiquity/success_command  string						\
+#	dmesg										|\
+#	grep "Kernel command line"							|\
+#	tr ' ' \\n									|\
+#	awk -F/ '/^url=/{print $3}'							|\
+#	xargs -i@ wget -O - http://@/kickstart/mint/s.mint-xfce/success_command.sh	|\
+#	/bin/sh
+
+ubiquity  ubiquity/success_command  string						\
+	wget -O - http://10.173.119.78/kickstart/mint/s.mint-xfce/success_command.sh	|\
+	/bin/sh
+
+# http://www.mybinarylife.net/2011/07/ubuntu-1104-custom-ubiquity-installer.html
+# http://ubuntuforums.org/showthread.php?t=2132617
+# https://lists.ubuntu.com/archives/ubuntu-devel-discuss/2007-October/002001.html
+# http://askubuntu.com/questions/29121/guide-to-particulars-in-customizing-ubuntu-installer
+#
+
+ubiquity    languagechooser/language-name     select      English
+ubiquity    countrychooser/shortlist          select      US
+ubiquity    time/zone                         select      America/New_York
+ubiquity    debian-installer/locale           select      en_US.UTF-8
+ubiquity    localechooser/supported-locales   multiselect en_US.UTF-8
+
+ubiquity    console-setup/ask_detect          boolean     false
+ubiquity    console-setup/layoutcode          string      us
+ubiquity    console-setup/modelcode           string      SKIP
+ubiquity    console-setup/modelcode           string      pc105
+ubiquity    keyboard-configuration/variant    select      English (US)
+ubiquity    keyboard-configuration/layout     select      English (US)
+ubiquity    keyboard-configuration/model      select      Generic 105-key (Intl) PC
+ubiquity    console-keymaps-at/keymap         select      us
+ubiquity    keyboard-configuration/xkb-keymap select      us
+
+
+console-setup   console-setup/layoutcode      string      us
+console-setup   console-setup/layout          select      U.S. English
+console-setup   console-setup/variantcode     select      U.S. English
+console-setup   console-setup/codeset         select      . Combined - Latin; Slavic Cyrillic; Hebrew; basic Arabic
+
+ubiquity ubiquity/reboot boolean true
+
+
+#d-i base-installer/kernel/override-image string linux-server
+d-i clock-setup/ntp      boolean true
+d-i clock-setup/utc-auto boolean true
+d-i clock-setup/utc      boolean true
+d-i time/zone            string  US/Eastern
+
+#d-i mirror/country string US
+#d-i mirror/http/proxy string
+
+d-i partman-auto/method                string  regular
+d-i partman-auto/purge_lvm_from_device boolean true
+d-i partman-lvm/confirm                boolean true
+d-i partman-auto/choose_recipe         select  atomic
+d-i partman/confirm_write_new_label    boolean true
+d-i partman/choose_partition           select  finish
+d-i partman/confirm                    boolean true
+
+d-i passwd/user-fullname       string   COSIT Admin
+d-i passwd/username            string   localcosadmin
+d-i passwd/user-password       password orlando1
+d-i passwd/user-password-again password orlando1
+
+#d-i grub-installer/only_debian boolean true
+#d-i grub-installer/with_other_os boolean true
+#d-i finish-install/reboot_in_progress note
+

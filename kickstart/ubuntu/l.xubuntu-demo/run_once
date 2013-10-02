@@ -1,0 +1,178 @@
+#!/bin/bash
+
+apt_cache_server='192.168.253.3'
+system_setup='system_setup'
+boot_grub="sda3"
+root_pool="sda4"
+
+function main(){
+	count_down 120
+	return 0
+
+	# Step 1: Prepare the Install Environment
+	enable_apt_cache
+	sudo add-apt-repository --yes ppa:indicator-multiload/stable-daily
+	sudo apt-add-repository --yes ppa:zfs-native/stable
+	sudo apt-get update
+	#sudo apt-get -y install gdisk vim
+	#sudo apt-get -y install indicator-multiload
+	sudo apt-get -y install vim gdisk debootstrap ubuntu-zfs
+	sleep 3
+	sudo modprobe zfs
+	#/bin/bash --login 
+	
+	# Step 2: Disk Partitioning
+	partition_gpt sda
+	sleep 3
+	
+	# Step 3: Disk Formatting
+	local  grub=$(get_disk_by_id ${boot_grub})
+	local rpool=$(get_disk_by_id ${root_pool})
+	#      3.1 Format the small partition as a filesystem that has a stage 1 GRUB support
+	sudo mke2fs -m 0 -L /boot/grub -j ${grub}
+	#      3.2 Create the root pool on the larger partition
+	sudo zpool create -f -o ashift=9 rpool ${rpool}
+	#      3.3 Create a "ROOT" filesystem in the root pool
+	sudo zfs create rpool/ROOT
+	#      3.4 Create a descendant filesystem for the Ubuntu system
+	sudo zfs create rpool/ROOT/ubuntu-1
+	#      3.5 Dismount all XFS filesystems
+	sudo zfs umount -a
+	#      3.6 Set the mountpoint property on the root filesystem
+	sudo zfs set mountpoint=/ rpool/ROOT/ubuntu-1
+	#      3.7 Set the bootfs property on the rool pool
+	sudo zpool set bootfs=rpool/ROOT/ubuntu-1 rpool
+	#      3.9 Exporting the pool
+	sudo zpool export rpool
+
+	# Step 4: System Instalation
+	#      4.1 Import the pool 
+	sudo zpool import -d /dev/disk/by-id -R /mnt rpool
+	#      4.2 Mount the small boot filesystem for GRUB that was created in step 3.1
+	sudo mkdir -p /mnt/boot/grub
+	sudo mount ${grub} /mnt/boot/grub
+	#      4.4 Install the minimal system
+	sudo http_proxy="http://${apt_cache_server}:3142"	\
+		sudo debootstrap				\
+			--include=vim,openssh-server		\
+			raring /mnt
+
+
+	# Step 5: System Configuration
+	#      5.1 Copy these files to the new system
+	sudo cp /etc/resolv.conf /mnt/etc/.
+	sudo cp /etc/hostname    /mnt/etc/.
+	sudo cp /etc/hosts       /mnt/etc/.
+	sudo mkdir -p                       /mnt/etc/apt/apt.conf.d/
+	sudo cp /etc/apt/apt.conf.d/01proxy /mnt/etc/apt/apt.conf.d/.
+	#      5.2 The /mnt/etc/fstab file should be empty except for a comment.  Add this line.
+	cat <<-FSTAB | sudo tee -a /mnt/etc/fstab
+		${grub} /boot/grub auto defaults 0 1
+	FSTAB
+	#      5.3 Edit the /mnt/etc/network/interfaces to enable dhcp for eth0 apon re-boot.
+	cat <<-INTERFACES | sudo tee -a /mnt/etc/network/interfaces
+
+		auto eth0
+		iface eth0 inet dhcp
+	INTERFACES
+	#      5.4  Make virtual filesystems in the LiveCD environment visible to the new system and chroot into it.
+	sudo mount --bind /dev  /mnt/dev
+	sudo mount --bind /proc /mnt/proc
+	sudo mount --bind /sys  /mnt/sys
+	
+	sudo wget -O /mnt/root/${system_setup} ${HTTP}/${system_setup}
+	#/bin/bash --login 
+	sudo chroot /mnt /bin/bash /root/${system_setup}
+
+
+	# Step 7: Cleanup and First Reboot
+	#      7.2 umount file systems
+	sudo umount /mnt/boot/grub
+	sleep 1
+	sudo umount /mnt/dev
+	sleep 1
+	sudo umount /mnt/proc
+	sleep 1
+	sudo umount /mnt/sys
+	sleep 1
+	sudo zfs umount -a
+	sleep 2
+	sudo zpool export rpool
+	count_down 10
+
+	#      7.3 REBOOT
+	sudo reboot
+	#ubiquity --automatic --desktop %k gtk_ui
+}
+function enable_apt_cache(){
+	cat <<-PROXY | sudo tee /etc/apt/apt.conf.d/01proxy
+		Acquire::http::Timeout "2";
+		Acquire::http::Proxy "http://${apt_cache_server}:3142";
+		Acquire::http::Proxy::download.oracle.com "DIRECT";
+		Acquire::http::Proxy::virtualbox.org "DIRECT";
+	PROXY
+}
+
+function partition_gpt(){
+	# http://www.gnu.org/software/parted/manual/html_mono/parted.html#SEC28
+	# http://www.rodsbooks.com/gdisk/sgdisk.html
+	# http://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html
+
+	local dev=$1
+	umount_all       ${dev}
+	sudo sgdisk /dev/${dev} -Z
+	sudo sgdisk /dev/${dev} -o
+	sudo sgdisk /dev/${dev} -n 1:+1M:+1M   -t 1:ef02 -c 1:"BIOS Boot Partition"
+	sudo sgdisk /dev/${dev} -n 2:+1M:+200M -t 2:ef00 -c 2:"EFI System Partition"
+	sudo sgdisk /dev/${dev} -n 3:+1M:+300M -t 3:be00 -c 3:"Solaris /boot/grub"
+	sudo sgdisk /dev/${dev} -n 4:+1M:-1M   -t 4:bf00 -c 4:"Solaris zfs rpool"
+	sudo sgdisk /dev/${dev} -p
+	return 0
+
+	#sudo parted      /dev/${dev} --script -- mklabel gpt
+	#sudo parted      /dev/${dev} --script -- mkpart  boot ext2 1   256
+	#sudo parted      /dev/${dev} --script -- mkpart  root ext4 257 -1
+	#sudo parted      /dev/${dev} --script -- set     1    boot on
+}
+function partition_msdos(){
+	# http://www.gnu.org/software/parted/manual/html_mono/parted.html#SEC28
+
+	local dev=$1
+	umount_all            ${dev}
+	sudo sgdisk      /dev/${dev} -Z
+	sudo parted      /dev/${dev} --script -- mklabel msdos
+	sudo parted      /dev/${dev} --script -- mkpart  primary 1   256
+	sudo parted      /dev/${dev} --script -- mkpart  primary 257 -1
+	sudo parted      /dev/${dev} --script -- set     1    boot on
+	sudo sfdisk --id /dev/${dev} 1 --change-id be
+	sudo sfdisk --id /dev/${dev} 2 --change-id bf
+}
+function umount_all(){
+	local dev=$1
+	local part
+	for part in $(ls -1 /dev/${dev}*); do
+		sudo umount  ${part}
+		sudo umount  ${part}
+		sudo swapoff ${part}    
+		sudo swapoff ${part}    
+	done
+}
+function get_disk_by_id(){
+	local dev=$1
+	local id
+	for id in $(ls -1 /dev/disk/by-id/* | grep \/scsi); do
+		ls -l ${id} | grep -q "\/${dev}$" && echo ${id}
+	done
+}
+function count_down(){
+	count=$1
+	while [ $count -ge 0 ]
+	do
+		sleep .5
+		echo -n $count.
+		count=$(( count - 1 ))
+	done
+	echo	
+}
+
+main "$@"
