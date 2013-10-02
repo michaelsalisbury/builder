@@ -1,47 +1,31 @@
 #!/bin/sh
 #!/bin/dash
 
+IP=$(echo ${url} | cut -d/ -f3)
+HTTP=${url%/*}
+SEED=${url##*/}
+FUNC=$(ps -w | sed -n "\|sed|d;s|.*${HTTP}/\([^ ]\+\).*|\1|p")
+LOGS="/root/root/${FUNC%.*}"
+USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
+APT_CACHE_SERVER=${IP}
+APT_CACHE_SERVER="192.168.253.3"
+
 main(){
-	# SOURCE common functions
-	source_funcs common_funcs
-
-	# print to screen some details about the environment
+	source_funcs ${HTTP}/common_funcs
 	explore "$@" 2>&1 | tee -a ${LOGS}_explore.log
-
-	# retrieve a folder of files: the cgi file packs tar.gz file fresh so files are always up-to-date
 	wget_tgz ${HTTP}/scripts.cgi /root/scripts
 
-
-	# Add command aliases and exports to the squashfs environment
-	chroot_profile_d /root aliases.sh export              url=\"${url}\"
-	chroot_profile_d /root aliases.sh export               IP=\"${IP}\"
-	chroot_profile_d /root aliases.sh export             HTTP=\"${HTTP}\"
-	chroot_profile_d /root aliases.sh export             SEED=\"${SEED}\"
-	chroot_profile_d /root aliases.sh export       FIRST_USER=\"${USER}\"
-	chroot_profile_d /root aliases.sh export APT_CACHE_SERVER=\"${APT_CACHE_SERVER}\"
-
-	chroot_profile_d /root aliases.sh alias test1=\"wget -O - ${HTTP}/test1 \| /bin/bash\"
-	chroot_profile_d /root aliases.sh alias test2=\"wget -O - ${HTTP}/test2 \| /bin/bash\"
-
-
-
+	myfunc
+	#pause_install /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
 	#chroot_enable_apt_cache_proxy
 	
 	#partman
-
-	# pause the install process ald allow for command line interaction
-	pause_install /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
-
-	# pause a few second (default 10) before continuing
 	count_down
 }
 source_funcs(){
-	# SOURCE script file path is relative to the seed file in ${url}
-	local SOURCE="$1"
-	eval "$(wget -O - ${url%/*}/${SOURCE})"
+	local URL="$1"
+	eval "$(wget -O - ${URL})"
 }
-
-
 pause_install(){
 	local install_pause_file="$1"
 	shift
@@ -56,7 +40,7 @@ pause_install(){
 	chroot_enable_apt_cache_proxy /root
 	chroot_apt_get                /root -y install vim gdisk
 	chroot_mount                  /root
-	interactive          3 chroot /root /bin/bash --login &
+	interactive          3 chroot /root /bin/bash -i &
 	local interactive_PID_bash=$!
 	# Inform the user to switch to tty2 or tty3 to explore and effect changes.
 	echo
@@ -117,7 +101,6 @@ explore(){
 	echo SEED :: ${SEED}
 	echo FUNC :: ${FUNC}
 	echo LOGS :: ${LOGS}
-	echo PROX :: ${APT_CACHE_SERVER}  
 	echo .KCL :: $(dmesg | grep "Kernel com" | tr \  \\n | grep ^url)
 }
 setup_wget(){

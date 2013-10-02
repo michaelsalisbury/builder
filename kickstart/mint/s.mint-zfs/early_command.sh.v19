@@ -1,47 +1,31 @@
 #!/bin/sh
 #!/bin/dash
 
+IP=$(echo ${url} | cut -d/ -f3)
+HTTP=${url%/*}
+SEED=${url##*/}
+FUNC=$(ps -w | sed -n "\|sed|d;s|.*${HTTP}/\([^ ]\+\).*|\1|p")
+LOGS="/root/root/${FUNC%.*}"
+USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
+APT_CACHE_SERVER=${IP}
+APT_CACHE_SERVER="192.168.253.3"
+
 main(){
-	# SOURCE common functions
-	source_funcs common_funcs
-
-	# print to screen some details about the environment
 	explore "$@" 2>&1 | tee -a ${LOGS}_explore.log
-
-	# retrieve a folder of files: the cgi file packs tar.gz file fresh so files are always up-to-date
 	wget_tgz ${HTTP}/scripts.cgi /root/scripts
 
-
-	# Add command aliases and exports to the squashfs environment
-	chroot_profile_d /root aliases.sh export              url=\"${url}\"
-	chroot_profile_d /root aliases.sh export               IP=\"${IP}\"
-	chroot_profile_d /root aliases.sh export             HTTP=\"${HTTP}\"
-	chroot_profile_d /root aliases.sh export             SEED=\"${SEED}\"
-	chroot_profile_d /root aliases.sh export       FIRST_USER=\"${USER}\"
-	chroot_profile_d /root aliases.sh export APT_CACHE_SERVER=\"${APT_CACHE_SERVER}\"
-
-	chroot_profile_d /root aliases.sh alias test1=\"wget -O - ${HTTP}/test1 \| /bin/bash\"
-	chroot_profile_d /root aliases.sh alias test2=\"wget -O - ${HTTP}/test2 \| /bin/bash\"
-
-
-
+	source_funcs ${HTTP}/common_funcs
+	myfunc
+	#pause_install /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
 	#chroot_enable_apt_cache_proxy
 	
 	#partman
-
-	# pause the install process ald allow for command line interaction
-	pause_install /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
-
-	# pause a few second (default 10) before continuing
 	count_down
 }
 source_funcs(){
-	# SOURCE script file path is relative to the seed file in ${url}
-	local SOURCE="$1"
-	eval "$(wget -O - ${url%/*}/${SOURCE})"
+	local URL="$1"
+	eval "$(wget -O - ${URL})"
 }
-
-
 pause_install(){
 	local install_pause_file="$1"
 	shift
@@ -56,7 +40,7 @@ pause_install(){
 	chroot_enable_apt_cache_proxy /root
 	chroot_apt_get                /root -y install vim gdisk
 	chroot_mount                  /root
-	interactive          3 chroot /root /bin/bash --login &
+	interactive          3 chroot /root /bin/bash -i &
 	local interactive_PID_bash=$!
 	# Inform the user to switch to tty2 or tty3 to explore and effect changes.
 	echo
@@ -81,6 +65,47 @@ pause_install(){
 	chroot_umount /root
 	echo
 }
+chroot_mount(){
+	local ROOT=$1
+	mount --bind /dev  ${ROOT}/dev
+	mount --bind /sys  ${ROOT}/sys
+	mount --bind /proc ${ROOT}/proc
+}
+chroot_umount(){
+	local ROOT=$1
+	umount ${ROOT}/dev
+	umount ${ROOT}/sys
+	umount ${ROOT}/proc
+}
+chroot_enable_dns(){
+	local ROOT=$1
+	echo nameserver ${IP} > ${ROOT}/etc/resolv.conf
+}
+chroot_enable_apt_cache_proxy(){
+	local ROOT=$1
+	cat << PROXY  > ${ROOT}/etc/apt/apt.conf.d/01proxy
+Acquire::http::Timeout "2";
+Acquire::http::Proxy "http://${APT_CACHE_SERVER}:3142";
+Acquire::http::Proxy::download.oracle.com "DIRECT";
+Acquire::http::Proxy::virtualbox.org "DIRECT";
+PROXY
+}
+chroot_apt_get(){
+	local ROOT=$1
+	shift
+	chroot_mount ${ROOT}
+	#chroot /root /usr/bin/apt-get update
+	chroot ${ROOT} /usr/bin/apt-get $@
+	chroot_umount ${ROOT}
+}
+chroot_add_apt_repo(){
+	local ROOT=$1
+	shift
+	chroot_mount ${ROOT}
+	chroot ${ROOT} /usr/bin/add-apt-repository $@
+	chroot ${ROOT} /usr/bin/apt-get update
+	chroot_umount ${ROOT}
+}
 partman(){
 	local preseed_partman="preseed.hd.atomic.cfg"
 	local preseed_partman="preseed.hd.basic.cfg"
@@ -96,6 +121,30 @@ dpkg_info(){
 		sed -i "1a\echo \$(date) :: ${file} >> /root/root/preinst.alpha" "${file}"
 		sed -i "1a\echo \$(date) :: ${file} >> /root/preinst.beta"       "${file}"
 	done
+}
+wget_tgz(){
+	local url=$1
+	local dir=$2
+	local dsc=$(basename ${dir})
+	chroot /root /bin/bash << BASH			\
+			1>> ${LOGS}_wget-${dsc}.log	\
+			2>> ${LOGS}_wget-${dsc}.log
+	mkdir ${dir}
+	/usr/bin/wget -O - ${url} |\
+	/bin/tar -xz -C ${dir}
+BASH
+}
+count_down(){
+	local message="$(echo "$*" | sed 's/[0-9]\+//')"
+	local count="$(echo "$*" | sed 's/[^0-9]*\([0-9]\+\).*/\1/')"
+	local count=${count:-10}
+	while [ $count -ge 0 ]
+	do
+		sleep .5
+		echo -n $count.
+		count=$(( count - 1 ))
+	done
+	echo $message
 }
 explore(){
 	date
@@ -117,8 +166,13 @@ explore(){
 	echo SEED :: ${SEED}
 	echo FUNC :: ${FUNC}
 	echo LOGS :: ${LOGS}
-	echo PROX :: ${APT_CACHE_SERVER}  
 	echo .KCL :: $(dmesg | grep "Kernel com" | tr \  \\n | grep ^url)
+}
+interactive(){
+	local tty_num=$1
+	shift
+	tty_dev="/dev/tty$tty_num"
+	exec $* < $tty_dev > $tty_dev 2> $tty_dev
 }
 setup_wget(){
 	baseURL=$(sed 's|.*ks=\([^ ]*\)/[^/ ]*.*|\1|p;d' /var/log/syslog | uniq)

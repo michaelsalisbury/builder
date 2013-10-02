@@ -1,13 +1,16 @@
 #!/bin/sh
 
 url=$(dmesg | grep "Kernel command line" | tr \  \\n | sed -n 's/^url=//p')
-IP=$(dmesg | grep "Kernel command line" | tr [:space:] \\n | awk -F/ '/^url=/{print $3}' | xargs -i@ echo http://@/kickstart)
+#IP=$(dmesg | grep "Kernel command line" | tr [:space:] \\n | awk -F/ '/^url=/{print $3}' | xargs -i@ echo http://@/kickstart)
+IP=$(dmesg | grep "Kernel command line" | tr [:space:] \\n | awk -F/ '/^url=/{print $3}')
 USER=$(wget -q -O - ${url} | awk '/username/{print $NF}')
 HTTP=${url%/*}
 SEED=${url##*/}
 FUNC=$(ps -fC sh | sed -n "s!.*${HTTP}/\([^ ]\+\).*!\1!p")
 LOGS="/target/root/${FUNC%.*}"
 LOGS="/var/log/installer/debug"
+APT_CACHE_SERVER=${IP}
+APT_CACHE_SERVER="192.168.253.3"
 
 main(){
 	explore "$@"	2>&1 | tee -a ${LOGS}_explore.log 
