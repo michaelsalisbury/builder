@@ -33,7 +33,7 @@ ubiquity  ubiquity/success_command  string						\
 	export DEPL="${url%/*}"								;\
 	export DEPL="${DEPL##*/}"							;\
 	wget -O - ${url%/*}/success_command.sh						|\
-	/bin/sh	1>/dev/null 2>/dev/null
+	/bin/sh 1>/dev/tty10 2>/dev/tty10
 	#awk '{system("echo -n `date \"+%b %e %R:%S\"` ${DEPL}\\ "); print $0}'		>>\
 	#/var/log/installer/debug
 
@@ -83,7 +83,7 @@ d-i partman/confirm                    boolean true
 
 d-i partman/confirm_nooverwrite        boolean true
 d-i partman/choose_partition           select  ""
-d-i partman-auto/disk                  string  /dev/sdb
+d-i partman-auto/disk                  string  /dev/sda
 
 d-i passwd/user-fullname       string   COSIT Admin
 d-i passwd/username            string   localcosadmin

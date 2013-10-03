@@ -13,7 +13,6 @@ main(){
 	# retrieve a folder of files: the cgi file packs tar.gz file fresh so files are always up-to-date
 	wget_tgz ${HTTP}/scripts.cgi /root/scripts
 
-
 	# Add command aliases and exports to the squashfs environment
 	chroot_profile_d /root aliases.sh export              url=\"${url}\"
 	chroot_profile_d /root aliases.sh export               IP=\"${IP}\"
@@ -25,61 +24,21 @@ main(){
 	chroot_profile_d /root aliases.sh alias test1=\"wget -q -O - ${HTTP}/test1 \| /bin/bash\"
 	chroot_profile_d /root aliases.sh alias test2=\"wget -q -O - ${HTTP}/test2 \| /bin/bash\"
 
-	# tests
+	# TESTING
 	# chroot_enable_apt_cache_proxy
 	# partman
 
-	# pause the install process ald allow for command line interaction
-	pause_install /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
+	# Pause the install process and allow for command line interaction
+	pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
 
-	# pause a few second (default 10) before continuing
+	# pause a few seconds (default 10) before continuing
 	count_down
 }
 source_funcs(){
 	# SOURCE script file path is relative to the seed file in ${url}
 	local SOURCE="$1"
-	eval "$(wget -O - ${url%/*}/${SOURCE})"
-}
-
-
-pause_install(){
-	local install_pause_file="$1"
-	shift
-	local count_down_opts="$*"
-	touch "${install_pause_file}"
-	local
-	# Setup shell /bin/sh on tty2
-	interactive 2 /bin/sh &
-	local interactive_PID_sh=$!
-	# Setup shell /bin/bash with chroot /root.  Install vim and gdisk first.
-	chroot_enable_dns             /root
-	chroot_enable_apt_cache_proxy /root
-	chroot_apt_get                /root -y install vim gdisk
-	chroot_mount                  /root
-	interactive          3 chroot /root /bin/bash --login &
-	local interactive_PID_bash=$!
-	# Inform the user to switch to tty2 or tty3 to explore and effect changes.
-	echo
-	echo '################################################################'
-	echo Welcome to your kickstart pre instalation interactive shell...
-	echo Jump to tty2 for /bin/sh to navigate the initramfs
-	echo Jump to tty3 for /bin/bash to navigate chroot /root
-	echo chroot /root is the squashfs where the LiveCD boots too.
-	echo Jump to tty2 or tty3 via Ctrl + Alt + F2'|'F3.
-	echo
-	echo To continue install rm \"${install_pause_file}\" from tty2
-	echo
-
-	# Start wait loop
-	while [ -f "${install_pause_file}" ]; do
-		count_down ${count_down_opts}
-	done
-	# kill interactive shells
-	kill -9 ${interactive_PID_sh}
-	kill -9 ${interactive_PID_bash}
-	# umount /root/dev /root/sys /root/proc
-	chroot_umount /root
-	echo
+	echo eval \"\$\(wget -O - ${url%/*}/${SOURCE}\)\"
+	eval "$(wget -q -O - ${url%/*}/${SOURCE})"
 }
 partman(){
 	local preseed_partman="preseed.hd.atomic.cfg"

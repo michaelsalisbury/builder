@@ -1,0 +1,87 @@
+#!/bin/sh
+
+main(){
+	echo url :: $url
+	source_funcs common_funcs
+
+	#chroot_apt_get_install /target test_again 5 6 7 8
+	#chroot_apt_get_install /target prep
+	#chroot_apt_get_install /target packages.cfg
+	#LOGS="/var/log/success_command"
+	#chroot_apt_get_install /target packages.cfg
+	
+
+	chroot_bash_script /target setup_repos.sh
+
+	
+
+}
+pkg_list_prep(){
+	cat << EOE
+		#[prep]#
+		vim
+		ntp
+		git
+		lsof iotop iftop
+		expect expect-dev
+		terminator multitail
+		#[screen]#
+		screen byobu
+		incron
+		bc
+		xterm
+		hwinfo ethtool ipcalc smartmontools jockey-common
+EOE
+}
+source_funcs(){
+	# SOURCE script file path is relative to the seed file in ${url}
+	local SOURCE="$1"
+	echo eval \"\$\(wget -O - ${url%/*}/${SOURCE}\)\"
+	eval "$(wget -q -O - ${url%/*}/${SOURCE})"
+}
+pause_install(){
+	local chroot_tty=9
+	local install_pause_file="$1"
+	shift
+	local count_down_opts="$*"
+	touch "${install_pause_file}"
+	local
+	# Prep chroot /target with some packages; vim gdisk mdadm
+	chroot_enable_dns               /target
+	chroot_enable_apt_cache_proxy   /target
+	chroot_debconf_set              /target mdadm mdadm/mail_to select root
+	chroot_debconf_show             /target mdadm
+	chroot_apt_get                  /target -y install vim gdisk mdadm
+	chroot_mount                    /target
+	# Setup shell /bin/bash with chroot /target.
+	interactive ${chroot_tty} chroot /target /bin/bash --login &
+	local interactive_PID_bash=$!
+	
+	# Inform the user to switch to tty2 or tty3 to explore and effect changes.
+	cat << MESSAGE | sed 's/^\t*//'
+
+	################################################################
+	Welcome to your kickstart pre instalation interactive shell...
+	To explore and debug scripts in the squashfs/(live boot env)
+	  switch to tty2 through tty6 for a interactive bash terminals.
+	To explore and debug scripts in installed OS on /dev/sdx
+	  switch to tty${chroot_tty} for a NON interactive bash terminal.
+	  This is a chrooted env within the squashfs
+	  (# chroot /target /bin/bash --login).
+
+	In order to jump to tty2'|'tty${chroot_tty} press Ctrl + Alt + F2'|'F${chroot_tty}.
+	
+	To continue install sudo rm "${install_pause_file}" via tty2
+	
+MESSAGE
+	# Start wait loop
+	while [ -f "${install_pause_file}" ]; do
+		count_down ${count_down_opts}
+	done
+	# kill interactive shell
+	kill -9 ${interactive_PID_bash}
+	# umount /root/dev /root/sys /root/proc
+	chroot_umount /target
+	echo
+}
+main "$@"

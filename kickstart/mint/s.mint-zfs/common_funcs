@@ -7,8 +7,45 @@
             HTTP=${url%/*}
             SEED=${url##*/}
 APT_CACHE_SERVER=${IP}
-APT_CACHE_SERVER=$(wget -O - ${HTTP}/APT_CACHE_SERVER_ADDRESS)
+APT_CACHE_SERVER=$(wget -q -O - ${HTTP}/APT_CACHE_SERVER_ADDRESS)
 
+##################################################################################
+################################################################# Package list parsing
+get_package_list(){
+	local NAME=$1
+	if wget_url_is_live ${HTTP}/${NAME}; then
+		  wget -O - ${HTTP}/${NAME} 2>/dev/null | format_package_list
+	elif pkg_list_${NAME} 2>/dev/null | grep -q ""; then
+	     pkg_list_${NAME} 2>/dev/null | format_package_list
+	else
+		echo $*
+	fi
+}
+format_package_list(){
+	sed 's/.*\([[][^]]\+\).*/\1/;s/[#%].*//'|\
+	xargs echo				|\
+	sed 's/[[]/\n/g;s/\n//'			|\
+	grep ""
+}
+
+##################################################################################
+################################################################# Execute scripts
+bash_script(){
+	local SCRIPT=$1
+	if wget_url_is_live ${HTTP}/${SCRIPT}; then
+		wget -q -O - ${HTTP}/${SCRIPT} | /bin/bash
+	fi
+}
+chroot_bash_script(){
+	local ROOT=$1
+	local SCRIPT=$2
+	if wget_url_is_live ${HTTP}/${SCRIPT}; then
+		wget -q -O - ${HTTP}/${SCRIPT} | chroot ${ROOT} /bin/bash
+	fi
+}
+
+##################################################################################
+################################################################# chroot mounts
 chroot_mount(){
 	local ROOT=$1
 	mount --bind /dev  ${ROOT}/dev
@@ -21,9 +58,20 @@ chroot_umount(){
 	umount ${ROOT}/sys
 	umount ${ROOT}/proc
 }
+
+##################################################################################
+################################################################# chroot DNS & Apt-Cache
 chroot_enable_dns(){
 	local ROOT=$1
-	echo nameserver ${IP} > ${ROOT}/etc/resolv.conf
+	if [ -f /etc/resolve.conf ]; then
+		cat /etc/resolv.conf > ${ROOT}/etc/resolv.conf
+	elif chroot ${ROOT} /usr/bin/host -W 1 google.com ${IP} |\
+			grep -q -v "connection timed out"; then
+		echo nameserver ${IP} > ${ROOT}/etc/resolv.conf
+	else
+		echo nameserver 8.8.8.8 >  ${ROOT}/etc/resolv.conf
+		echo nameserver 8.8.4.4 >> ${ROOT}/etc/resolv.conf
+	fi
 }
 chroot_enable_apt_cache_proxy(){
 	local ROOT=$1
@@ -33,6 +81,32 @@ Acquire::http::Proxy "http://${APT_CACHE_SERVER}:3142";
 Acquire::http::Proxy::download.oracle.com "DIRECT";
 Acquire::http::Proxy::virtualbox.org "DIRECT";
 PROXY
+}
+
+##################################################################################
+################################################################# chroot apt-get
+chroot_debconf_show(){
+	local ROOT=$1
+	shift
+	chroot ${ROOT} /usr/bin/debconf-show $@
+}
+chroot_debconf_set(){
+	local ROOT=$1
+	shift
+	echo $@ | chroot ${ROOT} /usr/bin/debconf-set-selections
+}
+chroot_apt_get_install(){
+	local ROOT=$1
+	shift
+	local LOG_ROOT="${ROOT}/${LOGS:-/root/SEED}"
+	get_package_list $* |\
+	while read SECTION_NAME PKGS; do
+		echo ${SECTION_NAME}
+		echo ${PKGS}
+		echo
+		chroot_apt_get /target -y install ${PKGS} 2>&1 |\
+		tee -a ${LOG_ROOT}-apt_install-${SECTION_NAME}.log
+	done
 }
 chroot_apt_get(){
 	local ROOT=$1
@@ -50,6 +124,9 @@ chroot_add_apt_repo(){
 	chroot ${ROOT} /usr/bin/apt-get update
 	chroot_umount ${ROOT}
 }
+
+##################################################################################
+################################################################# MISC
 chroot_profile_d(){
 	local ROOT=$1
 	shift
@@ -82,9 +159,116 @@ count_down(){
 	echo $message
 }
 interactive(){
+	echo $0 :: $*
 	local tty_num=$1
 	shift
 	tty_dev="/dev/tty$tty_num"
 	exec $* < $tty_dev > $tty_dev 2> $tty_dev
+}
+wget_url_is_live(){
+	local url=$1
+	wget -q --spider ${url} 2>/dev/null
+	return $?
+}
+test_func(){
+	echo Hello World
+
+
+
+}
+
+##################################################################################
+################################################################# Pausing Debuging
+pause_install_late(){
+	local chroot_tty=8
+	local install_pause_file="$1"
+	shift
+	local count_down_opts="$*"
+	touch "${install_pause_file}"
+	local
+	# Prep chroot /target with some packages; vim gdisk mdadm
+	chroot_enable_dns               /target
+	chroot_enable_apt_cache_proxy   /target
+	chroot_debconf_set              /target mdadm mdadm/mail_to select root
+	chroot_debconf_show             /target mdadm
+	chroot_apt_get                  /target -y install vim gdisk mdadm
+	chroot_mount                    /target
+	# Setup shell /bin/bash with chroot /target.
+	interactive ${chroot_tty} chroot /target /bin/bash --login &
+	local interactive_PID_bash=$!
+	
+	# Inform the user to switch to tty2 or tty3 to explore and effect changes.
+	cat << MESSAGE | sed 's/^\t*//'
+
+	################################################################
+	Welcome to your kickstart pre instalation interactive shell...
+	To explore and debug scripts in the squashfs/(live boot env)
+	  switch to tty2 through tty6 for a interactive bash terminals.
+	To explore and debug scripts in installed OS on /dev/sdx
+	  switch to tty${chroot_tty} for a NON interactive bash terminal.
+	  This is a chrooted env within the squashfs
+	  (# chroot /target /bin/bash --login).
+
+	In order to jump to tty2'|'tty${chroot_tty} press Ctrl + Alt + F2'|'F${chroot_tty}.
+	
+	To continue install sudo rm "${install_pause_file}" via tty2
+	
+MESSAGE
+	# Start wait loop
+	while [ -f "${install_pause_file}" ]; do
+		count_down ${count_down_opts}
+	done
+	# kill interactive shell
+	kill -9 ${interactive_PID_bash}
+	# umount /root/dev /root/sys /root/proc
+	chroot_umount /target
+	echo
+}
+pause_install_early(){
+	local install_pause_file="$1"
+	shift
+	local count_down_opts="$*"
+	touch "${install_pause_file}"
+	local
+	# Setup shell /bin/sh on tty2
+	interactive 2 /bin/sh &
+	local interactive_PID_sh=$!
+	# Setup shell /bin/bash with chroot /root.  Install vim and gdisk first.
+	chroot_enable_dns             /root
+	chroot_enable_apt_cache_proxy /root
+	chroot_add_apt_repo           /root sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe multiverse"
+	chroot_apt_get                /root -y install vim gdisk htop
+	chroot_mount                  /root
+	interactive          3 chroot /root /bin/bash --login &
+	local interactive_PID_bash=$!
+	# Inform the user to switch to tty2 or tty3 to explore and effect changes.
+
+	cat << MESSAGE | sed 's/^\t*//'
+
+	################################################################
+	Welcome to your kickstart pre instalation interactive shell...
+	To explore and debug scripts in the initramfs/(pre boot env)
+	  switch to tty2 for a NON interactive sh (BusyBox dash) terminal.
+	To explore and debug scripts in the squashfs/(live boot env)
+	  switch to tty3 for a NON interactive bash terminal.
+	  This is a chrooted env within the initramfs
+	  (# chroot /root /bin/bash --login).
+
+	In order to jump to tty2'|'tty3 press Ctrl + Alt + F2'|'F3.
+	
+	To continue install sudo rm "${install_pause_file}" via tty2
+
+MESSAGE
+
+	# Start wait loop
+	while [ -f "${install_pause_file}" ]; do
+		count_down ${count_down_opts}
+	done
+	# kill interactive shells
+	kill -9 ${interactive_PID_sh}
+	kill -9 ${interactive_PID_bash}
+	# umount /root/dev /root/sys /root/proc
+	chroot_umount /root
+	echo
 }
 

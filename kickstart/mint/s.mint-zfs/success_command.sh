@@ -4,76 +4,49 @@ url=$(dmesg | grep "Kernel command line" | tr \  \\n | sed -n 's/^url=//p')
 IP=$(dmesg | grep "Kernel command line" | tr [:space:] \\n | awk -F/ '/^url=/{print $3}')
 LOGS="/target/root/success_command"
 LOGS="/var/log/installer/debug"
+LOGS="/tmp/success_command"
 
 main(){
 	# SOURCE common functions
 	source_funcs common_funcs
 
-	# print to screen some details about the environment
+	# Add command aliases and exports to the installed environment
+	cat << PROFILE.D | sed 's/^\t*//' | tee -a /etc/profile.d/aliases.sh > /target/etc/profile.d/aliases.sh
+		export              url="${url}"
+		export               IP="${IP}"
+		export             HTTP="${HTTP}"
+		export             SEED="${SEED}"
+		export       FIRST_USER="${USER}"
+		export APT_CACHE_SERVER="${APT_CACHE_SERVER}"
+
+		alias ll='ls -la'
+		alias test1="wget -q -O - ${HTTP}/test1 | /bin/bash"
+		alias test2="wget -q -O - ${HTTP}/test2 | /bin/bash"
+		alias test3="wget -q -O - ${HTTP}/test3 | /bin/bash"
+		alias test4="wget -q -O - ${HTTP}/test4 | /bin/bash"
+		alias test5="wget -q -O - http://10.173.119.78/kickstart/mint/s.mint-zfs/test4 | /bin/bash"
+
+PROFILE.D
+
+	# Print to screen some details about the environment
 	explore "$@"	2>&1 | tee -a ${LOGS}_explore.log
 
-	pause_install /tmp/success-command-pause 30 .. /tmp/success-command-pause ...
-	#apt_update
-	#apt_install prep
-	#apt_install packages.cfg
-	#setup_sudo ${USER}
-	#setup_repos
-	#apt_install prep2
-	count_down 15
-}
-source_funcs(){
-	# SOURCE script file path is relative to the seed file in ${url}
-	local SOURCE="$1"
-	eval "$(wget -O - ${url%/*}/${SOURCE})"
+	# Install Customize
+	setup_sudo ${FIRST_USER}
+	chroot_bash_script     /target setup_repos.sh
+	chroot_apt_get_install /target packages.cfg
+
+	# Pause the install process and allow for command line interaction
+	pause_install_late /tmp/success-command-pause 30 .. /tmp/success-command-pause ...
+
+	# Pause a few seconds (default 10) before continuing
+	count_down
 }
 setup_sudo(){
 	local USER=$1
 	local FILE='/target/etc/sudoers.d/admins'
 	echo "${USER} ALL=(ALL) NOPASSWD: ALL" > ${FILE}
 	chmod 440 ${FILE}
-}
-setup_repos(){
-	/usr/sbin/chroot /target /bin/bash << BASH 2>&1 |\
-			tee -a ${LOGS}_repos.log
-	# Add Google Chrome Repo
-	echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > \
-	"/etc/apt/sources.list.d/google-chrome.list"
-	wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-
-	# Add Adobe Repo
-	local list='/etc/apt/sources.list.d/canonical_Adobe.list'
-	local http='http://archive.canonical.com/ubuntu'
-	local do_release=\${lsb_release -sc}
-	rm -f "\${list}"
-	case \${do_release} in
-		saucy)	do_release=quantal;;
-		raring)	for deb in deb deb-src; do
-				echo \${deb} \${http} \${do_release} partner >> "\${list}"
-			done
-			do_release=quantal;;
-	esac
-	for repo in "" -updates -security -backports; do
-		for deb in deb deb-src; do
-			echo \${deb} \${http} \${do_release}\${repo} partner >> "\${list}"
-		done
-	done
-	
-	# Oracle Java
-	add-apt-repository -y ppa:webupd8team/java
-
-	# Add X2GO Repos
-	add-apt-repository -y ppa:x2go/stable
-
-	# Add Grub Customizer Repos
-	add-apt-repository -y ppa:danielrichter2007/grub-customizer
-
-	sleep 5
-	apt-get update
-	sleep 5
-	apt-get -q -y install apt-file dlocate
-	sleep 5
-	apt-file update
-BASH
 }
 apt_install_prep(){
 	cat << EOE
@@ -92,69 +65,11 @@ apt_install_prep(){
 		hwinfo ethtool ipcalc smartmontools jockey-common
 EOE
 }
-apt_update(){
-	/usr/sbin/chroot /target /bin/bash << BASH 2>&1 |\
-			tee -a ${LOGS}_apt-update.log
-		apt-get update
-BASH
-}
-apt_fix(){
-	/usr/sbin/chroot /target /bin/bash << BASH 2>&1 |\
-			tee -a ${LOGS}_apt-fix.log
-		apt-get -y -q -f install
-BASH
-}
-apt_install(){
-	local SECTION_NAME PKGS NAME=$1
-	get_package_list ${NAME} |\
-	while read SECTION_NAME PKGS; do
-		apt_install_chroot ${SECTION_NAME} ${PKGS}
-	done
-}
-apt_install_chroot(){
-	local NAME=$1
-	shift
-	local PKGS="$*"
-	echo "# ${NAME} ###################################################"
-	echo "# ${PKGS}"
-	echo
-	/usr/sbin/chroot /target /bin/bash << BASH 2>&1 |\
-			tee -a ${LOGS}_apt-install-${NAME}.log
-		echo ${PKGS}
-		echo
-		apt-get -y -q install ${PKGS}
-BASH
-}
-get_package_list(){
-	local NAME=$1
-	if wget_url_is_live ${HTTP}/${NAME}; then
-		wget -O - ${HTTP}/${NAME} 2>/dev/null | format_package_list
-	else
-		apt_install_${NAME} 2>/dev/null	| format_package_list
-	fi
-}
-format_package_list(){
-	sed 's/.*\([[][^]]\+\).*/\1/;s/[#%].*//'|\
-	xargs echo				|\
-	sed 's/[[]/\n/g;s/\n//'			|\
-	grep ""
-}
-wget_url_is_live(){
-	local url=$1
-	wget -q --spider ${url} 2>/dev/null
-	return $?
-}
-count_down(){
-	local message="$(echo "$*" | sed 's/[0-9]\+//')"
-	local count="$(echo "$*" | sed 's/[^0-9]*\([0-9]\+\).*/\1/')"
-	local count=${count:-10}
-	while [ $count -ge 0 ]
-	do
-		sleep .5
-		echo -n $count.
-		count=$(( count - 1 ))
-	done
-	echo $message
+source_funcs(){
+	# SOURCE script file path is relative to the seed file in ${url}
+	local SOURCE="$1"
+	echo eval \"\$\(wget -O - ${url%/*}/${SOURCE}\)\"
+	eval "$(wget -q -O - ${url%/*}/${SOURCE})"
 }
 explore(){
 	date
@@ -177,59 +92,4 @@ explore(){
 	echo FUNC :: ${FUNC}
 	echo LOGS :: ${LOGS}
 }
-pause_install(){
-	local install_pause_file="$1"
-	shift
-	local count_down_opts="$*"
-	touch "${install_pause_file}"
-	local
-	# Setup shell /bin/sh on tty2
-	#interactive 2 /bin/sh &
-	#local interactive_PID_sh=$!
-	# Setup shell /bin/bash with chroot /root.  Install vim and gdisk first.
-	chroot_enable_dns             /target
-	chroot_enable_apt_cache_proxy /target
-	chroot_apt_get                /target -y install vim gdisk mdadm
-	chroot_mount                  /target
-	interactive          8 chroot /target /bin/bash --login &
-	local interactive_PID_bash=$!
-	# Inform the user to switch to tty2 or tty3 to explore and effect changes.
-	echo
-	echo '################################################################'
-	echo Welcome to your kickstart pre instalation interactive shell...
-	echo Jump to tty2-6 for /bin/sh to navigate the squashfs where the LiveCD boots too.
-	echo Jump to tty8 for /bin/bash to navigate the installed OS on /dev/sdb
-	echo Jump to tty2'|'tty8 via Ctrl + Alt + F2'|'F8.
-	echo
-	echo To continue install rm \"${install_pause_file}\" from tty2
-	echo
-
-	# Start wait loop
-	while [ -f "${install_pause_file}" ]; do
-		count_down ${count_down_opts}
-	done
-	# kill interactive shells
-	#kill -9 ${interactive_PID_sh}
-	kill -9 ${interactive_PID_bash}
-	# umount /root/dev /root/sys /root/proc
-	chroot_umount /target
-	echo
-}
-setup_wget(){
-	baseURL=$(sed 's|.*ks=\([^ ]*\)/[^/ ]*.*|\1|p;d' /var/log/syslog | uniq)
-	echo          ${baseURL}
-	wget -P  /lib ${baseURL}/wget-12.10/libssl.so.1.0.0
-	wget -P  /lib ${baseURL}/wget-12.10/libidn.so.11
-	wget -P  /tmp ${baseURL}/wget-12.10/wget
-	chmod +x /tmp/wget
-}
-setup_builder(){
-	opts="-r -nd -l 1 --cut-dirs 1 -A deb,exp,sh,cfg,sed,crt"
-	for f in builder functions defaults deploys DEB preseed; do
-		mkdir /tmp/$f
-		/tmp/wget $opts -P /tmp/$f/ ${baseURL}/$f/
-	done
-	env
-}
-
-main "$@" 2>&1 | tee ${LOGS}.log
+main "$@" 2>&1 | tee -a ${LOGS}.log
