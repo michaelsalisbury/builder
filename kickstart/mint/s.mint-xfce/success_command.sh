@@ -13,7 +13,7 @@ main(){
 	count_down 20
 	mkdir /target/root/explore
 	cp -vf /root/root/* /target/root/explore/.
-	#interactive 8
+	interactive 8
 	apt_update
 	apt_install prep
 	apt_install packages.cfg

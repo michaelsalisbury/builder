@@ -30,7 +30,9 @@ main(){
 	# partman
 
 	# setup rc.local and a run_once script
-	chroot_apt_get                /root -y install gnome-terminal
+	chroot_enable_dns             /root
+	chroot_enable_apt_cache_proxy /root
+	#chroot_apt_get                /root -y install gnome-terminal
 	runonce
 
 	# pause the install process ald allow for command line interaction
