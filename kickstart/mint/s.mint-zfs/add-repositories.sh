@@ -1,0 +1,1 @@
+../scripts_add-repositories.sh.template

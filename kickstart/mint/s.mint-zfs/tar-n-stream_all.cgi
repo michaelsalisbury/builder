@@ -5,7 +5,7 @@ function include(){
 	echo
 }
 function stream_tgz(){
-	tar -czh .
+	tar -cz .
 }
 echo "Content-Type: text/plain"
 echo # DO NOT REMOVE THIS BLANK LINE
