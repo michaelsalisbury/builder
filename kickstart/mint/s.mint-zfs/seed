@@ -16,6 +16,7 @@ d-i       preseed/early_command     string				\
 
 # This command runs after the entire install has finished but before fs are un-mounted
 ubiquity  ubiquity/success_command  string					\
+	chvt 10									;\
 	export url='\!Kernel!s!.*[[:space:]]url=\([^[:space:]]\+\).*!\1!p'	;\
 	export url="$(sed -n "${url}" /var/log/kern.log)"			;\
 	wget -O - ${url%/*}/success_command.sh					|\

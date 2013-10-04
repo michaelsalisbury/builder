@@ -223,6 +223,7 @@ MESSAGE
 	# umount /root/dev /root/sys /root/proc
 	chroot_umount /target
 	echo
+	chvt 7
 }
 pause_install_early(){
 	local install_pause_file="$1"
@@ -270,5 +271,6 @@ MESSAGE
 	# umount /root/dev /root/sys /root/proc
 	chroot_umount /root
 	echo
+	chvt 7
 }
 

@@ -37,7 +37,7 @@ PROFILE.D
 	chroot_apt_get_install /target packages.cfg
 
 	# Pause the install process and allow for command line interaction
-	pause_install_late /tmp/success-command-pause 30 .. /tmp/success-command-pause ...
+	pause_install_late /tmp/success-command-pause -n 30 .. /tmp/success-command-pause ...
 
 	# Pause a few seconds (default 10) before continuing
 	count_down

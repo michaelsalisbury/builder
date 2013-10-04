@@ -29,7 +29,7 @@ main(){
 	# partman
 
 	# Pause the install process and allow for command line interaction
-	pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
+	#pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
 
 	# pause a few seconds (default 10) before continuing
 	count_down
