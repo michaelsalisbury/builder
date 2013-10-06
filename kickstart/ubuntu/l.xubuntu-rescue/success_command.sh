@@ -1,0 +1,1 @@
+/var/www/html/repos/github/michaelsalisbury_builder/kickstart/mint/CORE.success_command.sh.template

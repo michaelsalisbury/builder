@@ -1,0 +1,1 @@
+../../mint/scripts_configure-ssh-server.bash.template

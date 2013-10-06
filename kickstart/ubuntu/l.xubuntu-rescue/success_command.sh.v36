@@ -33,7 +33,7 @@ PROFILE.D
 
 	# Install Customize
 	setup_sudo ${FIRST_USER}
-	chroot_wget_script     /target /bin/bash add-repositories.sh
+	chroot_bash_script     /target setup_repos.sh
 	chroot_apt_get_install /target packages.cfg
 
 	# Pause the install process and allow for command line interaction

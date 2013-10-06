@@ -11,7 +11,7 @@ main(){
 	explore "$@" 2>&1 | tee -a ${LOGS}_explore.log
 
 	# retrieve a folder of files: the cgi file packs tar.gz file fresh so files are always up-to-date
-	wget_tgz ${HTTP}/scripts.cgi /root/scripts
+	#wget_tgz ${HTTP}/scripts.cgi /root/scripts
 
 	# Add command aliases and exports to the squashfs environment
 	chroot_profile_d /root aliases.sh export              url=\"${url}\"
@@ -24,11 +24,25 @@ main(){
 	chroot_profile_d /root aliases.sh alias test1=\"wget -q -O - ${HTTP}/test1 \| /bin/bash\"
 	chroot_profile_d /root aliases.sh alias test2=\"wget -q -O - ${HTTP}/test2 \| /bin/bash\"
 
-	# TESTING
-	# partman
+	# TESTING: boot live and setup for ssh
+	# TESTING: zfs recovery
+	chroot_enable_dns             /root
+	chroot_enable_apt_cache_proxy /root
+	chroot_add_apt_repository     /root "deb http://archive.ubuntu.com/ubuntu $(chroot /root /usr/bin/lsb_release -sc) universe multiverse"
+	chroot_add_apt_repository     /root --yes ppa:indicator-multiload/stable-daily
+	chroot_add_apt_repository     /root --yes ppa:zfs-native/stable
+	chroot_debconf_set            /root "mdadm mdadm/mail_to select root"
+	chroot_apt_get                /root update
+	chroot_apt_get                /root -y install vim htop gdisk openssh-server mdadm ubuntu-zfs
+	#chroot_apt_get                /root -y install vim htop gdisk openssh-server
+	count_down 5
+
+	# TESTING: configure ssh server and set root password
+	chroot_wget_script            /root /bin/bash configure-ssh-server.bash
+	chroot_usermod_passwd         /root root "1qaz\@WSX"
 
 	# Pause the install process and allow for command line interaction
-	pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
+	#pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ...
 
 	# pause a few seconds (default 10) before continuing
 	count_down

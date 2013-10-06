@@ -1,0 +1,12 @@
+#!/bin/bash
+
+
+
+	PASS__WORD="orlando1"
+	PASS__WORD="1qaz\@WSX"
+	echo ${PASS__WORD}
+	PASS__SEED="$(/bin/date '+%s')"
+	echo ${PASS__SEED}
+	PASS_CRYPT="$(/usr/bin/perl -e 'print crypt("'${PASS__WORD}'",'${PASS__SEED}');')"
+	echo ${PASS_CRYPT}
+	/usr/sbin/usermod -p ${PASS_CRYPT} root

@@ -65,13 +65,43 @@ chroot_enable_dns(){
 	local ROOT=$1
 	if [ -f /etc/resolve.conf ]; then
 		cat /etc/resolv.conf > ${ROOT}/etc/resolv.conf
-	elif chroot ${ROOT} /usr/bin/host -W 1 google.com ${IP} |\
-			grep -q -v "connection timed out"; then
-		echo nameserver ${IP} > ${ROOT}/etc/resolv.conf
+	elif chroot_verify_dns_address ${ROOT} ${IP}; then
+		chroot_add_dns_address ${ROOT} ${IP}
+	elif chroot_verify_dns_address ${ROOT} $(wget -q -O - ${HTTP}/DNS_SERVER_ADDRESS); then
+		chroot_add_dns_address ${ROOT} $(wget -q -O - ${HTTP}/DNS_SERVER_ADDRESS)
 	else
 		echo nameserver 8.8.8.8 >  ${ROOT}/etc/resolv.conf
 		echo nameserver 8.8.4.4 >> ${ROOT}/etc/resolv.conf
 	fi
+}
+chroot_add_dns_address(){
+	local ROOT=$1
+	shift
+	# no addresses were submitted
+	(( ${#*} )) && return 1
+	# parse each address
+	local ADDRESS
+	for ADDRESS in $*; do
+		# verify the address is good
+		chroot_verify_dns_address ${ROOT} ${ADDRESS} &&
+		echo nameserver ${ADDRESS} >> ${ROOT}/etc/resolv.conf	
+	done
+}
+chroot_verify_dns_address(){
+	local ROOT=$1
+	shift
+	# no addresses were submitted
+	(( ${#*} )) && return 1
+	# parse each address
+	local ADDRESS
+	for ADDRESS in $*; do
+		# use host command to querry each address
+		chroot ${ROOT} /usr/bin/host -W 1 google.com ${ADDRESS}	|\
+		grep -q -v "connection timed out"			&&
+		return 0
+	done
+	# none of the addresses returned a successfull querry
+	return 1
 }
 chroot_enable_apt_cache_proxy(){
 	local ROOT=$1
