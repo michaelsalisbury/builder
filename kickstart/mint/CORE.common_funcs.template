@@ -234,7 +234,8 @@ pause_install_late(){
 	chroot_apt_get                  /target update
 	chroot_debconf_set              /target "mdadm mdadm/mail_to select root"
 	chroot_debconf_show             /target mdadm
-	chroot_apt_get                  /target -y install vim gdisk mdadm
+	chroot_apt_get                  /target -y install vim gdisk
+	chroot_apt_get                  /target -y install mdadm
 	chroot_mount                    /target
 
 	# Setup shell /bin/bash with chroot /target (new OS deployment on hard drive).
