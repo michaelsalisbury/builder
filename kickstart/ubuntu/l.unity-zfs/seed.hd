@@ -1,0 +1,47 @@
+# Auto wipe and format sda
+d-i partman-auto/disk					string		/dev/sda
+d-i partman-md/device_remove_md                         boolean         true
+d-i partman-auto/purge_lvm_from_device			boolean		true
+#d-i partman-auto/method					string		regular
+#d-i partman-auto/method					string		lvm
+#d-i partman-auto/method					string		raid
+#d-i partman-auto/init_automatically_partition		select		biggest_free
+#d-i partman-auto/init_automatically_partition		select		Guided - use entire disk
+#d-i partman-auto/init_automatically_partition		select		Guided - use entire disk and set up LVM
+
+d-i partman-auto/expert_recipe string root :: \
+	1 1 1 free \
+	$gptonly{ } $primary{ } $bios_boot{ } \
+	$iflabel{ gpt } \
+	method{ biosgrub } \
+	. \
+	200 2 200 efi \
+	$gptonly{ } $primary{ } \
+	method{ format } format{ } \
+	use_filesystem{ } filesystem{ vfat } \
+	. \
+	300 3 300 \boot \
+        $gptonly{ } $primary{ } $bootable \
+	method{ format } format{ ext4 } \
+	mountpoint{ /boot } \
+	. \
+	10240 4 10240 \mnt \
+	$gptonly{ } $primary{ } \
+	method{ format } format{ } \
+	method{ format } format{ ext4 } \
+	mountpoint{ /mnt } \
+	. \
+	1 5 -1 \ \
+	$gptonly{ } $primary{ } \
+	method{ format } format{ } \
+	method{ format } format{ ext4 } \
+	mountpoint{ / } \
+	.
+
+d-i partman-auto/choose_recipe				select		root
+d-i partman-partitioning/confirm_write_new_label	boolean 	true
+#d-i partman/choose_partition				select		Finish partitioning and write changes to disk
+d-i partman/choose_partition				select		""
+d-i partman/confirm					boolean		true
+d-i partman/confirm_nooverwrite				boolean		true
+d-1 partman-basicfilesystems/no_swap                    string          false

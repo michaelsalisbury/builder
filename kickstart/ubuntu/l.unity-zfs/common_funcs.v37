@@ -99,9 +99,7 @@ chroot_add_dns_address(){
 	local ROOT=$1
 	shift
 	# no addresses were submitted
-	if [ ${#*} -le 0 ]; then
-		return 1
-	fi
+	[[ ${#*} -le 0 ]] && return 1
 	# parse each address
 	local ADDRESS
 	for ADDRESS in $*; do
@@ -114,9 +112,7 @@ chroot_verify_dns_address(){
 	local ROOT=$1
 	shift
 	# no addresses were submitted
-	if [ ${#*} -le 0 ]; then
-		return 1
-	fi
+	[[ ${#*} -le 0 ]] && return 1
 	# parse each address
 	local ADDRESS
 	for ADDRESS in $*; do
@@ -231,7 +227,6 @@ pause_install_late(){
 	# Install vim, gdisk, mdadm to new OS deployment on hard drive
 	chroot_enable_dns               /target
 	chroot_enable_apt_cache_proxy   /target
-	chroot_apt_get                  /target update
 	chroot_debconf_set              /target "mdadm mdadm/mail_to select root"
 	chroot_debconf_show             /target mdadm
 	chroot_apt_get                  /target -y install vim gdisk mdadm
