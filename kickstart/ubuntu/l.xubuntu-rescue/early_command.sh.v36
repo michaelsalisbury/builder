@@ -33,8 +33,8 @@ main(){
 	chroot_add_apt_repository     /root --yes ppa:zfs-native/stable
 	chroot_debconf_set            /root "mdadm mdadm/mail_to select root"
 	chroot_apt_get                /root update
-	chroot_apt_get                /root -y install vim htop gdisk openssh-server mdadm ubuntu-zfs
-	#chroot_apt_get                /root -y install vim htop gdisk openssh-server
+	chroot_apt_get                /root -y install vim htop gdisk openssh-server smartmontools mdadm ubuntu-zfs
+	#chroot_apt_get                /root -y install vim htop gdisk openssh-server smartmontools
 	count_down 5
 
 	# TESTING: configure ssh server and set root password
