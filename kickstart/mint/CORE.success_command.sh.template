@@ -31,6 +31,8 @@ PROFILE.D
 	# Print to screen some details about the environment
 	explore "$@"	2>&1 | tee -a ${LOGS}_explore.log
 
+
+
 	# Install Customize
 	setup_sudo ${FIRST_USER}
 	chroot_wget_script     /target /bin/bash add-repositories.sh

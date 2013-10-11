@@ -90,13 +90,10 @@ d-i partman-auto/init_automatically_partition		select		biggest_free
 #d-i partman-auto/init_automatically_partition		select		Guided - use entire disk and set up LVM
 
 d-i partman-auto/expert_recipe string root :: \
-	1 1 1 free \
-	method{ biosgrub } \
-	. \
- 	1024 2 1024 linux-swap \
+ 	1024 1 1024 linux-swap \
         method{ swap } format{ } \
         . \
-	1 3 -1 \ \
+	1 2 -1 \ \
         $gptonly{ } $primary{ } \
 	method{ format } format{ } \
 	use_filesystem{ } filesystem{ ext4 } \

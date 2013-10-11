@@ -33,14 +33,16 @@ main(){
 	count_down 5
 	chroot_mount  /root	
 	chroot        /root /sbin/sgdisk /dev/sda -Z
-	chroot        /root /sbin/sgdisk /dev/sda -h
+	chroot        /root /sbin/sgdisk /dev/sda -o
+	#chroot        /root /sbin/sgdisk /dev/sda -h
 	chroot        /root /sbin/sgdisk /dev/sda -n 1:+1M:+1M     -t 1:ef02 -c 1:"BIOS Boot Partition"
+	#chroot        /root /sbin/sgdisk /dev/sda -n 1:+1M:+1M     -t 1:ef02 -c 1:"Reserved BIOS boot area"
 	chroot        /root /sbin/sgdisk /dev/sda -n 2:+1M:+200M   -t 2:ef00 -c 2:"EFI System Partition"
 	chroot        /root /sbin/sgdisk /dev/sda -n 3:+1M:+300M   -t 3:be00 -c 3:"Solaris /boot/grub"
 	chroot        /root /sbin/sgdisk /dev/sda -n 4:+1M:+10240M -t 4:bf00 -c 4:"Solaris zfs rpool"
 	chroot        /root /sbin/sgdisk /dev/sda -G
 	chroot        /root /sbin/sgdisk /dev/sda -C
-	chroot        /root /sbin/sgdisk /dev/sda -h 3:4
+	#chroot        /root /sbin/sgdisk /dev/sda -h 3:4
 	chroot        /root /sbin/sgdisk /dev/sda -p
 	count_down 5
 	chroot_umount /root
