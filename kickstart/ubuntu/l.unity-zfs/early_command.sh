@@ -1,1 +1,1 @@
-/var/www/repos/github/michaelsalisbury_builder/kickstart/mint/CORE.early_command.sh.template
+../../mint/CORE.early_command.sh.template
