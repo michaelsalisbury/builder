@@ -85,6 +85,9 @@ main(){
 	#chroot                        /root /bin/cp /opt/udev/etc/skel/Desktop/* /etc/skel/Desktop/.
 	chroot                        /root /bin/cp -rvf /opt/udev/etc/* /etc/.
 
+	# TESTING: setip ISO nfs mount
+
+
 
 	# Pause the install process and allow for command line interaction
 	#pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ..
