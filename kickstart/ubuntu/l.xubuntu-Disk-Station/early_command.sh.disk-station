@@ -1,0 +1,149 @@
+#!/bin/sh
+#!/bin/dash
+
+LOGS="/root/root/early_command"
+
+main(){
+	# SOURCE common functions
+	source_funcs common_funcs
+
+	# TESTING; setup DNS and Apt-Cache-Proxy
+	chroot_enable_dns             /root
+	chroot_enable_apt_cache_proxy /root
+	chroot_apt_get                /root -y install apt-file software-properties-common
+	chroot                        /root /usr/bin/apt-file update
+
+	# TESTING; setup oracle VirtualBox repos
+	VIRTUALBOX_URL="http://download.virtualbox.org/virtualbox"
+	mkdir -p "/root/etc/apt/sources.list.d"
+	echo "deb ${VIRTUALBOX_URL}/debian $(chroot /root /usr/bin/lsb_release -sc) contrib" >\
+		"/root/etc/apt/sources.list.d/oracle-virtualbox.list"
+	chroot                        /root /usr/bin/wget -q -O - "${VIRTUALBOX_URL}/debian/oracle_vbox.asc" |\
+	chroot                        /root /usr/bin/apt-key add -
+
+	# TESTING; additional repos
+	chroot_add_apt_repository     /root "deb http://archive.ubuntu.com/ubuntu $(chroot /root /usr/bin/lsb_release -sc) universe multiverse"
+	chroot_add_apt_repository     /root --yes ppa:indicator-multiload/stable-daily
+
+	# TESTING; pre-answer mdadm install dialog
+	chroot_debconf_set            /root "mdadm mdadm/mail_to select root"
+
+	# TESTING: update and install tools + dependencies
+	chroot_apt_get                /root update
+	chroot_apt_get                /root -y install vim htop gdisk gparted openssh-server smartmontools gnome-disk-utility mdadm bc terminator git
+
+	# TESTING: install virtualbox; get latest version info
+	VIRTUALBOX_PKG="$(chroot /root /usr/bin/apt-cache search virtualbox | awk '/Oracle VM VirtualBox/{print $1}')"
+	VIRTUALBOX_VER="$(chroot /root /usr/bin/apt-cache show ${VIRTUALBOX_PKG} | awk -F' |-|~' '/^Version/{print $2}')"
+	# TESTING: install virtualbox; setup extended pack download url
+	VIRTUALBOX_EXP="Oracle_VM_VirtualBox_Extension_Pack-${VIRTUALBOX_VER}.vbox-extpack"
+	# TESTING: install virtualbox; get extention pack
+	#chroot                        /root /usr/bin/wget -O /tmp/${VIRTUALBOX_EXP} ${VIRTUALBOX_URL}/${VIRTUALBOX_VER}/${VIRTUALBOX_EXP}
+	# TESTING: install virtualbox; install virtualbox
+	#chroot_apt_get                /root -y install ${VIRTUALBOX_PKG}
+	# TESTING: install virtualbox; install virtualbox extention pack
+      	#chroot                        /root /usr/bin/VBoxManage extpack install /tmp/${VIRTUALBOX_EXP}
+
+	# TESTING: configure ssh server and set root password
+	chroot_wget_script            /root /bin/bash configure-ssh-server.bash
+	chroot_usermod_passwd         /root root "1qaz\@WSX"
+
+	# Add command aliases and exports to the squashfs environment
+	chroot_profile_d /root aliases.sh export              url=\"${url}\"
+	chroot_profile_d /root aliases.sh export               IP=\"${IP}\"
+	chroot_profile_d /root aliases.sh export             HTTP=\"${HTTP}\"
+	chroot_profile_d /root aliases.sh export             SEED=\"${SEED}\"
+	chroot_profile_d /root aliases.sh export       FIRST_USER=\"${USER}\"
+	chroot_profile_d /root aliases.sh export APT_CACHE_SERVER=\"${APT_CACHE_SERVER}\"
+	chroot_profile_d /root aliases.sh export   VIRTUALBOX_URL=\"${VIRTUALBOX_URL}\"
+	chroot_profile_d /root aliases.sh export   VIRTUALBOX_PKG=\"${VIRTUALBOX_PKG}\"
+	chroot_profile_d /root aliases.sh export   VIRTUALBOX_EXP=\"${VIRTUALBOX_EXP}\"
+
+	chroot_profile_d /root aliases.sh alias test1=\"wget -q -O - ${HTTP}/test1 \| /bin/bash\"
+	chroot_profile_d /root aliases.sh alias test2=\"wget -q -O - ${HTTP}/test2 \| /bin/bash\"
+
+	# TESTING: setup desktop icons
+	chroot                        /root /bin/mkdir /etc/skel/Desktop
+	chroot                        /root /bin/cp /usr/share/applications/virtualbox.desktop               /etc/skel/Desktop/.
+	chroot                        /root /bin/chmod +x /etc/skel/Desktop/virtualbox.desktop
+	chroot                        /root /bin/cp /usr/share/applications/terminator.desktop               /etc/skel/Desktop/.
+	chroot                        /root /bin/chmod +x /etc/skel/Desktop/terminator.desktop
+	chroot                        /root /bin/cp /usr/share/applications/firefox.desktop                  /etc/skel/Desktop/.
+	chroot                        /root /bin/chmod +x /etc/skel/Desktop/firefox.desktop
+	chroot                        /root /bin/cp /usr/share/applications/gnome-disk-image-mounter.desktop /etc/skel/Desktop/.
+	chroot                        /root /bin/chmod +x /etc/skel/Desktop/gnome-disk-image-mounter.desktop
+	chroot                        /root /bin/cp /usr/share/applications/gnome-disks.desktop              /etc/skel/Desktop/.
+	chroot                        /root /bin/chmod +x /etc/skel/Desktop/gnome-disks.desktop
+
+	# TESTING: add xubuntu user to groups
+	DEFAULT_GRP="dialout cdrom floppy audio video plugdev users disk sudo syslog lpadmin vboxusers"
+	chroot                        /root /bin/sed -i '/^#ADD_EXTRA_GROUPS/s/^#//'                        /etc/adduser.conf
+	chroot                        /root /bin/sed -i "/^#EXTRA_GROUPS/c\EXTRA_GROUPS=\"${DEFAULT_GRP}\"" /etc/adduser.conf
+
+	# TESTING: setup udev scripts
+	wget_tgz ${HTTP}/tar-n-stream.udev.cgi /opt
+	#chroot                        /root /bin/cp /opt/udev/etc/skel/Desktop/* /etc/skel/Desktop/.
+	chroot                        /root /bin/cp -rvf /opt/udev/etc/* /etc/.
+
+
+	# Pause the install process and allow for command line interaction
+	#pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ..
+
+	# pause a few seconds (default 10) before continuing
+	count_down
+}
+source_funcs(){
+	# SOURCE script file path is relative to the seed file in ${url}
+	local SOURCE="$1"
+	#echo eval \"\$\(wget -O - ${url%/*}/${SOURCE}\)\"
+	eval "$(wget -q -O - ${url%/*}/${SOURCE})"
+}
+partman(){
+	local preseed_partman="preseed.hd.atomic.cfg"
+	local preseed_partman="preseed.hd.basic.cfg"
+	wget -O /root/tmp/${preseed_partman} ${HTTP}/preseed/${preseed_partman}
+	mount --bind /dev /root/dev
+	chroot  /root /usr/bin/debconf-set-selections   /tmp/${preseed_partman}
+}
+explore(){
+	date
+	echo
+	ls -l /
+	echo
+	ls -l /bin
+	echo
+	wget --version
+	echo
+	wget --help
+	echo
+	env
+	echo
+	echo .url :: ${url}
+	echo . IP :: ${IP}
+	echo USER :: ${USER}
+	echo HTTP :: ${HTTP}
+	echo SEED :: ${SEED}
+	echo FUNC :: ${FUNC}
+	echo LOGS :: ${LOGS}
+	echo PROX :: ${APT_CACHE_SERVER}  
+	echo .KCL :: $(dmesg | grep "Kernel com" | tr \  \\n | grep ^url)
+}
+setup_wget(){
+	baseURL=$(sed 's|.*ks=\([^ ]*\)/[^/ ]*.*|\1|p;d' /var/log/syslog | uniq)
+	echo          ${baseURL}
+	wget -P  /lib ${baseURL}/wget-12.10/libssl.so.1.0.0
+	wget -P  /lib ${baseURL}/wget-12.10/libidn.so.11
+	wget -P  /tmp ${baseURL}/wget-12.10/wget
+	chmod +x /tmp/wget
+}
+setup_builder(){
+	opts="-r -nd -l 1 --cut-dirs 1 -A deb,exp,sh,cfg,sed,crt"
+	for f in builder functions defaults deploys DEB preseed; do
+		mkdir /tmp/$f
+		/tmp/wget $opts -P /tmp/$f/ ${baseURL}/$f/
+	done
+	env
+}
+
+main "$@"
+

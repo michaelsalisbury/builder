@@ -1,0 +1,1 @@
+../../mint/CORE.success_command.sh.template

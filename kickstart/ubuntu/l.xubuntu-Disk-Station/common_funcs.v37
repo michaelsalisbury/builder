@@ -54,7 +54,7 @@ wget_tgz(){
 	chroot /root /bin/bash << BASH			\
 			1>> ${LOGS}_wget-${dsc}.log	\
 			2>> ${LOGS}_wget-${dsc}.log
-	mkdir -p ${dir}
+	mkdir ${dir}
 	/usr/bin/wget -O - ${url} |\
 	/bin/tar -xz -C ${dir}
 BASH
@@ -284,8 +284,6 @@ pause_install_early(){
 	# Install vim, gdisk, htop to squashfs live boot environment.
 	chroot_enable_dns             /root
 	chroot_enable_apt_cache_proxy /root
-	chroot_apt_get                /root -y install apt-file software-properties-common
-	chroot                        /root /usr/bin/apt-file update
 	chroot_add_apt_repository     /root "deb http://archive.ubuntu.com/ubuntu $(chroot /root /usr/bin/lsb_release -sc) universe multiverse"
 	chroot_apt_get                /root -y install vim gdisk htop
 	chroot_mount                  /root
