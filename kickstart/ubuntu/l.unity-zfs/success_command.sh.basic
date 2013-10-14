@@ -36,6 +36,14 @@ PROFILE.D
 	#chroot_wget_script     /target /bin/bash add-repositories.sh
 	#chroot_apt_get_install /target packages.cfg
 
+	# Migrate instalation to ZFS rpool
+	wget_script /bin/bash zfs-migrate
+
+
+	# Integrate ZFS with modules and fix grub
+	wget_script /bin/bash zfs-integrate
+
+
 	# Pause the install process and allow for command line interaction
 	pause_install_late /tmp/success-command-pause -n 30 .. /tmp/success-command-pause ...
 
