@@ -14,7 +14,7 @@ ln -sf ${gitRelativeRootPath}builder .
 ln -sf ${gitRelativeRootPath}functions .
 ln -sf ${gitRelativeRootPath}defaults .
 ln -sf ${gitRelativeRootPath}deploy_ubuntu deploys
-ln -sf "${scriptPath}"/preseed .
+ln -sf "${scriptRelativePath}"/preseed .
 ##############################################################################
 echo Linking CORE command templates
 ls -1 "${scriptRelativePath}"/CORE.* | while read CORE_FILE; do
