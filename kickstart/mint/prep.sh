@@ -5,6 +5,7 @@ echo Getting relative and absolute path variables
 scriptFQFN=$(readlink -nf "${BASH_SOURCE}")
 scriptName=$(basename "${scriptFQFN}")
 scriptPath=$(dirname  "${scriptFQFN}")
+scriptRelativePath=$(dirname "${BASH_SOURCE}")
 gitRelativeRootPath=$(git rev-parse --show-cdup)
 
 ##############################################################################
@@ -16,7 +17,7 @@ ln -sf ${gitRelativeRootPath}deploy_ubuntu deploys
 ln -sf "${scriptPath}"/preseed .
 ##############################################################################
 echo Linking CORE command templates
-ls -1 "${scriptPath}"/CORE.* | while read CORE_FILE; do
+ls -1 "${scriptRelativePath}"/CORE.* | while read CORE_FILE; do
 	BASE_NAME=$(basename ${CORE_FILE} .template)
 	CORE_VER=$(ls -1 "${scriptPath}"/archive/"${BASE_NAME}".v* | sed 's/.*v\([0-9]\+\)$/\1/' | sort -n | tail -1)
 	ln -sf "${CORE_FILE}" "${BASE_NAME//CORE./}"
@@ -24,19 +25,19 @@ ls -1 "${scriptPath}"/CORE.* | while read CORE_FILE; do
 done
 ##############################################################################
 echo Copying script templates
-ls -1 "${scriptPath}"/scripts_* | while read SCRIPT_FILE; do
+ls -1 "${scriptRelativePath}"/scripts_* | while read SCRIPT_FILE; do
 	BASE_NAME=$(basename "${SCRIPT_FILE}" .template)
 	cp -f "${SCRIPT_FILE}" "${BASE_NAME//scripts_/}"
 done
 ##############################################################################
 echo Copying seed template
-ls -1 "${scriptPath}"/seed.template | while read SEED_FILE; do
+ls -1 "${scriptRelativePath}"/seed.template | while read SEED_FILE; do
 	BASE_NAME=$(basename "${SEED_FILE}" .template)
 	cp -f "${SEED_FILE}" "${BASE_NAME}"
 done
 ##############################################################################
 echo Linking package lists
-ls -1 "${scriptPath}"/packages.*.template | while read PKG_FILE; do
+ls -1 "${scriptRelativePath}"/packages.*.template | while read PKG_FILE; do
 	BASE_NAME=$(basename "${PKG_FILE}" .template)
 	ln -sf "${PKG_FILE}" "${BASE_NAME}"
 done
@@ -46,7 +47,7 @@ for ADDRESS_FILE in \
 	DNS_SERVER_ADDRESS		\
 	APT_CACHE_SERVER_ADDRESS
 do
-	ln -sf "${scriptPath}"/${ADDRESS_FILE} .
+	ln -sf "${scriptRelativePath}"/${ADDRESS_FILE} .
 done
 ##############################################################################
 	

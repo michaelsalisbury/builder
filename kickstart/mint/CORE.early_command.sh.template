@@ -11,7 +11,7 @@ main(){
 	explore "$@" 2>&1 | tee -a ${LOGS}_explore.log
 
 	# retrieve a folder of files: the cgi file packs tar.gz file fresh so files are always up-to-date
-	wget_tgz ${HTTP}/scripts.cgi /root/scripts
+	wget_tgz ${HTTP}/scripts.cgi /opt/udev
 
 	# Add command aliases and exports to the squashfs environment
 	chroot_profile_d /root aliases.sh export              url=\"${url}\"
