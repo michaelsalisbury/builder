@@ -1,0 +1,37 @@
+#!/bin/bash
+
+
+
+
+
+function IF_PIPE(){
+	{
+		LOOP=true
+		trap LOOP=false USR1
+		while ${LOOP}; do echo >/dev/null; done
+		date
+	} &
+	local SPID=$!
+	local FPID=$(echo $(ps --no-heading -o ppid -p ${SPID}))
+	
+
+	#input=$(cat; echo a)
+	#input=$(dd bs=1 count=1 conv=nonblock 2>/dev/null)
+	#input=$(dd conv=nonblock 2>/dev/null)
+	#echo $input
+	readlink /proc/${FPID}/fd/0
+	#sleep 3
+	kill -USR1 ${SPID}
+	
+}
+
+
+
+
+echo one | IF_PIPE
+
+echo two | grep "" | IF_PIPE
+
+IF_PIPE three
+
+echo four

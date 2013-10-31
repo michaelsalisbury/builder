@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=VBOX Auto Launcher
+GenericName=VBOXLauncher
+Exec=/opt/udev/bin/vbox_launcher.sh
+Icon=/opt/udev/etc/vbox_launcher/harddrive.svg
+StartupNotify=true
+Terminal=false
+Type=Application
+X-XFCE-Source=file:///home/xubuntu/Desktop/vbox_launcher.desktop

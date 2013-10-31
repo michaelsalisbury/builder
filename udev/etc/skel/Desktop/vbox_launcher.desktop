@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Name=VBOX Auto Launcher
+GenericName=VBOXLauncher
+Exec=/opt/udev/bin/vbox_launcher.sh
+Icon=/opt/udev/etc/vbox_launcher/harddrive.svg
+StartupNotify=true
+Terminal=false
+Type=Application

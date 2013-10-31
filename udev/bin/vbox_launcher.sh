@@ -50,6 +50,8 @@ function ACTION_SELECT(){
 function ACTION_ADD(){
 	DEVICE=$(GET_DEVICE_LIST | head -1)
 	DEVICE=${1:-${DEVICE}}
+	declare -A VMDK
+	for DEV in ${DEVICE[*]};	do VMDK[${DEV}]="${DEV}";		done
 
 	# filter out root; system drive
 	IS_DEVICE_ROOT # function exits if positive
@@ -158,10 +160,11 @@ function START_VM(){
 		local USERNAME=$(GET_DISPLAY_USER ${DISPLAY})
 		/usr/bin/setsid su - ${USERNAME} -s /bin/bash <<-SU
 			export DISPLAY=:${DISPLAY}
+			which VBoxManage && VBoxManage setextradata global GUI/SuppressMessages ${VBOX_SUPPRESS_MESSAGES}
 			which VirtualBox && VirtualBox --startvm "${NAME[1]}"
 		SU
 	else
-		
+		which VBoxManage && VBoxManage setextradata global GUI/SuppressMessages ${VBOX_SUPPRESS_MESSAGES}
 		which VirtualBox && VirtualBox --startvm "${NAME[1]}"
 	fi
 }
@@ -369,9 +372,11 @@ function GET_VRDEPORT(){
 function GET_MAC(){
 	# dependant on global variables; MAC
 	local DEV=${1:-${DEVICE}}
+	local MAC=$(ifconfig eth0 | awk '/HWaddr/{print $5}' | tr -d : | tr [a-z] [A-Z])
 	# get mac; convert the sd disk letter to a number and add to mac base
-	# sdb = 99, sdc = 98, sdd = 97,,,
-	echo ${MAC}$(( 197 - $(printf "%d\n" \'${DEV:2}) ))
+	# sda = 99, sdb = 98, sdc = 97, sdd = 96,,,
+	echo ${MAC:0:4}$(( 196 - $(printf "%d\n" \'${DEV:2}) ))${MAC:6} |\
+	tee >(LOG - INF :: ${FUNCNAME} ::)
 }
 function GET_SELECTION_MEM(){
 	# dependant on global variables; SELECTION
@@ -493,7 +498,7 @@ function zenity_device_info_list(){
 	local DEV=""
 	local DISK_NUM=""
 	for DEV in ${DEVICE[*]}; do
-		echo "<b><big><span color='purple'>-VM DISK $(( DISK_NUM++ ))-</span></big></b>\n"
+		echo "<b><big><span color='purple'>-VM DISK $(( DISK_NUM++ ))-</span></big></b>"
 		echo "$(zenity_device_info ${DEV})\n"
 	done
 }
@@ -632,6 +637,13 @@ function zenity_choose_device_dialog(){
 		zenityText+=$(GET_CONFIG_SECTION \
 			   "$(GET_USER_CONFIG_FQFN)" \
 			    ${UCST_DISK_INSTRUCTIONS})
+
+	# get aditional selection instructions
+	if (( ${#DEVICE[*]} )); then
+		zenityText+=$(GET_CONFIG_SECTION \
+			   "$(GET_USER_CONFIG_FQFN)" \
+			    ${UCST_DISK_INSTRUCTIONS_2})
+	fi
 
 	# get column headers
 	eval local column=( $(GET_CONFIG_SECTION \
@@ -930,9 +942,11 @@ function IF_ROOT_ECHO(){
 	whoami | grep -q ^root$ && echo "$@"
 }
 function IF_ROOT_SU(){
-	whoami | grep -q ^root$ \
-		&& su - $(GET_DISPLAY_USER ${DISPLAY:-${TARGET_DISPLAY:-0}}) -s /bin/bash <(cat)\
-		|| /bin/bash <(cat)
+	if whoami | grep -q ^root$; then
+		cat | su - $(GET_DISPLAY_USER ${DISPLAY:-${TARGET_DISPLAY:-0}}) -s /bin/bash
+	else
+		cat | /bin/bash
+	fi
 }
 function GET_USERNAME(){
 	IF_ROOT_SU <<-SU
@@ -1024,9 +1038,9 @@ function UNMOUNT_DEVICES(){
 	for DEV in ${DEVICE[*]}; do
 		for PART in `ls /dev/${DEV}[0-9]`; do
 			for TRIES in {1..2}; do
-				umount ${PART} &>/dev/null
+				sudo -n umount ${PART} &>/dev/null
 			done
-			umount -v ${PART} \
+			sudo -n umount -v ${PART} \
 				1> >(LOG - STS :: ${FUNCNAME} ::) \
 				2> >(LOG - ERR :: ${FUNCNAME} ::)
 		done
@@ -1108,6 +1122,7 @@ BRIDGED_ETH=${BRIDGED_ETH:-eth0}
 #			when true  FILTER determines dual disk optional
 DEVICE2PROMPT_FILTERS=${DEVICE2PROMPT_FILTERS:-task}
 DEVICE2PROMPT_DEFAULT=${DEVICE2PROMPT_DEFAULT:-false}
+VBOX_SUPPRESS_MESSAGES=${VBOX_SUPPRESS_MESSAGES:-remindAboutAutoCapture,confirmInputCapture,remindAboutMouseIntegrationOn,remindAboutWrongColorDepth,confirmGoingFullscreen,remindAboutMouseIntegrationOff}
 
 # GLOBAL vars; VirtualBox
 SCTL='ide'

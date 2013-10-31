@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=COS FS3
+Comment=Browse the filesystem with the file manager
+Exec=thunar smb://cos-fs3.cos.ucf.edu/Ghost\$
+Icon=preferences-desktop-remote-desktop
+Path=
+Terminal=false
+StartupNotify=false
+X-XFCE-Source=file:///home/xubuntu/Desktop/cos-fs3.cos.ucf.edu.desktop

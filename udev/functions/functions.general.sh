@@ -30,14 +30,16 @@ function FIND_PID(){
 	done < <(ps --no-heading -o pid --ppid ${ppid})
 }
 function GET_DISPLAY_USER(){
-	echo localcosadmin
+	echo xubuntu
 	return 0
 	# Dependant on function LOG and GLOBAL var DEBUG
 	local DISPLAY_NUM=${1:-0}
 	local DISPLAY_NUM=${DISPLAY_NUM//[^0-9.]/}
+	#grep "[[:space:]]tty[0-9][[:space:]].*(:${DISPLAY_NUM}\(\.0\)\?)" 
 	who -u |\
-	grep "[[:space:]]tty[0-9][[:space:]].*(:${DISPLAY_NUM}\(\.0\)\?)" |\
+	grep "[[:space:]]\(tty\|pts/\)[0-9]\+[[:space:]].*(:${DISPLAY_NUM}\(\.0\)\?)" |\
 	awk '{print $1}' |\
+	sort -u |\
 	tee >(LOG ${DEBUG:-false} DEBUG :: ${FUNCNAME} :: DISPLAY_NUM = ${DISPLAY_NUM} ::) |\
 	grep ""
 	# this last line returns false to the calling function if no user found

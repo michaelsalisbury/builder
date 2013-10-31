@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=COS FS3
+Comment=Launch Thunar File Browser to COS FS3
+Exec=thunar smb://cos-fs3.cos.ucf.edu/Temp\$
+Icon=preferences-desktop-remote-desktop
+Path=
+Terminal=false
+StartupNotify=false

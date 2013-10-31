@@ -7,6 +7,8 @@ main(){
 	# SOURCE common functions
 	source_funcs common_funcs
 
+	#pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ..
+
 	# TESTING; setup DNS and Apt-Cache-Proxy
 	chroot_enable_dns             /root
 	chroot_enable_apt_cache_proxy /root
@@ -33,16 +35,17 @@ main(){
 	chroot_apt_get                /root -y install vim htop gdisk gparted openssh-server smartmontools gnome-disk-utility mdadm bc terminator git
 
 	# TESTING: install virtualbox; get latest version info
-	VIRTUALBOX_PKG="$(chroot /root /usr/bin/apt-cache search virtualbox | awk '/Oracle VM VirtualBox/{print $1}')"
+	VIRTUALBOX_PKG="$(chroot /root /usr/bin/apt-cache search virtualbox | awk '/Oracle VM VirtualBox/{print $1}') | sort -n | tail -1"
+	VIRTUALBOX_PKG="virtualbox-4.2"
 	VIRTUALBOX_VER="$(chroot /root /usr/bin/apt-cache show ${VIRTUALBOX_PKG} | awk -F' |-|~' '/^Version/{print $2}')"
 	# TESTING: install virtualbox; setup extended pack download url
 	VIRTUALBOX_EXP="Oracle_VM_VirtualBox_Extension_Pack-${VIRTUALBOX_VER}.vbox-extpack"
 	# TESTING: install virtualbox; get extention pack
-	#chroot                        /root /usr/bin/wget -O /tmp/${VIRTUALBOX_EXP} ${VIRTUALBOX_URL}/${VIRTUALBOX_VER}/${VIRTUALBOX_EXP}
+	chroot                        /root /usr/bin/wget -O /tmp/${VIRTUALBOX_EXP} ${VIRTUALBOX_URL}/${VIRTUALBOX_VER}/${VIRTUALBOX_EXP}
 	# TESTING: install virtualbox; install virtualbox
-	#chroot_apt_get                /root -y install ${VIRTUALBOX_PKG}
+	chroot_apt_get                /root -y install ${VIRTUALBOX_PKG}
 	# TESTING: install virtualbox; install virtualbox extention pack
-      	#chroot                        /root /usr/bin/VBoxManage extpack install /tmp/${VIRTUALBOX_EXP}
+      	chroot                        /root /usr/bin/VBoxManage extpack install /tmp/${VIRTUALBOX_EXP}
 
 	# TESTING: configure ssh server and set root password
 	chroot_wget_script            /root /bin/bash configure-ssh-server.bash
@@ -65,15 +68,11 @@ main(){
 	# TESTING: setup desktop icons
 	chroot                        /root /bin/mkdir /etc/skel/Desktop
 	chroot                        /root /bin/cp /usr/share/applications/virtualbox.desktop               /etc/skel/Desktop/.
-	chroot                        /root /bin/chmod +x /etc/skel/Desktop/virtualbox.desktop
 	chroot                        /root /bin/cp /usr/share/applications/terminator.desktop               /etc/skel/Desktop/.
-	chroot                        /root /bin/chmod +x /etc/skel/Desktop/terminator.desktop
 	chroot                        /root /bin/cp /usr/share/applications/firefox.desktop                  /etc/skel/Desktop/.
-	chroot                        /root /bin/chmod +x /etc/skel/Desktop/firefox.desktop
 	chroot                        /root /bin/cp /usr/share/applications/gnome-disk-image-mounter.desktop /etc/skel/Desktop/.
-	chroot                        /root /bin/chmod +x /etc/skel/Desktop/gnome-disk-image-mounter.desktop
 	chroot                        /root /bin/cp /usr/share/applications/gnome-disks.desktop              /etc/skel/Desktop/.
-	chroot                        /root /bin/chmod +x /etc/skel/Desktop/gnome-disks.desktop
+	chroot                        /root /bin/bash -c '/bin/chmod +x /etc/skel/Desktop/*.desktop'
 
 	# TESTING: add xubuntu user to groups
 	DEFAULT_GRP="dialout cdrom floppy audio video plugdev users disk sudo syslog lpadmin vboxusers"
@@ -83,11 +82,44 @@ main(){
 	# TESTING: setup udev scripts
 	wget_tgz ${HTTP}/tar-n-stream.udev.cgi /opt
 	#chroot                        /root /bin/cp /opt/udev/etc/skel/Desktop/* /etc/skel/Desktop/.
-	chroot                        /root /bin/cp -rvf /opt/udev/etc/* /etc/.
+	chroot                        /root /bin/bash -c '/bin/sed -i "s|#PROGRAM#|/opt/udev/bin/vbox_launcher.sh|" /opt/udev/etc/udev/rules.d/*'
+	chroot                        /root /bin/bash -c '/bin/cp -rvf /opt/udev/etc/* /etc/.'
+	chroot                        /root /usr/bin/touch /var/log/vbox_launcher.log
+	chroot                        /root /bin/chmod a+w /var/log/vbox_launcher.log
 
-	# TESTING: setip ISO nfs mount
+	# TESTING: setup ISO nfs mount
+	NFS_ISO="$(cat /etc/mtab | awk '/\/cdrom/{print $1}')"
+	NFS_ISO="${NFS_ISO%/*}/ISO"
+	NFS_OPT="$(cat /etc/mtab | awk '/\/cdrom/{print $4}')"
+	NFS_OPT="${NFS_OPT},_netdev"
+	mkdir      /root/ISO
+	ln -s           /ISO /root/etc/skel/ISO
+	echo ${NFS_ISO} /ISO nfs ${NFS_OPT} 0 0 >> /root/etc/fstab
 
+	# TESTING: setup FreeFileSync
+	wget_tgz http://${IP}/packages/Apps_Linux/FreeFileSync_5.22_Ubuntu_13.04_64-bit.tar.gz /opt
+	wget_tgz             ${HTTP}/tar-n-stream.FreeFileSync.cgi                             /opt
 
+	# TESTING: setup keyrings
+	chroot                       /root /bin/mkdir    -p /etc/skel/.local/share/keyrings
+	chroot                       /root /bin/chmod   700 /etc/skel/.local/share
+	chroot                       /root /bin/chmod   700 /etc/skel/.local/share/keyrings
+	chroot                       /root /usr/bin/wget -O /etc/skel/.local/share/keyrings/cos-fs3.cos.ucf.edu.keyring ${HTTP}/cos-fs3.cos.ucf.edu.kr
+	chroot                       /root /bin/chmod   600 /etc/skel/.local/share/keyrings/cos-fs3.cos.ucf.edu.keyring
+
+	# TESTING: setup custom desktop icons/launchers
+	wget_tgz ${HTTP}/tar-n-stream.Desktop.cgi /etc/skel
+
+	# TESTING: setup custom autostart launchers
+	chroot                       /root /bin/mkdir  -p /etc/skel/.config/xfce4
+	chroot                       /root /bin/chmod 700 /etc/skel/.config
+	wget_tgz ${HTTP}/tar-n-stream.autostart.cgi       /etc/skel/.config/xfce4
+	wget_tgz ${HTTP}/tar-n-stream.autostart.cgi       /etc/skel/.config
+
+	# TESTING: setup xfce panel
+	#chroot                       /root /bin/mkdir     /etc/skel/.config
+	#chroot                       /root /bin/chmod 700 /etc/skel/.config
+	#wget_tgz ${HTTP}/tar-n-stream.xfce4.cgi           /etc/skel/.config
 
 	# Pause the install process and allow for command line interaction
 	#pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ..

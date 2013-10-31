@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Free File Sync
+Comment=Free File Sync
+Exec=/opt/FreeFileSync/FreeFileSync
+Icon=system-software-update
+Path=
+Terminal=false
+StartupNotify=false

@@ -16,6 +16,7 @@ UCST_TOOL_INSTRUCTIONS    = Task Selection Instructions
 UCST_TOOL_COLUMN_HEADERS  = Task List Column Headers
 UCST_TOOL_SELECTIONS      = Task List Selections
 UCST_DISK_INSTRUCTIONS    = Disk Selection Instructions
+UCST_DISK_INSTRUCTIONS_2  = Disk Selection Instructions 2nd
 UCST_DISK_COLUMN_HEADERS  = Disk List Column Headers
 UCST_GLOBAL_VAR_DEFAULTS  = Global Defaults
 
@@ -24,6 +25,9 @@ MAC = 080027ABCD
 
 # VRDE base port number for RDP connections
 VRDEPORT = 33890
+
+# VBOX message suppression
+VBOX_SUPPRESS_MESSAGES = remindAboutAutoCapture,confirmInputCapture,remindAboutMouseIntegrationOn,remindAboutWrongColorDepth,confirmGoingFullscreen,remindAboutMouseIntegrationOff
 
 # Target Display Number
 TARGET_DISPLAY = 0

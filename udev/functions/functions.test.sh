@@ -1,21 +1,32 @@
 #!/bin/bash
+function GET_FUNC_PID(){
+	{
+		LOOP=true
+		trap LOOP=false USR1
+		while ${LOOP}; do echo >/dev/null; done
+	} &
+	local SPID=$!
+	echo $(ps --no-heading -o ppid -p $(ps --no-heading -o ppid -p ${SPID}))
+	kill -USR1 ${SPID}
+}
+
 function LOG(){
 	# Dependant on GLOBAL var LOG
 	# test first arg for true|false
 	while case "${1}" in
-		true)	;;						# do nothing, continue processing LOG entry
-		false)	return;;					# don't process LOG entry
-		ERR)	local ARGS+="   ERROR ";;			# common prefix ::    ERROR
-		DIS)	local ARGS+="DISABLED ";;			# common prefix :: DISABLED
-		INF)	local ARGS+="    INFO ";;			# common prefix ::     INFO
-		DBG)	local ARGS+="   DEBUG ";;			# common prefic ::    DEBUG
-		STS)	local ARGS+="  STATUS ";;			# common prefix ::   STATUS
-		DEF)	local ARGS+=" DEFAULT ";;			# common prefix ::  DEFAULT
-		CAN)	local ARGS+="CANCELED ";;			# common prefix :: CANCELED
-		BRO)	local ARGS+="  BROKEN ";;			# common prefix ::   BROKEN
-		-)	local log_pipe_only=true;;			# don't create a LOG entry unless data was piped
-		*)	local log_pipe_only=${log_pipe_only:-false}	# set default values for local vars
-			break;;						# done processing function switches
+		true)		;;						# do nothing, continue processing LOG entry
+		false)		return;;					# don't process LOG entry
+		ERROR|ERR)	local ARGS+="   ERROR ";;			# common prefix ::    ERROR
+		DISABLED|DIS)	local ARGS+="DISABLED ";;			# common prefix :: DISABLED
+		INFO|INF)	local ARGS+="    INFO ";;			# common prefix ::     INFO
+		DEBUG|DBG)	local ARGS+="   DEBUG ";;			# common prefic ::    DEBUG
+		STATUS|STS)	local ARGS+="  STATUS ";;			# common prefix ::   STATUS
+		DEFAULT|DEF)	local ARGS+=" DEFAULT ";;			# common prefix ::  DEFAULT
+		CANCELD|CAN)	local ARGS+="CANCELED ";;			# common prefix :: CANCELED
+		BROKEN|BRO)	local ARGS+="  BROKEN ";;			# common prefix ::   BROKEN
+		-)		local log_pipe_only=true;;			# don't create a LOG entry unless data was piped
+		*)		local log_pipe_only=${log_pipe_only:-false}	# set default values for local vars
+				break;;						# done processing function switches
 	esac; do shift; done
 	# test GLOBAL var LOG; comment these out for speed
 	(( ${#LOG} > 0 )) || { echo ERROR :: ${FUNCNAME} :: Log file not defined \(var LOG\). Log entry cancelled. 1>&2; return; }
@@ -24,8 +35,7 @@ function LOG(){
 	local IFS=' '
 	local ARGS+="$@"
 	# LOG piped data
-	if readlink /proc/$$/fd/0 | egrep -q "^pipe:" \
-	|| read -t 0 -N 0; then
+	if readlink /proc/$(GET_FUNC_PID)/fd/0 | egrep -q "^pipe:"; then
 		# Do not remove, this fixes something
 		echo -n
 		if (( ${#ARGS} > 0 )); then

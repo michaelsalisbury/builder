@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
+Type=Application
+Name=cos-fs3.cos.ucf.edu
+Comment=cos-fs3.cos.ucf.edu
+Exec=/usr/bin/python -c "import gnomekeyring; gnomekeyring.unlock_sync('cos-fs3.cos.ucf.edu', 'nrR3wvWEUXbKzgJ4g7XT6JqR' );"
+OnlyShowIn=XFCE;
+StartupNotify=false
+Terminal=false
+Hidden=false

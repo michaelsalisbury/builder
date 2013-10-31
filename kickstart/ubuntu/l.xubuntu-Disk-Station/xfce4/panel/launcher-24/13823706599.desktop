@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Catfish File Search
+Comment=Search the file system
+Categories=GNOME;Utility;
+Exec=catfish
+Icon=catfish
+Terminal=false
+Type=Application
+X-XFCE-Source=file:///usr/share/applications/catfish.desktop
