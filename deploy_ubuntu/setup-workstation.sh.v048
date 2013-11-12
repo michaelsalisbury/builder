@@ -209,7 +209,6 @@ function setup_Prep_Add_Repos(){
 	# Disable upgrades
 	sed -i '/^Prompt=/c\Prompt=never' /etc/update-manager/release-upgrades
 
-
 	# Add Neuro Debian Repo; was to pulldown tigervnc-server
 	if false; then
 		local list='/etc/apt/sources.list.d/neurodebian.sources.list'
@@ -242,40 +241,38 @@ function setup_Prep_Add_Repos(){
 	wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 
 	# Add UCK Repos
-	if false; then
-		local list='/etc/apt/sources.list.d/uck-team-uck'
-		local do_release=`lsb_release -sc`
-		rm -f "${list}"*
-		add-apt-repository -y ppa:uck-team/uck-stable
-		add-apt-repository -y ppa:uck-team/uck-unstable
-		# current stable build of uck is quantal
-		case ${do_release} in
-			saucy|raring)
-				cat <<-SED | sed -i -f <(cat) "${list}-stable-${do_release}.list"
-					/^deb/{
-						h
-						s/^/#/
-						x
-						s/${do_release}/precise/
-						G
-					}
-				SED
-				;;
-		esac
-		# last build of unionfs-fuse is oneiric
-		case ${do_release} in
-			saucy|raring|quantal)
-				cat <<-SED | sed -i -f <(cat) "${list}-unstable-${do_release}.list"
-					/^deb/{
-						h
-						x
-						s/${do_release}/oneiric/
-						G
-					}
-				SED
-				;;
-		esac
-	fi
+	local list='/etc/apt/sources.list.d/uck-team-uck'
+	local do_release=`lsb_release -sc`
+	rm -f "${list}"*
+	add-apt-repository -y ppa:uck-team/uck-stable
+	add-apt-repository -y ppa:uck-team/uck-unstable
+	# current stable build of uck is quantal
+	case ${do_release} in
+		saucy|raring)
+			cat <<-SED | sed -i -f <(cat) "${list}-stable-${do_release}.list"
+				/^deb/{
+					h
+					s/^/#/
+					x
+					s/${do_release}/precise/
+					G
+				}
+			SED
+			;;
+	esac
+	# last build of unionfs-fuse is oneiric
+	case ${do_release} in
+		saucy|raring|quantal)
+			cat <<-SED | sed -i -f <(cat) "${list}-unstable-${do_release}.list"
+				/^deb/{
+					h
+					x
+					s/${do_release}/oneiric/
+					G
+				}
+			SED
+			;;
+	esac
 
 	# Add Adobe Repo
 	local list='/etc/apt/sources.list.d/canonical_Adobe.list'
@@ -283,12 +280,7 @@ function setup_Prep_Add_Repos(){
 	local do_release=`lsb_release -sc`
 	rm -f "${list}"
 	case ${do_release} in
-		saucy)	for do_release in ${do_release} raring; do	
-				for deb in deb deb-src; do
-					echo ${deb} ${http} ${do_release} partner >> "${list}"
-				done
-			done
-			do_release=quantal;;
+		saucy)	do_release=quantal;;
 		raring)	for deb in deb deb-src; do
 				echo ${deb} ${http} ${do_release} partner >> "${list}"
 			done
@@ -333,9 +325,6 @@ function setup_Prep_Add_Repos(){
 
 	# Add Tweak & MyUnity Repos
 	add-apt-repository -y ppa:tualatrix/ppaapt-key adv --recv-keys --keyserver keyserver.ubuntu.com 2EBC26B60C5A2783
-
-	# enable i386 repos
-	sudo sed -i 's/^\(deb\s\|deb-src\s\)/\1[arch=amd64,i386] /' /etc/apt/sources.list
 
 	# Update
 	waitAptgetUpdate

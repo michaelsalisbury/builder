@@ -1,7 +1,4 @@
 #!/usr/bin/expect -f
-# Use this to diagnose why expect statements arn't matching
-#exp_internal 1
-
 proc cred_format {} {
 	puts "----------------------------------------------------"
 	puts "username = \[NID\]"
@@ -145,26 +142,27 @@ if {$force_conservative} {
 # -Don
 
 set timeout -1
-set query_loop true
-
-set test_cert_prompt	"\nEnter 'yes' to accept,.*:"
-set test_group_prompt	"\nGROUP:.*"
-set test_user_prompt	"\nUsername:"
-set test_pass_prompt	"\nPassword:"
-set test_con_estab	"\n.*You are now connected.*"
-
 spawn sudo openconnect $url
 match_max 100000
-while { $query_loop } {
-	expect {
-		-re $test_cert_prompt	{ send "yes\r" }
-		-re $test_group_prompt	{ send "$group\r" }
-		-re $test_user_prompt	{ send "$username\r" }
-		-re $test_pass_prompt	{ send "$password\r" }
-		-re $test_con_estab	{ set query_loop false }
-	}
-}
-
+expect -exact "Attempting to connect to 132.170.0.11:443\r
+SSL negotiation with ucfvpn-1.vpn.ucf.edu\r
+Connected to HTTPS on ucfvpn-1.vpn.ucf.edu\r
+GET https://ucfvpn-1.vpn.ucf.edu/\r
+Got HTTP response: HTTP/1.0 302 Object Moved\r
+SSL negotiation with ucfvpn-1.vpn.ucf.edu\r
+Connected to HTTPS on ucfvpn-1.vpn.ucf.edu\r
+GET https://ucfvpn-1.vpn.ucf.edu/+webvpn+/index.html\r
+Please enter your username and password.\r
+GROUP: \["
+#ucffaculty|ucfstudent\]:"
 expect *
-sleep 10
-exit
+send -- "$group\r"
+expect -exact "$group\r
+Username:"
+send -- "$username\r"
+expect -exact "$username\r
+Password:"
+send -- "$password\r"
+expect -exact "\r"
+expect *
+expect eof
