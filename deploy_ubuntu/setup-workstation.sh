@@ -455,6 +455,9 @@ function setup_Install_Daemon_VBox_Server(){
 function setup_Must_Have_Tools(){
 	desc vim, ethtool, iotop, iftop, jre, chrome
         ###################################################################################
+	# environment
+	local do_release=`lsb_release -sc`
+	#
 	waitForNetwork || return 1
 	stall 3
 	waitAptgetUpdate
@@ -497,14 +500,37 @@ EOL
 		done
 
 	# setup team viewer
-	cd   /tmp
 	local teamviewer_url='http://download.teamviewer.com/download/'
 	[ "x86_64" == $(uname -i) ]\
 		&& teamviewer_url+='teamviewer_linux_x64.deb' \
 		|| teamviewer_url+='teamviewer_linux.deb'
+
+	rm -rf /tmp/teamviewer
+	mkdir  /tmp/teamviewer
+	cd     /tmp/teamviewer
 	wget -O teamviewer.deb "${teamviewer_url}"
-	dpkg -i teamviewer.deb
-	rm   -f teamviewer.deb
+	case ${do_release} in
+		saucy)	rm -rf /tmp/teamviewer/deb
+			mkdir  /tmp/teamviewer/deb
+			mkdir  /tmp/teamviewer/deb/control.tar
+			cd     /tmp/teamviewer/deb
+			ar x ../teamviewer.deb
+			cd     /tmp/teamviewer/deb/control.tar
+			tar -xzf ../control.tar.gz
+			sed -i 's/lib321sound2/libasound2:i386/' control
+			sed -i 's/,\sia32-libs//'                control
+			tar c {post,pre}{inst,rm} md5sums control | gzip -c > ../control.tar.gz
+			cd     /tmp/teamviewer/deb
+			ar rcs ../${do_release}-teamviewer.deb debian-binary control.tar.gz data.tar.gz
+			cd     /tmp/teamviewer
+			;;
+	esac
+	case ${do_release} in
+		saucy)	dpkg -i ${do_release}-teamviewer.deb;;
+		*)	dpkg -i teamviewer.deb;;
+	esac
+	
+	#rm   -rf /tmp/teamviewer
 	# clean up
 	waitAptgetInstall
 	apt-get ${aptopt} -f install
