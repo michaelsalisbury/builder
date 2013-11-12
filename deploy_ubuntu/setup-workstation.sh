@@ -530,7 +530,7 @@ EOL
 		*)	dpkg -i teamviewer.deb;;
 	esac
 	
-	#rm   -rf /tmp/teamviewer
+	rm   -rf /tmp/teamviewer
 	# clean up
 	waitAptgetInstall
 	apt-get ${aptopt} -f install
