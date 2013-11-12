@@ -519,7 +519,7 @@ EOL
 			tar -xzf ../control.tar.gz
 			sed -i 's/lib321sound2/libasound2:i386/' control
 			sed -i 's/,\sia32-libs//'                control
-			tar c {post,pre}{inst,rm} md5sums control | gzip -c > ../control.tar.gz
+			tar c {post,pre}{inst,rm} control | gzip -c > ../control.tar.gz
 			cd     /tmp/teamviewer/deb
 			ar rcs ../${do_release}-teamviewer.deb debian-binary control.tar.gz data.tar.gz
 			cd     /tmp/teamviewer
