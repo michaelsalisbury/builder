@@ -110,8 +110,12 @@ function setup_Prep_Disable_Apport_Whoopsie(){
 }
 function setup_Prep_Disable_Guest(){
 	desc disable guest login
-	sed -i.bk`date "+%s"` '/^allow-guest=/d'                     /etc/lightdm/lightdm.conf
-	sed -i.bk`date "+%s"` '/\[SeatDefaults\]/aallow-guest=false' /etc/lightdm/lightdm.conf
+	local CONF
+	for CONF in /etc/lightdm/lightdm.conf /etc/lightdm/lightdm.conf.d/50-unity-greeter.conf; do
+		[ ! -f ${CONF} ] && continue
+		sed -i.bk`date "+%s"` '/^allow-guest=/d'                     ${CONF}
+		sed -i.bk`date "+%s"` '/\[SeatDefaults\]/aallow-guest=false' ${CONF}
+	done
 }
 function setup_Prep_Tweak_Apt_Cacher(){
 	desc append options to apt cacher client config
@@ -456,7 +460,7 @@ function setup_Must_Have_Tools(){
 	waitAptgetUpdate
 	apt-get ${aptopt} update
 	waitAptgetInstall
-	apt-get ${aptopt} install	vim ethtool hwinfo iotop iftop git xclip \
+	apt-get ${aptopt} install	vim ethtool iotop iftop git xclip \
 					terminator multitail everpad \
 					apt-file dlocate wajig aptitude\
 					expect expect-dev \
@@ -1012,11 +1016,16 @@ function setup_Crossover(){
         desc Codeweavers Crossover \for Office
         ###################################################################################
 	waitForNetwork || return 1
+	# environment
+	local do_release=`lsb_release -sc`
 	# dependencies
         waitAptgetInstall
-	apt-get ${aptopt} install gdebi libc6-i386 ia32-libs ia32-libs-multiarch \
-				 lib32gcc1 lib32nss-mdns lib32nss-mdns lib32z1 \
-				 python-glade2 lib32asound2
+	case ${do_release} in
+		saucy)	apt-get ${aptopt} install libasound2:i386;;
+		*)	apt-get ${aptopt} install ia32-libs ia32-libs-multiarch lib32asound2;;
+	esac
+	apt-get ${aptopt} install gdebi libc6-i386 lib32gcc1 lib32nss-mdns lib32z1 perl5-base perl-modules \
+					 python-gtk2 python-glade2 desktop-file-utils
 	# setup working dir
 	mkdir /root/codeweavers_crossover
 	cd    /root/codeweavers_crossover
@@ -1038,8 +1047,27 @@ function setup_Crossover(){
 	echo ${version%?}
 	# download crossover
 	wget --progress=bar:force ${url}
+	# remove ia32-libs dependency for saucy
+	case ${do_release} in
+		saucy)	rm -rf /root/codeweavers_crossover/deb
+			mkdir  /root/codeweavers_crossover/deb
+			mkdir  /root/codeweavers_crossover/deb/control.tar
+			cd     /root/codeweavers_crossover/deb
+			ar x ../${version%?}
+			cd     /root/codeweavers_crossover/deb/control.tar
+			tar -xzf ../control.tar.gz
+			sed -i 's/ia32-libs,\s//' control
+			tar c {post,pre}{inst,rm} md5sums control | gzip -c > ../control.tar.gz
+			cd     /root/codeweavers_crossover/deb
+			ar rcs ../${do_release}-${version%?} debian-binary control.tar.gz data.tar.gz
+			cd     /root/codeweavers_crossover
+			;;
+	esac
 	# install
-	dpkg -i ${version%?}
+	case ${do_release} in
+		saucy)	dpkg -i ${do_release}-${version%?};;
+		*)	dpkg -i ${version%?};;
+	esac
 }
 function setup_adobe(){
         desc Adobe, Java and Flash
@@ -1067,12 +1095,14 @@ function setup_adobe(){
 		local update=true
 	fi
 	# Add Medibuntu repo for free and non-free packages like acroread
+	if false; then
 	if ! ls /etc/apt/sources.list.d/medibuntu* &> /dev/null; then
 		wget -O "/etc/apt/sources.list.d/medibuntu.list" "http://www.medibuntu.org/sources.list.d/`lsb_release -cs`.list"
         	waitAptgetUpdate
 		apt-get --quiet update
 		apt-get --yes --quiet --allow-unauthenticated install medibuntu-keyring
 		local update=true
+	fi
 	fi
 	# Run apt-get update if new repo were added
 	if ${update:- false}; then
