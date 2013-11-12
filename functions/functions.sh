@@ -218,7 +218,7 @@ function system_hardware_platform_id(){
 	fi
 	# currently programmed to ID Dell, VirtualBox, VMWare
 	local SYSTEM_ID=""
-	for SYSTEMID in		\
+	for SYSTEM_ID in	\
 		dell		\
 		virtualbox	\
 		vmware		\
