@@ -517,7 +517,7 @@ EOL
 			ar x ../teamviewer.deb
 			cd     /tmp/teamviewer/deb/control.tar
 			tar -xzf ../control.tar.gz
-			sed -i 's/lib321sound2/libasound2:i386/' control
+			sed -i 's/lib32asound2/libasound2:i386/' control
 			sed -i 's/,\sia32-libs//'                control
 			tar c {post,pre}{inst,rm} control | gzip -c > ../control.tar.gz
 			cd     /tmp/teamviewer/deb
