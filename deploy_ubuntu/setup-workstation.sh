@@ -339,7 +339,9 @@ function setup_Prep_Add_Repos(){
 	add-apt-repository -y ppa:tualatrix/ppaapt-key adv --recv-keys --keyserver keyserver.ubuntu.com 2EBC26B60C5A2783
 
 	# enable i386 repos
-	sudo sed -i 's/^\(deb\s\|deb-src\s\)/\1[arch=amd64,i386] /' /etc/apt/sources.list
+	case "$(uname -m)" in
+		x86_64)	sudo sed -i 's/^\(deb\s\|deb-src\s\)/\1[arch=amd64,i386] /' /etc/apt/sources.list;;
+	esac
 
 	# Update
 	waitAptgetUpdate
@@ -518,7 +520,7 @@ EOL
 			cd     /tmp/teamviewer/deb/control.tar
 			tar -xzf ../control.tar.gz
 			sed -i 's/lib32asound2/libasound2:i386/' control
-			sed -i 's/,\sia32-libs//'                control
+			sed -i 's/ia32-libs/libxtst6:i386/'      control
 			tar c {post,pre}{inst,rm} control | gzip -c > ../control.tar.gz
 			cd     /tmp/teamviewer/deb
 			ar rcs ../${do_release}-teamviewer.deb debian-binary control.tar.gz data.tar.gz
