@@ -74,6 +74,19 @@ function setup_Prep_Policy_Changes(){
 }
 function setup_Prep_UCF(){
 	desc Prep: openconnect, cifs, hostname
+	# download office 2010
+	local OFFICE='http://10.173.119.78/packages/Apps_Linux/Office2010_wine32-v1.4/Office2010_wine32.tgz'
+	local CONFIG='http://10.173.119.78/packages/Apps_Linux/Office2010_wine32-v1.4/setup-office.sh'
+	local GETOPT='-q --spider'
+	if wget ${GETOPT} ${OFFICE} && wget ${GETOPT} ${CONFIG}; then
+		rm -rf /opt/msoffice
+ 		mkdir  /opt/msoffice
+		cd     /opt/msoffice
+		wget  -q ${OFFICE}
+		wget  -q ${CONFIG}
+		chmod +x ${CONFIG}
+	fi
+	return
 	# Setup hostname on systems Dell,vbox,other
 	local HOSTNAME=$(system_serial)
 	echo HOSTNAME :: ${HOSTNAME}
@@ -97,6 +110,7 @@ EOL
 		done | while read script; do
 			"${script:-false}" -C -rr
 		done
+
 
 }
 function setup_Prep_Add_SSH_Keys(){
