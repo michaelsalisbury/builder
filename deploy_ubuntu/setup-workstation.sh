@@ -79,12 +79,13 @@ function setup_Prep_UCF(){
 	local CONFIG='http://10.173.119.78/packages/Apps_Linux/Office2010_wine32-v1.4/setup-office.sh'
 	local GETOPT='-q --spider'
 	if wget ${GETOPT} ${OFFICE} && wget ${GETOPT} ${CONFIG}; then
+		echo Downloading MS Office 2010
 		rm -rf /opt/msoffice
  		mkdir  /opt/msoffice
 		cd     /opt/msoffice
 		wget  -q ${OFFICE}
 		wget  -q ${CONFIG}
-		chmod +x ${CONFIG}
+		chmod +x $(basename ${CONFIG})
 	fi
 	return
 	# Setup hostname on systems Dell,vbox,other
