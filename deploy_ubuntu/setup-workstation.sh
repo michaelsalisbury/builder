@@ -87,7 +87,6 @@ function setup_Prep_UCF(){
 		wget  -q ${CONFIG}
 		chmod +x $(basename ${CONFIG})
 	fi
-	return
 	# Setup hostname on systems Dell,vbox,other
 	local HOSTNAME=$(system_serial)
 	echo HOSTNAME :: ${HOSTNAME}
