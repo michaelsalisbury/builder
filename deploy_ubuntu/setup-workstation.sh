@@ -1,5 +1,5 @@
 #!/bin/builder.sh
-skip=( true false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
+skip=( true false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false false )
 step=1
 prefix="setup"
 source="https://raw.github.com/michaelsalisbury/builder/master/deploy_ubuntu/${scriptName}"
@@ -100,7 +100,7 @@ EOL
 
 
 }
-function setup_Prep_UCF_Office(){
+function setup_Prep_UCF_MSOffice(){
 	desc Prep: MS Office 2010 i386
         waitForNetwork || return 1
 	# download office 2010
