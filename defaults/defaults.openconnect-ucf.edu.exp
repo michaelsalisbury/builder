@@ -88,7 +88,7 @@ if { [string length $username] == 0 ||
      [string length $password] == 0 ||
      [string length $group] == 0    ||
      [string length $url] == 0      } {
-	puts "The correct credentials file format is as fololows"
+	puts "The correct credentials file format is as follows"
 	cred_format
 	puts ""
 	flush stdout
