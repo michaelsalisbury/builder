@@ -7,6 +7,7 @@ function includes(){
 	functions*.sh
 }
 function global_variables(){
+	owncloud_release_major=5
 	owncloud_Downloads_Prep=/root/Downloads
 	owncloud_changelog=$owncloud_Downloads_Prep/owncloud_changelog
 	owncloud_mysql_root_passwd=1qaz@WSX
@@ -19,7 +20,12 @@ function global_variables(){
 #	echo; line="#### $@ `repc 100 '#'`"; echo `repc 101 '#'`; echo ${line:0:100}; echo;
 #}
 function parse_new_version(){
-	sed '/^Release/s/[^"]*"\([0-9\.]*\)"$/\1/p;d' "$owncloud_changelog" | head -1;
+	#sed '/^Release/s/[^"]*"\([a-z0-9\.]*\)"$/\1/p;d'       "$owncloud_changelog" | grep ^${owncloud_release_major} | head -1;
+	sed '/Version/s/.*>Version\s\([^[:space:]]*\).*/\1/p;d' "$owncloud_changelog" | grep ^${owncloud_release_major} | head -1;
+}
+function parse_new_versions(){
+	#sed '/^Release/s/[^"]*"\([a-z0-9\.]*\)"$/\1/p;d'       "$owncloud_changelog" | grep ^${owncloud_release_major}
+	sed '/Version/s/.*>Version\s\([^[:space:]]*\).*/\1/p;d' "$owncloud_changelog" | grep ^${owncloud_release_major}
 }
 #function parse_cur_version(){
 #	sed "/version/s/[^']*'\([0-9\.]*\)',$/\1/p;d" /var/www/owncloud_config/config.php;
@@ -44,10 +50,12 @@ function setup_Download(){
                                                                    desc Download new release
 	mkdir   -p "$owncloud_Downloads_Prep"
 	rm      -f "$owncloud_changelog"
-	wget -q -O "$owncloud_changelog" http://owncloud.org/releases/Changelog
+	#wget -q -O "$owncloud_changelog" http://owncloud.org/releases/Changelog
+	wget -q -O "$owncloud_changelog" http://owncloud.org/changelog/
 	[ -f       "$owncloud_changelog" ] && echo Changelog retrieved. && echo
 	ver=`parse_new_version`
 	cur=`parse_cur_version`
+	parse_new_versions      && echo
 	echo New version = $ver && echo
 	echo Cur version = $cur && echo
 

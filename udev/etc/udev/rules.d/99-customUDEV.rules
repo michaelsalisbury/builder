@@ -1,3 +1,3 @@
 KERNEL=="sd?", SUBSYSTEM=="block", ACTION=="add",    RUN+="#PROGRAM# add    %k $name %p"
-KERNEL=="sd?", SUBSYSTEM=="block", ACTION=="remove", RUN+="#PROGRAM# remove %k $name %p"
+#KERNEL=="sd?", SUBSYSTEM=="block", ACTION=="remove", RUN+="#PROGRAM# remove %k $name %p"
 #DontRemoveThisRow#

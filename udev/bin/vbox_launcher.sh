@@ -56,6 +56,9 @@ function ACTION_ADD(){
 	# filter out root; system drive
 	IS_DEVICE_ROOT # function exits if positive
 
+	# filter out devices attached to running VMS
+	for DEV in ${DEVICE[*]};	do IS_VBOX_USING_DEVICE ${DEV} && EXIT 1;	done
+
 	# popup log
 	OPEN_POPUP_LOG
 
@@ -93,6 +96,9 @@ function ACTION_ADD(){
 
 	# LOG VM start
 	LOG INF :: VM started, NAME[${NAME[1]}] DEV0[${DEVICE[0]}] DEV1[${DEVICE[1]}]
+
+	# Exit Cleanly
+	EXIT 0
 }
 function ACTION_REMOVE(){
 	unset POPUP_LOG
@@ -112,6 +118,8 @@ function ACTION_REMOVE(){
 	# delete vm
 	DELETE_VM ${DEV}
 
+	# Exit Cleanly
+	EXIT 0
 }
 function ACTION_TRIGGER(){
 	#udevadm trigger --action=add    --sysname-match="sdb"
@@ -779,8 +787,29 @@ function GET_DEVICE_INFO_ARRAY(){
 }
 function GET_DEVICE_MOUNT(){
 	local DEV=$(basename "${1:-${DEVICE}}")
-	local DEVICE_VMDK_FILE_NAME="$(GET_DEVICE_VMDK_FILE_NAME ${DEV})"
 
+	# test for running VBOX
+	if DOES_VBOX_DEVICE_VMDK_EXIST ${DEV} && IS_VBOX_MACHINE_RUNNING $(GET_DEVICE_VBOX_MACHINE_UUID ${DEV}); then
+		echo VBOX
+		return 0
+	# test for mounted partition
+	elif grep -q "^/dev/${DEV}[0-9]*[[:space:]]" /etc/mtab; then
+		echo local
+		return 0
+	# test for off-line VBOX
+	elif DOES_VBOX_DEVICE_VMDK_EXIST ${DEV}; then
+		echo VBOX
+		return 0
+	else
+		echo ...
+		return 1
+	fi
+
+
+	# old code
+	echo ...
+	return 1
+	
 	# test mtab
 	if grep -q "^/dev/${DEV}[0-9]*[[:space:]]" /etc/mtab; then
 		echo local
@@ -844,6 +873,7 @@ function GET_VBOX_LIST_RUNNINGVMS(){
 function IS_VBOX_MACHINE_RUNNING(){
 	# provide vbox machine uuid or name (case insensative)
 	local VBOX_MACHINE_ID=${1//[{\}]/}
+	[ -z "${VBOX_MACHINE_ID}" ] && return 1
 	local VBOX_MACHINE=""
 	local IFS=${DIFS}
 	local line=""
@@ -851,7 +881,9 @@ function IS_VBOX_MACHINE_RUNNING(){
 		# split name and uuid into fields 0 and 1 of array
 		eval VBOX_MACHINE=( $(echo "${line//[{\}]/}") )
 		# test vbox machine name, partial OK
-		echo "${VBOX_MACHINE[0]}" | grep -iq  "${VBOX_MACHINE_ID}"  && return 0
+		echo "${VBOX_MACHINE[0]}" | grep -iq "${VBOX_MACHINE_ID}$"  && return 0
+		# test vbox machine name, partial OK
+		echo "${VBOX_MACHINE[0]}" | grep -iq "^${VBOX_MACHINE_ID}"  && return 0
 		# test vbox machine uuid, compleate required for match
 		echo "${VBOX_MACHINE[1]}" | grep -iq "^${VBOX_MACHINE_ID}$" && return 0
 	done < <(GET_VBOX_LIST_RUNNINGVMS)
@@ -870,6 +902,19 @@ function GET_VBOX_MACHINE_UUID(){
 	local IFS=${DIFS}
 	eval local MACHINE=( "$(GET_VBOX_LIST_VMS | grep ${TARGET_VM_MASK})" )
 	echo "${MACHINE[0]}" | sed 's/[{}]//g' 2> >(LOG - ERR :: ${FUNCNAME} ::)
+}
+function DOES_VBOX_DEVICE_VMDK_EXIST(){
+	local DEV=$(basename "${1:-${DEVICE}}")
+	local DEVICE_VMDK_FILE_NAME="$(GET_DEVICE_VMDK_FILE_NAME ${DEV})"
+	
+	# test
+	GET_VBOX_HDD_LIST | grep -q "^Location:[[:space:]].*/${DEVICE_VMDK_FILE_NAME}\$"
+}
+function IS_VBOX_USING_DEVICE(){
+	local DEV=$(basename "${1:-${DEVICE}}")
+
+	DOES_VBOX_DEVICE_VMDK_EXIST ${DEV} &&\
+	IS_VBOX_MACHINE_RUNNING $(GET_DEVICE_VBOX_MACHINE_UUID ${DEV})
 }
 ###########################################################################################
 ###################################################################### vboxmanage list hdds
@@ -909,7 +954,11 @@ function GET_DEVICE_VBOX_UUID(){
 	
 	local IFS=${DIFS}
 	local DATA=( $(GET_VBOX_HDD_ATTRIBUTE "/${DEVICE_VMDK_FILE_NAME}\$" Location:) )
-	echo "${DATA[0]}"
+	if [ -n "${DATA[0]}" ]; then
+		echo "${DATA[0]}"
+	else
+		echo ---
+	fi
 }
 function GET_DEVICE_VBOX_LOCATION(){
 	local DEV=$(basename "${1:-${DEVICE}}")
