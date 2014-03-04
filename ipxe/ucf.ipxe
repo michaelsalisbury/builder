@@ -1,0 +1,104 @@
+#!ipxe
+# make using command ~/ipxe/src/make --EMBEDDED_IMAGE=~/ipxe.scripts/ipxelinux.ipxt
+
+#goto Mint-XFCE.15-x86_64
+#goto Ubuntu-13.10-x86_64
+goto Menu
+
+:start
+:Menu
+	menu Welcome to iPXE's Boot Menu
+	item
+	item menu-winpe		Deploy Windows
+	item
+	item disk-station	Disk Station
+	item
+	item menu-ubuntu	Deploy Ubuntu
+	item
+	item menu-mint		Deploy Linux Mint
+	item
+	item smartos		Boot SmartOS
+	item
+	item shell		Enter iPXE shell
+	item
+	item reboot		Reboot
+	item
+	item exit		Exit (boot local disk)
+	choose --default smartos --timeout 60000 target && goto ${target}
+
+## Utility menu items:
+:menu-winpe
+	goto Windows
+
+:menu-ubuntu
+	goto Ubuntu-13.10-x86_64
+
+:menu-mint
+	goto Mint-XFCE.15-x86_64
+
+:shell
+	echo Type exit to get the back to the menu
+	shell
+	set menu-timeout 0
+	goto start
+
+:failed
+	echo Booting failed, dropping to shell
+	goto shell
+
+:reboot
+	reboot
+	goto DONE
+
+:exit
+	exit
+
+:Windows
+	chain http://10.173.119.78/ISOs/winpe/boot.ipxe
+	goto DONE
+
+:Disk-Station
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/ubuntu/xubuntu-13.04-desktop-amd64
+        set KERNEL   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/vmlinuz.efi
+        set INITRD   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/initrd.lz
+	set SEED     kickstart/ubuntu/l.xubuntu-Disk-Station/seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS} url=http://${SERVERIP}/${SEED}
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:Ubuntu-13.10-x86_64
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/ubuntu/ubuntu-13.10-desktop-amd64
+        set KERNEL   ISOs/ubuntu/ubuntu-13.10-desktop-amd64/casper/vmlinuz.efi
+        set INITRD   ISOs/ubuntu/ubuntu-13.10-desktop-amd64/casper/initrd.lz
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS} showmounts toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:Mint-XFCE.15-x86_64
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/mint/linuxmint-15-xfce-dvd-64bit
+        set KERNEL   ISOs/mint/linuxmint-15-xfce-dvd-64bit/casper/vmlinuz
+        set INITRD   ISOs/mint/linuxmint-15-xfce-dvd-64bit/casper/initrd.lz
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS} showmounts toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:DONE
+
+
+       
