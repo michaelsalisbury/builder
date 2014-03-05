@@ -11,7 +11,8 @@ goto Menu
 	item
 	item menu-winpe		Deploy Windows
 	item
-	item disk-station	Disk Station
+	item Disk-Station	Disk Station
+	item menu-xubuntu	Deploy Xubuntu
 	item
 	item menu-ubuntu	Deploy Ubuntu
 	item
@@ -29,6 +30,8 @@ goto Menu
 ## Utility menu items:
 :menu-winpe
 	goto Windows
+:menu-xubuntu
+	goto Xubuntu-13.10-x86_64
 
 :menu-ubuntu
 	goto Ubuntu-13.10-x86_64
@@ -58,19 +61,52 @@ goto Menu
 	goto DONE
 
 :Disk-Station
+	show net0/ip
+	show net0/netmask
+	show net0/gateway
+	show dns
+
 	set SERVERIP 10.173.119.78
         set NFSOPTS  -ouser=guest,ro
         set CIFS     ISOs/ubuntu/xubuntu-13.04-desktop-amd64
-        set KERNEL   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/vmlinuz.efi
+        set KERNEL   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/vmlinuz
         set INITRD   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/initrd.lz
 	set SEED     kickstart/ubuntu/l.xubuntu-Disk-Station/seed
-        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS} url=http://${SERVERIP}/${SEED}
-	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt
+        #set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS} url=http://${SERVERIP}/${SEED} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	set APPEND   ${APPEND} netcfg/confirm_static=true netcfg/get_ipaddress=${ip} netcfg/get_netmask=${netmask} netcfg/get_gateway=${gateway} netcfg/get_nameservers=${dns}
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}
         initrd http://${SERVERIP}/${INITRD}
         boot
 	goto DONE
+
+:Xubuntu-13.10-x86_64
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/ubuntu/xubuntu-13.04-desktop-amd64
+        set KERNEL   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/vmlinuz
+        set INITRD   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/initrd.lz
+	#set SEED     kickstart/ubuntu/l.xubuntu-Disk-Station/seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	#set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	# ip=192.168.0.101:192.168.0.10:192.168.0.1:255.255.255.0:client101:eth0:none
+	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
+	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
+	set APPEND   ${APPEND}  netcfg/get_nameservers=${dns} hostname=mytest
+	#set APPEND   ${APPEND} netcfg/dhcp_timeout=1 netcfg/disable_dhcp=true netcfg/confirm_static=true netcfg/get_nameservers=${dns}
+
+	#set APPEND   ${APPEND} ip=eth0,${ip},${netmask},${gateway} dns=${dns}
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+
 
 :Ubuntu-13.10-x86_64
 	set SERVERIP 10.173.119.78
@@ -78,7 +114,10 @@ goto Menu
         set CIFS     ISOs/ubuntu/ubuntu-13.10-desktop-amd64
         set KERNEL   ISOs/ubuntu/ubuntu-13.10-desktop-amd64/casper/vmlinuz.efi
         set INITRD   ISOs/ubuntu/ubuntu-13.10-desktop-amd64/casper/initrd.lz
-        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS} showmounts toram ro
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} netcfg/dhcp_timeout=0 netcfg/choose_interface=auto netcfg/disable_dhcp=true netcfg/confirm_static=true netcfg/get_ipaddress=${ip} netcfg/get_netmask=${netmask} netcfg/get_gateway=${gateway} netcfg/get_nameservers=${dns}
+	#set APPEND   ${APPEND} ip=${ip} netmask=${netmask} gateway=${gateway} dns=${dns}
+	set APPEND   ${APPEND} showmounts toram ro
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}
         initrd http://${SERVERIP}/${INITRD}

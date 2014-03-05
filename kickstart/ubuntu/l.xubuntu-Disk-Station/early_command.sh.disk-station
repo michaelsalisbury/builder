@@ -32,7 +32,7 @@ main(){
 
 	# TESTING: update and install tools + dependencies
 	chroot_apt_get                /root update
-	chroot_apt_get                /root -y install vim htop gdisk gparted openssh-server smartmontools gnome-disk-utility mdadm bc terminator git
+	chroot_apt_get                /root -y install vim htop gdisk gparted openssh-server smartmontools gnome-disk-utility mdadm bc terminator git hwinfo ncdu
 
 	# TESTING: install virtualbox; get latest version info
 	VIRTUALBOX_PKG="$(chroot /root /usr/bin/apt-cache search virtualbox | awk '/Oracle VM VirtualBox/{print $1}') | sort -n | tail -1"
@@ -115,6 +115,10 @@ main(){
 	chroot                       /root /bin/chmod 700 /etc/skel/.config
 	wget_tgz ${HTTP}/tar-n-stream.autostart.cgi       /etc/skel/.config/xfce4
 	wget_tgz ${HTTP}/tar-n-stream.autostart.cgi       /etc/skel/.config
+
+	# TESTING: change logrotate
+	chroot                       /root /bin/mv  /etc/cron.daily/logrotate /etc/cron.hourly/.
+	chroot                       /root /bin/sed -i '/{/a\\tsize 3M' /etc/logrotate.d/rsyslog
 
 	# TESTING: setup xfce panel
 	#chroot                       /root /bin/mkdir     /etc/skel/.config
