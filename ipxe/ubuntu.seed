@@ -1,0 +1,3 @@
+#
+d-i preseed/early_command string wget -O - ${url%/*}/ubuntu.early_command.sh | /bin/sh
+#d-i preseed/early_command string chroot /root /bin/sed -i '1,/^iface lo inet loopback$/!d' /etc/network/interfaces

@@ -12,7 +12,6 @@ goto Menu
 	item menu-winpe		Deploy Windows
 	item
 	item Disk-Station	Disk Station
-	item
 	item menu-xubuntu	Deploy Xubuntu
 	item
 	item menu-ubuntu	Deploy Ubuntu
@@ -62,6 +61,11 @@ goto Menu
 	goto DONE
 
 :Disk-Station
+	show net0/ip
+	show net0/netmask
+	show net0/gateway
+	show dns
+
 	set SERVERIP 10.173.119.78
         set NFSOPTS  -ouser=guest,ro
         set CIFS     ISOs/ubuntu/xubuntu-13.04-desktop-amd64
@@ -71,8 +75,7 @@ goto Menu
         set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
 	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
 	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
-	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:disk-station:eth0:static
-	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
+	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
 	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}
@@ -91,18 +94,21 @@ goto Menu
 	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
 	# this entry is to assign a static IP to the LIVE boot environment
 	#set APPEND   ${APPEND} STATICIP=eth0,${ip},${netmask},${gateway},10.171.12.5
-	# this entry is to assign a static IP to the pre-boot environment; This option overrides STATICIP
-	# aditionally when this otpion is used it over-writes the STATICIP var incorectly
-        # a custom seed script is needed to handle this
+	# this entry is to assign a static IP to the pre-boot environment
 	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
 	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
-	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
+	set APPEND   ${APPEND} STATICIP=eth0,${ip},${netmask},${gateway}
+	set APPEND   ${APPEND} staticip=eth0,${ip},${netmask},${gateway}
+	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37
 	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}
         initrd http://${SERVERIP}/${INITRD}
         boot
 	goto DONE
+
+
 
 :Ubuntu-13.10-x86_64
 	set SERVERIP 10.173.119.78
@@ -110,12 +116,10 @@ goto Menu
         set CIFS     ISOs/ubuntu/ubuntu-13.10-desktop-amd64
         set KERNEL   ISOs/ubuntu/ubuntu-13.10-desktop-amd64/casper/vmlinuz.efi
         set INITRD   ISOs/ubuntu/ubuntu-13.10-desktop-amd64/casper/initrd.lz
-	set SEED     ipxe/ubuntu.seed
         set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
-	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
-	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
-	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
-	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+	set APPEND   ${APPEND} netcfg/dhcp_timeout=0 netcfg/choose_interface=auto netcfg/disable_dhcp=true netcfg/confirm_static=true netcfg/get_ipaddress=${ip} netcfg/get_netmask=${netmask} netcfg/get_gateway=${gateway} netcfg/get_nameservers=${dns}
+	#set APPEND   ${APPEND} ip=${ip} netmask=${netmask} gateway=${gateway} dns=${dns}
+	set APPEND   ${APPEND} showmounts toram ro
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}
         initrd http://${SERVERIP}/${INITRD}
@@ -128,8 +132,7 @@ goto Menu
         set CIFS     ISOs/mint/linuxmint-15-xfce-dvd-64bit
         set KERNEL   ISOs/mint/linuxmint-15-xfce-dvd-64bit/casper/vmlinuz
         set INITRD   ISOs/mint/linuxmint-15-xfce-dvd-64bit/casper/initrd.lz
-        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
-	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS} showmounts toram ro
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}
         initrd http://${SERVERIP}/${INITRD}

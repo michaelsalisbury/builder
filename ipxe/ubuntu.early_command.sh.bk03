@@ -1,0 +1,109 @@
+#!/bin/sh
+
+STATICIP(){
+	local ROOT=$1
+	# exit if a static IP was not pushed by the PXE boot server
+	[ -z "${STATICIP}" ] && return 1
+	# record IFS delimiter default
+	DIFS=${IFS}
+	# set IFS delimiter to colons used to delimit STATICIP fields
+	IFS=:
+	# set input arguments to ${STATICIP} to seperate fields
+	set -- ${STATICIP}
+	# generate file
+	{
+		echo auto lo
+		echo iface lo inet loopback
+		echo
+		echo auto $6
+		echo iface $6 inet static
+		echo \ \ \ \ address $1
+		echo \ \ \ \ netmask $4
+		echo \ \ \ \ gateway $3
+		echo \ \ \ \ dns-nameservers ${dns0} ${dns1}
+	} | chroot ${ROOT} /usr/bin/tee /etc/network/interfaces
+	# fix IFS delimiter back to default
+	IFS=${DIFS}
+}
+STATICIP2(){
+	local ROOT=$1
+	# exit if a static IP was not pushed by the PXE boot server
+	[ -z "${STATICIP}" ] && return 1
+	# record IFS delimiter default
+	DIFS=${IFS}
+	# set IFS delimiter to colons used to delimit fields in ${STATICIP} env var
+	IFS=:
+	# set input arguments to ${STATICIP} to seperate fields
+	set -- ${STATICIP}
+	# generate file
+	{
+		echo auto lo
+		echo iface lo inet loopback
+		echo
+		echo auto $6
+		echo iface $6 inet manual
+		echo \ \ \ \ up ifconfig '$'IFACE up
+		echo \ \ \ \ dns-nameservers ${dns0} ${dns1}
+		echo \ \ \ \ dns-search ${search_domain=cos.ucf.edu}
+		echo \ \ \ \ post-up ip route add $(chroot ${ROOT} /sbin/ip route show 0/0)
+	} | chroot ${ROOT} /usr/bin/tee /etc/network/interfaces
+	# fix IFS delimiter back to default
+	IFS=${DIFS}
+}
+main(){
+	# SOURCE common functions
+	source_funcs common_funcs
+
+
+	# Fix Waiting for Network
+	#chroot                         /root /bin/sed -i 's/sleep [245][09]/sleep 3/' /etc/init/failsafe.conf
+	STATICIP2 /root
+	#pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ..
+	chroot                         /root /bin/sed -i 's/sleep 20/sleep 8/' /etc/init/failsafe.conf
+	chroot                         /root /bin/sed -i 's/sleep 40/sleep 2/' /etc/init/failsafe.conf
+	chroot                         /root /bin/sed -i 's/sleep 59/sleep 2/' /etc/init/failsafe.conf
+	#chroot                         /root /bin/sed -i '1,/^iface lo inet loopback$/!d' /etc/network/interfaces
+
+	
+	
+
+
+	#echo auto  eth0                      | chroot /root /usr/bin/tee -a /etc/network/interfaces
+	#echo iface eth0 inet manual          | chroot /root /usr/bin/tee -a /etc/network/interfaces
+	#echo up ifconfig '$'IFACE up         | chroot /root /usr/bin/tee -a /etc/network/interfaces
+	#echo dns-nameservers ${dns0} ${dns1} | chroot /root /usr/bin/tee -a /etc/network/interfaces
+	# both work
+	#chroot                         /root /bin/sed -i '$apost-up route add default gw 10.173.119.65'    /etc/network/interfaces
+	#chroot                         /root /bin/sed -i '$apost-up ip route add default via 10.173.119.65 dev eth0'    /etc/network/interfaces
+
+	#chroot                         /root /sbin/ip route show to 0/0                    |\
+	#chroot                         /root /usr/bin/xargs /bin/echo post-up ip route add |\
+	#chroot                         /root /usr/bin/tee -a /etc/network/interfaces
+
+	# works but less elagant; to much syntax punctuation and nesting
+	#chroot                         /root /sbin/ip route show                                       |\
+	#chroot                         /root /usr/bin/awk '/default/{print "post-up ip route add "$0}' |\
+	#chroot                         /root /usr/bin/tee -a                              /etc/network/interfaces
+
+	#chroot                         /root /bin/bash -e echo
+	#chroot                         /root /usr/sbin/update-rc.d networking disable
+	#chroot                         /root /usr/sbin/update-rc.d network-manager disable
+	#chroot                         /root /bin/sed -i '/^exit 0$/i/sbin/ifconfig eth0 up' /etc/rc.local
+
+	# TESTING; setup DNS and Apt-Cache-Proxy
+	#chroot_fix_wait_for_net       /root
+	#chroot_enable_dns             /root
+	#chroot_enable_apt_cache_proxy /root
+	#chroot_apt_get                /root -y install vim hwinfo ncdu apt-file software-properties-common
+	#chroot                        /root /usr/bin/apt-file update
+
+	#pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ..
+}
+source_funcs(){
+        # SOURCE script file path is relative to the seed file in ${url}
+        local SOURCE="$1"
+        #echo eval \"\$\(wget -O - ${url%/*}/${SOURCE}\)\"
+        eval "$(wget -q -O - ${url%/*}/${SOURCE})"
+}
+
+main "$@"

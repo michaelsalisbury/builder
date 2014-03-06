@@ -10,6 +10,8 @@ main(){
 	#pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ..
 
 	# TESTING; setup DNS and Apt-Cache-Proxy
+	#chroot                        /root /bin/sed -i '1,/^iface lo inet loopback$/!d' /etc/network/interfaces
+	chroot_configure_staticip     /root
 	chroot_enable_dns             /root
 	chroot_enable_apt_cache_proxy /root
 	chroot_apt_get                /root -y install apt-file software-properties-common

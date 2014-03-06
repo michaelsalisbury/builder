@@ -137,7 +137,7 @@ Acquire::http::Proxy::download.oracle.com "DIRECT";
 Acquire::http::Proxy::virtualbox.org "DIRECT";
 PROXY
 }
-chroot_configure_staticip(){
+configure_staticip(){
 	local ROOT=$1
 	# exit if a static IP was not pushed by the PXE boot server
 	[ -z "${STATICIP}" ] && return 1
@@ -308,13 +308,13 @@ MESSAGE
 }
 pause_install_early(){
 	# Install vim, gdisk, htop to squashfs live boot environment.
-	chroot_enable_dns             /root
-	chroot_enable_apt_cache_proxy /root
-	chroot_apt_get                /root -y install apt-file software-properties-common
-	chroot                        /root /usr/bin/apt-file update
-	chroot_add_apt_repository     /root "deb http://archive.ubuntu.com/ubuntu $(chroot /root /usr/bin/lsb_release -sc) universe multiverse"
-	chroot_apt_get                /root -y install vim gdisk htop hwinfo ncdu
-	chroot_mount                  /root
+	#chroot_enable_dns             /root
+	#chroot_enable_apt_cache_proxy /root
+	#chroot_apt_get                /root -y install apt-file software-properties-common
+	#chroot                        /root /usr/bin/apt-file update
+	#chroot_add_apt_repository     /root "deb http://archive.ubuntu.com/ubuntu $(chroot /root /usr/bin/lsb_release -sc) universe multiverse"
+	#chroot_apt_get                /root -y install vim gdisk htop hwinfo ncdu
+	#chroot_mount                  /root
 
 	# Setup shell /bin/sh on tty2 (pre-boot environment)
 	interactive 2 /bin/sh &
@@ -360,7 +360,7 @@ MESSAGE
 	kill -9 ${interactive_PID_bash}
 
 	# umount /root/dev /root/sys /root/proc
-	chroot_umount /root
+	#chroot_umount /root
 	echo
 	chvt 7
 }
