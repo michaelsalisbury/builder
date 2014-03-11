@@ -285,6 +285,10 @@ function CREATE_VM(){
 		*)	local boot1='dvd'
 			local DVD=$(GET_SELECTION_PATH);;
 	esac
+	# prep: determin if eth is bridged
+	ENABLE_BRIDGED_ETH=true
+	
+
 	# create vm
 	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
 		${VBM} createvm --name ${NAME[1]}	\
@@ -306,7 +310,7 @@ function CREATE_VM(){
 	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
 		${VBM} modifyvm ${NAME[1]} --nic1 bridged        \
 					   --cableconnected1 on  \
-					   --bridgeadapter1 ${BRIDGED_ETH} \
+		     ${ENABLE_BRIDGED_ETH:+--bridgeadapter1 ${BRIDGED_ETH}} \
 					   --nictype1 82540EM    \
 					   --macaddress1 $(GET_MAC)
 	SU
