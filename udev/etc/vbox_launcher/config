@@ -58,5 +58,8 @@ POPUP_LOG_AUTOCLOSE_DELAY = 10
 KERNEL_CMD_LINE_VAR_DEFAULT = KERNEL_CMD_LINE
 KERNEL_BOOT_PREFIX_DEFAULT = VBST_
 
+# DISABLE_BRIDGED_ETH_DEFAULT; can be used to force all virtual machines to use a natted eth
+DISABLE_BRIDGED_ETH_DEFAULT = false
+
 # LOG
 LOG = /var/log/vbox_launcher.log
