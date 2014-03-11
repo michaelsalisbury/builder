@@ -1,8 +1,11 @@
 [ Global Defaults ]
-	#DIALOG_TIMEOUT = 500
+   KERNEL_CMD_LINE_VAR = KERNEL_CMD_LINE
+    KERNEL_BOOT_PREFIX = VBST_
+       #DIALOG_TIMEOUT = 500
 		   MAC = 080027ABCD
 	      VRDEPORT = 33890
 	   BRIDGED_ETH = eth0
+   DISABLE_BRIDGED_ETH = false
 		 DEBUG = false
 	     POPUP_LOG = true
 	     POPUP_LOG = false

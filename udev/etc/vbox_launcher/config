@@ -53,5 +53,10 @@ UDEV_RULE_CONFIG_FILE_NAME_DEFAULT = 99-customUDEV.rules
 POPUP_LOG = false
 POPUP_LOG_AUTOCLOSE_DELAY = 10
 
+# KERNEL_CMD_LINE & KERNEL_BOOT_PREFIX; these vars control how to options passed
+#                                       from the kernel boot line are accessed
+KERNEL_CMD_LINE_VAR_DEFAULT = KERNEL_CMD_LINE
+KERNEL_BOOT_PREFIX_DEFAULT = VBST_
+
 # LOG
 LOG = /var/log/vbox_launcher.log

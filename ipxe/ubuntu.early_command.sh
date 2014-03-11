@@ -14,7 +14,7 @@ main(){
 	#chroot_apt_get                /root -y install vim hwinfo ncdu apt-file software-properties-common
 	#chroot                        /root /usr/bin/apt-file update
 
-	#pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ..
+	pause_install_early /tmp/early-command-pause -n 30 .. /tmp/early-command-pause ..
 }
 source_funcs(){
         # SOURCE script file path is relative to the seed file in ${url}

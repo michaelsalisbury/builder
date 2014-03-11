@@ -8,6 +8,7 @@
             SEED=${url##*/}
 APT_CACHE_SERVER=${IP}
 APT_CACHE_SERVER=$(wget -q -O - ${HTTP}/APT_CACHE_SERVER_ADDRESS)
+ KERNEL_CMD_LINE=$(dmesg | grep Kernel\ command\ line)
 
 ##################################################################################
 ################################################################# Package list parsing
@@ -365,3 +366,17 @@ MESSAGE
 	chvt 7
 }
 
+##################################################################################
+################################################## Aliases and CMDS passes to LIVE
+case ${pass_env_to_live=false} in
+	1|yes|YES|y|Y|true|TRUE|t|T)
+		chroot_profile_d /root aliases.sh export              url=\"${url}\"
+		chroot_profile_d /root aliases.sh export               IP=\"${IP}\"
+		chroot_profile_d /root aliases.sh export             HTTP=\"${HTTP}\"
+		chroot_profile_d /root aliases.sh export             SEED=\"${SEED}\"
+		chroot_profile_d /root aliases.sh export       FIRST_USER=\"${USER}\"
+		chroot_profile_d /root aliases.sh export APT_CACHE_SERVER=\"${APT_CACHE_SERVER}\"
+		chroot_profile_d /root aliases.sh export  KERNEL_CMD_LINE=\"${KERNEL_CMD_LINE}\"
+		echo;;
+	*)	echo;;
+esac
