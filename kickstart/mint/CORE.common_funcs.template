@@ -368,15 +368,12 @@ MESSAGE
 
 ##################################################################################
 ################################################## Aliases and CMDS passes to LIVE
-case ${pass_env_to_live=false} in
-	1|yes|YES|y|Y|true|TRUE|t|T)
-		chroot_profile_d /root aliases.sh export              url=\"${url}\"
-		chroot_profile_d /root aliases.sh export               IP=\"${IP}\"
-		chroot_profile_d /root aliases.sh export             HTTP=\"${HTTP}\"
-		chroot_profile_d /root aliases.sh export             SEED=\"${SEED}\"
-		chroot_profile_d /root aliases.sh export       FIRST_USER=\"${USER}\"
-		chroot_profile_d /root aliases.sh export APT_CACHE_SERVER=\"${APT_CACHE_SERVER}\"
-		chroot_profile_d /root aliases.sh export  KERNEL_CMD_LINE=\"${KERNEL_CMD_LINE}\"
-		echo;;
-	*)	echo;;
-esac
+if [ -n "${pass_env_to_live}" ]; then
+	chroot_profile_d ${pass_env_to_live} aliases.sh export              url=\"${url}\"
+	chroot_profile_d ${pass_env_to_live} aliases.sh export               IP=\"${IP}\"
+	chroot_profile_d ${pass_env_to_live} aliases.sh export             HTTP=\"${HTTP}\"
+	chroot_profile_d ${pass_env_to_live} aliases.sh export             SEED=\"${SEED}\"
+	chroot_profile_d ${pass_env_to_live} aliases.sh export       FIRST_USER=\"${USER}\"
+	chroot_profile_d ${pass_env_to_live} aliases.sh export APT_CACHE_SERVER=\"${APT_CACHE_SERVER}\"
+	chroot_profile_d ${pass_env_to_live} aliases.sh export  KERNEL_CMD_LINE=\"${KERNEL_CMD_LINE}\"
+fi

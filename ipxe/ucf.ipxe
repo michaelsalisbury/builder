@@ -73,6 +73,7 @@ goto Menu
 	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
 	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:disk-station:eth0:static
 	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
+	set APPEND   ${APPEND} pass_env_to_live=/root
 	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}
@@ -97,7 +98,7 @@ goto Menu
 	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
 	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
 	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
-	set APPEND   ${APPEND} pass_env_to_live=true
+	set APPEND   ${APPEND} pass_env_to_live=/root
 	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}

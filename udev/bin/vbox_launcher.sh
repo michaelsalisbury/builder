@@ -278,16 +278,23 @@ function CREATE_VM(){
 		echo ERROR :: ${FUNCNAME} :: VBoxManage not found. Skipping\! >> "${LOG}"
 		return
 	fi
-	# prep
+	# prep: boot source
 	case ${SELECTION[1]} in
 		-)	local boot1='net';;
 		0)	local boot1='disk';;
 		*)	local boot1='dvd'
 			local DVD=$(GET_SELECTION_PATH);;
 	esac
+	# prep: read vm options 
+	eval $(GET_SELECTION_OPT)
+
 	# prep: determin if eth is bridged
-	ENABLE_BRIDGED_ETH=true
-	
+	if ${DISABLE_BRIDGED_ETH}; then
+		unset ENABLE_BRIDGED_ETH
+	else
+		unset DISABLE_BRIDGED_ETH
+		ENABLE_BRIDGED_ETH=true
+	fi
 
 	# create vm
 	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
@@ -308,10 +315,11 @@ function CREATE_VM(){
 	SU
 	# set nic
 	IF_ROOT_SU <<-SU &> >(LOG - INF :: ${FUNCNAME} ::)
-		${VBM} modifyvm ${NAME[1]} --nic1 bridged        \
-					   --cableconnected1 on  \
-		     ${ENABLE_BRIDGED_ETH:+--bridgeadapter1 ${BRIDGED_ETH}} \
-					   --nictype1 82540EM    \
+		${VBM} modifyvm ${NAME[1]} --cableconnected1 on			\
+		    ${DISABLE_BRIDGED_ETH:+--nic1 nat}				\
+		     ${ENABLE_BRIDGED_ETH:+--nic1 bridged}			\
+		     ${ENABLE_BRIDGED_ETH:+--bridgeadapter1 ${BRIDGED_ETH}}	\
+					   --nictype1 82540EM			\
 					   --macaddress1 $(GET_MAC)
 	SU
 	# set VRDE
@@ -390,9 +398,18 @@ function GET_MAC(){
 	echo ${MAC:0:4}$(( 196 - $(printf "%d\n" \'${DEV:2}) ))${MAC:6} |\
 	tee >(LOG - INF :: ${FUNCNAME} ::)
 }
+function GET_SELECTION_OPT(){
+	if (( ${#SELECTION[6]} )); then
+		echo ${SELECTION[6]}	|\
+		tr , $'\n'		|\
+		awk '{if(/=/){print $0}else{print $0"=true"}}'
+	else
+		echo ""
+	fi
+}
 function GET_SELECTION_MEM(){
 	# dependant on global variables; SELECTION
-	echo ${SELECTION[5]} | sed 's/^$/128/'
+	echo ${SELECTION[5]} | sed "s/^$/${MEM_DEFAULT}/"
 }
 function GET_SELECTION_PATH(){
 	# dependant on global variables; SELECTION
@@ -1177,6 +1194,7 @@ MAC=${MAC//:/}
 MAC=${MAC:0:10}
 VRDEPORT=${VRDEPORT:-33890}
 DIALOG_TIMEOUT=${DIALOG_TIMEOUT:-25}
+MEM_DEFAULT=${MEM_DEFAULT:-128}
 BRIDGED_ETH=${BRIDGED_ETH:-eth0}
 DISABLE_BRIDGED_ETH=${DISABLE_BRIDGED_ETH:-${DISABLE_BRIDGED_ETH_DEFAULT:-false}}
 #DEVICE2PROMPT_FILTERS; comma delimited
