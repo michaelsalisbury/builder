@@ -67,7 +67,7 @@ main(){
 	chroot_profile_d /root aliases.sh alias test1=\"wget -q -O - ${HTTP}/test1 \| /bin/bash\"
 	chroot_profile_d /root aliases.sh alias test2=\"wget -q -O - ${HTTP}/test2 \| /bin/bash\"
 
-	chroot_profile_d /root aliases.sh alias rdesktop='rdesktop -d cos -T Win7-x86_64 -k en-us -r clipboard:PRIMARYCLIPBOARD -r sound=local -x 0x81 -z -N -a 32'
+	chroot_profile_d /root aliases.sh alias rdesktop=\"rdesktop -d cos -T Win7-x86_64 -k en-us -r clipboard:PRIMARYCLIPBOARD -r sound=local -x 0x81 -z -N -a 32\"
 
 	# TESTING: setup desktop icons
 	chroot                        /root /bin/mkdir /etc/skel/Desktop
@@ -94,7 +94,7 @@ main(){
 	# TESTING: setup ISO nfs mount
 	mkdir      /root/ISO
 	ln -s           /ISO /root/etc/skel/ISO
-	if (( ${#KERNEL_CMD_LINE} )) && echo ${KERNEL_CMD_LINE} | grep -q toram; then
+	if echo ${KERNEL_CMD_LINE} | grep -q toram; then
 		echo 10.173.119.72:/Library/NetBoot/NFSserver/ISO /ISO nfs _netdev,ro 0 0 >> /root/etc/fstab
 	else
 		cat /etc/mtab | awk '/\/cdrom/{print $1"/../ISO /ISO nfs _netdev,"$4" 0 0"}' >> /root/etc/fstab
