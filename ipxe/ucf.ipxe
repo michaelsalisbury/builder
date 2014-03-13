@@ -7,61 +7,71 @@ goto Menu
 
 :start
 :Menu
-	menu Welcome to iPXE's Boot Menu
+	menu Welcome to COSIT remote PXE Environment
 	item
 	item menu-winpe		Deploy Windows
 	item
-	item Disk-Station	Disk Station
+	item menu-disk-station	Disk Station
 	item
-	item menu-xubuntu	Deploy Xubuntu
+	item menu-tools		Tools: DBAN, SpinRite, SysRescueCD, KNOPPIX & Other
 	item
-	item menu-ubuntu	Deploy Ubuntu
+	item menu-ubuntu	Ubuntu: Live Boot & Deploys for Unity, Xubtunu, Mint & Other
 	item
-	item menu-mint		Deploy Linux Mint
-	item
-	item smartos		Boot SmartOS
-	item
+	#item menu-cosit	COSIT Deploy Server
+	#item
 	item shell		Enter iPXE shell
 	item
 	item reboot		Reboot
 	item
 	item exit		Exit (boot local disk)
-	choose --default menu-xubuntu --timeout 60000 target && goto ${target}
+	choose --default menu-disk-station --timeout 60000 target && goto ${target}
 
 ## Utility menu items:
 :menu-winpe
 	goto Windows
-:menu-xubuntu
-	goto Xubuntu-13.10-x86_64
-
+:menu-disk-station
+	goto xubuntu-Disk-Station
 :menu-ubuntu
-	goto Ubuntu-13.10-x86_64
-
-:menu-mint
-	goto Mint-XFCE.15-x86_64
-
+	chain http://10.173.119.78/ipxe/ucf.ubuntu.ipxe
+:menu-tools
+	chain http://10.173.119.78/ipxe/ucf.tools.ipxe
+#:menu-cosit
+#	goto COSIT-Deploy-Server
 :shell
 	echo Type exit to get the back to the menu
 	shell
 	set menu-timeout 0
 	goto start
-
 :failed
 	echo Booting failed, dropping to shell
 	goto shell
-
 :reboot
 	reboot
 	goto DONE
-
 :exit
 	exit
+
+## Actions
+
+:COSIT-Deploy-Server
+	#chain tftp://10.173.119.81/boot\x64\pxelinux.0
+	#chain tftp://10.173.119.81/boot\\x64\\pxelinux.0
+	#chain tftp://10.173.119.81\boot\x64\pxelinux.0
+	#chain tftp://10.173.119.81/boot\\x64\\pxelinux.0
+	set net0/next-server 10.173.119.81
+	#chain tftp://10.173.119.81/Boot/x64/pxeboot.0
+	#chain tftp://10.173.119.81/Boot\\x64\\pxeboot.0
+	chain tftp://10.173.119.81/Boot/x64/wdsnbp.0
+	#chain tftp://10.173.119.81/Boot\x64\pxeboot.0
+	#chain tftp://10.173.119.81/pxelinux.n12
+	#chain tftp://10.173.119.81/pxelinux.0
+	goto DONE
 
 :Windows
 	chain http://10.173.119.78/ISOs/winpe/boot.ipxe
 	goto DONE
 
-:Disk-Station
+:xubuntu-Disk-Station
 	set SERVERIP 10.173.119.78
         set NFSOPTS  -ouser=guest,ro
         set CIFS     ISOs/ubuntu/xubuntu-13.04-desktop-amd64
@@ -74,63 +84,7 @@ goto Menu
 	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:disk-station:eth0:static
 	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
 	set APPEND   ${APPEND} pass_env_to_live=/root
-	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
-        ####################################################################################################
-        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
-        initrd http://${SERVERIP}/${INITRD}
-        boot
-	goto DONE
-
-:Xubuntu-13.10-x86_64
-	set SERVERIP 10.173.119.78
-        set NFSOPTS  -ouser=guest,ro
-        set CIFS     ISOs/ubuntu/xubuntu-13.04-desktop-amd64
-        set KERNEL   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/vmlinuz
-        set INITRD   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/initrd.lz
-	set SEED     ipxe/ubuntu.seed
-        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
-	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
-	# this entry is to assign a static IP to the LIVE boot environment
-	#set APPEND   ${APPEND} STATICIP=eth0,${ip},${netmask},${gateway},10.171.12.5
-	# this entry is to assign a static IP to the pre-boot environment; This option overrides STATICIP
-	# aditionally when this otpion is used it over-writes the STATICIP var incorectly
-        # a custom seed script is needed to handle this
-	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
-	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
-	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
-	set APPEND   ${APPEND} pass_env_to_live=/root
-	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
-        ####################################################################################################
-        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
-        initrd http://${SERVERIP}/${INITRD}
-        boot
-	goto DONE
-
-:Ubuntu-13.10-x86_64
-	set SERVERIP 10.173.119.78
-        set NFSOPTS  -ouser=guest,ro
-        set CIFS     ISOs/ubuntu/ubuntu-13.10-desktop-amd64
-        set KERNEL   ISOs/ubuntu/ubuntu-13.10-desktop-amd64/casper/vmlinuz.efi
-        set INITRD   ISOs/ubuntu/ubuntu-13.10-desktop-amd64/casper/initrd.lz
-	set SEED     ipxe/ubuntu.seed
-        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
-	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
-	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
-	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
-	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
-        ####################################################################################################
-        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
-        initrd http://${SERVERIP}/${INITRD}
-        boot
-	goto DONE
-
-:Mint-XFCE.15-x86_64
-	set SERVERIP 10.173.119.78
-        set NFSOPTS  -ouser=guest,ro
-        set CIFS     ISOs/mint/linuxmint-15-xfce-dvd-64bit
-        set KERNEL   ISOs/mint/linuxmint-15-xfce-dvd-64bit/casper/vmlinuz
-        set INITRD   ISOs/mint/linuxmint-15-xfce-dvd-64bit/casper/initrd.lz
-        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} VBST_DISABLE_BRIDGED_ETH
 	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}

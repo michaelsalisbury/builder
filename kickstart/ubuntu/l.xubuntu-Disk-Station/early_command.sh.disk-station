@@ -34,7 +34,7 @@ main(){
 
 	# TESTING: update and install tools + dependencies
 	chroot_apt_get                /root update
-	chroot_apt_get                /root -y install vim htop gdisk gparted openssh-server smartmontools gnome-disk-utility mdadm bc terminator git hwinfo ncdu
+	chroot_apt_get                /root -y install vim htop gdisk gparted openssh-server smartmontools gnome-disk-utility mdadm bc terminator git hwinfo ncdu nfs-common rdesktop
 
 	# TESTING: install virtualbox; get latest version info
 	VIRTUALBOX_PKG="$(chroot /root /usr/bin/apt-cache search virtualbox | awk '/Oracle VM VirtualBox/{print $1}') | sort -n | tail -1"
@@ -90,13 +90,18 @@ main(){
 	chroot                        /root /bin/chmod a+w /var/log/vbox_launcher.log
 
 	# TESTING: setup ISO nfs mount
-	NFS_ISO="$(cat /etc/mtab | awk '/\/cdrom/{print $1}')"
-	NFS_ISO="${NFS_ISO%/*}/ISO"
-	NFS_OPT="$(cat /etc/mtab | awk '/\/cdrom/{print $4}')"
-	NFS_OPT="${NFS_OPT},_netdev"
 	mkdir      /root/ISO
 	ln -s           /ISO /root/etc/skel/ISO
-	echo ${NFS_ISO} /ISO nfs ${NFS_OPT} 0 0 >> /root/etc/fstab
+	if (( ${#KERNEL_CMD_LINE} )) && echo ${KERNEL_CMD_LINE} | grep -q toram; then
+		echo 10.173.119.72:/Library/NetBoot/NFSserver/ISO /ISO nfs _netdev,ro 0 0 >> /root/etc/fstab
+	else
+		cat /etc/mtab | awk '/\/cdrom/{print $1"/../ISO /ISO nfs _netdev,"$4" 0 0"}' >> /root/etc/fstab
+		#NFS_ISO="$(cat /etc/mtab | awk '/\/cdrom/{print $1}')"
+		#NFS_ISO="${NFS_ISO%/*}/ISO"
+		#NFS_OPT="$(cat /etc/mtab | awk '/\/cdrom/{print $4}')"
+		#NFS_OPT="${NFS_OPT},_netdev"
+		#echo ${NFS_ISO} /ISO nfs ${NFS_OPT} 0 0 >> /root/etc/fstab
+	fi
 
 	# TESTING: setup FreeFileSync
 	wget_tgz http://${IP}/packages/Apps_Linux/FreeFileSync_5.22_Ubuntu_13.04_64-bit.tar.gz /opt
