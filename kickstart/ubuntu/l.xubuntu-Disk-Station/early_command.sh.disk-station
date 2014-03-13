@@ -67,6 +67,8 @@ main(){
 	chroot_profile_d /root aliases.sh alias test1=\"wget -q -O - ${HTTP}/test1 \| /bin/bash\"
 	chroot_profile_d /root aliases.sh alias test2=\"wget -q -O - ${HTTP}/test2 \| /bin/bash\"
 
+	chroot_profile_d /root aliases.sh alias rdesktop='rdesktop -d cos -T Win7-x86_64 -k en-us -r clipboard:PRIMARYCLIPBOARD -r sound=local -x 0x81 -z -N -a 32'
+
 	# TESTING: setup desktop icons
 	chroot                        /root /bin/mkdir /etc/skel/Desktop
 	chroot                        /root /bin/cp /usr/share/applications/virtualbox.desktop               /etc/skel/Desktop/.
