@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=RDP Deploy Server 10.173.119.81
+Comment=RDP Deploy Server 10.173.119.81
+TryExec=rdesktop
+Exec=rdesktop 10.173.119.81 -T Deploy\ Server -d GEPMATH -u administrator -r clipboard:CLIPBOARD -r sound"="local -x 0x81 -z -N -a 32 -g 95%
+Icon=preferences-desktop-remote-desktop
+Type=Application
+

@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=Clonezilla
+Comment=Clonezilla
+TryExec=terminator
+Exec=terminator -m -x sudo /opt/clonezilla/clonezilla.sh
+Icon=gnome-session-switch
+Type=Application
+Categories=GNOME;GTK;Utility;TerminalEmulator;System;
+StartupNotify=true
+X-Ubuntu-Gettext-Domain=terminator
+X-Ayatana-Desktop-Shortcuts=NewWindow;
+[NewWindow Shortcut Group]
+Name=Open a New Window
+Exec=terminator
+TargetEnvironment=Unity
+

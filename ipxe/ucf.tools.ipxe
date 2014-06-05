@@ -1,0 +1,230 @@
+#!ipxe
+# make using command ~/ipxe/src/make --EMBEDDED_IMAGE=~/ipxe.scripts/ipxelinux.ipxt
+
+goto Menu
+
+:start
+:Menu
+	menu Tools: DBAN, SpinRite, SysRescueCD, KNOPPIX & Other
+	item goback		<<< Go Back
+	item
+	item dban		DBAN
+	item spinrite		Spinrite
+	item systemrescuecd	SysRescueCD
+	item clonezilla		CloneZilla
+	item knoppix            KNOPPIX
+	item
+	item shell		Enter iPXE shell
+	item reboot		Reboot
+	item exit		Exit (boot local disk)
+	choose --default spinrite --timeout 60000 target && goto ${target}
+
+## Utility menu items:
+:goback
+	chain http://10.173.119.78/ipxe/ucf.ipxe
+:dban
+	goto dban-2.2.6
+:spinrite
+	goto spinrite-6.0
+:systemrescuecd
+	#goto systemrescuecd-x86-3.1.0
+	goto systemrescuecd-x86-4.0.1
+:clonezilla
+	goto clonezilla-live-20130429-raring-amd64
+:knoppix
+	goto KNOPPIX-7.0.5
+:shell
+	echo Type exit to get the back to the menu
+	shell
+	set menu-timeout 0
+	goto start
+:failed
+	echo Booting failed, dropping to shell
+	goto shell
+:reboot
+	reboot
+	goto DONE
+:exit
+	exit
+
+## Actions
+:systemrescuecd-x86-3.1.0
+	set SERVERIP 10.173.119.72
+	set NFSMOUNT /Library/NetBoot/NFSserver/systemrescuecd-x86-3.1.0-builder
+	set KERNEL ${NFSMOUNT}/isolinux/rescue64
+	set INITRD ${NFSMOUNT}/isolinux/initram.igz
+	set APPEND root=/dev/nfs nfsboot=${SERVERIP}:${NFSMOUNT}
+	set APPEND ${APPEND} setkmap=us ip=dhcp verbose dostartx
+        ####################################################################################################
+	echo KERNEL ${KERNEL}
+	echo INITRD ${INITRD}
+        kernel nfs://${SERVERIP}${KERNEL} ${APPEND}
+        initrd nfs://${SERVERIP}${INITRD}
+        boot
+	goto DONE
+
+:systemrescuecd-x86-4.0.1
+	set SERVERIP 10.173.119.78
+	set HTTP   ISOs/systemrescuecd/systemrescuecd-x86-4.0.1
+	set KERNEL ${HTTP}/isolinux/rescue64
+	set INITRD ${HTTP}/isolinux/initram.igz
+	set APPEND netboot=http://${SERVERIP}/${HTTP}/sysrcd.dat
+	set APPEND ${APPEND} nodhcp ethx=${ip}/${netmask} gateway=${gateway} dns=10.171.12.5
+	set APPEND ${APPEND} verbose dostartx setkmap=us
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+	initrd http://${SERVERIP}/${INITRD}
+	boot
+	goto DONE
+
+:clonezilla-live-20130429-raring-amd64
+	# http://clonezilla.org/fine-print-live-doc.php?path=clonezilla-live/doc/99_Misc/00_live-boot-parameters.doc
+	set SERVERIP 10.173.119.72
+	set NFSMOUNT /Library/NetBoot/NFSserver/clonezilla
+	set KERNEL ${NFSMOUNT}/live/vmlinuz
+	set INITRD ${NFSMOUNT}/live/initrd.img
+	#set APPEND boot=live config ip=eth0:${ip}:${netmask}:${gateway}:10.171.12.5 noswap union=aufs
+	set APPEND boot=live config ip=${ip}::${gateway}:${netmask}:clonezilla:eth0:static
+	#set APPEND boot=live live-config noswap union=aufs ip=
+	set APPEND ${APPEND} netboot=nfs nfsroot=10.173.119.72:/Library/NetBoot/NFSserver/clonezilla
+	#set APPEND ${APPEND} ocs_live_run="ocs-live-general" ocs_live_extra_param="" 
+	set APPEND ${APPEND} ocs_live_extra_param="" keyboard-layouts="NONE"
+	set APPEND ${APPEND} ocs_live_batch="no" ocs_lang="" locales="en_US.UTF-8"
+	set APPEND ${APPEND} ocs_live_run="ocs-live-general"
+        ####################################################################################################
+        kernel nfs://${SERVERIP}${KERNEL} ${APPEND}
+        initrd nfs://${SERVERIP}${INITRD}
+        boot
+	goto DONE
+
+:KNOPPIX-7.0.5
+	set SERVERIP 10.173.119.78
+	set NFSMOUNT /Library/NetBoot/NFSserver/KNOPPIX_V7.0.5DVD-2012-12-21-EN
+	set NFSSERVER 10.173.119.72
+	set KERNEL ISOs/knoppix/knoppix-7.0.5/linux64
+	set INITRD ISOs/knoppix/knoppix-7.0.5/miniroot-x86_64.gz
+	set APPEND nfsdir=${NFSSERVER}:${NFSMOUNT}
+	set APPEND ${APPEND} nodhcp ramdisk_size=100000 lang=en vt.default_utf8=0 apm=power-off
+	set APPEND ${APPEND} nomce libata.force=noncq hpsa.hpsa_allow_any=1 loglevel=1 tz=localtime
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+LABEL knoppix64
+KERNEL images/KNOPPIX_V7.0.5DVD-2012-12-21-EN/linux64
+INITRD images/KNOPPIX_V7.0.5DVD-2012-12-21-EN/miniroot-x86_64.gz
+MENU DEFAULT
+
+:dban-2.2.6
+	set SERVERIP 10.173.119.78
+	set KERNEL ISOs/syslinux/memdisk
+	set INITRD ISOs/dban/dban-2.2.6_i586.iso
+	set APPEND iso raw
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+	initrd http://${SERVERIP}/${INITRD}
+	boot
+	goto DONE
+
+:dban-2.2.6-zero
+	set SERVERIP 10.173.119.78
+	set KERNEL  ISOs/dban/dban-2.2.6_i586.bzi
+	set APPEND  nuke="dwipe --autonuke --method zero" silent
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+	boot
+	goto DONE
+
+:dban-2.2.6-quick
+	set SERVERIP 10.173.119.78
+	set KERNEL  ISOs/dban/dban-2.2.6_i586.bzi
+	set APPEND  nuke="dwipe --autonuke --method quick" silent
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+	boot
+	goto DONE
+
+:dban-2.2.6-dwipe
+	set SERVERIP 10.173.119.78
+	set KERNEL  ISOs/dban/dban-2.2.6_i586.bzi
+	set APPEND  nuke="dwipe"
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+	boot
+	goto DONE
+
+:spinrite-6.0
+	set SERVERIP 10.173.119.78
+	set KERNEL ISOs/syslinux/memdisk
+	set INITRD ISOs/spinrite/balder10.spinrite.img
+	set APPEND raw
+        ####################################################################################################
+	initrd http://${SERVERIP}/${INITRD}
+	kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+	boot
+	goto DONE
+
+
+:Xubuntu-13.10-x86_64
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/ubuntu/xubuntu-13.04-desktop-amd64
+        set KERNEL   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/vmlinuz
+        set INITRD   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/initrd.lz
+	set SEED     ipxe/ubuntu.seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	# this entry is to assign a static IP to the LIVE boot environment
+	#set APPEND   ${APPEND} STATICIP=eth0,${ip},${netmask},${gateway},10.171.12.5
+	# this entry is to assign a static IP to the pre-boot environment; This option overrides STATICIP
+	# aditionally when this otpion is used it over-writes the STATICIP var incorectly
+        # a custom seed script is needed to handle this
+	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
+	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
+	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
+	set APPEND   ${APPEND} pass_env_to_live=/root
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:Ubuntu-13.10-x86_64
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/ubuntu/ubuntu-13.10-desktop-amd64
+        set KERNEL   ISOs/ubuntu/ubuntu-13.10-desktop-amd64/casper/vmlinuz.efi
+        set INITRD   ISOs/ubuntu/ubuntu-13.10-desktop-amd64/casper/initrd.lz
+	set SEED     ipxe/ubuntu.seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
+	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:Mint-XFCE.15-x86_64
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/mint/linuxmint-15-xfce-dvd-64bit
+        set KERNEL   ISOs/mint/linuxmint-15-xfce-dvd-64bit/casper/vmlinuz
+        set INITRD   ISOs/mint/linuxmint-15-xfce-dvd-64bit/casper/initrd.lz
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:DONE
+
+
+       

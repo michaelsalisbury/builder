@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=RDP Ghost Server 10.173.119.71
+Comment=RDP Ghost Server 10.173.119.71
+TryExec=rdesktop
+Exec=rdesktop 10.173.119.71 -T Ghost\ Server -d COS -u cosghost1  -r clipboard:CLIPBOARD -r sound"="local -x 0x81 -z -N -a 32 -g 95%
+Icon=preferences-desktop-remote-desktop
+Type=Application

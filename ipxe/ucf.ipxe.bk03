@@ -1,0 +1,209 @@
+#!ipxe
+# make using command ~/ipxe/src/make --EMBEDDED_IMAGE=~/ipxe.scripts/ipxelinux.ipxt
+
+#goto Mint-XFCE.15-x86_64
+#goto Ubuntu-13.10-x86_64
+goto Menu
+
+:start
+:Menu
+	menu Welcome to COSIT remote PXE Environment
+	item
+	item menu-winpe		Deploy Windows
+	item
+	item menu-disk-station	Disk Station
+	item
+	item menu-tools		Tools: DBAN, SpinRite, SysRescueCD, KNOPPIX & Other
+	item
+	item menu-ubuntu	Ubuntu: Live Boot & Deploys for Unity, Xubtunu, Mint & Other
+	item
+	#item menu-cosit	COSIT Deploy Server
+	#item
+	item shell		Enter iPXE shell
+	item
+	item reboot		Reboot
+	item
+	item exit		Exit (boot local disk)
+	choose --default menu-disk-station --timeout 60000 target && goto ${target}
+
+## Utility menu items:
+:menu-winpe
+	goto Windows
+:menu-disk-station
+	goto xubuntu-Disk-Station
+:menu-ubuntu
+	chain http://10.173.119.78/ipxe/ucf.ubuntu.ipxe
+:menu-tools
+	chain http://10.173.119.78/ipxe/ucf.tools.ipxe
+#:menu-cosit
+#	goto COSIT-Deploy-Server
+:shell
+	echo Type exit to get the back to the menu
+	shell
+	set menu-timeout 0
+	goto start
+:failed
+	echo Booting failed, dropping to shell
+	goto shell
+:reboot
+	reboot
+	goto DONE
+:exit
+	exit
+
+## Actions
+
+:COSIT-Deploy-Server
+	#chain tftp://10.173.119.81/boot\x64\pxelinux.0
+	#chain tftp://10.173.119.81/boot\\x64\\pxelinux.0
+	#chain tftp://10.173.119.81\boot\x64\pxelinux.0
+	#chain tftp://10.173.119.81/boot\\x64\\pxelinux.0
+	set net0/next-server 10.173.119.81
+	#chain tftp://10.173.119.81/Boot/x64/pxeboot.0
+	#chain tftp://10.173.119.81/Boot\\x64\\pxeboot.0
+	chain tftp://10.173.119.81/Boot/x64/wdsnbp.0
+	#chain tftp://10.173.119.81/Boot\x64\pxeboot.0
+	#chain tftp://10.173.119.81/pxelinux.n12
+	#chain tftp://10.173.119.81/pxelinux.0
+	goto DONE
+
+:Windows-works
+	imgfree
+	set next-server 10.173.119.81
+	set 252:string boot\x64\
+	set 210:string boot\x64\
+	set filename boot\x64\pxelinux.0
+	autoboot ||
+	shell ||
+	chain http://10.173.119.78/ipxe/ucf.ipxe
+
+:Windows-broke
+	imgfree
+	set next-server 10.208.8.209
+	#set next-server 10.173.119.81
+	set 210:string SMSBoot\x64\
+	#set 210:string boot\x86\
+	set filename ${210:string}wdsnbp.com
+	autoboot ||
+	shell ||
+	chain http://10.173.119.78/ipxe/ucf.ipxe
+
+:Windows
+	imgfree
+	set user-class rawpxe
+	set next-server 10.208.8.209
+	#set 210:string tftp://10.208.8.209/SMSBoot\x64\\
+	set 210:string tftp://10.208.8.209/SMSBoot\x64\
+	#set 209:string ${210:string}wdsnbp.com
+
+	#set next-server 10.173.119.81
+	#set 252:string \boot\x64
+	#set 210:string /boot/x64
+	#set 252:string SMSBoot\x64
+	#set filename boot\x64\pxeboot.0
+	#set filename boot\x64\wdsnbp.com
+	#set filename boot.sdi
+	#set filename Boot\x64\pxeboot.n12
+	#set filename boot\x64\pxeboot.com
+
+	#set filename boot\x86\wdsnbp.com
+	#set filename ${210wdsnbp.com
+	set filename SMSBoot\x64\pxeboot.n12
+	#set filename SMSBoot\x86\wdsnbp.com
+	#set filename SMSBoot\x64\wdsnbp.com
+	#set filename ${210:string}wdsnbp.com
+	
+	autoboot ||
+	shell ||
+	chain http://10.173.119.78/ipxe/ucf.ipxe
+
+:Windows-exp
+	imgfree
+	set next-server 10.173.119.81
+	set 252:string boot\x64\
+	set 210:string boot\x64\
+	#set 209:string pxeboot.n12
+	#set 209:string Boot\x64\pxelinux.cfg\default
+
+	#set filename pxeboot.com
+	#set filename boot/x64/pxeboot.0
+	#set filename boot\x64\pxeboot.0
+	#set filename boot\\x64\\pxeboot.0
+	#set filename boot/x64/pxeboot.com
+	#set filename boot%5Cx64%5Cpxeboot.com
+	#set filename pxeboot.com
+
+	# something worked here
+	#set filename boot\x64\pxeboot.com
+	#set filename boot\x64\wdsnbp.com
+	#set filename boot\x64\pxelinux.0
+	set filename Boot\x64\pxeboot.0
+	autoboot ||
+	#set arch x64
+	#chain tftp://10.173.119.81/boot%5Cx64%5Cpxeboot.com ||
+	#chain tftp://10.173.119.81/boot%5C%5Cx64%5C%5Cpxeboot.com ||
+	#chain tftp://10.173.119.81/%5CBoot%5Cx64%5Cpxeboot.com ||
+	#chain tftp://10.173.119.81/%5CBoot%5CPXE%5Cpxeboot.com ||
+	#chain tftp:///Boot/x64/pxeboot.0 ||
+	#chain tftp://10.173.119.81/Boot/x64/pxeboot.0 ||
+	#chain tftp:///Boot%5Cx64%5Cpxeboot.0 ||
+	#chain tftp:///Boot%5Cx64%5Cpxeboot.n12 ||
+	
+	shell ||
+	chain http://10.173.119.78/ipxe/ucf.ipxe
+	#chain \boot\x64\pxeboot.com ||
+	#chain tftp://10.173.119.81/boot\x64\pxeboot.com ||
+
+	#chain  ||
+
+	#kernel tftp://10.173.119.81\\boot\\x64\\memdisk iso raw
+	#initrd tftp://10.173.119.81\\boot\\x64\\images\ISOs\COSBootMediax86.iso
+
+	#imgfetch tftp://10.173.119.81\\boot\\x64\\memdisk ||
+	#imgfetch tftp://10.173.119.81/boot/x64/memdisk ||
+	#imgfetch tftp://10.173.119.81\/boot\/x64\/memdisk ||
+	#imgfetch tftp://10.173.119.81\/Boot\/x64\/memdisk ||
+	#imgfetch tftp://10.173.119.81/Boot\\x64\\memdisk ||
+	#imgfetch tftp://10.173.119.81\boot\x64\memdisk ||
+	#imgfetch tftp://10.173.119.81/boot\\/x64\\/memdisk ||
+	#imgfetch tftp://10.173.119.81/boot\/\/x64\/\/memdisk ||
+
+        prompt --timeout 311 3......... ||
+        prompt --timeout 311 3........ ||
+        prompt --timeout 311 3....... ||
+        prompt --timeout 311 2...... ||
+        prompt --timeout 311 2..... ||
+        prompt --timeout 311 2.... ||
+        prompt --timeout 311 1... ||
+        prompt --timeout 311 1.. ||
+        prompt --timeout 311 1. || echo
+
+	chain http://10.173.119.78/ipxe/ucf.ipxe
+	#chain http://10.173.119.78/ISOs/winpe/boot.ipxe
+	goto DONE
+
+:xubuntu-Disk-Station
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/ubuntu/xubuntu-13.04-desktop-amd64
+        set KERNEL   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/vmlinuz
+        set INITRD   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/initrd.lz
+	set SEED     kickstart/ubuntu/l.xubuntu-Disk-Station/seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
+	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:disk-station:eth0:static
+	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
+	set APPEND   ${APPEND} pass_env_to_live=/root
+	set APPEND   ${APPEND} VBST_DISABLE_BRIDGED_ETH
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:DONE
+
+
+       

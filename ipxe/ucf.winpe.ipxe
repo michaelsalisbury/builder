@@ -1,0 +1,71 @@
+#!ipxe
+
+:start
+:Menu
+	menu COSIT Windows Deployment Seclection
+        item
+	item COSIT		Return to main menu
+	item
+        item GhostPE-x86	GhostPE 5.0 (x86)
+	item
+	item HWINV		HWInv WinPE (x86)
+	item HWINV-v2		HWInv WinPE (x86) v2
+        item
+        item MDT		MDT-2012 (x64)
+        item
+        item DIAG		Diagnostics and Recovery Toolset 7.0 (x64)
+	item
+	item shell		Enter iPXE shell
+	item
+        item reboot             Reboot
+        item
+        item exit               Exit (boot local disk)
+        choose --default GhostPE-x86 --timeout 60000 target && goto ${target}
+
+:COSIT
+	chain http://10.173.119.78/ipxe/ucf.ipxe
+	goto DONE
+
+:shell
+        echo Type exit to get the back to the menu
+        shell
+        set menu-timeout 0
+        goto start
+
+:failed
+        echo Booting failed, dropping to shell
+        goto shell
+
+:reboot
+        reboot
+        goto DONE
+
+:exit
+        exit
+
+:GhostPE-x86
+	set TOOL tools/GhostPE5_x86.wim
+	#set TOOL tools/GhostPE5_x86.wim
+	goto boot
+:HWINV
+	set TOOL tools/HWInv_WinPE_x86.wim
+	goto boot
+:HWINV-v2
+	set TOOL tools/HWInv_WinPE_x86.v2.wim
+	goto boot
+:MDT
+	set TOOL tools/COS-MDT01_Production_x64.wim
+	goto boot
+:DIAG
+	set TOOL tools/DaRT70_boot.wim
+	goto boot
+
+:boot
+  cpuid --ext 29 && set arch amd64 || set arch x86
+  kernel wimboot
+  initrd ${arch}/ISO/bootmgr       bootmgr
+  initrd ${arch}/ISO/boot/bcd      BCD
+  initrd ${arch}/ISO/boot/boot.sdi boot.sdi
+  initrd ${TOOL}                   boot.wim
+  #initrd ${arch}/winpe.wim         boot.wim
+  boot
