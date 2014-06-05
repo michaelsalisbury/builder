@@ -21,13 +21,13 @@ function builder_main(){
 
 	garbage_collection
 
-	verify_wrapper			|| EXIT 1 # verify and or fix builder install (wrapper)
-	verify_script "$1"		|| EXIT 1 # verify script and set scriptFQFN global vars.
-	verify_shebang			|| EXIT 1 # verify and or fix script and shebang line
-	verify_logs			|| EXIT 1
+	verify_wrapper			|| EXIT $? # verify and or fix builder install (wrapper).  Error codes 1x
+	verify_script "$1"		|| EXIT $? # verify script and set scriptFQFN global vars. Error codes 2x
+	verify_shebang			|| EXIT $? # verify and or fix script and shebang line.    Error codes 3x
+	verify_logs			|| EXIT 40
 	source_global_control_vars	&& shift\
-					|| EXIT 1 # source; step, skip, prefix, source.
-	process_switches "$@"		|| EXIT 1 # process all command line and piped args
+					|| EXIT $? # source; step, skip, prefix, source.           Error codes 5x
+	process_switches "$@"		|| EXIT $? # process all command line and piped args.      Error codes 6x
 
 	# main execution loop
 	while ! is_finished && ! is_rebooting; do
@@ -37,7 +37,7 @@ function builder_main(){
 		next
 		reboot_start && sleep 3
 	done
-	is_rebooting && exit 1 || exit 0
+	is_rebooting && exit 7 || exit 0
 }
 function source_global_control_vars(){
 	# Include control GLOBAL variables skip, step & prefix
@@ -81,17 +81,17 @@ function source_global_control_vars(){
 		&& (( ${#skip[*]} == last_function + 1 )); then return 0; fi
 	done
 	derr 80 Problem sourceing GLOBAL control vars
-	return 1
+	return 51
 }
 function verify_wrapper(){
 	if [ "${buildScriptExpectedFQFN}" != "${buildScriptFQFN}" ]; then
 		if [ -f "${buildScriptExpectedFQFN}" ]; then
 			mesg 80 Old wrapper exits\! Please rectify and \then try again.
-			return 1
+			return 11
 		else
 			ln "${buildScriptFQFN}" "${buildScriptExpectedFQFN}"
 			mesg 80 Hard link setup: ${buildScriptFQFN} \>\> ${buildScriptFQFN}
-			return 1
+			return 12
 		fi  
 	fi
 }
@@ -103,7 +103,7 @@ function verify_script(){
 	else
 		show_help
 		mesg 80 Wrapper \"${buildScriptFQFN}\" call with script to process'!'
-		return 1
+		return 21
 	fi
 }
 function verify_shebang(){
@@ -114,7 +114,7 @@ function verify_shebang(){
 		   grep -v ^'\#!'${buildScriptExpectedFQFN}; then
 			sed -i "1i#\!${buildScriptExpectedFQFN}" "${scriptFQFN}"
 			mesg 80 Fixed script line 1 to read: $(sed -n '1p' "${scriptFQFN}")
-			return 1
+			return 31
 		fi
 	else
 		#!/usr/bin/env /bin/builder.sh
@@ -123,7 +123,7 @@ function verify_shebang(){
 		   grep -v ^'\#!'${env}[[:space:]]*${buildScriptExpectedFQFN}; then
 			sed -i "1i#\!${env} ${buildScriptExpectedFQFN}" "${scriptFQFN}"
 			mesg 80 Fixed script line 1 to read: $(sed -n '1p' "${scriptFQFN}")
-			return 1
+			return 32
 		fi
 	fi
 }
@@ -226,11 +226,11 @@ function process_switches(){
 			# dump function code to screen
 			d)	[ $OPTARG == a ] && dump_functions || show_function $OPTARG;;
 			# edit script with vim
-			e)	[ $OPTARG == s ] && vim "$scriptFQFN" && return 1;
-				[ $OPTARG == l ] && vim "$scrLogFQFN" && return 1;
+			e)	[ $OPTARG == s ] && vim "$scriptFQFN" && return 62;
+				[ $OPTARG == l ] && vim "$scrLogFQFN" && return 63;
 				vim "`log_get_name $OPTARG`";;
 			# get current step, error if done
-			g)	(( $step > `last_function` )) && EXIT 1 || echo $step; EXIT 0;; 
+			g)	(( $step > `last_function` )) && EXIT 69 || echo $step; EXIT 0;; 
 			# display help
                         h)	show_help; disp_functions; echo;;
 			# jump up or down (back or forward) a step
@@ -302,7 +302,7 @@ function process_switches(){
 				echo;;
 	esac
 
-	return 1
+	return 60
 }
 ###########################################################################################
 ###########################################################################################

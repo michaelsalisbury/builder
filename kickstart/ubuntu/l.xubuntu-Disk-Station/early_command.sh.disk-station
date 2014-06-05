@@ -34,7 +34,7 @@ main(){
 
 	# TESTING: update and install tools + dependencies
 	chroot_apt_get                /root update
-	chroot_apt_get                /root -y install vim htop gdisk gparted openssh-server smartmontools gnome-disk-utility mdadm bc terminator git hwinfo ncdu nfs-common rdesktop
+	chroot_apt_get                /root -y install vim htop gdisk gparted openssh-server smartmontools gnome-disk-utility mdadm bc terminator git hwinfo ncdu nfs-common rdesktop squashfs-tools aufs-tools
 
 	# TESTING: install virtualbox; get latest version info
 	VIRTUALBOX_PKG="$(chroot /root /usr/bin/apt-cache search virtualbox | awk '/Oracle VM VirtualBox/{print $1}') | sort -n | tail -1"
@@ -109,6 +109,9 @@ main(){
 	wget_tgz http://${IP}/packages/Apps_Linux/FreeFileSync_5.22_Ubuntu_13.04_64-bit.tar.gz /opt
 	wget_tgz             ${HTTP}/tar-n-stream.FreeFileSync.cgi                             /opt
 
+	# TESTING: setup clonezilla
+	wget_tgz ${HTTP}/tar-n-stream.clonezilla.cgi						/opt
+
 	# TESTING: setup keyrings
 	chroot                       /root /bin/mkdir    -p /etc/skel/.local/share/keyrings
 	chroot                       /root /bin/chmod   700 /etc/skel/.local/share
@@ -128,6 +131,10 @@ main(){
 	# TESTING: change logrotate
 	chroot                       /root /bin/mv  /etc/cron.daily/logrotate /etc/cron.hourly/.
 	chroot                       /root /bin/sed -i '/{/a\\tsize 3M' /etc/logrotate.d/rsyslog
+
+
+	
+
 
 	# TESTING: setup xfce panel
 	#chroot                       /root /bin/mkdir     /etc/skel/.config
