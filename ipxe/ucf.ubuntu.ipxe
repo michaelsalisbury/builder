@@ -23,7 +23,8 @@ goto Menu
 :live-xubuntu
 	goto Xubuntu-13.10-x86_64
 :live-ubuntu-unity
-	goto Ubuntu-13.10-x86_64
+	goto Ubuntu-14.04-x86_64
+	#goto Ubuntu-13.10-x86_64
 :live-linux-mint
 	goto Mint-XFCE.15-x86_64
 :shell
@@ -59,6 +60,26 @@ goto Menu
 	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
 	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
 	set APPEND   ${APPEND} pass_env_to_live=/root
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:Ubuntu-14.04-x86_64
+	set DISTRO   ubuntu
+	set VERSION  ${DISTRO}-14.04-desktop-amd64
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/${DISTRO}/${VERSION}
+        set KERNEL   ISOs/${DISTRO}/${VERSION}/casper/vmlinuz.efi
+        set INITRD   ISOs/${DISTRO}/${VERSION}/casper/initrd.lz
+	set SEED     ipxe/ubuntu.seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
+	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
 	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}
