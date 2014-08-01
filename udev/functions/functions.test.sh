@@ -146,7 +146,7 @@ function GET_DEVICE_INTERFACE(){
 	local DEV=$(basename "${1}")
 	# verify that block device exists
 	if ! file "/dev/${DEV}" | grep -q "block special"; then
-		LOG ERROR :: ${FUNCNAME} :: DEV[$DEV}] is not a blocl device.
+		LOG ERROR :: ${FUNCNAME} :: DEV[${DEV}] is not a blocl device.
 		echo none
 		return 1
 	fi
@@ -185,7 +185,7 @@ function GET_DEVICE_HWI_ATTRIBUTES(){
 	local DEV=$(basename "${1}")
 	# verify that block device exists
 	if ! file "/dev/${DEV}" | grep -q "block special"; then
-		LOG ERROR :: ${FUNCNAME} :: DEV[$DEV}] is not a blocl device.
+		LOG ERROR :: ${FUNCNAME} :: DEV[${DEV}] is not a blocl device.
 		echo none
 		return 1
 	fi
