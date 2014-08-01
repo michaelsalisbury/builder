@@ -38,18 +38,17 @@ main(){
 	# TESTING: update and install tools + dependencies
 	chroot_apt_get                /root update
 	#chroot_apt_get                /root -y install vim htop gdisk gparted openssh-server smartmontools gnome-disk-utility mdadm bc terminator git hwinfo ncdu nfs-common rdesktop squashfs-tools aufs-tools
-	chroot_apt_get                /root -y install vim gdisk smartmontools \
-                                                       bc ncdu wmctrl nfs-common \
-                                                       hwinfo
-	#chroot_apt_get                /root -y install gparted openssh-server mdadm htop
-	#chroot_apt_get                /root -y install gnome-disk-utility terminator git \
-        #                                               rdesktop squashfs-tools aufs-tools
-	#chroot_apt_get                /root -y install hwinfo
+	chroot_apt_get                /root -y install vim htop gdisk gparted \
+                                                       openssh-server smartmontools \
+                                                       gnome-disk-utility mdadm bc \
+                                                       terminator git ncdu nfs-common \
+                                                       rdesktop squashfs-tools aufs-tools
+	chroot_apt_get                /root -y install hwinfo
 
 	# TESTING: install virtualbox; get latest version info
 	#VIRTUALBOX_PKG="$(chroot /root /usr/bin/apt-cache search virtualbox | awk '/Oracle VM VirtualBox/{print $1}') | sort -n | tail -1"
-	VIRTUALBOX_PKG="virtualbox-4.2"
-	#VIRTUALBOX_PKG="virtualbox-4.3"
+	#VIRTUALBOX_PKG="virtualbox-4.2"
+	VIRTUALBOX_PKG="virtualbox-4.3"
 	VIRTUALBOX_VER="$(chroot /root /usr/bin/apt-cache show ${VIRTUALBOX_PKG} | awk -F' |-|~' '/^Version/{print $2}')"
 	# TESTING: install virtualbox; setup extended pack download url
 	VIRTUALBOX_EXP="Oracle_VM_VirtualBox_Extension_Pack-${VIRTUALBOX_VER}.vbox-extpack"
@@ -106,7 +105,7 @@ main(){
 	mkdir      /root/ISO
 	ln -s           /ISO /root/etc/skel/ISO
 	if echo ${KERNEL_CMD_LINE} | grep -q toram; then
-		echo 10.173.119.72:/Library/NetBoot/NFSserver/ISO /ISO nfs _netdev,ro,nolock 0 0 >> /root/etc/fstab
+		echo 10.173.119.72:/Library/NetBoot/NFSserver/ISO /ISO nfs _netdev,ro 0 0 >> /root/etc/fstab
 	else
 		cat /etc/mtab | awk '/\/cdrom/{print $1"/../ISO /ISO nfs _netdev,"$4" 0 0"}' >> /root/etc/fstab
 		#NFS_ISO="$(cat /etc/mtab | awk '/\/cdrom/{print $1}')"

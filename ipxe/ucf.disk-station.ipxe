@@ -1,0 +1,114 @@
+#!ipxe
+# make using command ~/ipxe/src/make --EMBEDDED_IMAGE=~/ipxe.scripts/ipxelinux.ipxt
+
+# Global VARS
+#set IPXESERVER 10.173.119.78
+#set LOCALDNS00 10.171.12.5
+#set LOCALDNS01 10.171.12.37
+#set LOCALDNS02 10.171.12.69
+#set LOCALDNS03 10.224.10.11
+#set LOCALSEARCH cos.ucf.edu
+
+# MAIN
+goto Menu
+
+:start
+:Menu
+	menu Welcome to COSIT remote PXE Environment
+	item menu-disk-station-stable	Disk Station Stable
+	item menu-disk-station-alpha	Disk Station Alpha
+	item menu-disk-station-beta	Disk Station Beta
+	item
+	item menu-tools			Tools: DBAN, SpinRite, SysRescueCD, KNOPPIX & Other
+	item
+	item menu-ubuntu		Ubuntu: Live Boot & Deploys for Unity, Xubtunu, Mint & Other
+	item
+	item menu-clusters		Clusters: Mucciolo, Kara, Bhattacharya, Chen
+	item
+	item shell			Enter iPXE shell
+	item
+	item reboot			Reboot
+	item
+	item exit		Exit (boot local disk)
+	choose --default menu-disk-station-stable --timeout 3000 target && goto ${target}
+
+## Utility menu items:
+:menu-disk-station-stable
+	goto xubuntu-Disk-Station
+:menu-disk-station-alpha
+	goto xubuntu-Disk-Station
+:menu-disk-station-beta
+	goto xubuntu-Disk-Station
+:menu-ubuntu
+	chain http://${IPXESERVER}/ipxe/ucf.ubuntu.ipxe
+:menu-tools
+	chain http://${IPXESERVER}/ipxe/ucf.tools.ipxe
+:menu-clusters
+	chain http://${IPXESERVER}/ipxe/ucf.clusters.ipxe
+:shell
+	echo Type exit to get the back to the menu
+	shell
+	set menu-timeout 0
+	goto start
+:failed
+	echo Booting failed, dropping to shell
+	goto shell
+:reboot
+	reboot
+	goto DONE
+:exit
+	exit
+
+## Actions
+:xubuntu-Disk-Station-old
+	set SERVERIP ${IPXESERVER}
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/ubuntu/xubuntu-13.04-desktop-amd64
+        set KERNEL   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/vmlinuz
+        set INITRD   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/initrd.lz
+	set SEED     kickstart/ubuntu/l.xubuntu-Disk-Station/seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
+	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:disk-station:eth0:static
+	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
+	set APPEND   ${APPEND} pass_env_to_live=/root
+	set APPEND   ${APPEND} VBST_DISABLE_BRIDGED_ETH
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:xubuntu-Disk-Station
+	set DISTRO   ubuntu
+	set VERSION  xubuntu-14.04.1-desktop-amd64
+	set SERVERIP ${IPXESERVER}
+	set dns0     ${LOCALDNS00}
+	set dns1     ${LOCALDNS01}
+	set search   ${LOCALSEARCH}
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/${DISTRO}/${VERSION}
+        set KERNEL   ISOs/${DISTRO}/${VERSION}/casper/vmlinuz.efi
+        set INITRD   ISOs/${DISTRO}/${VERSION}/casper/initrd.lz
+	#set SEED     ipxe/ubuntu.seed
+	set SEED     kickstart/ubuntu/l.xubuntu-Disk-Station/seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
+	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:disk-station:eth0:static
+	set APPEND   ${APPEND} dns0=${dn0} dns1=${dns1} search_domain=${search}
+	set APPEND   ${APPEND} pass_env_to_live=/root
+	#set APPEND   ${APPEND} VBST_DISABLE_BRIDGED_ETH
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:DONE
+
+
+       

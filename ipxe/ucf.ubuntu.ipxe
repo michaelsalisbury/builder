@@ -9,6 +9,7 @@ goto Menu
 	item goback		<<< Go Back
 	item
 	item live-xubuntu	Live Xubuntu
+	item live-mubuntu	Live Mubuntu
 	item live-ubuntu-unity	Live Ubuntu Unity
 	item live-linux-mint	Live Linux Mint
 	item
@@ -20,8 +21,12 @@ goto Menu
 ## Utility menu items:
 :goback
         chain http://10.173.119.78/ipxe/ucf.ipxe
+:live-mubuntu
+	goto Ubuntu-mate-14.10-x86_64
+
 :live-xubuntu
-	goto Xubuntu-13.10-x86_64
+	goto Xubuntu-14.04.1-x86_64
+	#goto Xubuntu-13.10-x86_64
 :live-ubuntu-unity
 	goto Ubuntu-14.04-x86_64
 	#goto Ubuntu-13.10-x86_64
@@ -42,6 +47,33 @@ goto Menu
 	exit
 
 ## Actions
+:Xubuntu-14.04.1-x86_64
+	set DISTRO   ubuntu
+	set VERSION  xubuntu-14.04.1-desktop-amd64
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/${DISTRO}/${VERSION}
+        set KERNEL   ISOs/${DISTRO}/${VERSION}/casper/vmlinuz.efi
+        set INITRD   ISOs/${DISTRO}/${VERSION}/casper/initrd.lz
+	set SEED     ipxe/ubuntu.seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	# this entry is to assign a static IP to the LIVE boot environment
+	#set APPEND   ${APPEND} STATICIP=eth0,${ip},${netmask},${gateway},10.171.12.5
+	# this entry is to assign a static IP to the pre-boot environment; This option overrides STATICIP
+	# aditionally when this option is used it over-writes the STATICIP var incorectly
+        # a custom seed script is needed to handle this
+	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
+	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
+	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
+	set APPEND   ${APPEND} pass_env_to_live=/root
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
 :Xubuntu-13.10-x86_64
 	set SERVERIP 10.173.119.78
         set NFSOPTS  -ouser=guest,ro
@@ -60,6 +92,26 @@ goto Menu
 	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
 	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
 	set APPEND   ${APPEND} pass_env_to_live=/root
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:Ubuntu-mate-14.10-x86_64
+	set DISTRO   ubuntu
+	set VERSION  ${DISTRO}-mate-14.10-alpha1-desktop-amd64
+	set SERVERIP 10.173.119.78
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/${DISTRO}/${VERSION}
+        set KERNEL   ISOs/${DISTRO}/${VERSION}/casper/vmlinuz
+        set INITRD   ISOs/${DISTRO}/${VERSION}/casper/initrd.lz
+	set SEED     ipxe/ubuntu.seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:xubuntu:eth0:static
+	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
 	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
         ####################################################################################################
         kernel http://${SERVERIP}/${KERNEL} ${APPEND}

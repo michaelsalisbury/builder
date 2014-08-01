@@ -1,8 +1,15 @@
 #!ipxe
 # make using command ~/ipxe/src/make --EMBEDDED_IMAGE=~/ipxe.scripts/ipxelinux.ipxt
 
-#goto Mint-XFCE.15-x86_64
-#goto Ubuntu-13.10-x86_64
+# Global VARS
+set IPXESERVER 10.173.119.78
+set LOCALDNS00 10.171.12.5
+set LOCALDNS01 10.171.12.37
+set LOCALDNS02 10.171.12.69
+set LOCALDNS03 10.224.10.11
+set LOCALSEARCH cos.ucf.edu
+
+# MAIN
 goto Menu
 
 :start
@@ -38,15 +45,15 @@ goto Menu
 :menu-winpe
 	goto SCCM-Deploy-Server
 :menu-ghost
-	chain http://10.173.119.78/ISOs/winpe/boot.ipxe
+	chain http://${IPXESERVER}/ISOs/winpe/boot.ipxe
 :menu-disk-station
-	goto xubuntu-Disk-Station
+	chain http://${IPXESERVER}/ipxe/ucf.disk-station.ipxe
 :menu-ubuntu
-	chain http://10.173.119.78/ipxe/ucf.ubuntu.ipxe
+	chain http://${IPXESERVER}/ipxe/ucf.ubuntu.ipxe
 :menu-tools
-	chain http://10.173.119.78/ipxe/ucf.tools.ipxe
+	chain http://${IPXESERVER}/ipxe/ucf.tools.ipxe
 :menu-clusters
-	chain http://10.173.119.78/ipxe/ucf.clusters.ipxe
+	chain http://${IPXESERVER}/ipxe/ucf.clusters.ipxe
 #:menu-cosit
 #	goto COSIT-Deploy-Server
 :shell
@@ -171,27 +178,6 @@ goto Menu
 
 	chain http://10.173.119.78/ipxe/ucf.ipxe
 	#chain http://10.173.119.78/ISOs/winpe/boot.ipxe
-	goto DONE
-
-:xubuntu-Disk-Station
-	set SERVERIP 10.173.119.78
-        set NFSOPTS  -ouser=guest,ro
-        set CIFS     ISOs/ubuntu/xubuntu-13.04-desktop-amd64
-        set KERNEL   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/vmlinuz
-        set INITRD   ISOs/ubuntu/xubuntu-13.04-desktop-amd64/casper/initrd.lz
-	set SEED     kickstart/ubuntu/l.xubuntu-Disk-Station/seed
-        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
-	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
-	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
-	set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:disk-station:eth0:static
-	set APPEND   ${APPEND} dns0=10.171.12.5 dns1=10.171.12.37 search_domain=cos.ucf.edu
-	set APPEND   ${APPEND} pass_env_to_live=/root
-	set APPEND   ${APPEND} VBST_DISABLE_BRIDGED_ETH
-	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
-        ####################################################################################################
-        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
-        initrd http://${SERVERIP}/${INITRD}
-        boot
 	goto DONE
 
 :DONE

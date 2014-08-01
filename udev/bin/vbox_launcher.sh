@@ -570,6 +570,7 @@ function zenity_name_task(){
 	# exit if user choose cancel or closed dialog
 	local IFS=,
 	case "${NAME[0]}.${#NAME[*]}" in
+		0.*)	LOG STS :: dbl_CLICK :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}].;;
 		1.*)	LOG CAN :: clk_X/CAN :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}]. Exiting\!
 			EXIT 1;;
 		5.1)	LOG STS :: TIMED_OUT :: Task naming dialog\; EC[${NAME[0]}] NAME["${NAME[*]:1}"] DEVICE[${DEVICE}].;;

@@ -106,7 +106,7 @@ main(){
 	mkdir      /root/ISO
 	ln -s           /ISO /root/etc/skel/ISO
 	if echo ${KERNEL_CMD_LINE} | grep -q toram; then
-		echo 10.173.119.72:/Library/NetBoot/NFSserver/ISO /ISO nfs _netdev,ro,nolock 0 0 >> /root/etc/fstab
+		echo 10.173.119.72:/Library/NetBoot/NFSserver/ISO /ISO nfs _netdev,ro 0 0 >> /root/etc/fstab
 	else
 		cat /etc/mtab | awk '/\/cdrom/{print $1"/../ISO /ISO nfs _netdev,"$4" 0 0"}' >> /root/etc/fstab
 		#NFS_ISO="$(cat /etc/mtab | awk '/\/cdrom/{print $1}')"
