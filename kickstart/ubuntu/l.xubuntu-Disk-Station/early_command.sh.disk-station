@@ -17,16 +17,20 @@ main(){
 	chroot_apt_get                /root -y install apt-file software-properties-common
 	chroot                        /root /usr/bin/apt-file update
 
-	# TESTING; setup oracle VirtualBox repos
+	# GLOBAL VARS
 	VIRTUALBOX_URL="http://download.virtualbox.org/virtualbox"
-	mkdir -p "/root/etc/apt/sources.list.d"
-	echo "deb ${VIRTUALBOX_URL}/debian $(chroot /root /usr/bin/lsb_release -sc) contrib" >\
-		"/root/etc/apt/sources.list.d/oracle-virtualbox.list"
+	UBUNTU_RELEASE="$(chroot /root /usr/bin/lsb_release -sc)"
+
+	# TESTING; setup oracle VirtualBox repos
+	#mkdir -p "/root/etc/apt/sources.list.d"
+	#echo "deb ${VIRTUALBOX_URL}/debian $(chroot /root /usr/bin/lsb_release -sc) contrib" >\
+	#	"/root/etc/apt/sources.list.d/oracle-virtualbox.list"
+	chroot_add_apt_repository     /root "deb ${VIRTUALBOX_URL}/debian ${UBUNTU_RELEASE} contrib"
 	chroot                        /root /usr/bin/wget -q -O - "${VIRTUALBOX_URL}/debian/oracle_vbox.asc" |\
 	chroot                        /root /usr/bin/apt-key add -
 
 	# TESTING; additional repos
-	chroot_add_apt_repository     /root "deb http://archive.ubuntu.com/ubuntu/ $(chroot /root /usr/bin/lsb_release -sc) universe multiverse"
+	chroot_add_apt_repository     /root "deb http://archive.ubuntu.com/ubuntu/ ${UBUNTU_RELEASE} universe multiverse"
 	chroot_add_apt_repository     /root --yes ppa:indicator-multiload/stable-daily
 
 	# TESTING: add raring universe to install depreciated "hwinfo" package

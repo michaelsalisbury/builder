@@ -1,17 +1,6 @@
 #!ipxe
 # make using command ~/ipxe/src/make --EMBEDDED_IMAGE=~/ipxe.scripts/ipxelinux.ipxt
 
-# Global VARS
-set IPXESERVER 10.173.119.78
-set LOCALDNS00 10.171.12.5
-set LOCALDNS01 10.171.12.37
-set LOCALDNS02 10.171.12.69
-set LOCALDNS03 10.224.10.11
-set LOCALSEARCH cos.ucf.edu
-
-chain http://${IPXESERVER}/ipxe/main-menu.ipxe
-goto DONE
-
 # MAIN
 goto Menu
 
@@ -80,14 +69,14 @@ goto Menu
 	set filename boot\x64\pxelinux.0
 	autoboot ||
 	shell ||
-	chain http://10.173.119.78/ipxe/ucf.ipxe
+	chain http://${IPXESERVER}/ipxe/ucf.ipxe
 
 :SCCM-Deploy-Server
 	set next-server 10.208.8.209
 	set filename SMSBoot\x64\wdsnbp.com
 	autoboot ||
 	shell ||
-	chain http://10.173.119.78/ipxe/ucf.ipxe
+	chain http://${IPXESERVER}/ipxe/ucf.ipxe
 
 :Windows-brokee
 	imgfree
@@ -116,7 +105,7 @@ goto Menu
 	
 	autoboot ||
 	shell ||
-	chain http://10.173.119.78/ipxe/ucf.ipxe
+	chain http://${IPXESERVER}/ipxe/ucf.ipxe
 
 :Windows-exp
 	imgfree
@@ -151,7 +140,7 @@ goto Menu
 	#chain tftp:///Boot%5Cx64%5Cpxeboot.n12 ||
 	
 	shell ||
-	chain http://10.173.119.78/ipxe/ucf.ipxe
+	chain http://${IPXESERVER}/ipxe/ucf.ipxe
 	#chain \boot\x64\pxeboot.com ||
 	#chain tftp://10.173.119.81/boot\x64\pxeboot.com ||
 
@@ -179,7 +168,7 @@ goto Menu
         prompt --timeout 311 1.. ||
         prompt --timeout 311 1. || echo
 
-	chain http://10.173.119.78/ipxe/ucf.ipxe
+	chain http://${IPXESERVER}/ipxe/ucf.ipxe
 	#chain http://10.173.119.78/ISOs/winpe/boot.ipxe
 	goto DONE
 

@@ -160,6 +160,10 @@ chroot_configure_staticip(){
 		echo \ \ \ \ dns-search ${search_domain=cos.ucf.edu}
 		echo \ \ \ \ post-up ip route add $(chroot ${ROOT} /sbin/ip route show 0/0)
 	} | chroot ${ROOT} /usr/bin/tee /etc/network/interfaces
+	# add entries to rc.local to initialize the interface card and re-mount any fstab entries
+	chroot ${ROOT} /bin/sed -i "/^exit 0$/i /sbin/ifconfig $6 up" /etc/rc.local 
+	chroot ${ROOT} /bin/sed -i "/^exit 0$/i /bin/mount -a"        /etc/rc.local 
+
 	# fix IFS delimiter back to default
 	IFS=${DIFS}
 	# fix /etc/init/failsafe.conf to bypass crazy sleep timers	
