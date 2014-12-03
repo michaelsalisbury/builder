@@ -36,7 +36,7 @@ function setup_make_Config(){
 		alias vpno='openconnect \$(awk -F'\''[= ]*'\'' '\''/^url/{print \$2}'\'' \${HOME}/.vpn.cred)'
 		#alias vpnc='\${HOME}/.scripts/openconnect.exp &\| tail -a \${HOME}/.logs/openconnect'
 		alias vpnc='\${HOME}/.scripts/openconnect.exp &> \${HOME}/.logs/openconnect &'
-		alias vpnd='sudo killall openconnect'
+		alias vpnd='sudo killall openconnect; sudo killall -9 openconnect; sudo resolvconf -u'
 		alias vpns='ifconfig tun; tail \${HOME}/.logs/openconnect'
 	END-OF-ALIASES
 	cat <<-END-OF-VPNCONF > /etc/skel/.vpn.cred
