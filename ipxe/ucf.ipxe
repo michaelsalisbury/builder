@@ -32,6 +32,8 @@ goto Menu
 	item
 	item menu-clusters	Clusters: Mucciolo, Kara, Bhattacharya, Chen
 	item
+	item menu-iscsi		iSCSI: DLPBMM1
+	item
 	#item menu-cosit	COSIT Deploy Server
 	#item
 	item shell		Enter iPXE shell
@@ -57,6 +59,8 @@ goto Menu
 	chain http://${IPXESERVER}/ipxe/ucf.tools.ipxe
 :menu-clusters
 	chain http://${IPXESERVER}/ipxe/ucf.clusters.ipxe
+:menu-iscsi
+	chain http://${IPXESERVER}/ipxe/ucf.iscsi.ipxe
 #:menu-cosit
 #	goto COSIT-Deploy-Server
 :shell

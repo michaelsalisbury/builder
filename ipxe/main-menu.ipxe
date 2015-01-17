@@ -2,11 +2,43 @@
 # make using command ~/ipxe/src/make --EMBEDDED_IMAGE=~/ipxe.scripts/ipxelinux.ipxt
 
 # MAIN
-goto Menu
+goto MacBoot
+# virtualbox Ubuntu-1404-iscsi
+:08:00:27:9a:9e:6d
+	set MacBoot menu-Ubuntu-1404-iscsi
+	goto menu-iscsi
+
+# Dell Optiplex 980 DLPBMM1
+:b8:ac:6f:ad:d5:e5
+	set MacBoot menu-DLPBMM1
+	goto menu-iscsi
+
+# virtualbox Win7-x86_64 TEST iscsi
+:08:00:27:ba:2b:cb
+	set MacBoot menu-VBOX-WIN7-TEST-iscsi	
+	goto menu-iscsi
+
+# virtualbox Win7-x86_64 DOMAIN iscsi
+:08:00:27:ba:2b:cc
+	set MacBoot menu-VBOX-WIN7-DOMAIN-iscsi	
+	goto menu-iscsi
+
+:MacBoot
+	set pause-wait-goto      Menu
+	set pause-wait-done      MacBootSelect
+	set press-key            s
+	set pause-wait-time-step 100
+	echo
+	#cho }----------X----------X----------X-----X-----X----------X----------X----------{
+	echo }---------------------Heads-Up :: Boot ${mac} ---------------------{
+	goto pause-wait
+
+:MacBootSelect
+	goto ${mac} ||
 
 :start
 :Menu
-	menu Welcome to COSIT remote PXE Environment
+	menu Welcome to COSIT remote PXE Environment ${mac}
 	item menu-cosit         WDS .cos Deploy Windows
 	item
 	item menu-winpe		SCCM .NET Deploy Windows
@@ -20,6 +52,8 @@ goto Menu
 	item menu-ubuntu	Ubuntu: Live Boot & Deploys for Unity, Xubtunu, Mint & Other
 	item
 	item menu-clusters	Clusters: Mucciolo, Kara, Bhattacharya, Chen
+	item
+	item menu-iscsi		iSCSI: DLPBMM1
 	item
 	#item menu-cosit	COSIT Deploy Server
 	#item
@@ -46,6 +80,8 @@ goto Menu
 	chain http://${IPXESERVER}/ipxe/ucf.tools.ipxe
 :menu-clusters
 	chain http://${IPXESERVER}/ipxe/ucf.clusters.ipxe
+:menu-iscsi
+	chain http://${IPXESERVER}/ipxe/ucf.iscsi.ipxe
 #:menu-cosit
 #	goto COSIT-Deploy-Server
 :shell
@@ -171,6 +207,83 @@ goto Menu
 	chain http://${IPXESERVER}/ipxe/ucf.ipxe
 	#chain http://10.173.119.78/ISOs/winpe/boot.ipxe
 	goto DONE
+
+###############################################################################################################################################################
+###############################################################################################################################################################
+###############################################################################################################################################################
+:pause-wait
+	isset ${pause-wait-time-step} || set pause-wait-time-step 1000
+	isset ${pause-wait-goto}      || set pause-wait-goto      pause-wait-done
+	set press-key s
+	#cho                  }----------X----------X----------X-----X-----X----------X----------X----------{
+	set pause-wait-header }---------------------Stand-By :: Press "${press-key}" to skip delay---------------------{
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} ${pause-wait-header} && goto ${pause-wait-goto} ||
+
+	#echo }----------------------------------Stand-By-----------------------------------{
+	echo ${pause-wait-header}
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 60........................................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 59.......................................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 58......................................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 57........................................................ && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 56....................................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 55...................................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 54..................................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 53.................................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 52................................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 51.................................................. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 50................................................. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 49................................................ && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 48............................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 47.............................................. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 46............................................. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 45............................................ && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 44........................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 43.......................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 42......................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 41........................................ && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 40....................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 39...................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 38..................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 37.................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 36................................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 35.................................. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 34................................. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 33................................ && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 32............................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 31.............................. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 30............................. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 29............................ && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 28........................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 27.......................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 26......................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 25........................ && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 24....................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 23...................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 22..................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 21.................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 20................... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 19.................. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 18................. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 17................ && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 16............... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 15.............. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 14............. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 13............ && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 12........... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 11.......... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 10......... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 9......... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 8........ && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 7....... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 6...... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 5..... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 4.... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 3... && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 2.. && goto ${pause-wait-goto} ||
+	prompt --timeout ${pause-wait-time-step} --key ${press-key} 1. && goto ${pause-wait-goto} || echo
+	goto ${pause-wait-done} ||
+	goto ${pause-wait-goto} ||
+	goto Menu
 
 :DONE
 

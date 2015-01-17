@@ -36,9 +36,9 @@ goto Menu
 :menu-disk-station-stable
 	goto xubuntu-Disk-Station
 :menu-disk-station-alpha
-	goto xubuntu-Disk-Station
+	goto xubuntu-Disk-Station-Alpha
 :menu-disk-station-beta
-	goto xubuntu-Disk-Station
+	goto xubuntu-Disk-Station-Beta
 :menu-ubuntu
 	chain http://${IPXESERVER}/ipxe/ucf.ubuntu.ipxe
 :menu-tools
@@ -82,6 +82,33 @@ goto Menu
 	goto DONE
 
 :xubuntu-Disk-Station
+	set DISTRO   ubuntu
+	set VERSION  xubuntu-14.04.1-desktop-amd64
+	set SERVERIP ${IPXESERVER}
+	set dns0     ${LOCALDNS00}
+	set dns1     ${LOCALDNS01}
+	set search   ${LOCALSEARCH}
+        set NFSOPTS  -ouser=guest,ro
+        set CIFS     ISOs/${DISTRO}/${VERSION}
+        set KERNEL   ISOs/${DISTRO}/${VERSION}/casper/vmlinuz.efi
+        set INITRD   ISOs/${DISTRO}/${VERSION}/casper/initrd.lz
+	#set SEED     ipxe/ubuntu.seed
+	set SEED     kickstart/ubuntu/l.xubuntu-Disk-Station/seed
+        set APPEND   boot=casper root=/dev/cifs netboot=cifs nfsroot=//${SERVERIP}/${CIFS} nfsopts=${NFSOPTS}
+	set APPEND   ${APPEND} url=http://${SERVERIP}/${SEED}
+	# ip=<client-ip>:<server-ip>:<gateway>:<subnet mask>:<client-hostname>:<interface>:<configuration-method>
+	#set APPEND   ${APPEND} ip=${ip}::${gateway}:${netmask}:disk-station:eth0:static
+	#set APPEND   ${APPEND} dns0=${dn0} dns1=${dns1} search_domain=${search}
+	set APPEND   ${APPEND} pass_env_to_live=/root
+	#set APPEND   ${APPEND} VBST_DISABLE_BRIDGED_ETH
+	set APPEND   ${APPEND} config showmounts keyboard-configuration/layoutcode=us noprompt toram ro
+        ####################################################################################################
+        kernel http://${SERVERIP}/${KERNEL} ${APPEND}
+        initrd http://${SERVERIP}/${INITRD}
+        boot
+	goto DONE
+
+:xubuntu-Disk-Station-Alpha
 	set DISTRO   ubuntu
 	set VERSION  xubuntu-14.04.1-desktop-amd64
 	set SERVERIP ${IPXESERVER}

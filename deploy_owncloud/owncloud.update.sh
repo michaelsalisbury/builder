@@ -7,7 +7,7 @@ function includes(){
 	functions*.sh
 }
 function global_variables(){
-	owncloud_release_major=5
+	owncloud_release_major=7
 	owncloud_Downloads_Prep=/root/Downloads
 	owncloud_changelog=$owncloud_Downloads_Prep/owncloud_changelog
 	owncloud_mysql_root_passwd=1qaz@WSX
