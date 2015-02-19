@@ -14,12 +14,12 @@ function main(){
 	GET_HOSTNAME_SIMPLE 10.173.158.26 ${DOM}
 	GET_HOSTNAME_DOM    10.173.158.26 ${DOM}
 
-	SSH_COPY_ID $(whoami) 10.173.161.254 'COSTech2010\!'
-	SSH_COPY_ID $(whoami) 10.173.161.50  'COSTech2010\!'
-	SSH_COPY_ID $(whoami) 10.173.161.50  'COSTech2010\!' ~/.ssh/id_rsa.2945star
+	SSH_COPY_ID $(whoami) 10.173.161.254 'xxxx'
+	SSH_COPY_ID $(whoami) 10.173.161.50  'xxxx'
+	SSH_COPY_ID $(whoami) 10.173.161.50  'xxxx' ~/.ssh/id_rsa.2945star
 
-	SSH_COPY_ID root      10.173.161.50  '1qaz@WSX'
-	SSH_COPY_ID root      10.173.161.50  '1qaz@WSX'      ~/.ssh/id_rsa.2945star 
+	SSH_COPY_ID root      10.173.161.50  'xxxx'
+	SSH_COPY_ID root      10.173.161.50  'xxxx'      ~/.ssh/id_rsa.2945star 
 
 
 	#IP_IS_UP ${IP}	&& echo "${IP}"
@@ -35,8 +35,8 @@ function PUSH_KEYS(){
 		#GET_HOST_ENTRY ${IP} ${DOM}
 	done < <(cat /etc/hosts | awk '/^[0-9].*/{print $1}')
 
-	local -A PASSWORDS=([root]='1qaz@WSX')
-	PASSWORDS+=([localcosadmin]='COSTech2010!')
+	local -A PASSWORDS=([root]='xxxx')
+	PASSWORDS+=([localcosadmin]='xxxx')
 	
 	local IP=10.173.161.50
 	for USERNAME in root localcosadmin; do

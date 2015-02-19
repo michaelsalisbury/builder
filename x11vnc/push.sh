@@ -9,7 +9,7 @@ function includes(){
 }
 function global_variables(){
 	SSH_USERNAME='localcosadmin'
-	SSH_PASSWORD='COSTech2010\!'
+	SSH_PASSWORD='xxxx'
 	push_packagename=$(basename "${scriptPath}")
 }
 function host_list(){
