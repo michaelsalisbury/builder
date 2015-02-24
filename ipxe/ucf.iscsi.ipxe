@@ -15,6 +15,8 @@ goto Menu
 	item
 	item menu-VBOX-WIN7-DOMAIN-iscsi	VirtualBox: WIN7-DOMAIN-iscsi
 	item
+	item menu-FreeNAS-9.2.1.8		FreeNAS: 9.2.1.8
+	item
 	item shell				Enter iPXE shell
 	item
 	item reboot				Reboot
@@ -24,6 +26,13 @@ goto Menu
 	#choose --default menu-disk-station --timeout 60000 target && goto ${target}
 
 ## Utility menu items:
+:menu-FreeNAS-9.2.1.8
+	set HOST     FreeNAS-9.2.1.8
+	set SERVER   G88192RMXYK
+	set SERVERIP 10.173.119.78
+	sanboot iscsi:${SERVERIP}::::iqn.edu.ucf.cos.${SERVER}:${HOST}
+	goto DONE
+
 :menu-DLPBMM1
 	set HOST     DLPBMM1
 	set SERVER   G88192RMXYK

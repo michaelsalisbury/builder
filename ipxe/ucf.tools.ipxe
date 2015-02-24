@@ -13,6 +13,8 @@ goto Menu
 	item systemrescuecd	SysRescueCD
 	item clonezilla		CloneZilla
 	item knoppix            KNOPPIX
+	item FreeNAS-9.2.1.8	FreeNAS: 9.2.1.8
+	item FreeNAS-9.2.3.x	FreeNAS: 9.3.x
 	item
 	item shell		Enter iPXE shell
 	item reboot		Reboot
@@ -22,6 +24,13 @@ goto Menu
 ## Utility menu items:
 :goback
 	chain http://10.173.119.78/ipxe/ucf.ipxe
+:FreeNAS-9.2.1.8
+	kernel http://10.173.119.78/ISOs/syslinux/memdisk iso raw
+	initrd http://10.173.119.78/ISOs/FreeNAS/FreeNAS-9.2.1.8-RELEASE-x64.iso
+	boot
+	goto DONE
+:FreeNAS-9.3.x
+
 :dban
 	goto dban-2.2.6
 :spinrite
