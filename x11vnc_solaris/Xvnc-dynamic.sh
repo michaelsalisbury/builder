@@ -1,6 +1,6 @@
 #!/bin/bash
 #https://wiki.archlinux.org/index.php/X11vnc
-DESKTOPS='gnome twm ice fluxbox xfce4 kde'
+DESKTOPS='gnome twm ice fluxbox xfce4 kde mate'
 #rfbport=33607
 #cat | /opt/csw/bin/nc 127.0.0.1 ${rfbport} &
 
@@ -246,7 +246,7 @@ function VERIFY_GLOBAL_DESKTOP(){
 	#[[ "${DESKTOPS}" =~ (^|[[:space:]])"${desktop}"([[:space:]]|$) ]] && return 0
 	# If no approved desktop is selected fix to default
 	echo FIXING :: desktop selection from ${desktop:-MISSING}
-	desktop='gnome'
+	desktop='mate'
 	DISPLAY_WRITE_KEY ${username} ${vncPORT} desktop
 }
 function VERIFY_GLOBAL_RESOLUTION(){

@@ -322,7 +322,7 @@ function DISPLAY_SETUP_DEFAULTS(){
 	# setup file if missingi & add port entry
 	DISPLAY_NEW_PORT ${username} ${vncPORT}
 	# setup default key value pairs
-	local desktop='gnome'
+	local desktop='mate'
 	local resolution='1024x768'
 	local depth='15'
 	local rfbport='0'

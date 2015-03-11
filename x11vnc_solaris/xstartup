@@ -39,6 +39,7 @@ function main(){
 	local  FLUXBOX=$(WHICH fluxbox			2>/dev/null)
 	local    XFCE4=$(WHICH xfce4-session		2>/dev/null)
 	local      KDE=$(WHICH startkde			2>/dev/null)
+	local     MATE=$(WHICH mate-session		2>/dev/null)
 
 	# Write display file details for vncserver connection
 	echo XSTARTUP :: Writting KEYS                     >> "${LOG}"
@@ -117,6 +118,8 @@ function main(){
 		gnome)		exec ${CKLAUNCH} ${SSHAGENT} ${GSESSION};;
 
 		xfce4)		exec ${CKLAUNCH} ${SSHAGENT} ${XFCE4};;
+
+		mate)		exec ${CKLAUNCH} ${SSHAGENT} ${MATE};;
 
 		kde)		exec ${CKLAUNCH} ${SSHAGENT} ${KDE};;
 
