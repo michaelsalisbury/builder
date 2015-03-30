@@ -11,6 +11,8 @@ goto Menu
 	item
 	item menu-Ubuntu-1404-iscsi		VirtualBox: Ubuntu-1404-iscsi
 	item
+	item menu-Ubuntu-1404-NETDEV		VirtualBox: Ubuntu-1404-NETDEV
+	item
 	item menu-VBOX-WIN7-TEST-iscsi		VirtualBox: WIN7-TEST-iscsi
 	item
 	item menu-VBOX-WIN7-DOMAIN-iscsi	VirtualBox: WIN7-DOMAIN-iscsi
@@ -35,6 +37,13 @@ goto Menu
 
 :menu-DLPBMM1
 	set HOST     DLPBMM1
+	set SERVER   G88192RMXYK
+	set SERVERIP 10.173.119.78
+	sanboot iscsi:${SERVERIP}::::iqn.edu.ucf.cos.${SERVER}:${HOST}
+	goto DONE
+
+:menu-Ubuntu-1404-NETDEV
+	set HOST     NETDEV
 	set SERVER   G88192RMXYK
 	set SERVERIP 10.173.119.78
 	sanboot iscsi:${SERVERIP}::::iqn.edu.ucf.cos.${SERVER}:${HOST}
