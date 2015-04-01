@@ -15,6 +15,8 @@ goto Menu
 	item knoppix            KNOPPIX
 	item FreeNAS-9.2.1.8	FreeNAS: 9.2.1.8
 	item FreeNAS-9.3.x	FreeNAS: 9.3.STABLE
+	item CentOS		CentOS 7 Everything
+	#item CentOS-Live	CentOS 7 Live
 	item
 	item shell		Enter iPXE shell
 	item reboot		Reboot
@@ -34,6 +36,10 @@ goto Menu
 	initrd http://10.173.119.78/ISOs/FreeNAS/FreeNAS-9.3-STABLE-201502162250.iso
 	boot
 	goto DONE
+:CentOS
+	goto CentOS-7-EVERYTHING
+:CentOS-Live
+	goto CentOS-7-Live
 
 :dban
 	goto dban-2.2.6
@@ -61,6 +67,42 @@ goto Menu
 	exit
 
 ## Actions
+:CentOS-7-NETBOOT
+	set SERVERIP 10.173.119.78
+	set HTTP     http://${SERVERIP}/ISOs/centos/CentOS-7-x86_64-NetInstall-1503/
+	set KERNEL   ${HTTP}/vmlinuz
+	set INITRD   ${HTTP}/initrd.img
+	set APPEND   ramdisk_size=100000 ip=dhcp repo=${HTTP}
+        ####################################################################################################
+	kernel ${KERNEL} ${APPEND}
+	initrd ${INITRD}
+	boot
+	goto DONE
+
+:CentOS-7-EVERYTHING
+	set SERVERIP 10.173.119.78
+	set HTTP     http://${SERVERIP}/ISOs/centos/CentOS-7-x86_64-Everything-1503-01
+	set KERNEL   ${HTTP}/images/pxeboot/vmlinuz
+	set INITRD   ${HTTP}/images/pxeboot/initrd.img
+	set APPEND   ramdisk_size=100000 ip=dhcp repo=${HTTP}
+        ####################################################################################################
+	kernel ${KERNEL} ${APPEND}
+	initrd ${INITRD}
+	boot
+	goto DONE
+
+:CentOS-7-Live
+	set SERVERIP 10.173.119.78
+	set HTTP     http://${SERVERIP}/ISOs/centos/CentOS-7-x86_64-LiveGNOME-1503
+	set KERNEL   ${HTTP}/isolinux/vmlinuz0
+	set INITRD   ${HTTP}/isolinux/initrd0.img
+	set APPEND   boot=live repo=${HTTP}
+        ####################################################################################################
+	kernel ${KERNEL} ${APPEND}
+	initrd ${INITRD}
+	boot
+	goto DONE
+
 :systemrescuecd-x86-3.1.0
 	set SERVERIP 10.173.119.72
 	set NFSMOUNT /Library/NetBoot/NFSserver/systemrescuecd-x86-3.1.0-builder
