@@ -25,18 +25,60 @@ function DEBUGGER(){
 		done < <(cat)
 	fi
 }
+function IS_DOMAIN(){
+	echo "$@" | DEBUGGER ??
+	local object=$1
+	id -u "${object}" &>/dev/null && ! IS_LOCAL_USER "${object}"
+}
+function GET_DOMAIN_TYPE(){
+	echo "$@" | DEBUGGER ??
+	local object=$1
+	IS_DOMAIN "${object}" || return 1
+	if which wbinfo &>/dev/null; then
+		wbinfo -n "${object}" 2>/dev/null |
+		awk '{print $2}' |
+		awk -F_ '{print $NF}'
+	elif getent initgroups "${object}" | grep -q -i "^${object}[[:space:]]*$"; then
+		echo GROUP
+	else
+		echo USER
+	fi
+}
+function IS_DOMAIN_USER(){
+	echo "$@" | DEBUGGER ??
+	local username=$1
+	GET_DOMAIN_TYPE "${username}" |
+	grep -q -i -x user
+}
+function IS_DOMAIN_GROUP(){
+	echo "$@" | DEBUGGER ??
+	local username=$1
+	GET_DOMAIN_TYPE "${username}" |
+	grep -q -i -x group
+}
+function IS_LOCAL_GROUP(){
+	echo "$@" | DEBUGGER ??
+	local group=$1
+	! id -u "${group}" &>/dev/null && getent group "${group}" &>/dev/null
+}
+function IS_LOCAL_USER(){
+	echo "$@" | DEBUGGER ??
+	local username=$1
+	getent shadow "${username}" &>/dev/null
+}
 function IS_USER_ADMIN(){
 	echo "$@" | DEBUGGER ??
 	local username=$1
 	local vncPORT=$2
 	shift 2
-	#GET_ALLOWED_USERS | grep "^${username}$" &>/dev/null
-	if GET_ALLOWED_USERS | grep "^${username}$" &>/dev/null; then
-		echo SUPERu :: User \"${username}\" is an admin\!
-		return 0
-	else
-		echo BASICu :: User \"${username}\" is NOT an admin\!
+
+	grep -i -F -x -f <(GET_ALLOWED_ADMIN_USERS_GROUPS "$@") <(GET_USER_GROUPS "${username}") | xargs echo ACCESS ::
+	if (( ${PIPESTATUS[0]} )); then	
+		echo BASIC\  :: User \"${username}\" is NOT an admin\!
 		return 1
+	else
+		echo SUPER\  :: User \"${username}\" is an admin\!
+		return 0
 	fi
 }
 function IS_USER_ALLOWED(){
@@ -44,70 +86,88 @@ function IS_USER_ALLOWED(){
 	local username=$1
 	local vncPORT=$2
 	shift 2
-        if GET_ALLOWED_USERS "$@" | grep "^${username}$" &>/dev/null; then
-                echo "$@"              | xargs echo OPTARG :: 
-                GET_ALLOWED_USERS "$@" | xargs echo ACCESS ::
-		return 0
-        else
+	echo "$@" | xargs echo OPTARG :: 
+	# compare lists "GET_ALLOWED_USERS_GROUPS,GET_USER_GROUPS" to see if there is a match between them
+	grep -i -F -x -f <(GET_ALLOWED_USERS_GROUPS "$@") <(GET_USER_GROUPS "${username}") | xargs echo ACCESS ::
+	if (( ${PIPESTATUS[0]} )); then	
                 echo EXITING\!\!\! User \"${username}\" tried to\
                         VNC via $'('127.0.0.1:${vncPORT}$')'.
 		return 1
         fi
 }
-function GET_ALLOWED_USERS(){
+function GET_USER_GROUPS(){
 	echo "$@" | DEBUGGER ??
-	local entry=""		# loop var
-	local usernames=""	# loop var
-	local config_folder=${CONFIG_FOLDER}
-	# Append root to list of allowed users
-	echo root
-	# Append all users in the wheel group to allowed users
-	PARSE_USERNAME wheel adm
-	#echo _TEST_ :: ${config_folder} >> "${LOG}"
-	for entry in "$@"; do
-		#echo PARSING ENTRY :: ${entry}
-		if [ -f "${entry}" ]; then
-			#echo _TEST_ :: is file >> "${LOG}"
-			while read -a usernames; do
-				PARSE_USERNAME "${usernames[*]}"
-			done < <(cat "${entry}")
-		elif [ -f "${config_folder}/${entry}" ]; then
-			#echo _TEST_ :: is relative 
-			while read -a usernames; do
-				#echo ${config_folder}/${entry} :: LINE :: ${usernames[*]}
-				PARSE_USERNAME "${usernames[*]}"
-			done < <(cat "${config_folder}/${entry}")
-		else
-			#echo _TEST_ :: is name >> "${LOG}"
-			PARSE_USERNAME ${entry}
-		fi
+	local GID username=$1
+	# domain groups if queried via group can hang due to the masive number of members
+	# domain groups are assumed to have a matching user with the same ID
+	IS_LOCAL_USER "${username}" && local DB='group' || local DB='passwd'
+	# echo the username
+	getent passwd "${username}" 2>/dev/null | cut -d: -f1
+	# generate a list of groups the user is a memebr off
+	for GID in `id -G "${username}" 2>/dev/null`; do
+		getent ${DB} ${GID} 2>/dev/null | cut -d: -f1
 	done
 }
-function PARSE_USERNAME(){
+function GET_ALLOWED_ADMIN_USERS_GROUPS(){
+	GET_ALLOWED_USERS_GROUPS "$@"
+}
+function GET_ALLOWED_USERS_GROUPS(){
 	echo "$@" | DEBUGGER ??
-	local username=""	# loop var
-	for username in "$@"; do
-		#echo _TEST_ :: PARSE :: "${username}" >> "${LOG}" 
-		# if name is a username then add to list
-		grep "^${username}:" /etc/passwd &> /dev/null && echo ${username}
-		# parse groups for match and list users	
-		cat <<-AWK | awk -F: -f <(cat) /etc/group
-			\$1=="${username}" {
-				gsub(" ","",\$4)	# remove all whitespace
-				sub(/^,*/,"",\$4)	# remove leading commas
-				sub(/,*\$/,"",\$4)	# remove trailing commas
-				gsub(",","\n",\$4)	# sub commas for newlines
-				if(\$4=="")exit		# exit if no users in group
-				print \$4
-				exit
-			}
-		AWK
-	done
+	local arg=""		# loop var
+	local object=""	# loop var
+	local config_folder=${CONFIG_FOLDER}
+	local admin_indicator='*'
+
+	# Append root to list of allowed users
+	echo root
+	# arguments supplied to this function are either users and groups or a file with a list of users or groups
+	for arg in "$@"; do
+		if [ -f "${arg}" ]; then
+			cat "${arg}"
+		elif [ -f "${config_folder}/${arg}" ]; then
+			cat "${config_folder}/${arg}"
+		else
+			echo "${arg}"
+		fi
+	done |
+	while read object; do
+		# remove blank or commane lines
+		[[ "${object}" =~ ^[[:space:]]*('#'|$) ]] && continue
+		# strip leading and trailing spaces
+		[[ "${object}" =~ ^[[:space:]]*(.*[^[:space:]])[[:space:]]*$ ]] && object=${BASH_REMATCH[1]}
+		# strip trailing admin indicator character
+		[[ "${object}" =~ (.*[^[:space:]])[[:space:]]*[${admin_indicator}]$ ]] && object=${BASH_REMATCH[1]} IS_ADMIN=true || IS_ADMIN=false
+		# skip users/groups who arn't admins
+		case "${FUNCNAME[1]}" in
+			GET_ALLOWED_ADMIN_USERS_GROUPS) ${IS_ADMIN} || continue;;
+		esac
+		# print allowed users/groups
+		echo "${object}"
+
+	done |
+	IS_USER_GROUP
+}
+function IS_USER_GROUP(){
+	echo "$@" | DEBUGGER ??
+	while read object; do
+		if IS_LOCAL_USER "${object}"; then
+			local DB='passwd'
+		elif IS_LOCAL_GROUP "${object}" || IS_DOMAIN_USER "${object}"; then
+			local DB='group'
+		else
+			local DB='passwd'
+		fi
+		getent ${DB} "${object}" 2>/dev/null | cut -d: -f1 
+	done < <((( ${#1} )) && echo "${object}" || cat)
+	# this returns the status of the last iteration of the getent command
+	# generally the exit status is not important unless only one object is being tested
+	return ${PIPESTATUS[0]}
 }
 function GET_USER_HOMEDIR(){
 	echo "$@" | DEBUGGER ??
 	local username="$1"
-	cat <<-AWK | awk -F: -f <(cat) /etc/passwd | tee >(DEBUGGER ==)
+	#cat <<-AWK | awk -F: -f <(cat) /etc/passwd <(which wbinfo &>/dev/null && wbinfo -i "${username}" 2>/dev/null) | tee >(DEBUGGER ==)
+	cat <<-AWK | awk -F: -f <(cat) <(getent passwd "$(id -u "${username}" 2>/dev/null)") | tee >(DEBUGGER ==)
 		\$1=="${username}"{print \$6}
 	AWK
 }

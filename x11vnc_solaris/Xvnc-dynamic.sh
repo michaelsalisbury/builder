@@ -28,11 +28,9 @@ function main(){
 	echo ___GET :: usr HOME :: `GET_USER_HOMEDIR $(GET_PROC_SRC_USER $$)`
 	echo
 
-	#GET_ALLOWED_USERS "$@"
-
 	# test if connecting user was not on the allowed_users array list
 	IS_USER_ALLOWED ${srcUSER} ${vncPORT} "$@" || exit 1
-	IS_USER_ADMIN   ${srcUSER} 
+	IS_USER_ADMIN   ${srcUSER} ${vncPORT} "$@"
 
 	# load last known display port details (bewaire; these will be global)
 	DISPLAY_READ_KEYS ${srcUSER} ${vncPORT}
