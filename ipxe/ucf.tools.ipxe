@@ -84,7 +84,13 @@ goto Menu
 	set HTTP     http://${SERVERIP}/ISOs/centos/CentOS-7-x86_64-Everything-1503-01
 	set KERNEL   ${HTTP}/images/pxeboot/vmlinuz
 	set INITRD   ${HTTP}/images/pxeboot/initrd.img
-	set APPEND   ramdisk_size=100000 ip=dhcp repo=${HTTP}
+	#set APPEND   ramdisk_size=100000 ip=dhcp repo=${HTTP}
+	#set APPEND   ramdisk_size=100000 repo=${HTTP} ip=10.171.92.208 netmask=255.255.255.0 gateway=10.171.92.1 dns=10.171.12.5
+	set APPEND   ramdisk_size=100000 repo=${HTTP}
+	set APPEND   ${APPEND} ip=${ip} netmask=${netmask} gateway=${gateway}
+	set APPEND   ${APPEND} nameserver=10.171.12.5
+	#set APPEND   ${APPEND} nameserver=10.171.12.5,10.171.12.37
+	#set APPEND   ${APPEND} dns=10.171.12.5
         ####################################################################################################
 	kernel ${KERNEL} ${APPEND}
 	initrd ${INITRD}
