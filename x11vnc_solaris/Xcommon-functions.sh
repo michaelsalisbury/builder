@@ -192,7 +192,7 @@ function GET_PROC_SOCKETS(){
 				-a			\
 				-c ${BASH_SRCNAME}	\
 				-a			\
-				-i 4			\
+				-i			\
 				-F n
 			)
 		echo ${SOCKETS[*]} | tee >(DEBUGGER ==)

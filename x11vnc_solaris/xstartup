@@ -117,6 +117,11 @@ function main(){
 	case ${DESKTOP} in
 		gnome)		exec ${CKLAUNCH} ${SSHAGENT} ${GSESSION};;
 
+		gnome-classic)	export GNOME_SHELL_SESSION_MODE=classic
+				exec -l /bin/sh -c ${GSESSION} --session=gnome-classic;;
+
+		gnome3)		exec -l /bin/sh -c ${GSESSION};;
+
 		xfce4)		exec ${CKLAUNCH} ${SSHAGENT} ${XFCE4};;
 
 		mate)		exec ${CKLAUNCH} ${SSHAGENT} ${MATE};;

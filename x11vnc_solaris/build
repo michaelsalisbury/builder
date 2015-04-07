@@ -80,6 +80,7 @@ read -d $'' majors <<-EOE
 	Xvnc-dynamic.sh
 	x11vnc.sh
 	xstartup
+	systemd/*
 EOE
 # Projects support files
 read -d $'' includes <<-EOE

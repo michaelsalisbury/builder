@@ -1,6 +1,6 @@
 #!/bin/bash
 #https://wiki.archlinux.org/index.php/X11vnc
-DESKTOPS='gnome twm ice fluxbox xfce4 kde mate'
+DESKTOPS='gnome twm ice fluxbox xfce4 kde mate gnome-classic gnome3'
 #rfbport=33607
 #cat | /opt/csw/bin/nc 127.0.0.1 ${rfbport} &
 
