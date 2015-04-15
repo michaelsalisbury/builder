@@ -1,0 +1,13 @@
+[Unit]
+Description=Dynamic VNC connections to console display over localhost
+
+[Socket]
+ListenStream=5899
+Accept=yes
+BindIPv6Only=both
+BindToDevice=lo
+
+[Install]
+Alias=x11vnc.socket
+WantedBy=sockets.target
+

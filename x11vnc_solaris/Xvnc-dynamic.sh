@@ -18,35 +18,35 @@ function main(){
 	# get connecting username
 	local srcUSER=`GET_PROC_SRC_USER $$`
 	local vncPORT=`GET_PROC_DST_PORT $$`
-	local usrHOME=`GET_USER_HOMEDIR ${srcUSER}`
+	local usrHOME=`GET_USER_HOMEDIR "${srcUSER}"`
 	
 	echo ___PID :: $$
-	echo ___GET :: src USER :: `GET_PROC_SRC_USER $$`
-	echo ___GET :: src PID_ :: `GET_PROC_SRC_PID $$`
-	echo ___GET :: src PORT :: `GET_PROC_SRC_PORT $$`
-	echo ___GET :: vnc PORT :: `GET_PROC_DST_PORT $$`
-	echo ___GET :: usr HOME :: `GET_USER_HOMEDIR $(GET_PROC_SRC_USER $$)`
+	echo ___GET :: src USER :: "`GET_PROC_SRC_USER $$`"
+	echo ___GET :: src PID_ ::  `GET_PROC_SRC_PID $$`
+	echo ___GET :: src PORT ::  `GET_PROC_SRC_PORT $$`
+	echo ___GET :: vnc PORT ::  `GET_PROC_DST_PORT $$`
+	echo ___GET :: usr HOME ::  `GET_USER_HOMEDIR "$(GET_PROC_SRC_USER $$)"`
 	echo
 
 	# test if connecting user was not on the allowed_users array list
-	IS_USER_ALLOWED ${srcUSER} ${vncPORT} "$@" || exit 1
-	IS_USER_ADMIN   ${srcUSER} ${vncPORT} "$@"
+	IS_USER_ALLOWED "${srcUSER}" ${vncPORT} "$@" || exit 1
+	IS_USER_ADMIN   "${srcUSER}" ${vncPORT} "$@"
 
 	# load last known display port details (bewaire; these will be global)
-	DISPLAY_READ_KEYS ${srcUSER} ${vncPORT}
+	DISPLAY_READ_KEYS "${srcUSER}" ${vncPORT}
 	
 	# verify that desktop selection is supported
-	VERIFY_GLOBAL_DESKTOP ${srcUSER} ${vncPORT}
+	VERIFY_GLOBAL_DESKTOP "${srcUSER}" ${vncPORT}
 
 	# verify resolution is formatted correctly and in range
-	VERIFY_GLOBAL_RESOLUTION ${srcUSER} ${vncPORT}
+	VERIFY_GLOBAL_RESOLUTION "${srcUSER}" ${vncPORT}
 
 	# verify that depth is a positive integer
 	# verify that depth is only values of 8, 16 & 24 (15 has font problems)
-	VERIFY_GLOBAL_DEPTH ${srcUSER} ${vncPORT}
+	VERIFY_GLOBAL_DEPTH "${srcUSER}" ${vncPORT}
 
 	# verify that Ubuntu gnome desktop has logout icon
-	VERIFY_UBUNTU_GNOME_LOGOUT ${srcUSER} ${desktop}
+	VERIFY_UBUNTU_GNOME_LOGOUT "${srcUSER}" ${desktop}
 
 	# echo vncserver setup details
 	echo GLOBAL :: ________________________
@@ -58,18 +58,18 @@ function main(){
         echo GLOBAL :: vncDisplay :: ${vncDisplay}
 
 	# test to see if display is still open 
-	if IS_DISPLAY_OPEN ${srcUSER} ${vncPID} ${vncDisplay}; then
+	if IS_DISPLAY_OPEN "${srcUSER}" ${vncPID} ${vncDisplay}; then
 		echo _JUMP_ ::
 	else
 		# generate randome port number to create vncserver display: rfbport
-		SET_FREE_LISTENING_PORT ${srcUSER} ${vncPORT}
+		SET_FREE_LISTENING_PORT "${srcUSER}" ${vncPORT}
 		# write xstartup file
-		SET_xstartup ${srcUSER}
+		SET_xstartup "${srcUSER}"
 		# Setup VNCDESKTOP environmental variable
-		SET_VNCDESKTOP ${srcUSER} ${vncPORT} ${rfbport} ${desktop}
+		SET_VNCDESKTOP "${srcUSER}" ${vncPORT} ${rfbport} ${desktop}
 		echo GLOBAL :: VNCDESKTOP :: ${VNCDESKTOP}
 		# setup vncserver display port
-		su - ${srcUSER} $(IS_OS_SOLARIS || echo -s /bin/bash)\
+		su - "${srcUSER}" $(IS_OS_SOLARIS || echo -s /bin/bash)\
 		<<-END-OF-VNCSERVER-SETUP
 			#export `grep ^PATH /etc/default/login`
 			export PATH=${PATH}
@@ -214,23 +214,12 @@ function SET_VNCDESKTOP(){
 	local rfbport=$3
 	local desktop=$4
 	read -d $'' VNCDESKTOP <<-EOE
-		vncUSER=${username}
+		SESSION=${username//\\/\\\\}@${vncPORT##*:}-${rfbport}:${desktop}
+		vncUSER=${username//\\/\\\\}
 		vncPORT=${vncPORT}
 		rfbport=${rfbport}
 		DESKTOP=${desktop}
 		    LOG=${LOG}
-	EOE
-}
-function SET_VNCDESKTOP_OLD(){
-	local username=$1
-	local vncPORT=$2
-	local rfbport=$3
-	local desktop=$4
-	read -d $'' VNCDESKTOP <<-EOE
-		[vncUSER]=${username}
-		[vncPORT]=${vncPORT}
-		[rfbport]=${rfbport}
-		[desktop]=${desktop}
 	EOE
 }
 function VERIFY_GLOBAL_DESKTOP(){

@@ -17,11 +17,10 @@ function WHICH(){
 	fi
 }
 function DEBUGGER(){
-	#${DEBUG:-true} && cat | xargs echo ${FUNCNAME[1]} ${1} >> "${LOG}"
 	if ${DEBUG:-true}; then
 		local DATA=""
-		while read DATA; do
-			echo "${DATA}" | xargs echo ${FUNCNAME[1]} ${1} >> "${LOG}"
+		while read -r DATA; do
+			echo ${FUNCNAME[1]} ${1} "${DATA}" >> "${LOG}"
 		done < <(cat)
 	fi
 }
@@ -36,9 +35,8 @@ function GET_DOMAIN_TYPE(){
 	IS_DOMAIN "${object}" || return 1
 	if which wbinfo &>/dev/null; then
 		wbinfo -n "${object}" 2>/dev/null |
-		awk '{print $2}' |
-		awk -F_ '{print $NF}'
-	elif getent initgroups "${object}" | grep -q -i "^${object}[[:space:]]*$"; then
+		grep -o "USER\|GROUP"
+	elif getent initgroups "${object}" | sed 's/ *$//' | grep -q -x -F "${object}"; then
 		echo GROUP
 	else
 		echo USER
@@ -71,8 +69,8 @@ function IS_USER_ADMIN(){
 	local username=$1
 	local vncPORT=$2
 	shift 2
-
-	grep -i -F -x -f <(GET_ALLOWED_ADMIN_USERS_GROUPS "$@") <(GET_USER_GROUPS "${username}") | xargs echo ACCESS ::
+	# compare lists "GET_ALLOWED_USERS_GROUPS,GET_USER_GROUPS" to see if there is a match between them
+	grep -i -F -x -f <(GET_ALLOWED_ADMIN_USERS_GROUPS "$@") <(GET_USER_GROUPS "${username}") | sed 's/^/ACCESS :: /'
 	if (( ${PIPESTATUS[0]} )); then	
 		echo BASIC\  :: User \"${username}\" is NOT an admin\!
 		return 1
@@ -88,7 +86,7 @@ function IS_USER_ALLOWED(){
 	shift 2
 	echo "$@" | xargs echo OPTARG :: 
 	# compare lists "GET_ALLOWED_USERS_GROUPS,GET_USER_GROUPS" to see if there is a match between them
-	grep -i -F -x -f <(GET_ALLOWED_USERS_GROUPS "$@") <(GET_USER_GROUPS "${username}") | xargs echo ACCESS ::
+	grep -i -F -x -f <(GET_ALLOWED_USERS_GROUPS "$@") <(GET_USER_GROUPS "${username}") | sed 's/^/ACCESS :: /'
 	if (( ${PIPESTATUS[0]} )); then	
                 echo EXITING\!\!\! User \"${username}\" tried to\
                         VNC via $'('127.0.0.1:${vncPORT}$')'.
@@ -129,8 +127,8 @@ function GET_ALLOWED_USERS_GROUPS(){
 		else
 			echo "${arg}"
 		fi
-	done |
-	while read object; do
+	done | 	# to preserve back slashes use option "-r" 
+	while read -r object; do
 		# remove blank or commane lines
 		[[ "${object}" =~ ^[[:space:]]*('#'|$) ]] && continue
 		# strip leading and trailing spaces
@@ -143,13 +141,13 @@ function GET_ALLOWED_USERS_GROUPS(){
 		esac
 		# print allowed users/groups
 		echo "${object}"
-
 	done |
 	IS_USER_GROUP
 }
 function IS_USER_GROUP(){
 	echo "$@" | DEBUGGER ??
-	while read object; do
+	# to preserve back slashes use option "-r" 
+	while read -r object; do
 		if IS_LOCAL_USER "${object}"; then
 			local DB='passwd'
 		elif IS_LOCAL_GROUP "${object}" || IS_DOMAIN_USER "${object}"; then
@@ -166,10 +164,7 @@ function IS_USER_GROUP(){
 function GET_USER_HOMEDIR(){
 	echo "$@" | DEBUGGER ??
 	local username="$1"
-	#cat <<-AWK | awk -F: -f <(cat) /etc/passwd <(which wbinfo &>/dev/null && wbinfo -i "${username}" 2>/dev/null) | tee >(DEBUGGER ==)
-	cat <<-AWK | awk -F: -f <(cat) <(getent passwd "$(id -u "${username}" 2>/dev/null)") | tee >(DEBUGGER ==)
-		\$1=="${username}"{print \$6}
-	AWK
+	getent passwd $(id -u "${username}") | grep -F "${username}" | cut -d: -f6
 }
 function GET_PROC_SOCKETS(){
 	echo "$@" | DEBUGGER ??
@@ -294,11 +289,11 @@ function GET_PROC_SRC_USER(){
 	echo "$@" | DEBUGGER ??
 	local process=$1
 	if (( ${#SRCUSER} > 0 )); then
-		echo ${SRCUSER} | tee >(DEBUGGER ==)
+		echo "${SRCUSER}" | tee >(DEBUGGER ==)
 	else
 		local srcPID=$(GET_PROC_SRC_PID ${process})
 		SRCUSER=`ps -o user -p ${srcPID} | sed '1d'`
-		echo ${SRCUSER} | tee >(DEBUGGER ==)
+		echo "${SRCUSER}" | tee >(DEBUGGER ==)
 	fi
 }
 function GET_PROC_SRC_PPID(){
@@ -361,7 +356,6 @@ function DISPLAY_READ_KEYS(){
 	mkfifo "${fifo_IN}"    "${fifo_OUT}" 2>/dev/null
 	dd  if="${fifo_IN}" of="${fifo_OUT}" 2>/dev/null &
 	# read entry values
-	#cat <<-SED | sed -n -f <(cat) "${displays}" | tee "${fifo_IN}"
 	cat <<-SED | sed -n -f <(cat) "${displays}" >> "${fifo_IN}" 
 		/^\[${vncPORT}]/,/^\[/{
 			/^[^\[]/p

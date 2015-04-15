@@ -1,0 +1,11 @@
+[Unit]
+Description=Dynamic VNC connections per user over localhost
+
+[Service]
+ExecStart=-/etc/x11vnc/Xvnc-dynamic.sh allowed.vncserver
+StandardInput=socket
+User=root
+Group=root
+
+[Install]
+WantedBy=Xvnc-dynamic.socket

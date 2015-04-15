@@ -1,2 +1,10 @@
+# users or groups that end with an asterisk are granted administrative powers per this program (not nessiseraly root)
+# administrative powers means that user/groups can connect to the real shell without logging in or authenticating (port 5899)
+# administrative powers has no effect on virtual desktops (ports 5900-5910)
+# domain users or groups must appear as they do when querried via the getent command (domain must be in caps and user/group lowercase)
+wheel*
+#NET\cos computer local admins*
 users
 localcosadmin
+#NET\domain users
+

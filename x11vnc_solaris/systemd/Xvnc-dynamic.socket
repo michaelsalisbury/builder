@@ -1,0 +1,22 @@
+[Unit]
+Description=Dynamic VNC connections per user over localhost
+
+[Socket]
+ListenStream=5900
+ListenStream=5901
+ListenStream=5902
+ListenStream=5903
+ListenStream=5904
+ListenStream=5905
+ListenStream=5906
+ListenStream=5907
+ListenStream=5908
+ListenStream=5909
+Accept=yes
+BindIPv6Only=both
+BindToDevice=lo
+
+[Install]
+Alias=Xvnc-dynamic.socket
+WantedBy=sockets.target
+

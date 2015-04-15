@@ -1,0 +1,184 @@
+#!/bin/bash
+
+function main(){
+	echo --------------------------------------------- >> "${LOG}"
+	echo STARTING xstartup                             >> "${LOG}"
+	echo                                               >> "${LOG}"
+	echo $PATH | tr ":" "\n" | sort                    >> "${LOG}"
+	echo                                               >> "${LOG}"
+
+	# restore user xstartup
+	# loop through backups restoring the first diff
+	# remove any matching files as accidents
+	if find "${BASH_SRCFQFN}".user* &> /dev/null; then
+		local xstartup=""
+		while read xstartup; do
+			if diff "${xstartup}" "${BASH_SRCFQFN}"; then
+				rm -f "${xstartup}"
+			else
+				mv -f "${xstartup}" "${BASH_SRCFQFN}"
+				break
+			fi
+		done < <(ls -1t "${BASH_SRCFQFN}".user*)
+	else
+	      rm -f "${BASH_SRCFQFN}"
+	fi
+	# remove Xcommon source functions
+	rm -f "${BASH_SRCFQFN}".Xcommon
+
+	# set GLOBAL vars
+	export VNCDESKTOP="${vncUSER}:${vncPORT}:${DESKTOP}"
+	export vncDisplay=${DISPLAY:1}
+	export     vncPID=$(cat "${BASH_SRCDIR}"/*${DISPLAY}.pid)
+
+	# get desktop session paths
+	local GSESSION=$(WHICH gnome-session		2>/dev/null)
+	local STARTKDE=$(WHICH startkde			2>/dev/null)
+	local      TWM=$(WHICH twm			2>/dev/null)
+	local    ICEWM=$(WHICH icewm-session		2>/dev/null)
+	local  FLUXBOX=$(WHICH fluxbox			2>/dev/null)
+	local    XFCE4=$(WHICH xfce4-session		2>/dev/null)
+	local      KDE=$(WHICH startkde			2>/dev/null)
+	local     MATE=$(WHICH mate-session		2>/dev/null)
+
+	# Write display file details for vncserver connection
+	echo XSTARTUP :: Writting KEYS                     >> "${LOG}"
+	DISPLAY_WRITE_KEY ${vncUSER} ${vncPORT} vncDisplay >> "${LOG}" 2>&1
+	DISPLAY_WRITE_KEY ${vncUSER} ${vncPORT} vncPID     >> "${LOG}" 2>&1
+
+	echo --------------------------------------------- >> "${LOG}"
+	echo XSTARTUP :: Starting Desktop                  >> "${LOG}"
+	echo XSTARTUP :: -- vncUSER :: ${vncUSER}          >> "${LOG}"
+	echo XSTARTUP :: -- vncPORT :: ${vncPORT}          >> "${LOG}"
+	echo XSTARTUP :: -- rfbport :: ${rfbport}          >> "${LOG}"
+	echo XSTARTUP :: -- desktop :: ${DESKTOP}          >> "${LOG}"
+	echo XSTARTUP :: VNCDESKTOP :: ${VNCDESKTOP}       >> "${LOG}"
+	echo XSTARTUP :: vncDISPLAY :: ${vncDisplay}       >> "${LOG}"
+	echo XSTARTUP :: --- vncPID :: ${vncPID}           >> "${LOG}"
+	
+	echo --------------------------------------------- >> "${LOG}"
+	#env                                                >> "${LOG}"
+	#echo --------------------------------------------- >> "${LOG}"
+	echo                                               >> "${LOG}"
+
+	# system specifics
+	local SSHAGENT=$(WHICH ssh-agent		2>/dev/null)
+	local CKLAUNCH=$(WHICH ck-launch-session	2>/dev/null)
+	echo XSTARTUP :: - SSHAGENT :: ${SSHAGENT}         >> "${LOG}"
+	echo XSTARTUP :: - CKLAUNCH :: ${CKLAUNCH}         >> "${LOG}"
+
+
+	# xstartup
+	unset SESSION_MANAGER
+	unset DBUS_SESSION_BUS_ADDRESS
+
+	# is Ubuntu
+	if IS_OS_UBUNTU; then
+                # setup LANG & LANGUAGE
+                if [ -f /etc/default/locale ]; then
+                        . /etc/default/locale
+                        export LANG
+                        export LANGUAGE
+                fi
+
+		#local GSESSION=$(WHICH gnome-session	2>/dev/null)
+		#local GSESSION+=\ --session=gnome-classic
+		local GSESSION+=\ --session=gnome-fallback
+		#local GSESSION=" $(WHICH gnome-session-fallback	2>/dev/null)"
+
+	# is Red Hat | CentOS
+	elif IS_OS_REDHAT; then
+                # setup LANG & SYSFONT
+                if [ -r /etc/sysconfig/i18n ]; then
+                        . /etc/sysconfig/i18n
+                        export LANG
+                        export SYSFONT
+                fi
+
+		local CKLAUNCH=$(WHICH ck-xinit-session	2>/dev/null)
+
+	# is Solaris
+	elif IS_OS_SOLARIS; then
+		[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+		xsetroot -solid grey
+		vncconfig -iconic &
+		xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
+		local CKLAUNCH="${BASH_SRCFQFN}".display${DISPLAY}
+		cat <<-CKLAUNCH > "${CKLAUNCH}"
+			#!/usr/bin/sh
+			rm -f "${CKLAUNCH}"
+			\$@
+			vncserver -kill ${DISPLAY}
+		CKLAUNCH
+		chmod +x "${CKLAUNCH}"
+	fi
+
+	# Launch sessions
+	case ${DESKTOP} in
+		gnome)		exec ${CKLAUNCH} ${SSHAGENT} ${GSESSION};;
+
+		gnome-classic)	export GNOME_SHELL_SESSION_MODE=classic
+				exec -l /bin/sh -c ${GSESSION} --session=gnome-classic;;
+
+		gnome3)		exec -l /bin/sh -c ${GSESSION};;
+
+		xfce4)		exec ${CKLAUNCH} ${SSHAGENT} ${XFCE4};;
+
+		mate)		exec ${CKLAUNCH} ${SSHAGENT} ${MATE};;
+
+		kde)		exec ${CKLAUNCH} ${SSHAGENT} ${KDE};;
+
+		ice)		[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+				xsetroot -solid grey
+				exec ${CKLAUNCH} ${SSHAGENT} ${ICEWM};;
+
+		fluxbox)	[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+				xsetroot -solid grey
+				exec ${CKLAUNCH} ${SSHAGENT} ${FLUXBOX};;
+
+		twm)		[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+				xsetroot -solid grey
+				xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP" &
+				exec ${CKLAUNCH} ${SSHAGENT} ${TWM};;
+	esac
+
+	# kill vncserver session at logout
+
+}
+function canonicalpath(){
+	if [ -d $1 ]; then
+		pushd $1 > /dev/null 2>&1
+		echo $PWD
+	elif [ -f $1 ]; then
+		pushd $(dirname $1) > /dev/null 2>&1
+		echo $PWD/$(basename $1)
+	else
+		echo "Invalid path $1"
+	fi
+	popd > /dev/null 2>&1
+}
+# GLOBAL vars; fully qualified script paths and names
+BASH_SRCFQFN=$(canonicalpath "${BASH_SOURCE}")
+BASH_SRCNAME=$(basename "${BASH_SRCFQFN}")
+BASH_SRCDIR=$(dirname "${BASH_SRCFQFN}")
+
+# GLOBAL vars; Temp directory for fifo locations
+TMP="/tmp/$$_${BASH_SRCNAME}_$$"
+mkdir "${TMP}"
+
+# extract connection details from VNCDESKTOP variable
+for VNCVARS in ${VNCDESKTOP}; do export ${VNCVARS}; done
+
+# Source Xcommon-functions
+[ -f "${BASH_SRCFQFN}".Xcommon ] &&\
+	source "${BASH_SRCFQFN}".Xcommon >> "${LOG}" 2>&1
+
+# GLOBAL vars; user display file
+DISPLAY_FILE=".vnc/displays"
+
+# set DEBUG to true for excessive function logging
+DEBUG=true
+DEBUG=false
+
+# MAIN; start desktop session
+main "$@"

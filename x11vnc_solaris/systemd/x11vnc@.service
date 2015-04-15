@@ -1,0 +1,11 @@
+[Unit]
+Description=Dynamic VNC connections to console display over localhost
+
+[Service]
+ExecStart=-/etc/x11vnc/x11vnc.sh allowed.x11vnc
+StandardInput=socket
+User=root
+Group=root
+
+[Install]
+WantedBy=x11vnc.socket
